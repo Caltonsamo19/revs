@@ -1098,32 +1098,26 @@ async function enviarBoasVindas(grupoId, participantId) {
         }
         
         // Usar mensagem personalizada do grupo ou padrão
-        let mensagemBoasVindas = configGrupo.boasVindas || `🎉 *BOAS-VINDAS AO GRUPO!*
+        let mensagemBoasVindas = configGrupo.boasVindas || `✅@NOME BEM-VINDO AO GRUPO 100% AUTOMÁTICO DE VENDA DE MEGAS!
 
-👋 Olá @NOME, seja bem-vindo!
+📱 Como funciona:
+Envie comprovante de pagamento
+Sistema processa automaticamente
+Participe do ranking de compradores
 
-🤖 *SISTEMA DE VENDAS 100% AUTOMÁTICO!*
-📱 1. Envie comprovante de pagamento aqui
-⚡ 2. Nosso sistema processa automaticamente
-📊 3. Participe do ranking geral de compradores
+⚡ Comandos principais:
+tabela - Ver preços 💰
+pagamento - Ver formas de pagamento 💳
+comocomprar - Instruções de compras 📋
+.ranking - Ver classificação 📊
+.meucodigo - Gerar código de referência 🔑
 
-💰 *COMANDOS ÚTEIS:*
-• *tabela* - Ver preços de pacotes
-• *pagamento* - Ver formas de pagamento
-• *.ranking* - Ver ranking do grupo
-• *.meucodigo* - Gerar seu código de referência
+🎁 Ganhe grátis:
+Até 5GB convidando amigos 👥
+200MB por compra dos seus indicados
+Use .convite CÓDIGO se alguém te indicou
 
-🎁 *GANHE MEGABYTES GRÁTIS!*
-💎 Ganhe até *5GB GRATUITOS* convidando amigos!
-🔑 1. Digite *.meucodigo* para gerar seu código
-👥 2. Convide amigos para o grupo
-💰 3. Peça para usarem seu código: *.convite SEUCÓDIGO*
-🎯 4. Ganhe *200MB* a cada compra deles (primeiras 5 compras)
-
-⚠️ *TEM CÓDIGO DE ALGUÉM?*
-Use: *.convite CÓDIGO* para ativar a parceria!
-
-🚀 Vamos começar? Qualquer dúvida, pergunte no grupo!`;
+❓ Dúvidas? Pergunte no grupo!`;
         
         // Substituir placeholder @NOME pelo nome real
         mensagemBoasVindas = mensagemBoasVindas.replace('@NOME', `@${participantId.replace('@c.us', '')}`);
@@ -5436,6 +5430,7 @@ process.on('SIGINT', async () => {
     console.log(ia.getStatus());
     process.exit(0);
 });
+
 
 
 
