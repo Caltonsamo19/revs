@@ -1832,7 +1832,7 @@ const MODERACAO_CONFIG = {
 
 // Configuração para cada grupo
 const CONFIGURACAO_GRUPOS = {
-    '120363023150137820@g.us': {
+    '120363020570328377@g.us': {
         nome: 'NET VODACOM ACESSÍVEL',
         tabela: `🚨📱 INTERNET VODACOM COM OS MELHORES PREÇOS!
 Mega Promoção da NET DA VODACOM ACESSÍVEL — Conecte-se já! 🚀
@@ -1880,8 +1880,7 @@ FORMAS DE PAGAMENTO💰💶
 📌 E-MOLA: 866291101
     Nome:   ISAC LURDES 
 
-🚀 O futuro é agora! Vamos? 🔥🛒
-`,
+🚀 O futuro é agora! Vamos? 🔥🛒`,
         pagamento: `FORMAS DE PAGAMENTO💰💶
 
 📌 M-PESA:  858891101
