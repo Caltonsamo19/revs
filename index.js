@@ -1872,34 +1872,31 @@ Mega Promoção da NET DA VODACOM ACESSÍVEL — Conecte-se já! 🚀
 ✅ 100GB – 1940MT
 ✅ 200GB – 3420MT
 
+FORMAS DE PAGAMENTO💰💶
 
-📦 Compra rápida. Entrega garantida. Atendimento VIP! 💎✨
+📌 M-PESA:  858891101
+   Nome:  ISAC DA LURDES
 
-🌟 TUDO TOP ILIMITADO 🌟
-📞💬 JÁ PODES FALAR SEM LIMITE E NAVEGAR COM A MELHOR INTERNET 🌐🔥
+📌 E-MOLA: 866291101
+    Nome:   ISAC LURDES 
 
-📅 MENSAL (30 DIAS) 📅
-
-💰 450MT — 📞 Chamadas Ilimitadas + 💬 SMS Ilimitadas + 📶 11GB
-💰 550MT — 📞 Chamadas Ilimitadas + 💬 SMS Ilimitadas + 📶 15GB
-💰 750MT — 📞 Chamadas Ilimitadas + 💬 SMS Ilimitadas + 📶 21GB
-💰 1100MT — 📞 Chamadas Ilimitadas + 💬 SMS Ilimitadas + 📶 33GB
-💰 1350MT — 📞 Chamadas Ilimitadas + 💬 SMS Ilimitadas + 📶 50GB
-💰 2300MT — 📞 Chamadas Ilimitadas + 💬 SMS Ilimitadas + 📶 100GB
-
+🚀 O futuro é agora! Vamos? 🔥🛒
 `,
-        pagamento: `💰 Método de Pagamento
-Envie o valor para um dos números abaixo:
-📲 858891101 — Isac Lurdes Raul Vilanculo
-📲 866291101 — Isac Lurdes Raul Vilanculo
+        pagamento: `FORMAS DE PAGAMENTO💰💶
 
+📌 M-PESA:  858891101
+   Nome:  ISAC DA LURDES
 
+📌 E-MOLA: 866291101
+    Nome:  ISAC LURDES 
 
-📌 Após o pagamento:
-📸 Envie o comprovativo ( screenshot ) no grupo.
-📱Informe ( junto com ) o número que receberá os megas.
+📮 Após a transferência enviei o comprovante em forma do cópia junto com seu número.
+ 
+> 1. 🚨Não mande comprovativo em formato de imagem 📸🚨
 
-🔥 Promoção ativa! Aproveite enquanto puder 🚀
+> 2.  🚨 Não mande valor que não têm na tabela🚨
+
+🚀 O futuro é agora! Vamos? 🔥🛒
 `
     }
 };
