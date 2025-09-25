@@ -1845,26 +1845,15 @@ Mega Promoção da NET DA VODACOM ACESSÍVEL — Conecte-se já! 🚀
 ✅ 10GB - 170MT
 
 
-📅 PACOTES SEMANAIS 
-⚠ Vai receber 100MB por dia durante 7 dias, totalizando +0.7GB
 
-✅ 2GB – 55MT
-✅ 3GB – 75MT
-✅ 5GB – 130MT
-✅ 10GB – 220MT
+🚨QUANDO PRECISAREM PACOTE MENSAL, ENTRA EM CONTACTO ATRAVÉS DO LINK ABAIXO 👇👇🚨
+
+https://wa.me/258858891101?text=%20Quero%20pacote%20mensal!%20
 
 
+QUANDO PRECISAREM DO  ILIMITADO, EMTREM EM CONTACTO COM O LINK 
+https://wa.me/258858891101?text=%20Quero%20pacote%20ilimitado!%20
 
-📅 PACOTES MENSAIS 
-⚠ Não deve ter txuna crédito ⚠
-
-✅ 5GB – 165MT
-✅ 10GB – 280MT
-✅ 20GB – 480MT
-✅ 30GB – 760MT
-✅ 50GB – 960MT
-✅ 100GB – 1940MT
-✅ 200GB – 3420MT
 
 FORMAS DE PAGAMENTO💰💶
 
@@ -1874,7 +1863,8 @@ FORMAS DE PAGAMENTO💰💶
 📌 E-MOLA: 866291101
     Nome:   ISAC LURDES 
 
-🚀 O futuro é agora! Vamos? 🔥🛒`,
+🚀 O futuro é agora! Vamos? 🔥🛒
+`,
         pagamento: `FORMAS DE PAGAMENTO💰💶
 
 📌 M-PESA:  858891101
@@ -5430,6 +5420,7 @@ process.on('SIGINT', async () => {
     console.log(ia.getStatus());
     process.exit(0);
 });
+
 
 
 
