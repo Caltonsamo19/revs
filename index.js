@@ -4806,8 +4806,14 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                             const chat = await client.getChatById(message.from);
                             const participants = await chat.participants;
 
-                            // Buscar participante por número
-                            const numeroComprador = resultadoConfirmacao.numeroComprador;
+                            // Buscar participante por número - extrair número limpo
+                            let numeroComprador = resultadoConfirmacao.numeroComprador;
+
+                            // Se o numeroComprador veio com @lid ou @c.us, extrair apenas o número
+                            if (numeroComprador.includes('@')) {
+                                numeroComprador = numeroComprador.split('@')[0];
+                            }
+
                             console.log(`🔍 Buscando participante com número: ${numeroComprador}`);
 
                             let participanteEncontrado = null;
@@ -4861,14 +4867,22 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                             const mensagemFinal = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${numeroParaExibir}`);
 
                             // Enviar mensagem - com menção se conseguiu resolver para @c.us
-                            if (idParaMencao.endsWith('@c.us')) {
-                                await client.sendMessage(message.from, mensagemFinal, {
-                                    mentions: [idParaMencao]
-                                });
-                                console.log(`✅ Mensagem enviada com menção @c.us`);
-                            } else {
-                                await client.sendMessage(message.from, mensagemFinal);
-                                console.log(`✅ Mensagem enviada sem menção (ID @lid não resolvido)`);
+                            try {
+                                if (idParaMencao.endsWith('@c.us') && participanteEncontrado) {
+                                    await client.sendMessage(message.from, mensagemFinal, {
+                                        mentions: [idParaMencao]
+                                    });
+                                    console.log(`✅ Mensagem enviada com menção @c.us para ${idParaMencao}`);
+                                } else {
+                                    // Enviar sem menção - pode ser @lid não resolvido ou erro
+                                    await client.sendMessage(message.from, mensagemFinal);
+                                    console.log(`✅ Mensagem enviada sem menção (ID: ${idParaMencao})`);
+                                }
+                            } catch (sendError) {
+                                console.error(`❌ Erro no sendMessage:`, sendError.message);
+                                // Última tentativa: usar reply simples
+                                await message.reply(mensagemFinal);
+                                console.log(`✅ Mensagem enviada via reply como fallback`);
                             }
 
                         } catch (error) {
