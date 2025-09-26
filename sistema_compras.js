@@ -282,12 +282,7 @@ class SistemaCompras {
             }
             
             // Registrar compra confirmada para o REMETENTE (quem comprou)
-            let numeroComprador = remetente || numero; // Fallback para compatibilidade
-
-            // Limpar formato @lid/@c.us se presente
-            if (typeof numeroComprador === 'string' && numeroComprador.includes('@')) {
-                numeroComprador = numeroComprador.split('@')[0];
-            }
+            const numeroComprador = remetente || numero; // Fallback para compatibilidade
             console.log(`🔍 Processando parabenização`);
             await this.registrarCompraConfirmada(numeroComprador, megas, referencia, compraPendente.grupoId);
             
