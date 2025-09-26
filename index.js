@@ -2034,24 +2034,48 @@ function getConfiguracaoGrupo(chatId) {
     return CONFIGURACAO_GRUPOS[chatId] || null;
 }
 
+// Função para resolver ID @lid para @c.us usando API oficial do whatsapp-web.js
+async function resolverLidParaCus(lidId) {
+    try {
+        if (!lidId.endsWith('@lid')) {
+            return lidId; // Se não é @lid, retorna como está
+        }
+
+        console.log(`🔄 Resolvendo @lid para @c.us: ${lidId}`);
+        const resultado = await client.getContactLidAndPhone([lidId]);
+
+        if (resultado && resultado.length > 0 && resultado[0].pn) {
+            const cusId = resultado[0].pn + '@c.us';
+            console.log(`✅ @lid resolvido: ${lidId} -> ${cusId}`);
+            return cusId;
+        } else {
+            console.log(`⚠️ Não foi possível resolver @lid: ${lidId}`);
+            return lidId;
+        }
+    } catch (error) {
+        console.error(`❌ Erro ao resolver @lid ${lidId}:`, error);
+        return lidId;
+    }
+}
+
 // Função para resolver ID interno (@lid) para número real (@c.us)
 function resolverIdReal(participantId, adminsEncontrados) {
     // Se já é @c.us, retorna como está
     if (participantId.endsWith('@c.us')) {
         return participantId;
     }
-    
+
     // Se tem mapeamento conhecido, usa ele
     if (MAPEAMENTO_IDS[participantId]) {
         return MAPEAMENTO_IDS[participantId];
     }
-    
+
     // Se é @lid, tenta encontrar correspondência nos admins
     if (participantId.endsWith('@lid')) {
         // Para agora, retorna o próprio ID para permitir comparação direta
         return participantId;
     }
-    
+
     return participantId;
 }
 
@@ -3209,24 +3233,34 @@ async function processMessage(message) {
                         for (let i = 0; i < ranking.length; i++) {
                             const item = ranking[i];
                             const contactId = item.numero + '@c.us';
-                            
+
                             // Obter informações do contato
                             try {
-                                const contact = await client.getContactById(contactId);
-                                
+                                // Resolver @lid para @c.us se necessário
+                                const contactIdResolvido = await resolverLidParaCus(contactId);
+                                const contact = await client.getContactById(contactIdResolvido);
+
                                 // Prioridade: nome salvo > nome do perfil > número
                                 const nomeExibicao = contact.name || contact.pushname || item.numero;
-                                const numeroLimpo = contact.id.user; // Número sem @ e sem +
-                                
+                                let numeroLimpo;
+
+                                // Lidar com diferentes formatos de ID
+                                if (contactIdResolvido.endsWith('@c.us')) {
+                                    numeroLimpo = contact.id.user; // Número sem @ e sem +
+                                } else {
+                                    // Para @lid que não foi resolvido, usar nome ou número original
+                                    numeroLimpo = nomeExibicao || item.numero;
+                                }
+
                                 const posicaoEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${item.posicao}º`;
-                                const megasFormatados = item.megas >= 1024 ? 
+                                const megasFormatados = item.megas >= 1024 ?
                                     `${(item.megas/1024).toFixed(1)}GB` : `${item.megas}MB`;
-                                
+
                                 mensagem += `${posicaoEmoji} @${numeroLimpo}\n`;
                                 mensagem += `   💾 ${megasFormatados} no grupo (${item.compras}x)\n`;
                                 mensagem += `   📊 Total: ${item.megasTotal >= 1024 ? (item.megasTotal/1024).toFixed(1)+'GB' : item.megasTotal+'MB'}\n\n`;
-                                
-                                mentions.push(contactId);
+
+                                mentions.push(contactIdResolvido);
                             } catch (error) {
                                 // Se não conseguir obter o contato, usar apenas o número
                                 const posicaoEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${item.posicao}º`;
@@ -3269,23 +3303,33 @@ async function processMessage(message) {
                         for (let i = 0; i < Math.min(inativos.length, 20); i++) {
                             const item = inativos[i];
                             const contactId = item.numero + '@c.us';
-                            
+
                             // Obter informações do contato
                             try {
-                                const contact = await client.getContactById(contactId);
-                                
+                                // Resolver @lid para @c.us se necessário
+                                const contactIdResolvido = await resolverLidParaCus(contactId);
+                                const contact = await client.getContactById(contactIdResolvido);
+
                                 // Prioridade: nome salvo > nome do perfil > número
                                 const nomeExibicao = contact.name || contact.pushname || item.numero;
-                                const numeroLimpo = contact.id.user; // Número sem @ e sem +
-                                
-                                const totalFormatado = item.megasTotal >= 1024 ? 
+                                let numeroLimpo;
+
+                                // Lidar com diferentes formatos de ID
+                                if (contactIdResolvido.endsWith('@c.us')) {
+                                    numeroLimpo = contact.id.user; // Número sem @ e sem +
+                                } else {
+                                    // Para @lid que não foi resolvido, usar nome ou número original
+                                    numeroLimpo = nomeExibicao || item.numero;
+                                }
+
+                                const totalFormatado = item.megasTotal >= 1024 ?
                                     `${(item.megasTotal/1024).toFixed(1)}GB` : `${item.megasTotal}MB`;
-                                
+
                                 mensagem += `👤 @${numeroLimpo}\n`;
                                 mensagem += `   ⏰ ${item.diasSemComprar} dias sem comprar\n`;
                                 mensagem += `   📊 Total: ${item.totalCompras}x compras (${totalFormatado})\n\n`;
-                                
-                                mentions.push(contactId);
+
+                                mentions.push(contactIdResolvido);
                             } catch (error) {
                                 // Se não conseguir obter o contato, usar apenas o número
                                 const totalFormatado = item.megasTotal >= 1024 ? 
@@ -3331,20 +3375,30 @@ async function processMessage(message) {
                         for (let i = 0; i < Math.min(semCompra.length, 30); i++) {
                             const item = semCompra[i];
                             const contactId = item.numero + '@c.us';
-                            
+
                             // Obter informações do contato
                             try {
-                                const contact = await client.getContactById(contactId);
-                                
+                                // Resolver @lid para @c.us se necessário
+                                const contactIdResolvido = await resolverLidParaCus(contactId);
+                                const contact = await client.getContactById(contactIdResolvido);
+
                                 // Prioridade: nome salvo > nome do perfil > número
                                 const nomeExibicao = contact.name || contact.pushname || item.numero;
-                                const numeroLimpo = contact.id.user; // Número sem @ e sem +
-                                
+                                let numeroLimpo;
+
+                                // Lidar com diferentes formatos de ID
+                                if (contactIdResolvido.endsWith('@c.us')) {
+                                    numeroLimpo = contact.id.user; // Número sem @ e sem +
+                                } else {
+                                    // Para @lid que não foi resolvido, usar nome ou número original
+                                    numeroLimpo = nomeExibicao || item.numero;
+                                }
+
                                 mensagem += `👤 @${numeroLimpo}\n`;
                                 mensagem += `   📅 Registrado: ${new Date(item.primeiraCompra).toLocaleDateString('pt-BR')}\n`;
                                 mensagem += `   💰 Compras: ${item.totalCompras} (${item.megasTotal}MB)\n\n`;
-                                
-                                mentions.push(contactId);
+
+                                mentions.push(contactIdResolvido);
                             } catch (error) {
                                 // Se não conseguir obter o contato, usar apenas o número
                                 mensagem += `👤 @${item.numero}\n`;
@@ -4745,19 +4799,30 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                     // Enviar mensagem de parabenização com menção clicável
                     if (resultadoConfirmacao.mensagem && resultadoConfirmacao.contactId) {
                         try {
+                            // Resolver @lid para @c.us se necessário
+                            const contactIdResolvido = await resolverLidParaCus(resultadoConfirmacao.contactId);
+
                             // Obter nome do contato para substituir o placeholder
-                            const contact = await client.getContactById(resultadoConfirmacao.contactId);
-                            
+                            const contact = await client.getContactById(contactIdResolvido);
+
                             // Prioridade: nome salvo > pushname (nome do perfil) > name > número
                             const nomeExibicao = contact.name || contact.pushname || contact.number;
-                            const numeroLimpo = contact.id.user; // Número sem @ e sem +
-                            
+                            let numeroLimpo;
+
+                            // Lidar com diferentes formatos de ID
+                            if (contactIdResolvido.endsWith('@c.us')) {
+                                numeroLimpo = contact.id.user; // Número sem @ e sem +
+                            } else {
+                                // Para @lid que não foi resolvido, usar nome ou número original
+                                numeroLimpo = nomeExibicao || resultadoConfirmacao.numeroComprador;
+                            }
+
                             // Substituir placeholder pelo número (formato correto para menções clickáveis)
                             const mensagemFinal = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${numeroLimpo}`);
-                            
-                            // Enviar com menção clicável
-                            await client.sendMessage(message.from, mensagemFinal, { 
-                                mentions: [resultadoConfirmacao.contactId] 
+
+                            // Enviar com menção clicável - usar o ID resolvido
+                            await client.sendMessage(message.from, mensagemFinal, {
+                                mentions: [contactIdResolvido]
                             });
                         } catch (error) {
                             console.error('❌ Erro ao enviar parabenização com menção:', error);
