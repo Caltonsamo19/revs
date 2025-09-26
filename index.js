@@ -4746,18 +4746,12 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                     // Enviar mensagem de parabenização com menção clicável
                     if (resultadoConfirmacao.mensagem && resultadoConfirmacao.contactId) {
                         try {
-                            // Obter nome do contato para substituir o placeholder
-                            const contact = await client.getContactById(resultadoConfirmacao.contactId);
-                            
-                            // Prioridade: nome salvo > pushname (nome do perfil) > name > número
-                            const nomeExibicao = contact.name || contact.pushname || contact.number;
-
-                            // Usar mesmo formato das boas-vindas (mantém @lid quando aplicável)
+                            // Usar mesmo formato das boas-vindas (WhatsApp resolve o nome automaticamente)
                             const mensagemFinal = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${resultadoConfirmacao.contactId.replace('@c.us', '')}`);
-                            
+
                             // Enviar com menção clicável
-                            await client.sendMessage(message.from, mensagemFinal, { 
-                                mentions: [resultadoConfirmacao.contactId] 
+                            await client.sendMessage(message.from, mensagemFinal, {
+                                mentions: [resultadoConfirmacao.contactId]
                             });
                         } catch (error) {
                             console.error('❌ Erro ao enviar parabenização com menção:', error);
