@@ -2037,24 +2037,27 @@ function getConfiguracaoGrupo(chatId) {
 // Função para resolver ID @lid para @c.us usando API oficial do whatsapp-web.js
 async function resolverLidParaCus(lidId) {
     try {
-        if (!lidId.endsWith('@lid')) {
+        if (!lidId || !lidId.endsWith('@lid')) {
+            console.log(`🔍 ID ${lidId} não é @lid, retornando como está`);
             return lidId; // Se não é @lid, retorna como está
         }
 
         console.log(`🔄 Resolvendo @lid para @c.us: ${lidId}`);
+
+        // Tentar resolver usando a API oficial
         const resultado = await client.getContactLidAndPhone([lidId]);
 
         if (resultado && resultado.length > 0 && resultado[0].pn) {
             const cusId = resultado[0].pn + '@c.us';
-            console.log(`✅ @lid resolvido: ${lidId} -> ${cusId}`);
+            console.log(`✅ @lid resolvido com sucesso: ${lidId} -> ${cusId}`);
             return cusId;
         } else {
-            console.log(`⚠️ Não foi possível resolver @lid: ${lidId}`);
-            return lidId;
+            console.log(`⚠️ API não retornou resultado para @lid: ${lidId}`);
+            return lidId; // Retorna o @lid original se não conseguir resolver
         }
     } catch (error) {
-        console.error(`❌ Erro ao resolver @lid ${lidId}:`, error);
-        return lidId;
+        console.error(`❌ Erro ao resolver @lid ${lidId}:`, error.message);
+        return lidId; // Retorna o @lid original em caso de erro
     }
 }
 
@@ -4801,29 +4804,45 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                         try {
                             // Resolver @lid para @c.us se necessário
                             const contactIdResolvido = await resolverLidParaCus(resultadoConfirmacao.contactId);
+                            console.log(`🔍 Contact ID original: ${resultadoConfirmacao.contactId}, resolvido: ${contactIdResolvido}`);
 
-                            // Obter nome do contato para substituir o placeholder
-                            const contact = await client.getContactById(contactIdResolvido);
+                            let contact = null;
+                            let numeroLimpo = resultadoConfirmacao.numeroComprador; // fallback
 
-                            // Prioridade: nome salvo > pushname (nome do perfil) > name > número
-                            const nomeExibicao = contact.name || contact.pushname || contact.number;
-                            let numeroLimpo;
+                            // Tentar obter informações do contato de forma segura
+                            try {
+                                contact = await client.getContactById(contactIdResolvido);
+                                console.log(`✅ Contato obtido: ${contact?.name || contact?.pushname || 'sem nome'}`);
 
-                            // Lidar com diferentes formatos de ID
-                            if (contactIdResolvido.endsWith('@c.us')) {
-                                numeroLimpo = contact.id.user; // Número sem @ e sem +
-                            } else {
-                                // Para @lid que não foi resolvido, usar nome ou número original
-                                numeroLimpo = nomeExibicao || resultadoConfirmacao.numeroComprador;
+                                // Prioridade: nome salvo > pushname (nome do perfil) > name > número
+                                const nomeExibicao = contact.name || contact.pushname || contact.number;
+
+                                // Lidar com diferentes formatos de ID
+                                if (contactIdResolvido.endsWith('@c.us')) {
+                                    numeroLimpo = contact.id.user; // Número sem @ e sem +
+                                } else {
+                                    // Para @lid que não foi resolvido, usar nome ou número original
+                                    numeroLimpo = nomeExibicao || resultadoConfirmacao.numeroComprador;
+                                }
+                            } catch (contactError) {
+                                console.log(`⚠️ Erro ao obter contato ${contactIdResolvido}, usando fallback: ${numeroLimpo}`);
+                                // Usar numeroComprador como fallback se não conseguir obter contato
                             }
 
                             // Substituir placeholder pelo número (formato correto para menções clickáveis)
                             const mensagemFinal = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${numeroLimpo}`);
 
-                            // Enviar com menção clicável - usar o ID resolvido
-                            await client.sendMessage(message.from, mensagemFinal, {
-                                mentions: [contactIdResolvido]
-                            });
+                            // Tentar enviar com menção clicável apenas se conseguiu resolver o ID para @c.us
+                            if (contactIdResolvido.endsWith('@c.us') && contact) {
+                                await client.sendMessage(message.from, mensagemFinal, {
+                                    mentions: [contactIdResolvido]
+                                });
+                                console.log(`✅ Mensagem enviada com menção para ${contactIdResolvido}`);
+                            } else {
+                                // Enviar sem menção se não conseguiu resolver para @c.us
+                                await client.sendMessage(message.from, mensagemFinal);
+                                console.log(`✅ Mensagem enviada sem menção (ID não resolvido ou @lid)`);
+                            }
                         } catch (error) {
                             console.error('❌ Erro ao enviar parabenização com menção:', error);
                             // Fallback: enviar sem menção clicável
