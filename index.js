@@ -1691,28 +1691,26 @@ FORMAS DE PAGAMENTO💰💶
     },
     '120363402302455817@g.us': {
         nome: 'KA-Net Automático',
-        tabela: `🛑INTERNET VODACOM
+        tabela: `INTERNET VODACOM
 
-💱 Diários (Válidos Por 24Hrs)🛑
-18MT------1GB
-36MT------2GB
-90MT------5GB
-170MT------10GB
+Diários (Válidos Por 24Hrs)
+1GB = 18MT
+2GB = 36MT
+5GB = 90MT
+10GB = 170MT
 
-🛑Semanal ( 7 Dias )
+Semanal (7 Dias)
+3.4GB = 95MT
+5.3GB = 140MT
+7.2GB = 190MT
+10.7GB = 290MT
 
-95MT --------- 3.4GB
-140MT ------- 5.3GB
-190MT ------- 7.2GB
-290MT ------- 10.7GB
-
-
-Mensal(Válido Por 30Dias)🛑
-150MT------5GB
-250MT------10GB
-710MT------35GB
-1030MT------50GB
-2040MT------100GB`,
+Mensal (Válido Por 30 Dias)
+5GB = 150MT
+10GB = 250MT
+35GB = 710MT
+50GB = 1030MT
+100GB = 2040MT`,
         pagamento: `💳 FORMAS/ PAGAMENTOS :⤵
 - 📲 𝗘-𝗠𝗢𝗟𝗔: 876692062💶💰
 - Catia Anabela Nharrava 
@@ -5314,6 +5312,7 @@ process.on('SIGINT', async () => {
     console.log(ia.getStatus());
     process.exit(0);
 });
+
 
 
 
