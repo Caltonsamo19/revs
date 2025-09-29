@@ -58,6 +58,9 @@ const SistemaPacotes = require('./sistema_pacotes');
 // === IMPORTAR SISTEMA DE COMPRAS ===
 const SistemaCompras = require('./sistema_compras');
 
+// === IMPORTAR SISTEMA DE RELATÓRIOS ===
+const SistemaRelatorios = require('./sistema_relatorios');
+
 // === CONFIGURAÇÃO GOOGLE SHEETS - BOT RETALHO (SCRIPT PRÓPRIO) ===
 const GOOGLE_SHEETS_CONFIG = {
     scriptUrl: process.env.GOOGLE_SHEETS_SCRIPT_URL_RETALHO || 'https://script.google.com/macros/s/AKfycbyMilUC5bYKGXV95LR4MmyaRHzMf6WCmXeuztpN0tDpQ9_2qkgCxMipSVqYK_Q6twZG/exec',
@@ -1341,9 +1344,9 @@ async function verificarPagamentoIndividual(referencia, valorEsperado) {
             return true;
         }
 
-        // Segunda tentativa: busca apenas por referência (usando connection pool)
+        // Segunda tentativa: busca apenas por referência (usando axiosInstance)
         console.log(`🔍 REVENDEDORES: Tentando busca apenas por referência...`);
-        response = await paymentsApi.post(PAGAMENTOS_CONFIG.scriptUrl, {
+        response = await axiosInstance.post(PAGAMENTOS_CONFIG.scriptUrl, {
             action: "buscar_por_referencia_only",
             referencia: referencia
         }, {
@@ -1685,8 +1688,40 @@ FORMAS DE PAGAMENTO💰💶
 
 🚀 O futuro é agora! Vamos? 🔥🛒
 `
+    },
+    '120363402302455817@g.us': {
+        nome: 'KA-Net Automático',
+        tabela: `🛑INTERNET VODACOM
+
+💱 Diários (Válidos Por 24Hrs)🛑
+18MT------1GB
+36MT------2GB
+90MT------5GB
+170MT------10GB
+
+🛑Semanal ( 7 Dias )
+
+95MT --------- 3.4GB
+140MT ------- 5.3GB
+190MT ------- 7.2GB
+290MT ------- 10.7GB
+
+
+Mensal(Válido Por 30Dias)🛑
+150MT------5GB
+250MT------10GB
+710MT------35GB
+1030MT------50GB
+2040MT------100GB`,
+        pagamento: `💳 FORMAS/ PAGAMENTOS :⤵
+- 📲 𝗘-𝗠𝗢𝗟𝗔: 876692062💶💰
+- Catia Anabela Nharrava 
+- 📲 𝗠-𝗣𝗘𝗦𝗔: 856268077💷💰 
+- ↪📞Kelven Junior Anabela Nharrava
+`
     }
 };
+
 
 
 // === FUNÇÃO GOOGLE SHEETS ===
@@ -2592,6 +2627,24 @@ client.on('ready', async () => {
     console.log(`🔗 URL: ${GOOGLE_SHEETS_CONFIG.scriptUrl}`);
     console.log('🤖 Bot Retalho - Lógica simples igual ao Bot Atacado!');
 
+    // === INICIALIZAR SISTEMA DE RELATÓRIOS ===
+    try {
+        global.sistemaRelatorios = new SistemaRelatorios(client, GOOGLE_SHEETS_CONFIG, PAGAMENTOS_CONFIG);
+
+        // Configurar números de relatório (AJUSTAR CONFORME NECESSÁRIO)
+        // sistemaRelatorios.configurarNumeroRelatorio('GRUPO_ID_AQUI', '258847123456');
+
+        // Iniciar agendamento às 22h
+        global.sistemaRelatorios.iniciarAgendamento();
+
+        console.log('📊 Sistema de relatórios iniciado!');
+        console.log('⏰ Relatórios agendados para 22:00 diariamente');
+        console.log('📞 Configure números com: !config-relatorio');
+
+    } catch (error) {
+        console.error('❌ Erro ao iniciar sistema de relatórios:', error.message);
+    }
+
     // === INICIALIZAR SISTEMA DE RETRY SILENCIOSO ===
     await carregarPagamentosPendentes();
     console.log('🔄 Sistema de Retry Silencioso ATIVADO!');
@@ -2619,7 +2672,7 @@ client.on('ready', async () => {
         console.log(`   📋 ${config.nome} (${grupoId})`);
     });
     
-    console.log('\n🔧 Comandos admin: .ia .stats .sheets .test_sheets .test_grupo .grupos_status .grupos .grupo_atual .addcomando .comandos .delcomando .test_vision .ranking .inativos .semcompra .resetranking .bonus .setboasvindas .getboasvindas .testboasvindas .testreferencia');
+    console.log('\n🔧 Comandos admin: .ia .stats .sheets .test_sheets .test_grupo .grupos_status .grupos .grupo_atual .addcomando .comandos .delcomando .test_vision .ranking .inativos .semcompra .resetranking .bonus .setboasvindas .getboasvindas .testboasvindas .testreferencia .config-relatorio .list-relatorios .remove-relatorio .test-relatorio');
     
     // Iniciar monitoramento automático de novos membros
     await iniciarMonitoramentoMembros();
@@ -3662,6 +3715,159 @@ async function processMessage(message) {
                         await message.reply(`❌ *ERRO INTERNO*\n\n⚠️ Não foi possível conceder bônus\n\n📝 Erro: ${error.message}`);
                         return;
                     }
+                }
+
+                // === COMANDOS DE RELATÓRIOS ===
+
+                // .config-relatorio GRUPO_ID NUMERO - Configurar número para relatórios (ADMIN APENAS)
+                if (comando.startsWith('.config-relatorio ')) {
+                    if (!isAdmin) {
+                        await message.reply('❌ Apenas administradores podem usar este comando!');
+                        return;
+                    }
+
+                    const parametros = comando.split(' ');
+                    if (parametros.length < 3) {
+                        await message.reply(
+                            `❌ *FORMATO INCORRETO*\n\n` +
+                            `✅ Use: *.config-relatorio GRUPO_ID NUMERO*\n\n` +
+                            `📋 **Exemplos:**\n` +
+                            `• *.config-relatorio 258820749141-1441573529@g.us 258847123456*\n\n` +
+                            `💡 **Para obter ID do grupo:**\n` +
+                            `Use: *.grupo_atual*`
+                        );
+                        return;
+                    }
+
+                    const grupoId = parametros[1];
+                    let numeroRelatorio = parametros[2];
+
+                    // Validar número
+                    if (!/^\d{9}$/.test(numeroRelatorio) && !/^\d{12}$/.test(numeroRelatorio)) {
+                        await message.reply(
+                            `❌ *NÚMERO INVÁLIDO*\n\n` +
+                            `✅ Use formato de 9 ou 12 dígitos:\n` +
+                            `• 847123456 (9 dígitos)\n` +
+                            `• 258847123456 (12 dígitos)`
+                        );
+                        return;
+                    }
+
+                    // Converter para formato completo se necessário
+                    if (numeroRelatorio.length === 9) {
+                        numeroRelatorio = '258' + numeroRelatorio;
+                    }
+
+                    // Configurar no sistema de relatórios
+                    if (global.sistemaRelatorios) {
+                        global.sistemaRelatorios.configurarNumeroRelatorio(grupoId, numeroRelatorio);
+
+                        await message.reply(
+                            `✅ *CONFIGURAÇÃO SALVA*\n\n` +
+                            `📱 Grupo: ${grupoId.split('@')[0]}\n` +
+                            `📞 Número para relatórios: ${numeroRelatorio}\n` +
+                            `⏰ Relatórios às 22:00 diariamente\n\n` +
+                            `💡 Teste com: *.test-relatorio*`
+                        );
+                    } else {
+                        await message.reply('❌ Sistema de relatórios não está disponível');
+                    }
+                    return;
+                }
+
+                // .list-relatorios - Listar configurações de relatórios (ADMIN APENAS)
+                if (comando === '.list-relatorios') {
+                    if (!isAdmin) {
+                        await message.reply('❌ Apenas administradores podem usar este comando!');
+                        return;
+                    }
+
+                    if (global.sistemaRelatorios) {
+                        const configs = global.sistemaRelatorios.numerosRelatorio;
+                        if (Object.keys(configs).length === 0) {
+                            await message.reply(
+                                `📋 *CONFIGURAÇÕES DE RELATÓRIOS*\n\n` +
+                                `❌ Nenhum grupo configurado\n\n` +
+                                `💡 Configure com: *.config-relatorio*`
+                            );
+                        } else {
+                            let texto = `📋 *CONFIGURAÇÕES DE RELATÓRIOS*\n\n`;
+
+                            for (const [grupoId, numero] of Object.entries(configs)) {
+                                const grupoNome = grupoId.split('@')[0];
+                                texto += `📱 ${grupoNome}\n`;
+                                texto += `   📞 ${numero}\n\n`;
+                            }
+
+                            texto += `⏰ Horário: 22:00 diariamente\n`;
+                            texto += `🧪 Teste: *.test-relatorio*`;
+
+                            await message.reply(texto);
+                        }
+                    } else {
+                        await message.reply('❌ Sistema de relatórios não está disponível');
+                    }
+                    return;
+                }
+
+                // .remove-relatorio GRUPO_ID - Remover configuração de relatórios (ADMIN APENAS)
+                if (comando.startsWith('.remove-relatorio ')) {
+                    if (!isAdmin) {
+                        await message.reply('❌ Apenas administradores podem usar este comando!');
+                        return;
+                    }
+
+                    const grupoId = comando.split(' ')[1];
+                    if (!grupoId) {
+                        await message.reply(
+                            `❌ *FORMATO INCORRETO*\n\n` +
+                            `✅ Use: *.remove-relatorio GRUPO_ID*\n` +
+                            `💡 Liste os grupos com: *.list-relatorios*`
+                        );
+                        return;
+                    }
+
+                    if (global.sistemaRelatorios) {
+                        global.sistemaRelatorios.removerNumeroRelatorio(grupoId);
+                        await message.reply(
+                            `✅ *CONFIGURAÇÃO REMOVIDA*\n\n` +
+                            `📱 Grupo: ${grupoId.split('@')[0]}\n` +
+                            `❌ Relatórios desativados para este grupo`
+                        );
+                    } else {
+                        await message.reply('❌ Sistema de relatórios não está disponível');
+                    }
+                    return;
+                }
+
+                // .test-relatorio [GRUPO_ID] - Testar relatório (ADMIN APENAS)
+                if (comando.startsWith('.test-relatorio')) {
+                    if (!isAdmin) {
+                        await message.reply('❌ Apenas administradores podem usar este comando!');
+                        return;
+                    }
+
+                    if (!global.sistemaRelatorios) {
+                        await message.reply('❌ Sistema de relatórios não está disponível');
+                        return;
+                    }
+
+                    const parametros = comando.split(' ');
+                    const grupoId = parametros[1] || message.from; // Usar grupo atual se não especificado
+
+                    await message.reply(
+                        `🧪 *TESTE DE RELATÓRIOS*\n\n` +
+                        `📊 Gerando relatório de teste...\n` +
+                        `⏳ Aguarde alguns segundos...`
+                    );
+
+                    try {
+                        await global.sistemaRelatorios.testarRelatorio(grupoId);
+                        await message.reply('✅ Teste concluído! Verifique se o relatório foi enviado.');
+                    } catch (error) {
+                        await message.reply(`❌ Erro no teste: ${error.message}`);
+                    }
+                    return;
                 }
             }
 
