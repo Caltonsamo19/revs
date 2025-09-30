@@ -4943,7 +4943,7 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                             // Normalizar ID para formato @c.us igual às boas-vindas
                             const participantId = resultadoConfirmacao.contactId; // IGUAL ÀS BOAS-VINDAS
                             // Usar exato formato das boas-vindas
-                            const mensagemFinal = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${participantId.replace('@c.us', '')}`);
+                            const mensagemFinal = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${participantId.replace('@c.us', '').replace('@lid', '')}`);
 
                             // Enviar com menção igual às boas-vindas
                             await client.sendMessage(message.from, mensagemFinal, {
@@ -4953,7 +4953,7 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                             console.error('❌ Erro ao enviar parabenização com menção:', error);
                             // Fallback: enviar sem menção clicável
                             const participantId = resultadoConfirmacao.contactId; // IGUAL ÀS BOAS-VINDAS
-                            const mensagemFallback = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${participantId.replace('@c.us', '')}`);
+                            const mensagemFallback = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${participantId.replace('@c.us', '').replace('@lid', '')}`);
                             await message.reply(mensagemFallback);
                         }
                     }
