@@ -2208,60 +2208,6 @@ async function lidParaNumero(lid) {
     }
 }
 
-// Função para normalizar IDs para menções (EXATAMENTE igual às boas-vindas) - VERSÃO MELHORADA
-async function normalizarIdParaMencao(numero, grupoInfo = 'desconhecido') {
-    console.log(`🔄 INDEX: INICIO - Normalizando ID: ${numero} [GRUPO: ${grupoInfo}]`);
-
-    // Se já é um ID completo, processar conforme o tipo
-    if (numero.includes('@')) {
-        console.log(`🔄 INDEX: ID contém '@', verificando tipo...`);
-        if (numero.endsWith('@lid')) {
-            console.log(`🔄 INDEX: Detectado LID, iniciando conversão via API...`);
-            // NOVO: Usar API oficial do wwebjs para conversão LID
-            try {
-                console.log(`🔄 INDEX: Chamando lidParaNumero(${numero})...`);
-                const numeroReal = await lidParaNumero(numero);
-                console.log(`🔄 INDEX: Resultado lidParaNumero: ${numeroReal}`);
-                if (numeroReal) {
-                    const resultado = numeroReal + '@c.us';
-                    console.log(`✅ INDEX: Conversão LID via API SUCESSO: ${numero} → ${resultado}`);
-                    return resultado;
-                } else {
-                    console.log(`⚠️ INDEX: lidParaNumero retornou null, passando para fallback...`);
-                }
-            } catch (error) {
-                console.error(`❌ INDEX: Erro na conversão LID via API: ${error.message}`);
-                console.error(`❌ INDEX: Stack trace do erro:`, error.stack);
-            }
-
-            // Fallback: usar mapeamento manual se API falhar
-            console.log(`🔄 INDEX: Tentando fallback com mapeamento manual...`);
-            const numeroMapeado = MAPEAMENTO_IDS[numero];
-            if (numeroMapeado) {
-                console.log(`✅ INDEX: Fallback - Mapeamento encontrado: ${numero} → ${numeroMapeado}`);
-                return numeroMapeado;
-            } else {
-                console.log(`⚠️ INDEX: Nenhum mapeamento encontrado para: ${numero}`);
-            }
-
-            // Fallback final: extrair número e converter
-            console.log(`🔄 INDEX: Usando fallback final - conversão simples...`);
-            const numeroLimpo = numero.replace('@lid', '');
-            const resultado = numeroLimpo + '@c.us';
-            console.log(`⚠️ INDEX: Fallback final - Conversão LID: ${numero} → ${resultado}`);
-            return resultado;
-        }
-        if (numero.endsWith('@c.us')) {
-            console.log(`✅ INDEX: Já no formato correto: ${numero}`);
-            return numero; // Já está no formato correto
-        }
-    }
-
-    // Se é apenas número, adicionar @c.us
-    const resultado = numero + '@c.us';
-    console.log(`🔄 INDEX: Adicionando @c.us: ${numero} → ${resultado}`);
-    return resultado;
-}
 
 async function isAdminGrupo(chatId, participantId) {
     try {
@@ -3437,12 +3383,12 @@ async function processMessage(message) {
                         
                         for (let i = 0; i < ranking.length; i++) {
                             const item = ranking[i];
-                            // Usar função de normalização igual às boas-vindas
-                            const contactId = await normalizarIdParaMencao(item.numero, `RANKING-${chatId}`);
+                            // COPIAR EXATAMENTE A LÓGICA DAS BOAS-VINDAS - SEM CONVERSÃO
+                            const participantId = item.numero; // Usar número exatamente como está salvo
 
                             // Obter informações do contato
                             try {
-                                const contact = await client.getContactById(contactId);
+                                const contact = await client.getContactById(participantId);
 
                                 // Prioridade: nome salvo > nome do perfil > número
                                 const nomeExibicao = contact.name || contact.pushname || item.numero;
@@ -3452,11 +3398,11 @@ async function processMessage(message) {
                                     `${(item.megas/1024).toFixed(1)}GB` : `${item.megas}MB`;
 
                                 // Usar exatamente o mesmo padrão das boas-vindas
-                                mensagem += `${posicaoEmoji} @${contactId.replace('@c.us', '')}\n`;
+                                mensagem += `${posicaoEmoji} @${participantId.replace('@c.us', '')}\n`;
                                 mensagem += `   💾 ${megasFormatados} no grupo (${item.compras}x)\n`;
                                 mensagem += `   📊 Total: ${item.megasTotal >= 1024 ? (item.megasTotal/1024).toFixed(1)+'GB' : item.megasTotal+'MB'}\n\n`;
 
-                                mentions.push(contactId);
+                                mentions.push(participantId);
                             } catch (error) {
                                 // Se não conseguir obter o contato, usar apenas o número com padrão das boas-vindas
                                 const posicaoEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${item.posicao}º`;
@@ -3464,11 +3410,11 @@ async function processMessage(message) {
                                     `${(item.megas/1024).toFixed(1)}GB` : `${item.megas}MB`;
 
                                 // Usar exatamente o mesmo padrão das boas-vindas
-                                mensagem += `${posicaoEmoji} @${contactId.replace('@c.us', '')}\n`;
+                                mensagem += `${posicaoEmoji} @${participantId.replace('@c.us', '')}\n`;
                                 mensagem += `   💾 ${megasFormatados} no grupo (${item.compras}x)\n`;
                                 mensagem += `   📊 Total: ${item.megasTotal >= 1024 ? (item.megasTotal/1024).toFixed(1)+'GB' : item.megasTotal+'MB'}\n\n`;
 
-                                mentions.push(contactId);
+                                mentions.push(participantId);
                             }
                         }
                         
@@ -3499,12 +3445,12 @@ async function processMessage(message) {
                         
                         for (let i = 0; i < Math.min(inativos.length, 20); i++) {
                             const item = inativos[i];
-                            // Usar função de normalização igual às boas-vindas
-                            const contactId = await normalizarIdParaMencao(item.numero, `INATIVOS-${chatId}`);
-                            
+                            // COPIAR EXATAMENTE A LÓGICA DAS BOAS-VINDAS - SEM CONVERSÃO
+                            const participantId = item.numero; // Usar número exatamente como está salvo
+
                             // Obter informações do contato
                             try {
-                                const contact = await client.getContactById(contactId);
+                                const contact = await client.getContactById(participantId);
                                 
                                 // Prioridade: nome salvo > nome do perfil > número
                                 const nomeExibicao = contact.name || contact.pushname || item.numero;
@@ -3513,21 +3459,21 @@ async function processMessage(message) {
                                 const totalFormatado = item.megasTotal >= 1024 ? 
                                     `${(item.megasTotal/1024).toFixed(1)}GB` : `${item.megasTotal}MB`;
                                 
-                                mensagem += `👤 @${contactId.replace('@c.us', '')}\n`;
+                                mensagem += `👤 @${participantId.replace('@c.us', '')}\n`;
                                 mensagem += `   ⏰ ${item.diasSemComprar} dias sem comprar\n`;
                                 mensagem += `   📊 Total: ${item.totalCompras}x compras (${totalFormatado})\n\n`;
                                 
-                                mentions.push(contactId);
+                                mentions.push(participantId);
                             } catch (error) {
                                 // Se não conseguir obter o contato, usar apenas o número
                                 const totalFormatado = item.megasTotal >= 1024 ? 
                                     `${(item.megasTotal/1024).toFixed(1)}GB` : `${item.megasTotal}MB`;
                                 
-                                mensagem += `👤 @${contactId.replace('@c.us', '')}\n`;
+                                mensagem += `👤 @${participantId.replace('@c.us', '')}\n`;
                                 mensagem += `   ⏰ ${item.diasSemComprar} dias sem comprar\n`;
                                 mensagem += `   📊 Total: ${item.totalCompras}x compras (${totalFormatado})\n\n`;
                                 
-                                mentions.push(contactId);
+                                mentions.push(participantId);
                             }
                         }
                         
@@ -3562,29 +3508,29 @@ async function processMessage(message) {
                         
                         for (let i = 0; i < Math.min(semCompra.length, 30); i++) {
                             const item = semCompra[i];
-                            // Usar função de normalização igual às boas-vindas
-                            const contactId = await normalizarIdParaMencao(item.numero, `SEMCOMPRA-${chatId}`);
-                            
+                            // COPIAR EXATAMENTE A LÓGICA DAS BOAS-VINDAS - SEM CONVERSÃO
+                            const participantId = item.numero; // Usar número exatamente como está salvo
+
                             // Obter informações do contato
                             try {
-                                const contact = await client.getContactById(contactId);
+                                const contact = await client.getContactById(participantId);
                                 
                                 // Prioridade: nome salvo > nome do perfil > número
                                 const nomeExibicao = contact.name || contact.pushname || item.numero;
                                 const numeroLimpo = contact.id.user; // Número sem @ e sem +
                                 
-                                mensagem += `👤 @${contactId.replace('@c.us', '')}\n`;
+                                mensagem += `👤 @${participantId.replace('@c.us', '')}\n`;
                                 mensagem += `   📅 Registrado: ${new Date(item.primeiraCompra).toLocaleDateString('pt-BR')}\n`;
                                 mensagem += `   💰 Compras: ${item.totalCompras} (${item.megasTotal}MB)\n\n`;
                                 
-                                mentions.push(contactId);
+                                mentions.push(participantId);
                             } catch (error) {
                                 // Se não conseguir obter o contato, usar apenas o número
-                                mensagem += `👤 @${contactId.replace('@c.us', '')}\n`;
+                                mensagem += `👤 @${participantId.replace('@c.us', '')}\n`;
                                 mensagem += `   📅 Registrado: ${new Date(item.primeiraCompra).toLocaleDateString('pt-BR')}\n`;
                                 mensagem += `   💰 Compras: ${item.totalCompras} (${item.megasTotal}MB)\n\n`;
                                 
-                                mentions.push(contactId);
+                                mentions.push(participantId);
                             }
                         }
                         
@@ -3877,8 +3823,8 @@ async function processMessage(message) {
                             return;
                         }
 
-                        // Usar função de normalização igual às boas-vindas
-                        const participantId = await normalizarIdParaMencao(numeroDestino, `BONUS-${chatId}`);
+                        // COPIAR EXATAMENTE A LÓGICA DAS BOAS-VINDAS - SEM CONVERSÃO
+                        const participantId = numeroDestino; // Usar número exatamente como recebido
                         
                         // Inicializar saldo se não existir
                         if (!bonusSaldos[participantId]) {
@@ -4995,19 +4941,19 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                     if (resultadoConfirmacao.mensagem && resultadoConfirmacao.contactId) {
                         try {
                             // Normalizar ID para formato @c.us igual às boas-vindas
-                            const contactIdNormalizado = await normalizarIdParaMencao(resultadoConfirmacao.contactId, `PARABENS-${chatId}`);
+                            const participantId = resultadoConfirmacao.contactId; // IGUAL ÀS BOAS-VINDAS
                             // Usar exato formato das boas-vindas
-                            const mensagemFinal = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${contactIdNormalizado.replace('@c.us', '')}`);
+                            const mensagemFinal = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${participantId.replace('@c.us', '')}`);
 
                             // Enviar com menção igual às boas-vindas
                             await client.sendMessage(message.from, mensagemFinal, {
-                                mentions: [contactIdNormalizado]
+                                mentions: [participantId]
                             });
                         } catch (error) {
                             console.error('❌ Erro ao enviar parabenização com menção:', error);
                             // Fallback: enviar sem menção clicável
-                            const contactIdNormalizado = await normalizarIdParaMencao(resultadoConfirmacao.contactId, `PARABENS-FALLBACK-${chatId}`);
-                            const mensagemFallback = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${contactIdNormalizado.replace('@c.us', '')}`);
+                            const participantId = resultadoConfirmacao.contactId; // IGUAL ÀS BOAS-VINDAS
+                            const mensagemFallback = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${participantId.replace('@c.us', '')}`);
                             await message.reply(mensagemFallback);
                         }
                     }

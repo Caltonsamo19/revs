@@ -27,37 +27,6 @@ function carregarMapeamentosCompras() {
 // Carregar na inicialização do módulo
 carregarMapeamentosCompras();
 
-// Função para normalizar IDs para menções (EXATAMENTE igual às boas-vindas)
-function normalizarIdParaMencao(numero, grupoInfo = 'desconhecido') {
-    console.log(`🔄 COMPRAS: Normalizando ID: ${numero} [GRUPO: ${grupoInfo}]`);
-
-    // Se já é um ID completo, processar conforme o tipo
-    if (numero.includes('@')) {
-        if (numero.endsWith('@lid')) {
-            // Converter @lid para @c.us usando mapeamento primeiro
-            const numeroMapeado = MAPEAMENTO_IDS[numero];
-            if (numeroMapeado) {
-                console.log(`✅ Mapeamento encontrado: ${numero} → ${numeroMapeado}`);
-                return numeroMapeado;
-            }
-
-            // Se não tem mapeamento específico, extrair o número e converter
-            const numeroLimpo = numero.replace('@lid', '');
-            const resultado = numeroLimpo + '@c.us';
-            console.log(`🔄 Conversão LID: ${numero} → ${resultado}`);
-            return resultado;
-        }
-        if (numero.endsWith('@c.us')) {
-            console.log(`✅ Já no formato correto: ${numero}`);
-            return numero; // Já está no formato correto
-        }
-    }
-
-    // Se é apenas número, adicionar @c.us
-    const resultado = numero + '@c.us';
-    console.log(`🔄 Adicionando @c.us: ${numero} → ${resultado}`);
-    return resultado;
-}
 
 class SistemaCompras {
     constructor() {
@@ -537,14 +506,14 @@ class SistemaCompras {
 
             return {
                 mensagem: mensagem,
-                contactId: normalizarIdParaMencao(numero, `PARABENS-${grupoId || 'sem-grupo'}`)
+                contactId: numero // USAR EXATAMENTE COMO ESTÁ SALVO - IGUAL ÀS BOAS-VINDAS
             };
 
         } catch (error) {
             console.error('❌ COMPRAS: Erro ao gerar mensagem:', error);
             return {
                 mensagem: `🎉 Obrigado, @NOME_PLACEHOLDER, sua compra foi registrada com sucesso!`,
-                contactId: normalizarIdParaMencao(numero, `PARABENS-ERRO-${grupoId || 'sem-grupo'}`)
+                contactId: numero // USAR EXATAMENTE COMO ESTÁ SALVO - IGUAL ÀS BOAS-VINDAS
             };
         }
     }
