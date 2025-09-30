@@ -1610,7 +1610,8 @@ const ADMINISTRADORES_GLOBAIS = [
 // Mapeamento de IDs internos (@lid) para números reais (@c.us)
 const MAPEAMENTO_IDS = {
     '23450974470333@lid': '258852118624@c.us',  // Seu ID
-    '245075749638206@lid': null  // Será identificado automaticamente
+    '245075749638206@lid': null,  // Será identificado automaticamente
+    '76991768342659@lid': '258870818180@c.us'  // Joãozinho - corrigido manualmente
 };
 
 // === CONFIGURAÇÃO DE MODERAÇÃO ===
@@ -2091,47 +2092,87 @@ function resolverIdReal(participantId, adminsEncontrados) {
 // Função para converter LID para número usando API oficial do wwebjs
 async function lidParaNumero(lid) {
     try {
-        console.log(`🔍 Convertendo LID para número: ${lid}`);
+        console.log(`🔍 INICIO: Convertendo LID para número: ${lid}`);
+        console.log(`🔍 CLIENTE: Status do cliente: ${client ? 'disponível' : 'não disponível'}`);
+
+        if (!client) {
+            console.error(`❌ Cliente WhatsApp não está disponível para conversão LID`);
+            return null;
+        }
+
+        // Verificar se o cliente está realmente pronto
+        try {
+            const info = await client.getState();
+            console.log(`🔍 ESTADO: Cliente estado: ${info}`);
+            if (info !== 'CONNECTED') {
+                console.error(`❌ Cliente não está conectado (estado: ${info}) - não é possível converter LID`);
+                return null;
+            }
+        } catch (stateError) {
+            console.error(`❌ Erro ao verificar estado do cliente:`, stateError.message);
+            return null;
+        }
+
+        console.log(`🔍 CHAMANDO: client.getContactById(${lid})`);
         const contato = await client.getContactById(lid);
+        console.log(`🔍 CONTATO: Objeto recebido:`, contato ? 'OK' : 'NULL');
+
+        if (!contato) {
+            console.error(`❌ Contato não encontrado para LID: ${lid}`);
+            return null;
+        }
+
         const numeroReal = contato.number;
-        console.log(`✅ LID convertido: ${lid} → ${numeroReal}`);
+        console.log(`✅ LID convertido com sucesso: ${lid} → ${numeroReal}`);
         return numeroReal; // Retorna número no formato internacional (ex: 258841234567)
     } catch (err) {
-        console.error(`❌ Erro ao buscar número para LID ${lid}:`, err.message);
+        console.error(`❌ Erro detalhado ao buscar número para LID ${lid}:`, err.message);
+        console.error(`❌ Stack trace:`, err.stack);
         return null;
     }
 }
 
 // Função para normalizar IDs para menções (EXATAMENTE igual às boas-vindas) - VERSÃO MELHORADA
 async function normalizarIdParaMencao(numero) {
-    console.log(`🔄 INDEX: Normalizando ID: ${numero}`);
+    console.log(`🔄 INDEX: INICIO - Normalizando ID: ${numero}`);
 
     // Se já é um ID completo, processar conforme o tipo
     if (numero.includes('@')) {
+        console.log(`🔄 INDEX: ID contém '@', verificando tipo...`);
         if (numero.endsWith('@lid')) {
+            console.log(`🔄 INDEX: Detectado LID, iniciando conversão via API...`);
             // NOVO: Usar API oficial do wwebjs para conversão LID
             try {
+                console.log(`🔄 INDEX: Chamando lidParaNumero(${numero})...`);
                 const numeroReal = await lidParaNumero(numero);
+                console.log(`🔄 INDEX: Resultado lidParaNumero: ${numeroReal}`);
                 if (numeroReal) {
                     const resultado = numeroReal + '@c.us';
-                    console.log(`✅ INDEX: Conversão LID via API: ${numero} → ${resultado}`);
+                    console.log(`✅ INDEX: Conversão LID via API SUCESSO: ${numero} → ${resultado}`);
                     return resultado;
+                } else {
+                    console.log(`⚠️ INDEX: lidParaNumero retornou null, passando para fallback...`);
                 }
             } catch (error) {
                 console.error(`❌ INDEX: Erro na conversão LID via API: ${error.message}`);
+                console.error(`❌ INDEX: Stack trace do erro:`, error.stack);
             }
 
             // Fallback: usar mapeamento manual se API falhar
+            console.log(`🔄 INDEX: Tentando fallback com mapeamento manual...`);
             const numeroMapeado = MAPEAMENTO_IDS[numero];
             if (numeroMapeado) {
                 console.log(`✅ INDEX: Fallback - Mapeamento encontrado: ${numero} → ${numeroMapeado}`);
                 return numeroMapeado;
+            } else {
+                console.log(`⚠️ INDEX: Nenhum mapeamento encontrado para: ${numero}`);
             }
 
             // Fallback final: extrair número e converter
+            console.log(`🔄 INDEX: Usando fallback final - conversão simples...`);
             const numeroLimpo = numero.replace('@lid', '');
             const resultado = numeroLimpo + '@c.us';
-            console.log(`⚠️ INDEX: Fallback - Conversão LID: ${numero} → ${resultado}`);
+            console.log(`⚠️ INDEX: Fallback final - Conversão LID: ${numero} → ${resultado}`);
             return resultado;
         }
         if (numero.endsWith('@c.us')) {

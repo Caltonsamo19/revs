@@ -4,7 +4,8 @@ const path = require('path');
 // Mapeamento de IDs internos (@lid) para números reais (@c.us) - igual ao index.js
 const MAPEAMENTO_IDS = {
     '23450974470333@lid': '258852118624@c.us',  // ID conhecido
-    '245075749638206@lid': null  // Será identificado automaticamente
+    '245075749638206@lid': null,  // Será identificado automaticamente
+    '76991768342659@lid': '258870818180@c.us'  // Joãozinho - corrigido manualmente
 };
 
 // Função para normalizar IDs para menções (EXATAMENTE igual às boas-vindas)
