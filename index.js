@@ -1688,9 +1688,8 @@ FORMAS DE PAGAMENTO💰💶
 
 🚀 O futuro é agora! Vamos? 🔥🛒
 `
-    },
-    '120363402302455817@g.us': {
-        nome: 'KA-Net Automático',
+    },'120363402302455817@g.us': {
+        nome: 'KA-NET',
         tabela: `INTERNET VODACOM
 
 Diários (Válidos Por 24Hrs)
@@ -1710,7 +1709,7 @@ Mensal (Válido Por 30 Dias)
 10GB = 250MT
 35GB = 710MT
 50GB = 1030MT
-100GB = 2040MT`,
+100GB = 2040MT`,
         pagamento: `💳 FORMAS/ PAGAMENTOS :⤵
 - 📲 𝗘-𝗠𝗢𝗟𝗔: 876692062💶💰
 - Catia Anabela Nharrava 
@@ -1718,8 +1717,8 @@ Mensal (Válido Por 30 Dias)
 - ↪📞Kelven Junior Anabela Nharrava
 `
     }
+    
 };
-
 
 
 // === FUNÇÃO GOOGLE SHEETS ===
@@ -3274,7 +3273,7 @@ async function processMessage(message) {
                                 const megasFormatados = item.megas >= 1024 ? 
                                     `${(item.megas/1024).toFixed(1)}GB` : `${item.megas}MB`;
                                 
-                                mensagem += `${posicaoEmoji} @${numeroLimpo}\n`;
+                                mensagem += `${posicaoEmoji} @${contactId.replace('@c.us', '')}\n`;
                                 mensagem += `   💾 ${megasFormatados} no grupo (${item.compras}x)\n`;
                                 mensagem += `   📊 Total: ${item.megasTotal >= 1024 ? (item.megasTotal/1024).toFixed(1)+'GB' : item.megasTotal+'MB'}\n\n`;
                                 
@@ -3285,7 +3284,7 @@ async function processMessage(message) {
                                 const megasFormatados = item.megas >= 1024 ? 
                                     `${(item.megas/1024).toFixed(1)}GB` : `${item.megas}MB`;
                                 
-                                mensagem += `${posicaoEmoji} @${item.numero}\n`;
+                                mensagem += `${posicaoEmoji} @${contactId.replace('@c.us', '')}\n`;
                                 mensagem += `   💾 ${megasFormatados} no grupo (${item.compras}x)\n`;
                                 mensagem += `   📊 Total: ${item.megasTotal >= 1024 ? (item.megasTotal/1024).toFixed(1)+'GB' : item.megasTotal+'MB'}\n\n`;
                                 
@@ -3333,7 +3332,7 @@ async function processMessage(message) {
                                 const totalFormatado = item.megasTotal >= 1024 ? 
                                     `${(item.megasTotal/1024).toFixed(1)}GB` : `${item.megasTotal}MB`;
                                 
-                                mensagem += `👤 @${numeroLimpo}\n`;
+                                mensagem += `👤 @${contactId.replace('@c.us', '')}\n`;
                                 mensagem += `   ⏰ ${item.diasSemComprar} dias sem comprar\n`;
                                 mensagem += `   📊 Total: ${item.totalCompras}x compras (${totalFormatado})\n\n`;
                                 
@@ -3343,7 +3342,7 @@ async function processMessage(message) {
                                 const totalFormatado = item.megasTotal >= 1024 ? 
                                     `${(item.megasTotal/1024).toFixed(1)}GB` : `${item.megasTotal}MB`;
                                 
-                                mensagem += `👤 @${item.numero}\n`;
+                                mensagem += `👤 @${contactId.replace('@c.us', '')}\n`;
                                 mensagem += `   ⏰ ${item.diasSemComprar} dias sem comprar\n`;
                                 mensagem += `   📊 Total: ${item.totalCompras}x compras (${totalFormatado})\n\n`;
                                 
@@ -3392,14 +3391,14 @@ async function processMessage(message) {
                                 const nomeExibicao = contact.name || contact.pushname || item.numero;
                                 const numeroLimpo = contact.id.user; // Número sem @ e sem +
                                 
-                                mensagem += `👤 @${numeroLimpo}\n`;
+                                mensagem += `👤 @${contactId.replace('@c.us', '')}\n`;
                                 mensagem += `   📅 Registrado: ${new Date(item.primeiraCompra).toLocaleDateString('pt-BR')}\n`;
                                 mensagem += `   💰 Compras: ${item.totalCompras} (${item.megasTotal}MB)\n\n`;
                                 
                                 mentions.push(contactId);
                             } catch (error) {
                                 // Se não conseguir obter o contato, usar apenas o número
-                                mensagem += `👤 @${item.numero}\n`;
+                                mensagem += `👤 @${contactId.replace('@c.us', '')}\n`;
                                 mensagem += `   📅 Registrado: ${new Date(item.primeiraCompra).toLocaleDateString('pt-BR')}\n`;
                                 mensagem += `   💰 Compras: ${item.totalCompras} (${item.megasTotal}MB)\n\n`;
                                 
@@ -4960,8 +4959,10 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                         } catch (error) {
                             console.error('❌ Erro ao enviar parabenização com menção:', error);
                             // Fallback: enviar sem menção clicável
-                            const mensagemFallback = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${resultadoConfirmacao.numeroComprador}`);
-                            await message.reply(mensagemFallback);
+                            const mensagemFallback = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${resultadoConfirmacao.contactId.replace('@c.us', '')}`);
+                            await client.sendMessage(message.from, mensagemFallback, {
+                                mentions: [resultadoConfirmacao.contactId]
+                            });
                         }
                     }
                 } else {
@@ -5312,7 +5313,6 @@ process.on('SIGINT', async () => {
     console.log(ia.getStatus());
     process.exit(0);
 });
-
 
 
 
