@@ -2088,6 +2088,33 @@ function resolverIdReal(participantId, adminsEncontrados) {
     return participantId;
 }
 
+// Função para normalizar IDs para menções (igual às boas-vindas)
+function normalizarIdParaMencao(numero) {
+    // Se já é um ID completo, processar conforme o tipo
+    if (numero.includes('@')) {
+        if (numero.endsWith('@lid')) {
+            // Converter @lid para @c.us usando mapeamento
+            const numeroMapeado = MAPEAMENTO_IDS[numero];
+            if (numeroMapeado) {
+                return numeroMapeado;
+            }
+            // Se não tem mapeamento, extrair apenas o número e converter para @c.us
+            const numeroLimpo = numero.replace('@lid', '');
+            // Se é o ID específico conhecido, mapear
+            if (numero === '23450974470333@lid') {
+                return '258852118624@c.us';
+            }
+            return numeroLimpo + '@c.us';
+        }
+        if (numero.endsWith('@c.us')) {
+            return numero; // Já está no formato correto
+        }
+    }
+
+    // Se é apenas número, adicionar @c.us
+    return numero + '@c.us';
+}
+
 async function isAdminGrupo(chatId, participantId) {
     try {
         console.log(`🔍 Verificando admin: chatId=${chatId}, participantId=${participantId}`);
@@ -3259,35 +3286,37 @@ async function processMessage(message) {
                         
                         for (let i = 0; i < ranking.length; i++) {
                             const item = ranking[i];
-                            const contactId = item.numero + '@c.us';
-                            
+                            // Usar função de normalização igual às boas-vindas
+                            const contactId = normalizarIdParaMencao(item.numero);
+
                             // Obter informações do contato
                             try {
                                 const contact = await client.getContactById(contactId);
-                                
+
                                 // Prioridade: nome salvo > nome do perfil > número
                                 const nomeExibicao = contact.name || contact.pushname || item.numero;
-                                const numeroLimpo = contact.id.user; // Número sem @ e sem +
-                                
+
                                 const posicaoEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${item.posicao}º`;
-                                const megasFormatados = item.megas >= 1024 ? 
+                                const megasFormatados = item.megas >= 1024 ?
                                     `${(item.megas/1024).toFixed(1)}GB` : `${item.megas}MB`;
-                                
+
+                                // Usar exatamente o mesmo padrão das boas-vindas
                                 mensagem += `${posicaoEmoji} @${contactId.replace('@c.us', '')}\n`;
                                 mensagem += `   💾 ${megasFormatados} no grupo (${item.compras}x)\n`;
                                 mensagem += `   📊 Total: ${item.megasTotal >= 1024 ? (item.megasTotal/1024).toFixed(1)+'GB' : item.megasTotal+'MB'}\n\n`;
-                                
+
                                 mentions.push(contactId);
                             } catch (error) {
-                                // Se não conseguir obter o contato, usar apenas o número
+                                // Se não conseguir obter o contato, usar apenas o número com padrão das boas-vindas
                                 const posicaoEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${item.posicao}º`;
-                                const megasFormatados = item.megas >= 1024 ? 
+                                const megasFormatados = item.megas >= 1024 ?
                                     `${(item.megas/1024).toFixed(1)}GB` : `${item.megas}MB`;
-                                
+
+                                // Usar exatamente o mesmo padrão das boas-vindas
                                 mensagem += `${posicaoEmoji} @${contactId.replace('@c.us', '')}\n`;
                                 mensagem += `   💾 ${megasFormatados} no grupo (${item.compras}x)\n`;
                                 mensagem += `   📊 Total: ${item.megasTotal >= 1024 ? (item.megasTotal/1024).toFixed(1)+'GB' : item.megasTotal+'MB'}\n\n`;
-                                
+
                                 mentions.push(contactId);
                             }
                         }
@@ -3319,7 +3348,8 @@ async function processMessage(message) {
                         
                         for (let i = 0; i < Math.min(inativos.length, 20); i++) {
                             const item = inativos[i];
-                            const contactId = item.numero + '@c.us';
+                            // Usar função de normalização igual às boas-vindas
+                            const contactId = normalizarIdParaMencao(item.numero);
                             
                             // Obter informações do contato
                             try {
@@ -3381,7 +3411,8 @@ async function processMessage(message) {
                         
                         for (let i = 0; i < Math.min(semCompra.length, 30); i++) {
                             const item = semCompra[i];
-                            const contactId = item.numero + '@c.us';
+                            // Usar função de normalização igual às boas-vindas
+                            const contactId = normalizarIdParaMencao(item.numero);
                             
                             // Obter informações do contato
                             try {
@@ -3646,7 +3677,8 @@ async function processMessage(message) {
                             return;
                         }
 
-                        const participantId = numeroDestino + '@c.us';
+                        // Usar função de normalização igual às boas-vindas
+                        const participantId = normalizarIdParaMencao(numeroDestino);
                         
                         // Inicializar saldo se não existir
                         if (!bonusSaldos[participantId]) {
@@ -4946,20 +4978,23 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                 if (resultadoConfirmacao) {
                     console.log(`✅ COMPRAS: Confirmação processada - ${resultadoConfirmacao.numero} | ${resultadoConfirmacao.megas}MB`);
                     
-                    // Enviar mensagem de parabenização com menção clicável
+                    // Enviar mensagem de parabenização com menção clicável (igual às boas-vindas)
                     if (resultadoConfirmacao.mensagem && resultadoConfirmacao.contactId) {
                         try {
-                            // Usar mesmo formato das boas-vindas (WhatsApp resolve o nome automaticamente)
-                            const mensagemFinal = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${resultadoConfirmacao.contactId.replace('@c.us', '')}`);
+                            // Normalizar ID para formato @c.us igual às boas-vindas
+                            const contactIdNormalizado = normalizarIdParaMencao(resultadoConfirmacao.contactId);
+                            // Usar exato formato das boas-vindas
+                            const mensagemFinal = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${contactIdNormalizado.replace('@c.us', '')}`);
 
-                            // Enviar com menção clicável
+                            // Enviar com menção igual às boas-vindas
                             await client.sendMessage(message.from, mensagemFinal, {
-                                mentions: [resultadoConfirmacao.contactId]
+                                mentions: [contactIdNormalizado]
                             });
                         } catch (error) {
                             console.error('❌ Erro ao enviar parabenização com menção:', error);
                             // Fallback: enviar sem menção clicável
-                            const mensagemFallback = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${resultadoConfirmacao.contactId.replace('@c.us', '')}`);
+                            const contactIdNormalizado = normalizarIdParaMencao(resultadoConfirmacao.contactId);
+                            const mensagemFallback = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${contactIdNormalizado.replace('@c.us', '')}`);
                             await message.reply(mensagemFallback);
                         }
                     }
