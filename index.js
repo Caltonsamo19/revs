@@ -2,6 +2,7 @@ require('dotenv').config();
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const fs = require('fs').promises;
+const path = require('path');
 const axios = require('axios'); // npm install axios
 
 // === AXIOS SIMPLIFICADO (SEGUINDO PADRÃO BOT1) ===
@@ -1607,12 +1608,87 @@ const ADMINISTRADORES_GLOBAIS = [
     // Removido temporariamente para testar verificação de grupo: '245075749638206@lid'
 ];
 
-// Mapeamento de IDs internos (@lid) para números reais (@c.us)
-const MAPEAMENTO_IDS = {
+// Mapeamento de IDs internos (@lid) para números reais (@c.us) - SISTEMA DINÂMICO
+let MAPEAMENTO_IDS = {
     '23450974470333@lid': '258852118624@c.us',  // Seu ID
     '245075749638206@lid': null,  // Será identificado automaticamente
     '76991768342659@lid': '258870818180@c.us'  // Joãozinho - corrigido manualmente
 };
+
+// === SISTEMA AUTOMÁTICO DE MAPEAMENTO LID ===
+const ARQUIVO_MAPEAMENTOS = path.join(__dirname, 'mapeamentos_lid.json');
+
+async function carregarMapeamentos() {
+    try {
+        if (fs.existsSync(ARQUIVO_MAPEAMENTOS)) {
+            const data = await fs.readFile(ARQUIVO_MAPEAMENTOS, 'utf8');
+            const mapeamentosSalvos = JSON.parse(data);
+            // Mesclar com os mapeamentos base
+            MAPEAMENTO_IDS = { ...MAPEAMENTO_IDS, ...mapeamentosSalvos };
+            console.log(`✅ Carregados ${Object.keys(mapeamentosSalvos).length} mapeamentos LID salvos`);
+        }
+    } catch (error) {
+        console.error('❌ Erro ao carregar mapeamentos LID:', error.message);
+    }
+}
+
+async function salvarMapeamentos() {
+    try {
+        // Filtrar apenas os mapeamentos válidos (não null)
+        const mapeamentosValidos = {};
+        for (const [lid, numero] of Object.entries(MAPEAMENTO_IDS)) {
+            if (numero && numero !== null) {
+                mapeamentosValidos[lid] = numero;
+            }
+        }
+        await fs.writeFile(ARQUIVO_MAPEAMENTOS, JSON.stringify(mapeamentosValidos, null, 2));
+        console.log(`💾 Salvos ${Object.keys(mapeamentosValidos).length} mapeamentos LID`);
+    } catch (error) {
+        console.error('❌ Erro ao salvar mapeamentos LID:', error.message);
+    }
+}
+
+async function adicionarMapeamento(lid, numeroReal) {
+    if (!lid || !numeroReal || lid === numeroReal) return false;
+
+    // Validar formato
+    if (!lid.endsWith('@lid') || !numeroReal.endsWith('@c.us')) return false;
+
+    // Verificar se já existe
+    if (MAPEAMENTO_IDS[lid] === numeroReal) return false;
+
+    // Adicionar novo mapeamento
+    MAPEAMENTO_IDS[lid] = numeroReal;
+    console.log(`✅ NOVO MAPEAMENTO: ${lid} → ${numeroReal}`);
+    await salvarMapeamentos();
+    return true;
+}
+
+// Função para tentar aprender mapeamento automaticamente quando ambos os formatos estão disponíveis
+async function aprenderMapeamento(message) {
+    try {
+        if (!message.from || !message.author) return;
+
+        const from = message.from; // ID do remetente (pode ser @c.us)
+        const author = message.author; // ID do autor (pode ser @lid)
+
+        // Se temos um @lid e um @c.us, podemos aprender o mapeamento
+        if (author && author.endsWith('@lid') && from && from.endsWith('@c.us')) {
+            // Extrair número base para validar se correspondem
+            const numeroLid = author.replace('@lid', '');
+            const numeroReal = from.replace('@c.us', '');
+
+            // Tentar encontrar uma correspondência lógica (primeiros dígitos, etc.)
+            // Por enquanto, sempre tentar mapear se não temos o mapeamento
+            if (!MAPEAMENTO_IDS[author]) {
+                await adicionarMapeamento(author, from);
+                console.log(`🔍 APRENDIZADO: Detectado possível mapeamento ${author} → ${from}`);
+            }
+        }
+    } catch (error) {
+        // Silencioso - não queremos spam nos logs
+    }
+}
 
 // === CONFIGURAÇÃO DE MODERAÇÃO ===
 const MODERACAO_CONFIG = {
@@ -2133,8 +2209,8 @@ async function lidParaNumero(lid) {
 }
 
 // Função para normalizar IDs para menções (EXATAMENTE igual às boas-vindas) - VERSÃO MELHORADA
-async function normalizarIdParaMencao(numero) {
-    console.log(`🔄 INDEX: INICIO - Normalizando ID: ${numero}`);
+async function normalizarIdParaMencao(numero, grupoInfo = 'desconhecido') {
+    console.log(`🔄 INDEX: INICIO - Normalizando ID: ${numero} [GRUPO: ${grupoInfo}]`);
 
     // Se já é um ID completo, processar conforme o tipo
     if (numero.includes('@')) {
@@ -2722,6 +2798,9 @@ client.on('ready', async () => {
     console.log('📊 Google Sheets configurado!');
     console.log(`🔗 URL: ${GOOGLE_SHEETS_CONFIG.scriptUrl}`);
     console.log('🤖 Bot Retalho - Lógica simples igual ao Bot Atacado!');
+
+    // Carregar mapeamentos LID salvos
+    await carregarMapeamentos();
 
     // === INICIALIZAR SISTEMA DE RELATÓRIOS ===
     try {
@@ -3359,7 +3438,7 @@ async function processMessage(message) {
                         for (let i = 0; i < ranking.length; i++) {
                             const item = ranking[i];
                             // Usar função de normalização igual às boas-vindas
-                            const contactId = await normalizarIdParaMencao(item.numero);
+                            const contactId = await normalizarIdParaMencao(item.numero, `RANKING-${chatId}`);
 
                             // Obter informações do contato
                             try {
@@ -3421,7 +3500,7 @@ async function processMessage(message) {
                         for (let i = 0; i < Math.min(inativos.length, 20); i++) {
                             const item = inativos[i];
                             // Usar função de normalização igual às boas-vindas
-                            const contactId = await normalizarIdParaMencao(item.numero);
+                            const contactId = await normalizarIdParaMencao(item.numero, `INATIVOS-${chatId}`);
                             
                             // Obter informações do contato
                             try {
@@ -3484,7 +3563,7 @@ async function processMessage(message) {
                         for (let i = 0; i < Math.min(semCompra.length, 30); i++) {
                             const item = semCompra[i];
                             // Usar função de normalização igual às boas-vindas
-                            const contactId = await normalizarIdParaMencao(item.numero);
+                            const contactId = await normalizarIdParaMencao(item.numero, `SEMCOMPRA-${chatId}`);
                             
                             // Obter informações do contato
                             try {
@@ -3528,6 +3607,55 @@ async function processMessage(message) {
                 // .resetranking - Comando removido (ranking diário/semanal desabilitado)
                 if (comando === '.resetranking') {
                     await message.reply(`❌ *COMANDO DESABILITADO*\n\nO sistema de ranking diário/semanal foi removido.\nApenas o ranking geral está ativo.`);
+                    return;
+                }
+
+                // .mapear LID NUMERO - Mapear manualmente LID para número real
+                if (comando.startsWith('.mapear ')) {
+                    const partes = message.body.trim().split(' ');
+                    if (partes.length !== 3) {
+                        await message.reply(`❌ *USO INCORRETO*\n\n✅ **Formato:**\n*.mapear LID_CODE NUMERO*\n\n📝 **Exemplo:**\n*.mapear 76991768342659@lid 258870818180@c.us*\n\n💡 **Dica:** Use este comando quando souber que um LID específico corresponde a um número real.`);
+                        return;
+                    }
+
+                    const [, lidCode, numeroReal] = partes;
+
+                    // Validar formatos
+                    if (!lidCode.endsWith('@lid')) {
+                        await message.reply(`❌ *LID INVÁLIDO*\n\nO LID deve terminar com '@lid'\n\n📝 **Exemplo:** 76991768342659@lid`);
+                        return;
+                    }
+
+                    if (!numeroReal.endsWith('@c.us')) {
+                        await message.reply(`❌ *NÚMERO INVÁLIDO*\n\nO número deve terminar com '@c.us'\n\n📝 **Exemplo:** 258870818180@c.us`);
+                        return;
+                    }
+
+                    const sucesso = await adicionarMapeamento(lidCode, numeroReal);
+                    if (sucesso) {
+                        await message.reply(`✅ *MAPEAMENTO ADICIONADO*\n\n🔗 ${lidCode}\n↓\n📱 ${numeroReal}\n\n💾 Salvo no arquivo de mapeamentos.`);
+                    } else {
+                        await message.reply(`⚠️ *MAPEAMENTO JÁ EXISTE*\n\nEste LID já está mapeado para:\n📱 ${MAPEAMENTO_IDS[lidCode] || 'Desconhecido'}`);
+                    }
+                    return;
+                }
+
+                // .mapeamentos - Listar todos os mapeamentos conhecidos
+                if (comando === '.mapeamentos') {
+                    let mensagem = `📋 *MAPEAMENTOS LID CONHECIDOS*\n━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+                    const mapeamentosValidos = Object.entries(MAPEAMENTO_IDS).filter(([lid, numero]) => numero && numero !== null);
+
+                    if (mapeamentosValidos.length === 0) {
+                        mensagem += `❌ Nenhum mapeamento encontrado`;
+                    } else {
+                        mapeamentosValidos.forEach(([lid, numero], index) => {
+                            mensagem += `${index + 1}. ${lid}\n   → ${numero}\n\n`;
+                        });
+                        mensagem += `📊 *Total: ${mapeamentosValidos.length} mapeamentos*`;
+                    }
+
+                    await message.reply(mensagem);
                     return;
                 }
                 
@@ -3750,7 +3878,7 @@ async function processMessage(message) {
                         }
 
                         // Usar função de normalização igual às boas-vindas
-                        const participantId = await normalizarIdParaMencao(numeroDestino);
+                        const participantId = await normalizarIdParaMencao(numeroDestino, `BONUS-${chatId}`);
                         
                         // Inicializar saldo se não existir
                         if (!bonusSaldos[participantId]) {
@@ -4867,7 +4995,7 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                     if (resultadoConfirmacao.mensagem && resultadoConfirmacao.contactId) {
                         try {
                             // Normalizar ID para formato @c.us igual às boas-vindas
-                            const contactIdNormalizado = await normalizarIdParaMencao(resultadoConfirmacao.contactId);
+                            const contactIdNormalizado = await normalizarIdParaMencao(resultadoConfirmacao.contactId, `PARABENS-${chatId}`);
                             // Usar exato formato das boas-vindas
                             const mensagemFinal = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${contactIdNormalizado.replace('@c.us', '')}`);
 
@@ -4878,7 +5006,7 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                         } catch (error) {
                             console.error('❌ Erro ao enviar parabenização com menção:', error);
                             // Fallback: enviar sem menção clicável
-                            const contactIdNormalizado = await normalizarIdParaMencao(resultadoConfirmacao.contactId);
+                            const contactIdNormalizado = await normalizarIdParaMencao(resultadoConfirmacao.contactId, `PARABENS-FALLBACK-${chatId}`);
                             const mensagemFallback = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${contactIdNormalizado.replace('@c.us', '')}`);
                             await message.reply(mensagemFallback);
                         }
@@ -5102,7 +5230,10 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
 // Novo handler principal com queue
 client.on('message', async (message) => {
     try {
-        // Primeiro: tentar processar comandos administrativos rápidos
+        // PRIMEIRO: Tentar aprender mapeamentos LID automaticamente
+        await aprenderMapeamento(message);
+
+        // Segundo: tentar processar comandos administrativos rápidos
         const adminProcessed = await handleAdminCommands(message);
         if (adminProcessed) return;
 

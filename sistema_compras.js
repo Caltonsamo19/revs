@@ -1,16 +1,35 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-// Mapeamento de IDs internos (@lid) para números reais (@c.us) - igual ao index.js
-const MAPEAMENTO_IDS = {
+// Mapeamento de IDs internos (@lid) para números reais (@c.us) - SISTEMA DINÂMICO COMPARTILHADO
+const ARQUIVO_MAPEAMENTOS = path.join(__dirname, 'mapeamentos_lid.json');
+
+let MAPEAMENTO_IDS = {
     '23450974470333@lid': '258852118624@c.us',  // ID conhecido
     '245075749638206@lid': null,  // Será identificado automaticamente
     '76991768342659@lid': '258870818180@c.us'  // Joãozinho - corrigido manualmente
 };
 
+// Carregar mapeamentos salvos (se o arquivo existir)
+function carregarMapeamentosCompras() {
+    try {
+        if (require('fs').existsSync(ARQUIVO_MAPEAMENTOS)) {
+            const data = require('fs').readFileSync(ARQUIVO_MAPEAMENTOS, 'utf8');
+            const mapeamentosSalvos = JSON.parse(data);
+            MAPEAMENTO_IDS = { ...MAPEAMENTO_IDS, ...mapeamentosSalvos };
+            console.log(`✅ COMPRAS: Carregados ${Object.keys(mapeamentosSalvos).length} mapeamentos LID`);
+        }
+    } catch (error) {
+        console.error('❌ COMPRAS: Erro ao carregar mapeamentos LID:', error.message);
+    }
+}
+
+// Carregar na inicialização do módulo
+carregarMapeamentosCompras();
+
 // Função para normalizar IDs para menções (EXATAMENTE igual às boas-vindas)
-function normalizarIdParaMencao(numero) {
-    console.log(`🔄 Normalizando ID: ${numero}`);
+function normalizarIdParaMencao(numero, grupoInfo = 'desconhecido') {
+    console.log(`🔄 COMPRAS: Normalizando ID: ${numero} [GRUPO: ${grupoInfo}]`);
 
     // Se já é um ID completo, processar conforme o tipo
     if (numero.includes('@')) {
@@ -518,14 +537,14 @@ class SistemaCompras {
 
             return {
                 mensagem: mensagem,
-                contactId: normalizarIdParaMencao(numero)
+                contactId: normalizarIdParaMencao(numero, `PARABENS-${grupoId || 'sem-grupo'}`)
             };
 
         } catch (error) {
             console.error('❌ COMPRAS: Erro ao gerar mensagem:', error);
             return {
                 mensagem: `🎉 Obrigado, @NOME_PLACEHOLDER, sua compra foi registrada com sucesso!`,
-                contactId: normalizarIdParaMencao(numero)
+                contactId: normalizarIdParaMencao(numero, `PARABENS-ERRO-${grupoId || 'sem-grupo'}`)
             };
         }
     }
