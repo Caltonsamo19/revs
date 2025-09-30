@@ -7,31 +7,36 @@ const MAPEAMENTO_IDS = {
     '245075749638206@lid': null  // Será identificado automaticamente
 };
 
-// Função para normalizar IDs para menções (igual às boas-vindas)
+// Função para normalizar IDs para menções (EXATAMENTE igual às boas-vindas)
 function normalizarIdParaMencao(numero) {
+    console.log(`🔄 Normalizando ID: ${numero}`);
+
     // Se já é um ID completo, processar conforme o tipo
     if (numero.includes('@')) {
         if (numero.endsWith('@lid')) {
-            // Converter @lid para @c.us usando mapeamento
+            // Converter @lid para @c.us usando mapeamento primeiro
             const numeroMapeado = MAPEAMENTO_IDS[numero];
             if (numeroMapeado) {
+                console.log(`✅ Mapeamento encontrado: ${numero} → ${numeroMapeado}`);
                 return numeroMapeado;
             }
-            // Se não tem mapeamento, extrair apenas o número e converter para @c.us
+
+            // Se não tem mapeamento específico, extrair o número e converter
             const numeroLimpo = numero.replace('@lid', '');
-            // Se é o ID específico conhecido, mapear
-            if (numero === '23450974470333@lid') {
-                return '258852118624@c.us';
-            }
-            return numeroLimpo + '@c.us';
+            const resultado = numeroLimpo + '@c.us';
+            console.log(`🔄 Conversão LID: ${numero} → ${resultado}`);
+            return resultado;
         }
         if (numero.endsWith('@c.us')) {
+            console.log(`✅ Já no formato correto: ${numero}`);
             return numero; // Já está no formato correto
         }
     }
 
     // Se é apenas número, adicionar @c.us
-    return numero + '@c.us';
+    const resultado = numero + '@c.us';
+    console.log(`🔄 Adicionando @c.us: ${numero} → ${resultado}`);
+    return resultado;
 }
 
 class SistemaCompras {

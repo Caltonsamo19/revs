@@ -2088,31 +2088,62 @@ function resolverIdReal(participantId, adminsEncontrados) {
     return participantId;
 }
 
-// Função para normalizar IDs para menções (igual às boas-vindas)
-function normalizarIdParaMencao(numero) {
+// Função para converter LID para número usando API oficial do wwebjs
+async function lidParaNumero(lid) {
+    try {
+        console.log(`🔍 Convertendo LID para número: ${lid}`);
+        const contato = await client.getContactById(lid);
+        const numeroReal = contato.number;
+        console.log(`✅ LID convertido: ${lid} → ${numeroReal}`);
+        return numeroReal; // Retorna número no formato internacional (ex: 258841234567)
+    } catch (err) {
+        console.error(`❌ Erro ao buscar número para LID ${lid}:`, err.message);
+        return null;
+    }
+}
+
+// Função para normalizar IDs para menções (EXATAMENTE igual às boas-vindas) - VERSÃO MELHORADA
+async function normalizarIdParaMencao(numero) {
+    console.log(`🔄 INDEX: Normalizando ID: ${numero}`);
+
     // Se já é um ID completo, processar conforme o tipo
     if (numero.includes('@')) {
         if (numero.endsWith('@lid')) {
-            // Converter @lid para @c.us usando mapeamento
+            // NOVO: Usar API oficial do wwebjs para conversão LID
+            try {
+                const numeroReal = await lidParaNumero(numero);
+                if (numeroReal) {
+                    const resultado = numeroReal + '@c.us';
+                    console.log(`✅ INDEX: Conversão LID via API: ${numero} → ${resultado}`);
+                    return resultado;
+                }
+            } catch (error) {
+                console.error(`❌ INDEX: Erro na conversão LID via API: ${error.message}`);
+            }
+
+            // Fallback: usar mapeamento manual se API falhar
             const numeroMapeado = MAPEAMENTO_IDS[numero];
             if (numeroMapeado) {
+                console.log(`✅ INDEX: Fallback - Mapeamento encontrado: ${numero} → ${numeroMapeado}`);
                 return numeroMapeado;
             }
-            // Se não tem mapeamento, extrair apenas o número e converter para @c.us
+
+            // Fallback final: extrair número e converter
             const numeroLimpo = numero.replace('@lid', '');
-            // Se é o ID específico conhecido, mapear
-            if (numero === '23450974470333@lid') {
-                return '258852118624@c.us';
-            }
-            return numeroLimpo + '@c.us';
+            const resultado = numeroLimpo + '@c.us';
+            console.log(`⚠️ INDEX: Fallback - Conversão LID: ${numero} → ${resultado}`);
+            return resultado;
         }
         if (numero.endsWith('@c.us')) {
+            console.log(`✅ INDEX: Já no formato correto: ${numero}`);
             return numero; // Já está no formato correto
         }
     }
 
     // Se é apenas número, adicionar @c.us
-    return numero + '@c.us';
+    const resultado = numero + '@c.us';
+    console.log(`🔄 INDEX: Adicionando @c.us: ${numero} → ${resultado}`);
+    return resultado;
 }
 
 async function isAdminGrupo(chatId, participantId) {
@@ -3287,7 +3318,7 @@ async function processMessage(message) {
                         for (let i = 0; i < ranking.length; i++) {
                             const item = ranking[i];
                             // Usar função de normalização igual às boas-vindas
-                            const contactId = normalizarIdParaMencao(item.numero);
+                            const contactId = await normalizarIdParaMencao(item.numero);
 
                             // Obter informações do contato
                             try {
@@ -3349,7 +3380,7 @@ async function processMessage(message) {
                         for (let i = 0; i < Math.min(inativos.length, 20); i++) {
                             const item = inativos[i];
                             // Usar função de normalização igual às boas-vindas
-                            const contactId = normalizarIdParaMencao(item.numero);
+                            const contactId = await normalizarIdParaMencao(item.numero);
                             
                             // Obter informações do contato
                             try {
@@ -3412,7 +3443,7 @@ async function processMessage(message) {
                         for (let i = 0; i < Math.min(semCompra.length, 30); i++) {
                             const item = semCompra[i];
                             // Usar função de normalização igual às boas-vindas
-                            const contactId = normalizarIdParaMencao(item.numero);
+                            const contactId = await normalizarIdParaMencao(item.numero);
                             
                             // Obter informações do contato
                             try {
@@ -3678,7 +3709,7 @@ async function processMessage(message) {
                         }
 
                         // Usar função de normalização igual às boas-vindas
-                        const participantId = normalizarIdParaMencao(numeroDestino);
+                        const participantId = await normalizarIdParaMencao(numeroDestino);
                         
                         // Inicializar saldo se não existir
                         if (!bonusSaldos[participantId]) {
@@ -4795,7 +4826,7 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                     if (resultadoConfirmacao.mensagem && resultadoConfirmacao.contactId) {
                         try {
                             // Normalizar ID para formato @c.us igual às boas-vindas
-                            const contactIdNormalizado = normalizarIdParaMencao(resultadoConfirmacao.contactId);
+                            const contactIdNormalizado = await normalizarIdParaMencao(resultadoConfirmacao.contactId);
                             // Usar exato formato das boas-vindas
                             const mensagemFinal = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${contactIdNormalizado.replace('@c.us', '')}`);
 
@@ -4806,7 +4837,7 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                         } catch (error) {
                             console.error('❌ Erro ao enviar parabenização com menção:', error);
                             // Fallback: enviar sem menção clicável
-                            const contactIdNormalizado = normalizarIdParaMencao(resultadoConfirmacao.contactId);
+                            const contactIdNormalizado = await normalizarIdParaMencao(resultadoConfirmacao.contactId);
                             const mensagemFallback = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${contactIdNormalizado.replace('@c.us', '')}`);
                             await message.reply(mensagemFallback);
                         }
