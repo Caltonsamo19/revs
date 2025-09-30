@@ -1,6 +1,39 @@
 const fs = require('fs').promises;
 const path = require('path');
 
+// Mapeamento de IDs internos (@lid) para números reais (@c.us) - igual ao index.js
+const MAPEAMENTO_IDS = {
+    '23450974470333@lid': '258852118624@c.us',  // ID conhecido
+    '245075749638206@lid': null  // Será identificado automaticamente
+};
+
+// Função para normalizar IDs para menções (igual às boas-vindas)
+function normalizarIdParaMencao(numero) {
+    // Se já é um ID completo, processar conforme o tipo
+    if (numero.includes('@')) {
+        if (numero.endsWith('@lid')) {
+            // Converter @lid para @c.us usando mapeamento
+            const numeroMapeado = MAPEAMENTO_IDS[numero];
+            if (numeroMapeado) {
+                return numeroMapeado;
+            }
+            // Se não tem mapeamento, extrair apenas o número e converter para @c.us
+            const numeroLimpo = numero.replace('@lid', '');
+            // Se é o ID específico conhecido, mapear
+            if (numero === '23450974470333@lid') {
+                return '258852118624@c.us';
+            }
+            return numeroLimpo + '@c.us';
+        }
+        if (numero.endsWith('@c.us')) {
+            return numero; // Já está no formato correto
+        }
+    }
+
+    // Se é apenas número, adicionar @c.us
+    return numero + '@c.us';
+}
+
 class SistemaCompras {
     constructor() {
         console.log('🛒 Inicializando Sistema de Registro de Compras...');
@@ -479,14 +512,14 @@ class SistemaCompras {
 
             return {
                 mensagem: mensagem,
-                contactId: numero + '@c.us'
+                contactId: normalizarIdParaMencao(numero)
             };
 
         } catch (error) {
             console.error('❌ COMPRAS: Erro ao gerar mensagem:', error);
             return {
                 mensagem: `🎉 Obrigado, @NOME_PLACEHOLDER, sua compra foi registrada com sucesso!`,
-                contactId: numero + '@c.us'
+                contactId: normalizarIdParaMencao(numero)
             };
         }
     }
