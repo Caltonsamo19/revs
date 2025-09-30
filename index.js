@@ -821,9 +821,9 @@ async function criarReferenciaAutomaticaBackup(convidadorId, convidadoId, grupoI
         try {
             await client.sendMessage(grupoId,
                 `🎉 *NOVO MEMBRO ADICIONADO!*\n\n` +
-                `👋 Bem-vindo *${nomeConvidado}*!\n\n` +
-                `📢 Sistema detectou provável adição por: *${nomeConvidador}*\n` +
-                `🎁 *${nomeConvidador}* ganhará *200MB* a cada compra de *${nomeConvidado}*!\n\n` +
+                `👋 Bem-vindo @${convidadoId.replace('@c.us', '')}!\n\n` +
+                `📢 Sistema detectou provável adição por: @${convidadorId.replace('@c.us', '')}\n` +
+                `🎁 @${convidadorId.replace('@c.us', '')} ganhará *200MB* a cada compra de @${convidadoId.replace('@c.us', '')}!\n\n` +
                 `📋 *Benefícios:*\n` +
                 `• Máximo: 5 compras = 1000MB (1GB)\n` +
                 `• Saque mínimo: 1000MB\n` +
@@ -1142,9 +1142,9 @@ async function processarBonusCompra(remetenteCompra, valorCompra) {
 
         await client.sendMessage(message.from,
             `🎉 *BÔNUS DE REFERÊNCIA CREDITADO!*\n\n` +
-            `💎 *${nomeConvidador}*, recebeste *${bonusAtual}MB* de bônus!\n\n` +
-            `👤 *Referenciado:* ${nomeComprador}\n` +
-            `📢 *Motivo:* ${nomeComprador} que você ${tipoReferencia} fez uma compra!\n` +
+            `💎 @${convidador.replace('@c.us', '')}, recebeste *${bonusAtual}MB* de bônus!\n\n` +
+            `👤 *Referenciado:* @${remetenteCompra.replace('@c.us', '')}\n` +
+            `📢 *Motivo:* @${remetenteCompra.replace('@c.us', '')} que você ${tipoReferencia} fez uma compra!\n` +
             `🛒 *Compra:* ${referencia.comprasRealizadas}ª de 5\n` +
             `💰 *Novo saldo:* ${novoSaldoFormatado}\n\n` +
             `${novoSaldo >= 1024 ? '🚀 *Já podes sacar!* Use: *.sacar*' : '⏳ *Continua a convidar amigos para ganhar mais bônus!*'}`, {
@@ -1240,9 +1240,9 @@ async function criarReferenciaAutomatica(convidadorId, convidadoId, grupoId) {
         try {
             await client.sendMessage(grupoId,
                 `🎉 *NOVO MEMBRO ADICIONADO!*\n\n` +
-                `👋 Bem-vindo *${nomeConvidado}*!\n\n` +
-                `📢 Adicionado por: *${nomeConvidador}*\n` +
-                `🎁 *${nomeConvidador}* ganhará *200MB* a cada compra de *${nomeConvidado}*!\n\n` +
+                `👋 Bem-vindo @${convidadoId.replace('@c.us', '')}!\n\n` +
+                `📢 Adicionado por: @${convidadorId.replace('@c.us', '')}\n` +
+                `🎁 @${convidadorId.replace('@c.us', '')} ganhará *200MB* a cada compra de @${convidadoId.replace('@c.us', '')}!\n\n` +
                 `📋 *Benefícios:*\n` +
                 `• Máximo: 5 compras = 1000MB (1GB)\n` +
                 `• Saque mínimo: 1000MB\n` +
@@ -3684,9 +3684,9 @@ async function processMessage(message) {
 
                         // Notificar o usuário que recebeu o bônus
                         try {
-                            await client.sendMessage(message.from, 
+                            await client.sendMessage(message.from,
                                 `🎁 *BÔNUS ADMINISTRATIVO!*\n\n` +
-                                `💎 @${numeroDestino}, recebeste *${quantidadeFormatada}* de bônus!\n\n` +
+                                `💎 @${participantId.replace('@c.us', '')}, recebeste *${quantidadeFormatada}* de bônus!\n\n` +
                                 `👨‍💼 *Ofertado por:* Administrador\n` +
                                 `💰 *Novo saldo:* ${novoSaldoFormatado}\n\n` +
                                 `${novoSaldo >= 1024 ? '🚀 *Já podes sacar!* Use: *.sacar*' : '💡 *Continua a acumular para sacar!*'}`, {
@@ -4960,9 +4960,7 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                             console.error('❌ Erro ao enviar parabenização com menção:', error);
                             // Fallback: enviar sem menção clicável
                             const mensagemFallback = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${resultadoConfirmacao.contactId.replace('@c.us', '')}`);
-                            await client.sendMessage(message.from, mensagemFallback, {
-                                mentions: [resultadoConfirmacao.contactId]
-                            });
+                            await message.reply(mensagemFallback);
                         }
                     }
                 } else {
