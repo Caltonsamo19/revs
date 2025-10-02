@@ -550,37 +550,82 @@ Se não conseguires extrair os dados:
     return isNaN(numero) ? 0 : numero;
   }
 
+  // === FUNÇÃO AUXILIAR PARA NORMALIZAR NÚMEROS ===
+  normalizarNumero(numeroString) {
+    // Remove espaços, hífens, pontos e + do número
+    let numeroLimpo = numeroString.replace(/[\s\-\.+]/g, '');
+
+    // Remove código de país 258 se presente
+    if (numeroLimpo.startsWith('258')) {
+      numeroLimpo = numeroLimpo.substring(3);
+    }
+
+    // Retorna apenas se for um número válido de 9 dígitos começando com 8
+    if (/^8[0-9]{8}$/.test(numeroLimpo)) {
+      return numeroLimpo;
+    }
+
+    return null;
+  }
+
   // === FUNÇÃO MELHORADA PARA EXTRAIR NÚMEROS DE LEGENDAS ===
   extrairNumerosDeLegenda(legendaImagem) {
     console.log(`   🔍 LEGENDA: Analisando "${legendaImagem}"`);
-    
+
     if (!legendaImagem || typeof legendaImagem !== 'string' || legendaImagem.trim().length === 0) {
       console.log(`   ❌ LEGENDA: Vazia ou inválida`);
       return [];
     }
-    
+
     // Limpar a legenda de forma mais robusta
     let legendaLimpa = legendaImagem
       .replace(/[📱📲📞☎️🔢💳🎯🤖✅❌⏳💰📊💵📋⚡]/g, ' ') // Remover emojis comuns
       .replace(/\s+/g, ' ') // Normalizar espaços
       .trim();
-    
+
     // console.log(`   📝 LEGENDA: Limpa "${legendaLimpa}"`);
-    
-    // Buscar números de 9 dígitos que começam com 8
-    const regexNumeros = /\b8[0-9]{8}\b/g;
-    const numerosEncontrados = legendaLimpa.match(regexNumeros) || [];
+
+    // NOVOS PADRÕES DE DETECÇÃO:
+    // 1. Números com espaços: 85 211 8624 ou 848 715 208
+    // 2. Números com +258: +258852118624 ou +258 85 211 8624
+    // 3. Números com 258: 25852118624 ou 258 85 211 8624
+    // 4. Números normais: 852118624
+    const padroes = [
+      /\+?258[\s\-]?8[0-9][\s\-]?[0-9]{3}[\s\-]?[0-9]{4}/g,  // +258 85 211 8624 ou 258 85 211 8624
+      /(?<!\d)\+?258\s*8[0-9]{8}(?!\d)/g,                      // +258852118624 ou 258852118624 (12 dígitos)
+      /\b8[0-9][\s\-]?[0-9]{3}[\s\-]?[0-9]{4}\b/g,            // 85 211 8624 ou 848 715 208
+      /\b8[0-9]{8}\b/g                                         // 852118624 (padrão original)
+    ];
+
+    const numerosEncontrados = [];
+
+    for (const padrao of padroes) {
+      const matches = legendaLimpa.match(padrao);
+      if (matches) {
+        numerosEncontrados.push(...matches);
+      }
+    }
     
     if (numerosEncontrados.length === 0) {
       console.log(`   ❌ LEGENDA: Nenhum número encontrado`);
       return [];
     }
-    
-    // console.log(`   📱 LEGENDA: Números brutos encontrados: ${numerosEncontrados.join(', ')}`);
-    
+
+    console.log(`   📱 LEGENDA: Números brutos encontrados: ${numerosEncontrados.join(', ')}`);
+
+    // Normalizar todos os números encontrados
+    const numerosNormalizados = new Set();
+    for (const numeroRaw of numerosEncontrados) {
+      const numeroNormalizado = this.normalizarNumero(numeroRaw);
+      if (numeroNormalizado) {
+        numerosNormalizados.add(numeroNormalizado);
+      }
+    }
+
     const numerosValidos = [];
-    
-    for (const numero of numerosEncontrados) {
+
+    for (const numero of numerosNormalizados) {
+      // Procurar o número original na legenda para análise de contexto
       const posicao = legendaLimpa.indexOf(numero);
       const comprimentoLegenda = legendaLimpa.length;
       
@@ -668,26 +713,52 @@ Se não conseguires extrair os dados:
   // === EXTRAIR NÚMEROS DE TEXTO (MELHORADO) ===
   extrairTodosNumeros(mensagem) {
     // console.log(`   🔍 TEXTO: Extraindo números da mensagem...`);
-    
+
     if (!mensagem || typeof mensagem !== 'string') {
       console.log(`   ❌ TEXTO: Mensagem inválida`);
       return [];
     }
-    
-    // Procurar números de 9 dígitos que começam com 8
-    const regex = /\b8[0-9]{8}\b/g;
-    const matches = mensagem.match(regex);
-    
-    if (!matches || matches.length === 0) {
+
+    // NOVOS PADRÕES DE DETECÇÃO (mesmos da legenda):
+    // 1. Números com espaços: 85 211 8624 ou 848 715 208
+    // 2. Números com +258: +258852118624 ou +258 85 211 8624
+    // 3. Números com 258: 25852118624 ou 258 85 211 8624
+    // 4. Números normais: 852118624
+    const padroes = [
+      /\+?258[\s\-]?8[0-9][\s\-]?[0-9]{3}[\s\-]?[0-9]{4}/g,  // +258 85 211 8624 ou 258 85 211 8624
+      /(?<!\d)\+?258\s*8[0-9]{8}(?!\d)/g,                      // +258852118624 ou 258852118624 (12 dígitos)
+      /\b8[0-9][\s\-]?[0-9]{3}[\s\-]?[0-9]{4}\b/g,            // 85 211 8624 ou 848 715 208
+      /\b8[0-9]{8}\b/g                                         // 852118624 (padrão original)
+    ];
+
+    const numerosEncontrados = [];
+
+    for (const padrao of padroes) {
+      const matches = mensagem.match(padrao);
+      if (matches) {
+        numerosEncontrados.push(...matches);
+      }
+    }
+
+    if (numerosEncontrados.length === 0) {
       console.log(`   ❌ TEXTO: Nenhum número encontrado`);
       return [];
     }
-    
-    // console.log(`   📱 TEXTO: Números brutos encontrados: ${matches.join(', ')}`);
-    
+
+    console.log(`   📱 TEXTO: Números brutos encontrados: ${numerosEncontrados.join(', ')}`);
+
+    // Normalizar todos os números encontrados
+    const numerosNormalizados = new Set();
+    for (const numeroRaw of numerosEncontrados) {
+      const numeroNormalizado = this.normalizarNumero(numeroRaw);
+      if (numeroNormalizado) {
+        numerosNormalizados.add(numeroNormalizado);
+      }
+    }
+
     const numerosValidos = [];
-    
-    for (const numero of matches) {
+
+    for (const numero of numerosNormalizados) {
       const posicao = mensagem.indexOf(numero);
       const tamanhoMensagem = mensagem.length;
       const percentualPosicao = (posicao / tamanhoMensagem) * 100;
