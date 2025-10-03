@@ -486,13 +486,13 @@ class SistemaCompras {
 
             if (diasSemComprar > 1) {
                 // Cliente que não comprava há dias
-                mensagem = `🎉 Obrigado, @NOME_PLACEHOLDER, Há ${diasSemComprar} dias que você não comprava, bom tê-lo de volta! Foram adicionados ${megasFormatados}, totalizando ${totalFormatado} comprados.\n`;
+                mensagem = `✅ Obrigado, @NOME_PLACEHOLDER, Há ${diasSemComprar} dias que você não comprava, bom tê-lo de volta! Foram adicionados ${megasFormatados}, totalizando ${totalFormatado} comprados.\n`;
             } else if (comprasDoDia === 1) {
                 // Primeira compra do dia
-                mensagem = `🎉 Obrigado, @NOME_PLACEHOLDER, Você está fazendo a sua 1ª compra do dia! Foram adicionados ${megasFormatados}, totalizando ${totalFormatado} comprados.\n`;
+                mensagem = `✅ Obrigado, @NOME_PLACEHOLDER, Você está fazendo a sua 1ª compra do dia! Foram adicionados ${megasFormatados}, totalizando ${totalFormatado} comprados.\n`;
             } else {
                 // Múltiplas compras do dia
-                mensagem = `🎉 Obrigado, @NOME_PLACEHOLDER, Você está fazendo a sua ${comprasDoDia}ª compra do dia! Foram adicionados ${megasFormatados}, totalizando ${totalFormatado} comprados.\n`;
+                mensagem = `✅ Obrigado, @NOME_PLACEHOLDER, Você está fazendo a sua ${comprasDoDia}ª compra do dia! Foram adicionados ${megasFormatados}, totalizando ${totalFormatado} comprados.\n`;
             }
 
             // Mensagem do ranking baseada na posição (apenas ranking geral)

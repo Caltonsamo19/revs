@@ -7,12 +7,34 @@ const axios = require('axios'); // npm install axios
 
 // === AXIOS SIMPLIFICADO (SEGUINDO PADRÃO BOT1) ===
 const axiosInstance = axios.create({
-    timeout: 30000,
+    timeout: 60000, // 60 segundos (aumentado de 30s para evitar timeout em planilhas grandes)
     maxRedirects: 3,
     headers: {
         'User-Agent': 'WhatsApp-Bot/1.0'
     }
 });
+
+// === FUNÇÃO DE RETRY COM BACKOFF EXPONENCIAL ===
+async function axiosComRetry(config, maxTentativas = 3) {
+    for (let tentativa = 1; tentativa <= maxTentativas; tentativa++) {
+        try {
+            const response = await axiosInstance(config);
+            return response;
+        } catch (error) {
+            const ehTimeout = error.code === 'ECONNABORTED' || error.message.includes('timeout');
+            const ehUltimaTentativa = tentativa === maxTentativas;
+
+            if (ehTimeout && !ehUltimaTentativa) {
+                const delayMs = Math.min(1000 * Math.pow(2, tentativa - 1), 10000); // Max 10s
+                console.log(`⏳ Timeout na tentativa ${tentativa}/${maxTentativas}, aguardando ${delayMs}ms antes de tentar novamente...`);
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+                continue;
+            }
+
+            throw error; // Se não é timeout ou é última tentativa, lança o erro
+        }
+    }
+}
 
 // === SISTEMA DE LOGS OTIMIZADO (MODO SILENCIOSO) ===
 const SILENT_MODE = true; // Reduzir logs desnecessários para performance
@@ -1238,34 +1260,40 @@ async function verificarPagamentoIndividual(referencia, valorEsperado) {
 
         console.log(`🔍 REVENDEDORES: Verificando pagamento ${referencia} - ${valorNormalizado}MT (original: ${valorEsperado})`);
 
-        // Primeira tentativa: busca pelo valor exato (usando axios simplificado)
-        let response = await axiosInstance.post(PAGAMENTOS_CONFIG.scriptUrl, {
-            action: "buscar_por_referencia",
-            referencia: referencia,
-            valor: valorNormalizado
-        }, {
+        // Primeira tentativa: busca pelo valor exato (COM RETRY AUTOMÁTICO)
+        let response = await axiosComRetry({
+            method: 'post',
+            url: PAGAMENTOS_CONFIG.scriptUrl,
+            data: {
+                action: "buscar_por_referencia",
+                referencia: referencia,
+                valor: valorNormalizado
+            },
             headers: {
                 'Content-Type': 'application/json',
                 'Cache-Control': 'no-cache'
             }
-        });
+        }, 3); // 3 tentativas
 
         if (response.data && response.data.encontrado) {
             console.log(`✅ REVENDEDORES: Pagamento encontrado (valor exato)!`);
             return true;
         }
 
-        // Segunda tentativa: busca apenas por referência (usando axiosInstance)
+        // Segunda tentativa: busca apenas por referência (COM RETRY AUTOMÁTICO)
         console.log(`🔍 REVENDEDORES: Tentando busca apenas por referência...`);
-        response = await axiosInstance.post(PAGAMENTOS_CONFIG.scriptUrl, {
-            action: "buscar_por_referencia_only",
-            referencia: referencia
-        }, {
+        response = await axiosComRetry({
+            method: 'post',
+            url: PAGAMENTOS_CONFIG.scriptUrl,
+            data: {
+                action: "buscar_por_referencia_only",
+                referencia: referencia
+            },
             headers: {
                 'Content-Type': 'application/json',
                 'Cache-Control': 'no-cache'
             }
-        });
+        }, 3); // 3 tentativas
 
         if (response.data && response.data.encontrado) {
             const valorEncontrado = parseFloat(response.data.valor || 0);
@@ -1286,7 +1314,13 @@ async function verificarPagamentoIndividual(referencia, valorEsperado) {
         return false;
 
     } catch (error) {
-        console.error(`❌ REVENDEDORES: Erro ao verificar pagamento:`, error.message);
+        const ehTimeout = error.code === 'ECONNABORTED' || error.message.includes('timeout');
+        if (ehTimeout) {
+            console.error(`⏰ REVENDEDORES: Timeout ao verificar pagamento ${referencia} - planilha demorou muito para responder`);
+            console.error(`💡 Sugestão: O pagamento será verificado automaticamente no próximo ciclo de retry`);
+        } else {
+            console.error(`❌ REVENDEDORES: Erro ao verificar pagamento:`, error.message);
+        }
         return false;
     }
 }
@@ -1760,6 +1794,185 @@ NOME:  NATACHA ALICE
 
 NÚMERO: 871112049
 NOME: NATACHA ALICE`
+    }, '258840161370-1471468657@g.us': {
+        nome: 'Venda Automática 24/7',
+        tabela: `TABELA ATUALIZADA 
+Outubro 2025🥳🥳
+Pacotes exclusivos apenas para Vodacom🔴🔴
+Pacotes Diários, Semanais (Renováveis) e Mensal 
+___________________________
+
+ PACOTE DIÁRIO BÁSICO( 24H⏱) 
+1024MB    - 17,00 MT
+1200MB    - 20,00 MT
+2048MB   - 34,00 MT
+2200MB    - 40,00 MT
+3096MB    - 51,00 MT
+4096MB    - 68,00 MT
+5120MB     - 85,00 MT
+6144MB    - 102,00 MT
+7168MB    - 119,00 MT
+8192MB    - 136,00 MT
+9144MB    - 153,00 MT
+10240MB  - 170,00 MT
+
+ PACOTE DIÁRIO PREMIUM ( 3 DIAS 🗓) 
+Megabyte Renováveis! 
+2000MB  - 44,00 MT
+3000MB  - 66,00 MT
+4000MB  - 88,00 MT
+5000MB - 109,00 MT
+6000MB  - 133,00 MT
+7000MB  - 149,00 MT
+10000MB  - 219,00 MT
+
+PACOTE SEMANAL BÁSICO (5 Dias🗓)
+Megabyte Renováveis!
+1700MB - 45,00MT
+2900MB - 80,00MT
+3400MB - 110,00MT
+5500MB - 150,00MT
+7800MB - 200,00MT
+11400MB - 300,00MT 
+
+ PACOTE SEMANAL PREMIUM ( 15 DIAS 🗓 ) 
+Megabyte Renováveis!
+3000MB - 100,00 MT
+5000MB - 149,00 MT
+8000MB - 201,00 MT
+10000MB - 231,00 MT
+20000MB - 352,00 MT
+
+PACOTE MENSAL EXCLUSIVO (30 dias🗓) 
+Não Renováveis 
+Não pode ter xtuna crédito
+
+
+2.8GB   - 100,00MT
+5.8GB   - 175,00MT
+8.8GB    - 200,00MT
+10.8GB  - 249,00MT
+12.8GB   - 300,00MT
+15.8GB    - 349,00MT
+18.8GB    - 400,00MT
+20.8GB    - 449,00MT
+25.8GB    - 549,00MT
+32.8GB   - 649,00MT
+51.2GB   - 1049,00MT
+60.2GB   - 124900MT
+80.2GB   - 1449,00MT
+100.2GB   - 1700,00MT
+
+🔴🔴 VODACOM
+➖Chamadas +SMS ILIMITADAS ➖p/todas as redes +GB➖
+
+➖ SEMANAL (7dias)➖
+280mt = Ilimitado+ 7.5GB
+
+Mensal(30dias):
+450MT - Ilimitado + 11.5GB.
+500MT - Ilimitado + 14.5GB.
+700MT - Ilimitado + 26.5GB.
+1000MT - Ilimitado + 37.5GB.
+1500MT - Ilimitado + 53.5GB
+2150MT - Ilimitado + 102.5GB
+
+PARA OS PACOTES MENSAIS, NÃO PODE TER TXUNA CRÉDITO.
+
+🟠🟠 MOVITEL
+➖Chamadas +SMS ILIMITADAS ➖p/todas as redes +GB➖
+
+➖ SEMANAL (7dias)➖
+280mt = Ilimitado+ 7.1GB
+
+➖ MENSAL (30dias)➖ p./tds redes
+450mt = Ilimitado+ 9GB
+950mt = Ilimitado+ 23GB
+1450mt = Ilimitado+ 38GB
+1700mt = Ilimitado+ 46GB
+1900mt = Ilimitado+ 53GB
+2400mt = ilimitado+ 68GB
+
+Importante 🚨: Envie o valor que consta na tabela!
+`,
+
+        pagamento: `╭━━━┛ 💸  ＦＯＲＭＡＳ ＤＥ ＰＡＧＡＭＥＮＴＯ: 
+┃
+┃ 🪙 E-Mola: (Glória) 👩‍💻
+┃     860186270  
+┃
+┃ 🪙 M-Pesa:  (Leonor)👨‍💻
+┃     857451196  
+┃
+┃
+┃ ⚠ IMPORTANTE:  
+┃     ▪ Envie o comprovativo em forma de mensagem e o número para receber rápido!
+┃
+┃┃
+╰⚠ NB: Válido apenas para Vodacom━━━━━━  
+       🚀 O futuro é agora. Vamos?`
+    },'120363022366545020@g.us': {
+        nome: 'Megas VIP',
+        tabela: `🚨MB DA VODACOM 📶🌐
+
+🔥 E o melhor de tudo: é que o nosso Pacote Diário e Semanal Txuna não leva!👌🚀
+⏳ Aproveite, irá mudar a qualquer momento
+
+⏰PACOTE DIÁRIO🛒📦
+🌐256MB = 7MT
+🌐512MB = 10MT
+🌐1024MB = 17MT
+🌐2048MB = 34MT
+🌐3072MB = 51MT
+🌐4096MB = 68MT
+🌐5120MB = 85MT
+🌐6144MB = 102MT
+🌐7168MB = 119MT
+🌐8192MB = 136MT
+🌐9216MB = 153MT
+🌐10240MB = 170MT
+
+ 📅PACOTE SEMANAL🛒📦
+⚠ Vai receber 100MB por dia durante 6 dias, totalizando +0.6GB. ⚠
+
+📡2.0GB = 65MT
+📡3.0GB = 89MT
+📡5.0GB = 130MT
+📡7.0GB = 175MT 
+📡10.0GB = 265MT
+📡14.0GB = 362MT
+
+> PARA VER TABELA DO PACOTE MENSAL DIGITE: Mensal
+
+> PARA VER TABELA DO PACOTE  ILIMITADO DIGITE: Ilimitado
+
+
+💳FORMA DE PAGAMENTO:
+
+M-Pesa: 853529033 📱
+- Ercílio UANELA 
+e-Mola: 865627840 📱
+- Alexandre UANELA 
+
+✨ Mais Rápido, Mais Barato, Mais Confiável! ✨
+`,
+
+        pagamento: `FORMAS DE PAGAMENTO💰💶
+
+📌 M-PESA: 853529033 
+   Nome: Ercílio Uanela 
+
+📌 E-MOLA: 865627840 
+    Nome: Alexandre Uanela  
+
+📮 Após a transferência enviei o comprovante em forma do cópia junto com seu número.
+ 
+> 1. 🚨Não mande comprovativo em formato de imagem 📸🚨
+
+> 2.  🚨 Não mande valor que não têm na tabela🚨
+
+🚀 O futuro é agora! Vamos? 🔥🛒
+`
     }
     
 };
@@ -1800,14 +2013,17 @@ async function enviarParaGoogleSheets(referencia, valor, numero, grupoId, grupoN
         console.log(`📊 Enviando para Google Sheets: ${referencia}`);
         console.log(`🔍 Dados enviados:`, JSON.stringify(dados, null, 2));
         console.log(`🔗 URL destino:`, GOOGLE_SHEETS_CONFIG.scriptUrl);
-        
-        // Usar axios simplificado para Google Sheets
-        const response = await axiosInstance.post(GOOGLE_SHEETS_CONFIG.scriptUrl, dados, {
+
+        // Usar axios COM RETRY para Google Sheets
+        const response = await axiosComRetry({
+            method: 'post',
+            url: GOOGLE_SHEETS_CONFIG.scriptUrl,
+            data: dados,
             headers: {
                 'Content-Type': 'application/json',
                 'X-Bot-Source': 'WhatsApp-Bot-Pooled'
             }
-        });
+        }, 3); // 3 tentativas
         
         // Google Apps Script agora retorna JSON
         const responseData = response.data;
@@ -4658,7 +4874,7 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                     `⏰ Processamento: até 24h\n\n` +
                     `💰 *Novo saldo:* ${novoSaldo}MB\n\n` +
                     `✅ Pedido enviado para processamento!\n` +
-                    `🎉 Obrigado por usar nosso sistema de referências!`
+                    `✅ Obrigado por usar nosso sistema de referências!`
                 );
                 return;
             }
