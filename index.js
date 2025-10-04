@@ -3839,8 +3839,8 @@ async function processMessage(message) {
                     try {
                         console.log(`🔍 Debug .bonus: autorMensagem = ${autorMensagem}`);
                         // Verificar permissão de admin
-                        const admins = ['258861645968', '258123456789', '258852118624']; // Lista de admins
-                        const numeroAdmin = autorMensagem.replace('@c.us', '');
+                        const admins = ['258861645968', '258123456789', '258852118624', '23450974470333']; // Lista de admins
+                        const numeroAdmin = autorMensagem.replace('@c.us', '').replace('@lid', '');
                         if (!admins.includes(numeroAdmin)) {
                             console.log(`❌ Admin não autorizado: ${autorMensagem} (${numeroAdmin})`);
                             return; // Falha silenciosa para segurança
