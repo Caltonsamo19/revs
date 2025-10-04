@@ -3937,14 +3937,18 @@ async function processMessage(message) {
 
                         console.log(`🎁 ADMIN BONUS: ${autorMensagem} deu ${quantidadeFormatada} para ${numeroDestino}`);
 
-                        // Notificar o usuário que recebeu o bônus
+                        // Notificar o usuário que recebeu o bônus (usando mesmo formato da confirmação de compra)
                         try {
-                            await client.sendMessage(message.from,
-                                `🎁 *BÔNUS ADMINISTRATIVO!*\n\n` +
-                                `💎 @${participantId.replace('@c.us', '')}, recebeste *${quantidadeFormatada}* de bônus!\n\n` +
+                            const mensagemBonus = `🎁 *BÔNUS ADMINISTRATIVO!*\n\n` +
+                                `💎 @NOME_PLACEHOLDER, recebeste *${quantidadeFormatada}* de bônus!\n\n` +
                                 `👨‍💼 *Ofertado por:* Administrador\n` +
                                 `💰 *Novo saldo:* ${novoSaldoFormatado}\n\n` +
-                                `${novoSaldo >= 1024 ? '🚀 *Já podes sacar!* Use: *.sacar*' : '💡 *Continua a acumular para sacar!*'}`, {
+                                `${novoSaldo >= 1024 ? '🚀 *Já podes sacar!* Use: *.sacar*' : '💡 *Continua a acumular para sacar!*'}`;
+
+                            // Substituir placeholder e enviar com menção (igual confirmação de compra)
+                            const mensagemFinal = mensagemBonus.replace('@NOME_PLACEHOLDER', `@${participantId.replace('@c.us', '').replace('@lid', '')}`);
+
+                            await client.sendMessage(message.from, mensagemFinal, {
                                 mentions: [participantId]
                             });
                         } catch (notificationError) {
