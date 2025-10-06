@@ -3837,74 +3837,108 @@ async function processMessage(message) {
                 // .bonus NUMERO QUANTIDADE - Dar bônus manual (ADMIN APENAS)
                 if (comando.startsWith('.bonus ')) {
                     try {
-                        console.log(`🔍 Debug .bonus: autorMensagem = ${autorMensagem}`);
+                        console.log(`\n🎁 === COMANDO .BONUS DETECTADO ===`);
+                        console.log(`🔍 Autor: ${autorMensagem}`);
+                        console.log(`📝 Comando completo: "${comando}"`);
+
                         // Verificar permissão de admin
                         const admins = ['258861645968', '258123456789', '258852118624', '23450974470333']; // Lista de admins
                         const numeroAdmin = autorMensagem.replace('@c.us', '').replace('@lid', '');
+                        console.log(`🔑 Número admin processado: ${numeroAdmin}`);
+                        console.log(`📋 Admins permitidos: ${admins.join(', ')}`);
+
                         if (!admins.includes(numeroAdmin)) {
-                            console.log(`❌ Admin não autorizado: ${autorMensagem} (${numeroAdmin})`);
+                            console.log(`❌ Admin NÃO autorizado`);
                             return; // Falha silenciosa para segurança
                         }
 
+                        console.log(`✅ Admin AUTORIZADO`);
+
                         const parametros = comando.split(' ');
+                        console.log(`📊 Parâmetros: ${JSON.stringify(parametros)}`);
+
                         if (parametros.length < 3) {
+                            console.log(`❌ Parâmetros insuficientes (${parametros.length})`);
                             await message.reply(`❌ *FORMATO INCORRETO*\n\n✅ Use: *.bonus @usuario QUANTIDADE* ou *.bonus NUMERO QUANTIDADE*\nExemplos:\n• *.bonus @258123456789 500MB*\n• *.bonus 258123456789 500MB*`);
                             return;
                         }
 
                         let numeroDestino = parametros[1];
                         const quantidadeStr = parametros[2].toUpperCase();
+                        console.log(`📱 Número destino: ${numeroDestino}`);
+                        console.log(`💎 Quantidade: ${quantidadeStr}`);
 
                         // Verificar se é menção ou número direto
                         if (numeroDestino.startsWith('@')) {
+                            console.log(`🔍 Detectada menção (@)`);
                             // Remover @ e verificar se tem menções na mensagem
                             const numeroMencao = numeroDestino.substring(1);
                             if (message.mentionedIds && message.mentionedIds.length > 0) {
+                                console.log(`✅ Menções encontradas: ${message.mentionedIds.join(', ')}`);
                                 // Usar a primeira menção encontrada
                                 const mencaoId = message.mentionedIds[0];
                                 numeroDestino = mencaoId.replace('@c.us', '');
+                                console.log(`📱 Número extraído da menção: ${numeroDestino}`);
                             } else {
+                                console.log(`⚠️ Nenhuma menção encontrada, usando número após @`);
                                 // Tentar usar o número após @
                                 numeroDestino = numeroMencao;
                             }
                         }
 
+                        console.log(`🔎 Validando número: "${numeroDestino}"`);
+                        console.log(`   - Tem 9 dígitos? ${/^\d{9}$/.test(numeroDestino)}`);
+                        console.log(`   - Tem 12 dígitos? ${/^\d{12}$/.test(numeroDestino)}`);
+
                         // Validar número - aceitar 9 dígitos (848715208) ou 12 dígitos (258848715208)
                         if (!/^\d{9}$/.test(numeroDestino) && !/^\d{12}$/.test(numeroDestino)) {
+                            console.log(`❌ Número INVÁLIDO: ${numeroDestino}`);
                             await message.reply(`❌ *NÚMERO INVÁLIDO*\n\n✅ Use formato:\n• *.bonus @848715208 500MB* (9 dígitos)\n• *.bonus @258848715208 500MB* (12 dígitos)\n• *.bonus 848715208 500MB* (número direto)`);
                             return;
                         }
-                        
+
+                        console.log(`✅ Número válido`);
+
                         // Converter para formato completo se necessário (adicionar 258 no início)
                         if (numeroDestino.length === 9) {
                             numeroDestino = '258' + numeroDestino;
+                            console.log(`🔄 Convertido para 12 dígitos: ${numeroDestino}`);
                         }
 
                         // Converter quantidade para MB
                         let quantidadeMB;
                         if (quantidadeStr.endsWith('GB')) {
                             const gb = parseFloat(quantidadeStr.replace('GB', ''));
+                            console.log(`💎 Convertendo GB: ${gb}GB = ${gb * 1024}MB`);
                             if (isNaN(gb) || gb <= 0) {
+                                console.log(`❌ GB inválido: ${quantidadeStr}`);
                                 await message.reply(`❌ Quantidade inválida: *${quantidadeStr}*`);
                                 return;
                             }
                             quantidadeMB = Math.round(gb * 1024);
                         } else if (quantidadeStr.endsWith('MB')) {
                             quantidadeMB = parseInt(quantidadeStr.replace('MB', ''));
+                            console.log(`💎 Usando MB diretamente: ${quantidadeMB}MB`);
                             if (isNaN(quantidadeMB) || quantidadeMB <= 0) {
+                                console.log(`❌ MB inválido: ${quantidadeStr}`);
                                 await message.reply(`❌ Quantidade inválida: *${quantidadeStr}*`);
                                 return;
                             }
                         } else {
+                            console.log(`❌ Formato desconhecido: ${quantidadeStr}`);
                             await message.reply(`❌ *FORMATO INVÁLIDO*\n\n✅ Use: MB ou GB\nExemplos: 500MB, 1.5GB, 2GB`);
                             return;
                         }
 
+                        console.log(`✅ Quantidade final: ${quantidadeMB}MB`);
+
                         // COPIAR EXATAMENTE A LÓGICA DAS BOAS-VINDAS - SEM CONVERSÃO
                         const participantId = numeroDestino; // Usar número exatamente como recebido
+                        console.log(`🎯 Participant ID: ${participantId}`);
                         
                         // Inicializar saldo se não existir
                         if (!bonusSaldos[participantId]) {
+                            console.log(`🆕 Criando novo registro de bônus para ${participantId}`);
                             bonusSaldos[participantId] = {
                                 saldo: 0,
                                 detalhesReferencias: {},
@@ -3912,22 +3946,27 @@ async function processMessage(message) {
                                 totalReferencias: 0,
                                 bonusAdmin: []
                             };
+                        } else {
+                            console.log(`✅ Registro existente encontrado (saldo atual: ${bonusSaldos[participantId].saldo}MB)`);
                         }
 
                         // Adicionar bônus
+                        const saldoAnterior = bonusSaldos[participantId].saldo;
                         bonusSaldos[participantId].saldo += quantidadeMB;
-                        
+                        console.log(`💰 Saldo: ${saldoAnterior}MB → ${bonusSaldos[participantId].saldo}MB (+${quantidadeMB}MB)`);
+
                         // Registrar histórico de bônus admin
                         if (!bonusSaldos[participantId].bonusAdmin) {
                             bonusSaldos[participantId].bonusAdmin = [];
                         }
-                        
+
                         bonusSaldos[participantId].bonusAdmin.push({
                             quantidade: quantidadeMB,
                             data: new Date().toISOString(),
                             admin: autorMensagem,
                             motivo: 'Bônus administrativo'
                         });
+                        console.log(`📝 Histórico de bônus admin atualizado (${bonusSaldos[participantId].bonusAdmin.length} registros)`);
 
                         // Sistema de cache otimizado - sem salvamento em arquivos
 
@@ -3935,7 +3974,7 @@ async function processMessage(message) {
                         const novoSaldo = bonusSaldos[participantId].saldo;
                         const novoSaldoFormatado = novoSaldo >= 1024 ? `${(novoSaldo/1024).toFixed(2)}GB` : `${novoSaldo}MB`;
 
-                        console.log(`🎁 ADMIN BONUS: ${autorMensagem} deu ${quantidadeFormatada} para ${numeroDestino}`);
+                        console.log(`🎁 ADMIN BONUS CONCEDIDO: ${autorMensagem} → ${numeroDestino} (+${quantidadeFormatada})`);
 
                         // Notificar o usuário que recebeu o bônus (usando mesmo formato da confirmação de compra)
                         try {

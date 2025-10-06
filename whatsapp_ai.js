@@ -591,10 +591,10 @@ Se não conseguires extrair os dados:
     // 3. Números com 258: 25852118624 ou 258 85 211 8624
     // 4. Números normais: 852118624
     const padroes = [
-      /\+?258[\s\-]?8[0-9][\s\-]?[0-9]{3}[\s\-]?[0-9]{4}/g,  // +258 85 211 8624 ou 258 85 211 8624
-      /(?<!\d)\+?258\s*8[0-9]{8}(?!\d)/g,                      // +258852118624 ou 258852118624 (12 dígitos)
-      /\b8[0-9][\s\-]?[0-9]{3}[\s\-]?[0-9]{4}\b/g,            // 85 211 8624 ou 848 715 208
-      /\b8[0-9]{8}\b/g                                         // 852118624 (padrão original)
+      /\+?\s*258\s*8[0-9]\s*[0-9]{3}\s*[0-9]{4}/g,           // +258 85 211 8624 (com espaços variados)
+      /(?<!\d)\+?258\s*8[0-9]{8}(?!\d)/g,                    // +258852118624 ou 258852118624 (junto)
+      /\b8[0-9]\s*[0-9]{3}\s*[0-9]{4}\b/g,                   // 85 211 8624 (com espaços variados)
+      /\b8[0-9]{8}\b/g                                        // 852118624 (padrão normal)
     ];
 
     const numerosEncontrados = [];
@@ -725,10 +725,10 @@ Se não conseguires extrair os dados:
     // 3. Números com 258: 25852118624 ou 258 85 211 8624
     // 4. Números normais: 852118624
     const padroes = [
-      /\+?258[\s\-]?8[0-9][\s\-]?[0-9]{3}[\s\-]?[0-9]{4}/g,  // +258 85 211 8624 ou 258 85 211 8624
-      /(?<!\d)\+?258\s*8[0-9]{8}(?!\d)/g,                      // +258852118624 ou 258852118624 (12 dígitos)
-      /\b8[0-9][\s\-]?[0-9]{3}[\s\-]?[0-9]{4}\b/g,            // 85 211 8624 ou 848 715 208
-      /\b8[0-9]{8}\b/g                                         // 852118624 (padrão original)
+      /\+?\s*258\s*8[0-9]\s*[0-9]{3}\s*[0-9]{4}/g,           // +258 85 211 8624 (com espaços variados)
+      /(?<!\d)\+?258\s*8[0-9]{8}(?!\d)/g,                    // +258852118624 ou 258852118624 (junto)
+      /\b8[0-9]\s*[0-9]{3}\s*[0-9]{4}\b/g,                   // 85 211 8624 (com espaços variados)
+      /\b8[0-9]{8}\b/g                                        // 852118624 (padrão normal)
     ];
 
     const numerosEncontrados = [];
@@ -1018,14 +1018,14 @@ Se não conseguires extrair os dados:
       return null;
     }
     
-    // Padrões melhorados para pedidos específicos
+    // Padrões melhorados para pedidos específicos (com suporte a números espaçados)
     const padroesPedidos = [
-      // Formato: quantidade + unidade + número
-      /(\d+(?:\.\d+)?)\s*(gb|g|giga|gigas?|mb|m|mega|megas?)\s+([8][0-9]{8})/gi,
-      // Formato: número + quantidade + unidade
-      /([8][0-9]{8})\s+(\d+(?:\.\d+)?)\s*(gb|g|giga|gigas?|mb|m|mega|megas?)/gi,
-      // Formato com "para": 2gb para 852413946
-      /(\d+(?:\.\d+)?)\s*(gb|g|giga|gigas?|mb|m|mega|megas?)\s+(?:para\s+)?([8][0-9]{8})/gi
+      // Formato: quantidade + unidade + número (com ou sem espaços no número)
+      /(\d+(?:\.\d+)?)\s*(gb|g|giga|gigas?|mb|m|mega|megas?)\s+(?:\+?\s*258\s*)?([8][0-9]\s*[0-9]{3}\s*[0-9]{4}|[8][0-9]{8})/gi,
+      // Formato: número + quantidade + unidade (com ou sem espaços no número)
+      /(?:\+?\s*258\s*)?([8][0-9]\s*[0-9]{3}\s*[0-9]{4}|[8][0-9]{8})\s+(\d+(?:\.\d+)?)\s*(gb|g|giga|gigas?|mb|m|mega|megas?)/gi,
+      // Formato com "para": 2gb para 852413946 ou 85 211 8624
+      /(\d+(?:\.\d+)?)\s*(gb|g|giga|gigas?|mb|m|mega|megas?)\s+(?:para\s+)?(?:\+?\s*258\s*)?([8][0-9]\s*[0-9]{3}\s*[0-9]{4}|[8][0-9]{8})/gi
     ];
     
     const pedidos = [];
@@ -1033,18 +1033,24 @@ Se não conseguires extrair os dados:
     for (const padrao of padroesPedidos) {
       let match;
       while ((match = padrao.exec(mensagem)) !== null) {
-        let quantidade, unidade, numero;
-        
-        if (match[1] && /\d/.test(match[1]) && match[2] && /[8][0-9]{8}/.test(match[3])) {
+        let quantidade, unidade, numeroRaw;
+
+        // Detectar formato: quantidade + unidade + número
+        if (match[1] && /\d/.test(match[1]) && match[2] && match[3]) {
           quantidade = parseFloat(match[1]);
           unidade = match[2].toLowerCase();
-          numero = match[3];
-        } else if (match[1] && /[8][0-9]{8}/.test(match[1]) && match[2] && /\d/.test(match[2])) {
-          numero = match[1];
+          numeroRaw = match[3];
+        }
+        // Detectar formato: número + quantidade + unidade
+        else if (match[1] && match[2] && /\d/.test(match[2]) && match[3]) {
+          numeroRaw = match[1];
           quantidade = parseFloat(match[2]);
           unidade = match[3].toLowerCase();
         }
-        
+
+        // Normalizar o número (remover espaços, +258, etc)
+        const numero = numeroRaw ? this.normalizarNumero(numeroRaw) : null;
+
         if (quantidade && unidade && numero) {
           let quantidadeGB;
           if (unidade.includes('gb') || unidade.includes('giga') || unidade === 'g') {
@@ -1192,7 +1198,17 @@ Se não conseguires extrair os dados:
   // === PROCESSAR TEXTO (MELHORADO) ===
   async processarTexto(mensagem, remetente, timestamp, configGrupo = null) {
     console.log(`   📝 Analisando mensagem: "${mensagem}"`);
-    
+
+    // IGNORAR COMANDOS ADMIN/BOT (não processar como comprovante)
+    if (mensagem.startsWith('.')) {
+      console.log(`   🤖 Comando detectado - ignorando processamento de comprovante`);
+      return {
+        sucesso: false,
+        tipo: 'comando_ignorado',
+        mensagem: null
+      };
+    }
+
     // VERIFICAR PEDIDOS ESPECÍFICOS PRIMEIRO
     if (configGrupo) {
       const pedidosEspecificos = this.analisarPedidosEspecificos(mensagem, configGrupo);
