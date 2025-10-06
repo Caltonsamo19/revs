@@ -3977,19 +3977,22 @@ async function processMessage(message) {
                         console.log(`🎁 ADMIN BONUS CONCEDIDO: ${autorMensagem} → ${numeroDestino} (+${quantidadeFormatada})`);
 
                         // Notificar o usuário que recebeu o bônus (USANDO EXATAMENTE O PADRÃO DAS CONFIRMAÇÕES DE COMPRA)
+                        const mensagemBonus = `🎁 *BÔNUS ADMINISTRATIVO!*\n\n` +
+                            `💎 @NOME_PLACEHOLDER, recebeste *${quantidadeFormatada}* de bônus!\n\n` +
+                            `👨‍💼 *Ofertado por:* Administrador\n` +
+                            `💰 *Novo saldo:* ${novoSaldoFormatado}\n\n` +
+                            `${novoSaldo >= 1024 ? '🚀 *Já podes sacar!* Use: *.sacar*' : '💡 *Continua a acumular para sacar!*'}`;
+
                         try {
-                            const mensagemBonus = `🎁 *BÔNUS ADMINISTRATIVO!*\n\n` +
-                                `💎 @NOME_PLACEHOLDER, recebeste *${quantidadeFormatada}* de bônus!\n\n` +
-                                `👨‍💼 *Ofertado por:* Administrador\n` +
-                                `💰 *Novo saldo:* ${novoSaldoFormatado}\n\n` +
-                                `${novoSaldo >= 1024 ? '🚀 *Já podes sacar!* Use: *.sacar*' : '💡 *Continua a acumular para sacar!*'}`;
+                            // Garantir que participantId tem @c.us para menção funcionar
+                            const contactIdMencao = participantId.includes('@c.us') ? participantId : `${participantId}@c.us`;
 
                             // COPIAR EXATAMENTE O PADRÃO DAS CONFIRMAÇÕES (linha 5081)
                             const mensagemFinal = mensagemBonus.replace('@NOME_PLACEHOLDER', `@${participantId.replace('@c.us', '').replace('@lid', '')}`);
 
                             // Enviar com menção igual às confirmações de compra (linha 5084-5086)
                             await client.sendMessage(message.from, mensagemFinal, {
-                                mentions: [participantId]
+                                mentions: [contactIdMencao]
                             });
                         } catch (notificationError) {
                             console.error('❌ Erro ao enviar notificação de bônus admin:', notificationError);
