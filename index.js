@@ -3976,7 +3976,7 @@ async function processMessage(message) {
 
                         console.log(`🎁 ADMIN BONUS CONCEDIDO: ${autorMensagem} → ${numeroDestino} (+${quantidadeFormatada})`);
 
-                        // Notificar o usuário que recebeu o bônus (usando mesmo formato da confirmação de compra)
+                        // Notificar o usuário que recebeu o bônus (USANDO EXATAMENTE O PADRÃO DAS CONFIRMAÇÕES DE COMPRA)
                         try {
                             const mensagemBonus = `🎁 *BÔNUS ADMINISTRATIVO!*\n\n` +
                                 `💎 @NOME_PLACEHOLDER, recebeste *${quantidadeFormatada}* de bônus!\n\n` +
@@ -3984,14 +3984,18 @@ async function processMessage(message) {
                                 `💰 *Novo saldo:* ${novoSaldoFormatado}\n\n` +
                                 `${novoSaldo >= 1024 ? '🚀 *Já podes sacar!* Use: *.sacar*' : '💡 *Continua a acumular para sacar!*'}`;
 
-                            // Substituir placeholder e enviar com menção (igual confirmação de compra)
+                            // COPIAR EXATAMENTE O PADRÃO DAS CONFIRMAÇÕES (linha 5081)
                             const mensagemFinal = mensagemBonus.replace('@NOME_PLACEHOLDER', `@${participantId.replace('@c.us', '').replace('@lid', '')}`);
 
+                            // Enviar com menção igual às confirmações de compra (linha 5084-5086)
                             await client.sendMessage(message.from, mensagemFinal, {
                                 mentions: [participantId]
                             });
                         } catch (notificationError) {
                             console.error('❌ Erro ao enviar notificação de bônus admin:', notificationError);
+                            // Fallback: enviar sem menção (igual às confirmações linha 5091-5092)
+                            const mensagemFallback = mensagemBonus.replace('@NOME_PLACEHOLDER', `@${participantId.replace('@c.us', '').replace('@lid', '')}`);
+                            await message.reply(mensagemFallback);
                         }
 
                         await message.reply(
