@@ -959,8 +959,17 @@ let salvamentoPendente = false;
 
 async function salvarDadosReferencia() {
     // Evitar salvamentos simultâneos
-    if (salvamentoPendente) return;
+    if (salvamentoPendente) {
+        console.log(`⏳ Salvamento já em andamento, aguardando...`);
+        return;
+    }
     salvamentoPendente = true;
+
+    console.log(`💾 Iniciando salvamento de dados de referência...`);
+    console.log(`   - Códigos: ${Object.keys(codigosReferencia).length} registros`);
+    console.log(`   - Referências: ${Object.keys(referenciasClientes).length} registros`);
+    console.log(`   - Bônus: ${Object.keys(bonusSaldos).length} registros`);
+    console.log(`   - Saques: ${Object.keys(pedidosSaque).length} registros`);
 
     try {
         // Usar Promise.allSettled para não falhar se um arquivo der erro
@@ -971,13 +980,24 @@ async function salvarDadosReferencia() {
             fs.writeFile(ARQUIVO_SAQUES, JSON.stringify(pedidosSaque))
         ]);
 
-        // Log apenas se houve falhas
+        // Log detalhado de cada salvamento
+        const nomeArquivos = ['ARQUIVO_CODIGOS', 'ARQUIVO_REFERENCIAS', 'ARQUIVO_BONUS', 'ARQUIVO_SAQUES'];
+        resultados.forEach((resultado, index) => {
+            if (resultado.status === 'fulfilled') {
+                console.log(`   ✅ ${nomeArquivos[index]} salvo com sucesso`);
+            } else {
+                console.error(`   ❌ ${nomeArquivos[index]} FALHOU:`, resultado.reason);
+            }
+        });
+
         const falhas = resultados.filter(r => r.status === 'rejected');
         if (falhas.length > 0) {
-            console.error('❌ Algumas escritas falharam:', falhas.length);
+            console.error(`❌ Total de falhas: ${falhas.length}/${resultados.length}`);
+        } else {
+            console.log(`✅ Todos os arquivos salvos com sucesso!`);
         }
     } catch (error) {
-        console.error('❌ Erro ao salvar dados de referência:', error);
+        console.error('❌ Erro crítico ao salvar dados de referência:', error);
     } finally {
         salvamentoPendente = false;
     }
@@ -999,13 +1019,19 @@ function agendarSalvamento() {
 
 // Função para buscar saldo de bônus em todos os formatos possíveis
 function buscarSaldoBonus(userId) {
+    console.log(`\n🔍 === BUSCA DE SALDO DETALHADA ===`);
+    console.log(`📱 Buscando saldo para userId: "${userId}"`);
+
     // Tentar formato exato primeiro
     if (bonusSaldos[userId]) {
+        console.log(`✅ Encontrado no formato exato: ${userId} (${bonusSaldos[userId].saldo}MB)`);
         return bonusSaldos[userId];
     }
+    console.log(`❌ Não encontrado no formato exato: ${userId}`);
 
     // Extrair número base (sem sufixos)
     const numeroBase = userId.replace('@c.us', '').replace('@lid', '');
+    console.log(`🔢 Número base extraído: "${numeroBase}"`);
 
     // Tentar todos os formatos possíveis
     const formatosPossiveis = [
@@ -1014,12 +1040,23 @@ function buscarSaldoBonus(userId) {
         `${numeroBase}@lid`
     ];
 
+    console.log(`🔍 Testando ${formatosPossiveis.length} formatos possíveis:`);
     for (const formato of formatosPossiveis) {
+        console.log(`   - Testando: "${formato}"`);
         if (bonusSaldos[formato]) {
-            console.log(`💡 Saldo encontrado em formato alternativo: ${formato}`);
+            console.log(`   ✅ ENCONTRADO! Formato: ${formato}, Saldo: ${bonusSaldos[formato].saldo}MB`);
             return bonusSaldos[formato];
+        } else {
+            console.log(`   ❌ Não encontrado`);
         }
     }
+
+    console.log(`❌ Saldo não encontrado em nenhum formato`);
+    console.log(`📋 Saldos existentes no sistema (primeiros 10):`);
+    const chaves = Object.keys(bonusSaldos).slice(0, 10);
+    chaves.forEach(chave => {
+        console.log(`   • ${chave}: ${bonusSaldos[chave].saldo}MB`);
+    });
 
     return null;
 }
@@ -3800,8 +3837,14 @@ async function processMessage(message) {
                         // Usar @c.us como principal para referência
                         const participantId = participantIdCus;
 
-                        // Salvar dados após conceder bônus
-                        agendarSalvamento();
+                        // Salvar dados IMEDIATAMENTE após conceder bônus (crítico!)
+                        console.log(`💾 Salvando dados de bônus imediatamente...`);
+                        try {
+                            await salvarDadosReferencia();
+                            console.log(`✅ Dados de bônus salvos com sucesso!`);
+                        } catch (erroSalvamento) {
+                            console.error(`❌ ERRO CRÍTICO ao salvar bônus:`, erroSalvamento);
+                        }
 
                         const quantidadeFormatada = quantidadeMB >= 1024 ? `${(quantidadeMB/1024).toFixed(2)}GB` : `${quantidadeMB}MB`;
                         const novoSaldo = bonusSaldos[participantId].saldo;
