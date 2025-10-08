@@ -3724,7 +3724,8 @@ async function processMessage(message) {
                                 console.log(`✅ Menções encontradas: ${message.mentionedIds.join(', ')}`);
                                 // Usar a primeira menção encontrada
                                 const mencaoId = message.mentionedIds[0];
-                                numeroDestino = mencaoId.replace('@c.us', '');
+                                // Remover AMBOS os sufixos possíveis (@c.us e @lid)
+                                numeroDestino = mencaoId.replace('@c.us', '').replace('@lid', '');
                                 console.log(`📱 Número extraído da menção: ${numeroDestino}`);
                             } else {
                                 console.log(`⚠️ Nenhuma menção encontrada, usando número após @`);
@@ -3736,17 +3737,18 @@ async function processMessage(message) {
                         console.log(`🔎 Validando número: "${numeroDestino}"`);
                         console.log(`   - Tem 9 dígitos? ${/^\d{9}$/.test(numeroDestino)}`);
                         console.log(`   - Tem 12 dígitos? ${/^\d{12}$/.test(numeroDestino)}`);
+                        console.log(`   - É ID @lid? ${/^\d+$/.test(numeroDestino)}`);
 
-                        // Validar número - aceitar 9 dígitos (848715208) ou 12 dígitos (258848715208)
-                        if (!/^\d{9}$/.test(numeroDestino) && !/^\d{12}$/.test(numeroDestino)) {
+                        // Validar número - aceitar 9 dígitos, 12 dígitos ou IDs @lid (15 dígitos)
+                        if (!/^\d{9,15}$/.test(numeroDestino)) {
                             console.log(`❌ Número INVÁLIDO: ${numeroDestino}`);
-                            await message.reply(`❌ *NÚMERO INVÁLIDO*\n\n✅ Use formato:\n• *.bonus @848715208 500MB* (9 dígitos)\n• *.bonus @258848715208 500MB* (12 dígitos)\n• *.bonus 848715208 500MB* (número direto)`);
+                            await message.reply(`❌ *NÚMERO INVÁLIDO*\n\n✅ Use formato:\n• *.bonus @usuario 500MB* (com menção)\n• *.bonus @848715208 500MB* (9 dígitos)\n• *.bonus @258848715208 500MB* (12 dígitos)\n• *.bonus 848715208 500MB* (número direto)`);
                             return;
                         }
 
-                        console.log(`✅ Número válido`);
+                        console.log(`✅ Número válido (${numeroDestino.length} dígitos)`);
 
-                        // Converter para formato completo se necessário (adicionar 258 no início)
+                        // Converter para formato completo se necessário (apenas para números de 9 dígitos)
                         if (numeroDestino.length === 9) {
                             numeroDestino = '258' + numeroDestino;
                             console.log(`🔄 Convertido para 12 dígitos: ${numeroDestino}`);
