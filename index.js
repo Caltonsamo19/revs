@@ -1018,7 +1018,7 @@ function agendarSalvamento() {
 }
 
 // Função para buscar saldo de bônus em todos os formatos possíveis
-function buscarSaldoBonus(userId) {
+async function buscarSaldoBonus(userId) {
     console.log(`\n🔍 === BUSCA DE SALDO DETALHADA ===`);
     console.log(`📱 Buscando saldo para userId: "${userId}"`);
 
@@ -1049,6 +1049,32 @@ function buscarSaldoBonus(userId) {
         } else {
             console.log(`   ❌ Não encontrado`);
         }
+    }
+
+    // BUSCA AVANÇADA: Tentar obter número real do contato
+    console.log(`🔍 Tentando busca avançada via número real do contato...`);
+    try {
+        const contact = await client.getContactById(userId);
+        if (contact && contact.number) {
+            console.log(`📞 Número real encontrado: ${contact.number}`);
+            const numeroReal = contact.number;
+
+            // Tentar com o número real
+            const formatosReais = [
+                numeroReal,
+                `${numeroReal}@c.us`,
+                `${numeroReal}@lid`
+            ];
+
+            for (const formato of formatosReais) {
+                if (bonusSaldos[formato]) {
+                    console.log(`   ✅ ENCONTRADO via número real! Formato: ${formato}, Saldo: ${bonusSaldos[formato].saldo}MB`);
+                    return bonusSaldos[formato];
+                }
+            }
+        }
+    } catch (error) {
+        console.log(`⚠️ Erro ao buscar contato: ${error.message}`);
     }
 
     console.log(`❌ Saldo não encontrado em nenhum formato`);
@@ -4657,7 +4683,7 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
             // .bonus - Ver saldo de bônus
             if (comando === '.bonus' || comando === '.saldo') {
                 console.log(`🔍 Buscando saldo para: ${remetente}`);
-                const saldo = buscarSaldoBonus(remetente);
+                const saldo = await buscarSaldoBonus(remetente);
                 
                 if (!saldo || saldo.saldo === 0) {
                     await message.reply(
@@ -4735,7 +4761,7 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                 
                 // Verificar saldo (buscar em todos os formatos)
                 console.log(`🔍 Buscando saldo para saque: ${remetente}`);
-                const saldo = buscarSaldoBonus(remetente);
+                const saldo = await buscarSaldoBonus(remetente);
                 if (!saldo || saldo.saldo < quantidadeMB) {
                     const saldoAtual = saldo ? saldo.saldo : 0;
                     await message.reply(
@@ -4795,7 +4821,7 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                 }
                 
                 const quantidadeFormatada = quantidadeMB >= 1024 ? `${(quantidadeMB/1024).toFixed(2)}GB` : `${quantidadeMB}MB`;
-                const saldoAtualizado = buscarSaldoBonus(remetente);
+                const saldoAtualizado = await buscarSaldoBonus(remetente);
                 const novoSaldo = saldoAtualizado ? saldoAtualizado.saldo : 0;
                 
                 await message.reply(
