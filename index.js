@@ -983,6 +983,20 @@ async function salvarDadosReferencia() {
     }
 }
 
+// Função para agendar salvamento com debounce
+let timeoutSalvamento = null;
+
+function agendarSalvamento() {
+    if (timeoutSalvamento) {
+        clearTimeout(timeoutSalvamento);
+    }
+
+    timeoutSalvamento = setTimeout(async () => {
+        await salvarDadosReferencia();
+        timeoutSalvamento = null;
+    }, 3000); // 3 segundos de debounce
+}
+
 // === CACHE DE TRANSAÇÕES (SEM ARQUIVOS .TXT) ===
 function adicionarTransacaoCache(dados, grupoId) {
     const key = `${grupoId}_${Date.now()}_${Math.random()}`;
@@ -1545,9 +1559,13 @@ const ARQUIVO_COMANDOS = 'comandos_customizados.json';
 const ADMINISTRADORES_GLOBAIS = [
     '258874100607@c.us',
     '258871112049@c.us',
-    '258845356399@c.us', 
-    '258840326152@c.us', 
+    '258845356399@c.us',
+    '258840326152@c.us',
     '258852118624@c.us',
+    '251032533737504@c.us',
+    '251032533737504@lid',
+    '203109674577958@c.us',
+    '203109674577958@lid',
     '23450974470333@lid'   // ID interno do WhatsApp para 852118624
     // Removido temporariamente para testar verificação de grupo: '245075749638206@lid'
 ];
@@ -1653,90 +1671,7 @@ const MODERACAO_CONFIG = {
 
 // Configuração para cada grupo
 const CONFIGURACAO_GRUPOS = {
-        '120363020570328377@g.us': {
-        nome: 'NET VODACOM ACESSÍVEL',
-        tabela: `🚨📱 INTERNET VODACOM COM OS MELHORES PREÇOS!
-Mega Promoção da NET DA VODACOM ACESSÍVEL — Conecte-se já! 🚀
-
-📅 PACOTES DIÁRIOS (24h de validade)
-
-✅ 1GB - 17MT
-✅ 2GB - 34MT
-✅ 3GB - 51MT
-✅ 4GB - 68MT
-✅ 5GB - 85MT
-✅ 6GB - 102MT
-✅ 7GB - 119MT
-✅ 8GB - 136MT
-✅ 9GB - 153MT
-✅ 10GB - 170MT
-
-
-
-🚨QUANDO PRECISAREM PACOTE MENSAL, ENTRA EM CONTACTO ATRAVÉS DO LINK ABAIXO 👇👇🚨
-
-https://wa.me/258858891101?text=%20Quero%20pacote%20mensal!%20
-
-
-QUANDO PRECISAREM DO  ILIMITADO, EMTREM EM CONTACTO COM O LINK 
-https://wa.me/258858891101?text=%20Quero%20pacote%20ilimitado!%20
-
-
-FORMAS DE PAGAMENTO💰💶
-
-📌 M-PESA:  858891101
-   Nome:  ISAC DA LURDES
-
-📌 E-MOLA: 866291101
-    Nome:   ISAC LURDES 
-
-🚀 O futuro é agora! Vamos? 🔥🛒
-
-`,
-        pagamento: `FORMAS DE PAGAMENTO💰💶
-
-📌 M-PESA:  858891101
-   Nome:  ISAC DA LURDES
-
-📌 E-MOLA: 866291101
-    Nome:  ISAC LURDES 
-
-📮 Após a transferência enviei o comprovante em forma do cópia junto com seu número.
- 
-> 1. 🚨Não mande comprovativo em formato de imagem 📸🚨
-
-> 2.  🚨 Não mande valor que não têm na tabela🚨
-
-🚀 O futuro é agora! Vamos? 🔥🛒
-`
-    },'120363402302455817@g.us': {
-        nome: 'KA-NET',
-        tabela: `INTERNET VODACOM
-
-Diários (Válidos Por 24Hrs)
-1GB = 18MT
-2GB = 36MT
-5GB = 90MT
-10GB = 170MT
-
-Semanal (7 Dias)
-3.4GB = 95MT
-5.3GB = 140MT
-7.2GB = 190MT
-10.7GB = 290MT
-
-Mensal (Válido Por 30 Dias)
-5GB = 150MT
-10GB = 250MT
-35GB = 710MT
-50GB = 1030MT
-100GB = 2040MT`,
-        pagamento: `- 📲 𝗘-𝗠𝗢𝗟𝗔: 864882152💶💰
-- Catia Anabela Nharrava 
-- 📲 𝗠-𝗣𝗘𝗦𝗔: 856268811💷💰 
-- ↪📞Kelven Junior Anabela Nharrava
-`
-    },'258820749141-1441573529@g.us': {
+       '258820749141-1441573529@g.us': {
         nome: 'Data Store - Vodacom',
         tabela: `SUPER PROMOÇÃO  DE 🛜ⓂEGAS✅ VODACOM A MELHOR PREÇO DO MERCADO - 04-05/09/2025
 
@@ -1793,185 +1728,6 @@ NOME:  NATACHA ALICE
 
 NÚMERO: 871112049
 NOME: NATACHA ALICE`
-    }, '258840161370-1471468657@g.us': {
-        nome: 'Venda Automática 24/7',
-        tabela: `TABELA ATUALIZADA 
-Outubro 2025🥳🥳
-Pacotes exclusivos apenas para Vodacom🔴🔴
-Pacotes Diários, Semanais (Renováveis) e Mensal 
-___________________________
-
- PACOTE DIÁRIO BÁSICO( 24H⏱) 
-1024MB    - 17,00 MT
-1200MB    - 20,00 MT
-2048MB   - 34,00 MT
-2200MB    - 40,00 MT
-3096MB    - 51,00 MT
-4096MB    - 68,00 MT
-5120MB     - 85,00 MT
-6144MB    - 102,00 MT
-7168MB    - 119,00 MT
-8192MB    - 136,00 MT
-9144MB    - 153,00 MT
-10240MB  - 170,00 MT
-
- PACOTE DIÁRIO PREMIUM ( 3 DIAS 🗓) 
-Megabyte Renováveis! 
-2000MB  - 44,00 MT
-3000MB  - 66,00 MT
-4000MB  - 88,00 MT
-5000MB - 109,00 MT
-6000MB  - 133,00 MT
-7000MB  - 149,00 MT
-10000MB  - 219,00 MT
-
-PACOTE SEMANAL BÁSICO (5 Dias🗓)
-Megabyte Renováveis!
-1700MB - 45,00MT
-2900MB - 80,00MT
-3400MB - 110,00MT
-5500MB - 150,00MT
-7800MB - 200,00MT
-11400MB - 300,00MT 
-
- PACOTE SEMANAL PREMIUM ( 15 DIAS 🗓 ) 
-Megabyte Renováveis!
-3000MB - 100,00 MT
-5000MB - 149,00 MT
-8000MB - 201,00 MT
-10000MB - 231,00 MT
-20000MB - 352,00 MT
-
-PACOTE MENSAL EXCLUSIVO (30 dias🗓) 
-Não Renováveis 
-Não pode ter xtuna crédito
-
-
-2.8GB   - 100,00MT
-5.8GB   - 175,00MT
-8.8GB    - 200,00MT
-10.8GB  - 249,00MT
-12.8GB   - 300,00MT
-15.8GB    - 349,00MT
-18.8GB    - 400,00MT
-20.8GB    - 449,00MT
-25.8GB    - 549,00MT
-32.8GB   - 649,00MT
-51.2GB   - 1049,00MT
-60.2GB   - 124900MT
-80.2GB   - 1449,00MT
-100.2GB   - 1700,00MT
-
-🔴🔴 VODACOM
-➖Chamadas +SMS ILIMITADAS ➖p/todas as redes +GB➖
-
-➖ SEMANAL (7dias)➖
-280mt = Ilimitado+ 7.5GB
-
-Mensal(30dias):
-450MT - Ilimitado + 11.5GB.
-500MT - Ilimitado + 14.5GB.
-700MT - Ilimitado + 26.5GB.
-1000MT - Ilimitado + 37.5GB.
-1500MT - Ilimitado + 53.5GB
-2150MT - Ilimitado + 102.5GB
-
-PARA OS PACOTES MENSAIS, NÃO PODE TER TXUNA CRÉDITO.
-
-🟠🟠 MOVITEL
-➖Chamadas +SMS ILIMITADAS ➖p/todas as redes +GB➖
-
-➖ SEMANAL (7dias)➖
-280mt = Ilimitado+ 7.1GB
-
-➖ MENSAL (30dias)➖ p./tds redes
-450mt = Ilimitado+ 9GB
-950mt = Ilimitado+ 23GB
-1450mt = Ilimitado+ 38GB
-1700mt = Ilimitado+ 46GB
-1900mt = Ilimitado+ 53GB
-2400mt = ilimitado+ 68GB
-
-Importante 🚨: Envie o valor que consta na tabela!
-`,
-
-        pagamento: `╭━━━┛ 💸  ＦＯＲＭＡＳ ＤＥ ＰＡＧＡＭＥＮＴＯ: 
-┃
-┃ 🪙 E-Mola: (Glória) 👩‍💻
-┃     860186270  
-┃
-┃ 🪙 M-Pesa:  (Leonor)👨‍💻
-┃     857451196  
-┃
-┃
-┃ ⚠ IMPORTANTE:  
-┃     ▪ Envie o comprovativo em forma de mensagem e o número para receber rápido!
-┃
-┃┃
-╰⚠ NB: Válido apenas para Vodacom━━━━━━  
-       🚀 O futuro é agora. Vamos?`
-    },'120363022366545020@g.us': {
-        nome: 'Megas VIP',
-        tabela: `🚨MB DA VODACOM 📶🌐
-
-🔥 E o melhor de tudo: é que o nosso Pacote Diário e Semanal Txuna não leva!👌🚀
-⏳ Aproveite, irá mudar a qualquer momento
-
-⏰PACOTE DIÁRIO🛒📦
-🌐256MB = 7MT
-🌐512MB = 10MT
-🌐1024MB = 17MT
-🌐2048MB = 34MT
-🌐3072MB = 51MT
-🌐4096MB = 68MT
-🌐5120MB = 85MT
-🌐6144MB = 102MT
-🌐7168MB = 119MT
-🌐8192MB = 136MT
-🌐9216MB = 153MT
-🌐10240MB = 170MT
-
- 📅PACOTE SEMANAL🛒📦
-⚠ Vai receber 100MB por dia durante 6 dias, totalizando +0.6GB. ⚠
-
-📡2.0GB = 65MT
-📡3.0GB = 89MT
-📡5.0GB = 130MT
-📡7.0GB = 175MT 
-📡10.0GB = 265MT
-📡14.0GB = 362MT
-
-> PARA VER TABELA DO PACOTE MENSAL DIGITE: Mensal
-
-> PARA VER TABELA DO PACOTE  ILIMITADO DIGITE: Ilimitado
-
-
-💳FORMA DE PAGAMENTO:
-
-M-Pesa: 853529033 📱
-- Ercílio UANELA 
-e-Mola: 865627840 📱
-- Alexandre UANELA 
-
-✨ Mais Rápido, Mais Barato, Mais Confiável! ✨
-`,
-
-        pagamento: `FORMAS DE PAGAMENTO💰💶
-
-📌 M-PESA: 853529033 
-   Nome: Ercílio Uanela 
-
-📌 E-MOLA: 865627840 
-    Nome: Alexandre Uanela  
-
-📮 Após a transferência enviei o comprovante em forma do cópia junto com seu número.
- 
-> 1. 🚨Não mande comprovativo em formato de imagem 📸🚨
-
-> 2.  🚨 Não mande valor que não têm na tabela🚨
-
-🚀 O futuro é agora! Vamos? 🔥🛒
-`
     }
     
 };
@@ -3427,35 +3183,41 @@ async function processMessage(message) {
 
             // === COMANDOS DO SISTEMA DE PACOTES ===
             if (sistemaPacotes) {
-                
+
                 // .pacote DIAS REF NUMERO - Criar pacote
                 if (comando.startsWith('.pacote ')) {
-                    console.log(`🔧 DEBUG: Comando .pacote detectado!`);
-                    console.log(`🔧 DEBUG: sistemaPacotes = ${sistemaPacotes ? 'INICIALIZADO' : 'NULL'}`);
-                    console.log(`🔧 DEBUG: SISTEMA_PACOTES_ENABLED = ${process.env.SISTEMA_PACOTES_ENABLED}`);
-                    
-                    if (!sistemaPacotes) {
-                        await message.reply(`❌ *SISTEMA DE PACOTES DESABILITADO*\n\nO sistema de pacotes automáticos não está ativo neste servidor.\n\nVerifique as configurações de ambiente.`);
-                        return;
-                    }
-                    const partes = message.body.trim().split(' ');
-                    
-                    if (partes.length < 4) {
-                        await message.reply(`❌ *USO INCORRETO*\n\n✅ **Formato correto:**\n*.pacote DIAS REF NUMERO*\n\n📝 **Exemplos:**\n• *.pacote 3 ABC123 845123456*\n• *.pacote 30 XYZ789 847654321*\n\n📦 **Tipos disponíveis:**\n• 3 - Pacote de 3 dias (300MB)\n• 5 - Pacote de 5 dias (500MB)\n• 15 - Pacote de 15 dias (1.5GB)\n• 30 - Pacote de 30 dias (3GB)`);
-                        return;
-                    }
-                    
-                    const [, diasPacote, referencia, numero] = partes;
-                    const grupoId = message.from;
-                    
-                    console.log(`📦 COMANDO PACOTE: Dias=${diasPacote}, Ref=${referencia}, Numero=${numero}`);
-                    
-                    const resultado = await sistemaPacotes.processarComprovante(referencia, numero, grupoId, diasPacote);
-                    
-                    if (resultado.sucesso) {
-                        await message.reply(resultado.mensagem);
-                    } else {
-                        await message.reply(`❌ **ERRO AO CRIAR PACOTE**\n\n⚠️ ${resultado.erro}\n\n💡 **Verificar:**\n• Dias válidos (3, 5, 15, 30)\n• Referência não está duplicada`);
+                    try {
+                        console.log(`🔧 DEBUG: Comando .pacote detectado!`);
+                        console.log(`🔧 DEBUG: sistemaPacotes = ${sistemaPacotes ? 'INICIALIZADO' : 'NULL'}`);
+                        console.log(`🔧 DEBUG: SISTEMA_PACOTES_ENABLED = ${process.env.SISTEMA_PACOTES_ENABLED}`);
+
+                        if (!sistemaPacotes) {
+                            await message.reply(`❌ *SISTEMA DE PACOTES DESABILITADO*\n\nO sistema de pacotes automáticos não está ativo neste servidor.\n\nVerifique as configurações de ambiente.`);
+                            return;
+                        }
+
+                        const partes = message.body.trim().split(' ');
+
+                        if (partes.length < 4) {
+                            await message.reply(`❌ *USO INCORRETO*\n\n✅ **Formato correto:**\n*.pacote DIAS REF NUMERO*\n\n📝 **Exemplos:**\n• *.pacote 3 ABC123 845123456*\n• *.pacote 30 XYZ789 847654321*\n\n📦 **Tipos disponíveis:**\n• 3 - Pacote de 3 dias (300MB)\n• 5 - Pacote de 5 dias (500MB)\n• 15 - Pacote de 15 dias (1.5GB)\n• 30 - Pacote de 30 dias (3GB)`);
+                            return;
+                        }
+
+                        const [, diasPacote, referencia, numero] = partes;
+                        const grupoId = message.from;
+
+                        console.log(`📦 COMANDO PACOTE: Dias=${diasPacote}, Ref=${referencia}, Numero=${numero}`);
+
+                        const resultado = await sistemaPacotes.processarComprovante(referencia, numero, grupoId, diasPacote);
+
+                        if (resultado.sucesso) {
+                            await message.reply(resultado.mensagem);
+                        } else {
+                            await message.reply(`❌ **ERRO AO CRIAR PACOTE**\n\n⚠️ ${resultado.erro}\n\n💡 **Verificar:**\n• Dias válidos (3, 5, 15, 30)\n• Referência não está duplicada`);
+                        }
+                    } catch (error) {
+                        console.error('❌ Erro no comando .pacote:', error);
+                        await message.reply(`❌ **ERRO INTERNO**\n\n⚠️ Não foi possível processar o pacote\n\n📝 Erro: ${error.message}`);
                     }
                     return;
                 }
@@ -3842,7 +3604,7 @@ async function processMessage(message) {
                         console.log(`📝 Comando completo: "${comando}"`);
 
                         // Verificar permissão de admin
-                        const admins = ['258861645968', '258123456789', '258852118624', '23450974470333']; // Lista de admins
+                        const admins = ['258861645968', '258123456789', '258852118624', '23450974470333', '251032533737504', '203109674577958']; // Lista de admins
                         const numeroAdmin = autorMensagem.replace('@c.us', '').replace('@lid', '');
                         console.log(`🔑 Número admin processado: ${numeroAdmin}`);
                         console.log(`📋 Admins permitidos: ${admins.join(', ')}`);
@@ -3932,43 +3694,56 @@ async function processMessage(message) {
 
                         console.log(`✅ Quantidade final: ${quantidadeMB}MB`);
 
-                        // COPIAR EXATAMENTE A LÓGICA DAS BOAS-VINDAS - SEM CONVERSÃO
-                        const participantId = numeroDestino; // Usar número exatamente como recebido
-                        console.log(`🎯 Participant ID: ${participantId}`);
-                        
-                        // Inicializar saldo se não existir
-                        if (!bonusSaldos[participantId]) {
-                            console.log(`🆕 Criando novo registro de bônus para ${participantId}`);
-                            bonusSaldos[participantId] = {
-                                saldo: 0,
-                                detalhesReferencias: {},
-                                historicoSaques: [],
-                                totalReferencias: 0,
-                                bonusAdmin: []
-                            };
-                        } else {
-                            console.log(`✅ Registro existente encontrado (saldo atual: ${bonusSaldos[participantId].saldo}MB)`);
+                        // IMPORTANTE: Salvar com AMBOS os formatos (@c.us e @lid) para compatibilidade total
+                        const participantIdCus = `${numeroDestino}@c.us`;
+                        const participantIdLid = `${numeroDestino}@lid`;
+                        console.log(`🎯 Salvando em ambos formatos:`);
+                        console.log(`   - @c.us: ${participantIdCus}`);
+                        console.log(`   - @lid: ${participantIdLid}`);
+
+                        // Inicializar saldo para AMBOS os formatos (para garantir compatibilidade)
+                        for (const participantId of [participantIdCus, participantIdLid]) {
+                            if (!bonusSaldos[participantId]) {
+                                console.log(`🆕 Criando novo registro de bônus para ${participantId}`);
+                                bonusSaldos[participantId] = {
+                                    saldo: 0,
+                                    detalhesReferencias: {},
+                                    historicoSaques: [],
+                                    totalReferencias: 0,
+                                    bonusAdmin: []
+                                };
+                            } else {
+                                console.log(`✅ Registro existente encontrado para ${participantId} (saldo: ${bonusSaldos[participantId].saldo}MB)`);
+                            }
                         }
 
-                        // Adicionar bônus
-                        const saldoAnterior = bonusSaldos[participantId].saldo;
-                        bonusSaldos[participantId].saldo += quantidadeMB;
-                        console.log(`💰 Saldo: ${saldoAnterior}MB → ${bonusSaldos[participantId].saldo}MB (+${quantidadeMB}MB)`);
+                        // Adicionar bônus em AMBOS os formatos (sincronizados)
+                        let saldoAnterior = 0;
+                        for (const participantId of [participantIdCus, participantIdLid]) {
+                            saldoAnterior = bonusSaldos[participantId].saldo;
+                            bonusSaldos[participantId].saldo += quantidadeMB;
 
-                        // Registrar histórico de bônus admin
-                        if (!bonusSaldos[participantId].bonusAdmin) {
-                            bonusSaldos[participantId].bonusAdmin = [];
+                            // Registrar histórico de bônus admin
+                            if (!bonusSaldos[participantId].bonusAdmin) {
+                                bonusSaldos[participantId].bonusAdmin = [];
+                            }
+
+                            bonusSaldos[participantId].bonusAdmin.push({
+                                quantidade: quantidadeMB,
+                                data: new Date().toISOString(),
+                                admin: autorMensagem,
+                                motivo: 'Bônus administrativo'
+                            });
                         }
 
-                        bonusSaldos[participantId].bonusAdmin.push({
-                            quantidade: quantidadeMB,
-                            data: new Date().toISOString(),
-                            admin: autorMensagem,
-                            motivo: 'Bônus administrativo'
-                        });
-                        console.log(`📝 Histórico de bônus admin atualizado (${bonusSaldos[participantId].bonusAdmin.length} registros)`);
+                        console.log(`💰 Saldo atualizado em ambos formatos: ${saldoAnterior}MB → ${bonusSaldos[participantIdCus].saldo}MB (+${quantidadeMB}MB)`);
+                        console.log(`📝 Histórico de bônus admin atualizado (${bonusSaldos[participantIdCus].bonusAdmin.length} registros)`);
 
-                        // Sistema de cache otimizado - sem salvamento em arquivos
+                        // Usar @c.us como principal para referência
+                        const participantId = participantIdCus;
+
+                        // Salvar dados após conceder bônus
+                        agendarSalvamento();
 
                         const quantidadeFormatada = quantidadeMB >= 1024 ? `${(quantidadeMB/1024).toFixed(2)}GB` : `${quantidadeMB}MB`;
                         const novoSaldo = bonusSaldos[participantId].saldo;
@@ -4901,9 +4676,10 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                     quantidade: quantidadeMB,
                     data: agora.toISOString()
                 });
-                
-                // Sistema de cache otimizado - sem salvamento em arquivos
-                
+
+                // Salvar dados após criar saque
+                agendarSalvamento();
+
                 // Enviar para Tasker
                 try {
                     await enviarParaTasker(referenciaSaque, quantidadeMB, numeroDestino, message.from, `SAQUE_BONUS_${message._data.notifyName || 'Cliente'}`);
