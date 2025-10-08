@@ -265,21 +265,9 @@ let membrosProcessadosViaEvent = new Set(); // Evita processamento duplicado
 
 // Sistema automático de detecção de novos membros
 async function iniciarMonitoramentoMembros() {
-    console.log('🕵️ Iniciando monitoramento automático de novos membros...');
-    
-    // Executar a cada 2 minutos (otimizado - era 30s)
-    setInterval(async () => {
-        try {
-            await verificarNovosMembros();
-        } catch (error) {
-            console.error('❌ Erro no monitoramento de membros:', error);
-        }
-    }, 120000); // 2 minutos
-    
-    // Primeira execução após 10 segundos (para dar tempo do bot conectar)
-    setTimeout(async () => {
-        await verificarNovosMembros();
-    }, 10000);
+    console.log('⏸️ Monitoramento automático de novos membros está DESATIVADO');
+    // Função desativada completamente - não faz nada
+    return;
 }
 
 // Verificar novos membros em todos os grupos monitorados
@@ -1693,15 +1681,19 @@ const ARQUIVO_MAPEAMENTOS = path.join(__dirname, 'mapeamentos_lid.json');
 
 async function carregarMapeamentos() {
     try {
-        if (fs.existsSync(ARQUIVO_MAPEAMENTOS)) {
-            const data = await fs.readFile(ARQUIVO_MAPEAMENTOS, 'utf8');
-            const mapeamentosSalvos = JSON.parse(data);
-            // Mesclar com os mapeamentos base
-            MAPEAMENTO_IDS = { ...MAPEAMENTO_IDS, ...mapeamentosSalvos };
-            console.log(`✅ Carregados ${Object.keys(mapeamentosSalvos).length} mapeamentos LID salvos`);
-        }
+        // Tentar ler o arquivo diretamente (se não existir, vai dar erro e cai no catch)
+        const data = await fs.readFile(ARQUIVO_MAPEAMENTOS, 'utf8');
+        const mapeamentosSalvos = JSON.parse(data);
+        // Mesclar com os mapeamentos base
+        MAPEAMENTO_IDS = { ...MAPEAMENTO_IDS, ...mapeamentosSalvos };
+        console.log(`✅ Carregados ${Object.keys(mapeamentosSalvos).length} mapeamentos LID salvos`);
     } catch (error) {
-        console.error('❌ Erro ao carregar mapeamentos LID:', error.message);
+        // Se o arquivo não existir (ENOENT), apenas ignora silenciosamente
+        if (error.code === 'ENOENT') {
+            console.log('📋 Nenhum arquivo de mapeamentos LID encontrado - usando mapeamentos padrão');
+        } else {
+            console.error('❌ Erro ao carregar mapeamentos LID:', error.message);
+        }
     }
 }
 
@@ -2843,12 +2835,17 @@ client.on('ready', async () => {
     });
     
     console.log('\n🔧 Comandos admin: .ia .stats .sheets .test_sheets .test_grupo .grupos_status .grupos .grupo_atual .addcomando .comandos .delcomando .test_vision .ranking .inativos .semcompra .resetranking .bonus .testreferencia .config-relatorio .list-relatorios .remove-relatorio .test-relatorio');
-    
-    // Iniciar monitoramento automático de novos membros
-    await iniciarMonitoramentoMembros();
+
+    // Monitoramento de novos membros DESATIVADO
+    console.log('⏸️ Monitoramento automático de novos membros DESATIVADO');
 });
 
+// Event group-join DESATIVADO
 client.on('group-join', async (notification) => {
+    // Sistema de boas-vindas automáticas DESATIVADO
+    return;
+
+    /* CÓDIGO DESATIVADO
     try {
         console.log('🔍 EVENT group-join disparado!');
         console.log('📊 Tipo de notificação:', notification.type); // 'add' ou 'invite'
@@ -2965,6 +2962,7 @@ client.on('group-join', async (notification) => {
     } catch (error) {
         console.error('❌ Erro no evento group-join:', error);
     }
+    FIM DO CÓDIGO DESATIVADO */
 });
 
 // === HANDLERS SEPARADOS POR TIPO DE COMANDO ===
