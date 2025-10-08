@@ -997,6 +997,54 @@ function agendarSalvamento() {
     }, 3000); // 3 segundos de debounce
 }
 
+// Função para buscar saldo de bônus em todos os formatos possíveis
+function buscarSaldoBonus(userId) {
+    // Tentar formato exato primeiro
+    if (bonusSaldos[userId]) {
+        return bonusSaldos[userId];
+    }
+
+    // Extrair número base (sem sufixos)
+    const numeroBase = userId.replace('@c.us', '').replace('@lid', '');
+
+    // Tentar todos os formatos possíveis
+    const formatosPossiveis = [
+        numeroBase,
+        `${numeroBase}@c.us`,
+        `${numeroBase}@lid`
+    ];
+
+    for (const formato of formatosPossiveis) {
+        if (bonusSaldos[formato]) {
+            console.log(`💡 Saldo encontrado em formato alternativo: ${formato}`);
+            return bonusSaldos[formato];
+        }
+    }
+
+    return null;
+}
+
+// Função para atualizar saldo em todos os formatos existentes
+function atualizarSaldoBonus(userId, operacao) {
+    const numeroBase = userId.replace('@c.us', '').replace('@lid', '');
+    const formatosPossiveis = [
+        numeroBase,
+        `${numeroBase}@c.us`,
+        `${numeroBase}@lid`
+    ];
+
+    let atualizado = 0;
+    for (const formato of formatosPossiveis) {
+        if (bonusSaldos[formato]) {
+            operacao(bonusSaldos[formato]);
+            atualizado++;
+        }
+    }
+
+    console.log(`💾 Saldo atualizado em ${atualizado} formato(s)`);
+    return atualizado > 0;
+}
+
 // === CACHE DE TRANSAÇÕES (SEM ARQUIVOS .TXT) ===
 function adicionarTransacaoCache(dados, grupoId) {
     const key = `${grupoId}_${Date.now()}_${Math.random()}`;
@@ -3739,6 +3787,16 @@ async function processMessage(message) {
                         console.log(`💰 Saldo atualizado em ambos formatos: ${saldoAnterior}MB → ${bonusSaldos[participantIdCus].saldo}MB (+${quantidadeMB}MB)`);
                         console.log(`📝 Histórico de bônus admin atualizado (${bonusSaldos[participantIdCus].bonusAdmin.length} registros)`);
 
+                        // DEBUG: Verificar como o beneficiário pode consultar
+                        console.log(`\n🔍 === DEBUG: COMO CONSULTAR O BÔNUS ===`);
+                        console.log(`📋 Beneficiário pode consultar com qualquer formato:`);
+                        console.log(`   1. .saldo (se estiver como ${participantIdCus})`);
+                        console.log(`   2. .saldo (se estiver como ${participantIdLid})`);
+                        console.log(`   3. .saldo (se estiver como ${numeroDestino})`);
+                        console.log(`💡 Saldos salvos:`);
+                        console.log(`   - ${participantIdCus}: ${bonusSaldos[participantIdCus]?.saldo || 0}MB`);
+                        console.log(`   - ${participantIdLid}: ${bonusSaldos[participantIdLid]?.saldo || 0}MB`);
+
                         // Usar @c.us como principal para referência
                         const participantId = participantIdCus;
 
@@ -4553,7 +4611,8 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
 
             // .bonus - Ver saldo de bônus
             if (comando === '.bonus' || comando === '.saldo') {
-                const saldo = bonusSaldos[remetente];
+                console.log(`🔍 Buscando saldo para: ${remetente}`);
+                const saldo = buscarSaldoBonus(remetente);
                 
                 if (!saldo || saldo.saldo === 0) {
                     await message.reply(
@@ -4629,8 +4688,9 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                     return;
                 }
                 
-                // Verificar saldo
-                const saldo = bonusSaldos[remetente];
+                // Verificar saldo (buscar em todos os formatos)
+                console.log(`🔍 Buscando saldo para saque: ${remetente}`);
+                const saldo = buscarSaldoBonus(remetente);
                 if (!saldo || saldo.saldo < quantidadeMB) {
                     const saldoAtual = saldo ? saldo.saldo : 0;
                     await message.reply(
@@ -4667,14 +4727,16 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                 
                 // Salvar pedido
                 pedidosSaque[referenciaSaque] = pedido;
-                
-                // Debitar do saldo
-                bonusSaldos[remetente].saldo -= quantidadeMB;
-                bonusSaldos[remetente].historicoSaques = bonusSaldos[remetente].historicoSaques || [];
-                bonusSaldos[remetente].historicoSaques.push({
-                    referencia: referenciaSaque,
-                    quantidade: quantidadeMB,
-                    data: agora.toISOString()
+
+                // Debitar do saldo em todos os formatos
+                atualizarSaldoBonus(remetente, (saldoObj) => {
+                    saldoObj.saldo -= quantidadeMB;
+                    saldoObj.historicoSaques = saldoObj.historicoSaques || [];
+                    saldoObj.historicoSaques.push({
+                        referencia: referenciaSaque,
+                        quantidade: quantidadeMB,
+                        data: agora.toISOString()
+                    });
                 });
 
                 // Salvar dados após criar saque
@@ -4688,7 +4750,8 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                 }
                 
                 const quantidadeFormatada = quantidadeMB >= 1024 ? `${(quantidadeMB/1024).toFixed(2)}GB` : `${quantidadeMB}MB`;
-                const novoSaldo = bonusSaldos[remetente].saldo;
+                const saldoAtualizado = buscarSaldoBonus(remetente);
+                const novoSaldo = saldoAtualizado ? saldoAtualizado.saldo : 0;
                 
                 await message.reply(
                     `✅ *SOLICITAÇÃO DE SAQUE CRIADA*\n\n` +
