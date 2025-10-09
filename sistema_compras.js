@@ -666,17 +666,32 @@ class SistemaCompras {
 
     // === COMANDOS ADMINISTRATIVOS ===
     async obterRankingCompletoGrupo(grupoId) {
-        if (!grupoId || !this.rankingPorGrupo[grupoId]) {
+        if (!grupoId) {
+            console.log('❌ RANKING: grupoId não fornecido');
             return [];
         }
-        
+
+        // Atualizar ranking se não existir
+        if (!this.rankingPorGrupo[grupoId]) {
+            console.log(`🔄 RANKING: Atualizando ranking do grupo ${grupoId}`);
+            await this.atualizarRankingGrupo(grupoId);
+        }
+
+        // Verificar novamente após atualização
+        if (!this.rankingPorGrupo[grupoId] || this.rankingPorGrupo[grupoId].length === 0) {
+            console.log(`📊 RANKING: Nenhum comprador no grupo ${grupoId}`);
+            return [];
+        }
+
+        console.log(`📊 RANKING: Retornando ${this.rankingPorGrupo[grupoId].length} compradores`);
+
         // Retornar todos os compradores ordenados por megas do grupo
         return this.rankingPorGrupo[grupoId].map(item => ({
             numero: item.numero,
             posicao: item.posicao,
-            megas: item.megas,
-            compras: item.compras,
-            megasTotal: item.megasTotal
+            megas: item.megas || 0,
+            compras: item.compras || 0,
+            megasTotal: item.megasTotal || 0
         }));
     }
 

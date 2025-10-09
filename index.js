@@ -3092,9 +3092,14 @@ async function processMessage(message) {
                 if (comando === '.ranking') {
                     try {
                         const ranking = await sistemaCompras.obterRankingCompletoGrupo(message.from);
-                        
-                        if (ranking.length === 0) {
-                            await message.reply(`📊 *RANKING DE COMPRADORES*\n━━━━━━━━━━━━━━━━━━━━━━━\n\n🚫 Nenhum comprador registrado hoje.`);
+
+                        console.log(`📊 DEBUG RANKING: Recebeu ${ranking ? ranking.length : 0} itens`);
+                        if (ranking && ranking.length > 0) {
+                            console.log(`📊 DEBUG RANKING: Primeiro item:`, JSON.stringify(ranking[0]));
+                        }
+
+                        if (!ranking || ranking.length === 0) {
+                            await message.reply(`📊 *RANKING DE COMPRADORES*\n━━━━━━━━━━━━━━━━━━━━━━━\n\n🚫 Nenhum comprador registrado no grupo.`);
                             return;
                         }
                         
@@ -3150,10 +3155,25 @@ async function processMessage(message) {
                                 mentions.push(participantId);
                             }
                         }
-                        
+
                         mensagem += `🏆 *Total de compradores no grupo: ${ranking.length}*`;
-                        
-                        await client.sendMessage(message.from, mensagem, { mentions: mentions });
+
+                        // Validar e limpar array de mentions
+                        const mentionsValidos = mentions.filter(id => {
+                            if (!id || typeof id !== 'string') {
+                                console.log(`⚠️ Mention inválido (não é string):`, id);
+                                return false;
+                            }
+                            if (!id.includes('@c.us')) {
+                                console.log(`⚠️ Mention sem @c.us:`, id);
+                                return false;
+                            }
+                            return true;
+                        });
+
+                        console.log(`📊 Ranking: ${ranking.length} compradores, ${mentionsValidos.length} mentions válidos`);
+
+                        await client.sendMessage(message.from, mensagem, { mentions: mentionsValidos });
                         return;
                     } catch (error) {
                         console.error('❌ Erro ao obter ranking:', error);
