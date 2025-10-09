@@ -3187,61 +3187,83 @@ async function processMessage(message) {
                     }
                 }
                 
-                // .inativos - Mostrar compradores inativos (mais de 10 dias sem comprar)
+                // .inativos - Mostrar membros do grupo que NUNCA compraram
                 if (comando === '.inativos') {
                     try {
-                        const inativos = await sistemaCompras.obterInativos();
-                        
-                        if (inativos.length === 0) {
-                            await message.reply(`😴 *COMPRADORES INATIVOS*\n━━━━━━━━━━━━━━━━━━━━━━━\n\n🎉 Todos os compradores estão ativos!\nNinguém está há mais de 10 dias sem comprar.`);
+                        // Obter todos os participantes do grupo
+                        const chat = await message.getChat();
+                        const participantes = chat.participants || [];
+
+                        console.log(`👥 Total de participantes no grupo: ${participantes.length}`);
+
+                        // Obter lista de compradores do grupo
+                        const compradores = await sistemaCompras.obterRankingCompletoGrupo(message.from);
+                        const compradoresSet = new Set(compradores.map(c => c.numero));
+
+                        console.log(`🛒 Total de compradores: ${compradores.length}`);
+
+                        // Filtrar participantes que nunca compraram
+                        const nuncaCompraram = participantes
+                            .map(p => p.id._serialized)
+                            .filter(id => !compradoresSet.has(id));
+
+                        console.log(`🚫 Membros que nunca compraram: ${nuncaCompraram.length}`);
+
+                        if (nuncaCompraram.length === 0) {
+                            await message.reply(`🎉 *MEMBROS QUE NUNCA COMPRARAM*\n━━━━━━━━━━━━━━━━━━━━━━━\n\n✅ Todos os membros do grupo já fizeram pelo menos uma compra!`);
                             return;
                         }
-                        
-                        let mensagem = `😴 *COMPRADORES INATIVOS*\n━━━━━━━━━━━━━━━━━━━━━━━\n`;
-                        mensagem += `⏰ Mais de 10 dias sem comprar\n\n`;
-                        let mentions = [];
-                        
-                        for (let i = 0; i < Math.min(inativos.length, 20); i++) {
-                            const item = inativos[i];
-                            // COPIAR EXATAMENTE A LÓGICA DAS BOAS-VINDAS - SEM CONVERSÃO
-                            const participantId = item.numero; // Usar número exatamente como está salvo
 
-                            // Obter informações do contato
+                        let mensagem = `🚫 *MEMBROS QUE NUNCA COMPRARAM*\n━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                        mensagem += `📊 Total: ${nuncaCompraram.length} membros\n\n`;
+                        let mentions = [];
+
+                        // Limitar a 50 membros para não sobrecarregar a mensagem
+                        const limite = Math.min(nuncaCompraram.length, 50);
+
+                        for (let i = 0; i < limite; i++) {
+                            const participantId = nuncaCompraram[i];
+
+                            // Validar ID
+                            if (!participantId || participantId.startsWith('SAQUE_BONUS_')) {
+                                continue;
+                            }
+
                             try {
                                 const contact = await client.getContactById(participantId);
-                                
-                                // Prioridade: nome salvo > nome do perfil > número
-                                const nomeExibicao = contact.name || contact.pushname || item.numero;
-                                const numeroLimpo = contact.id.user; // Número sem @ e sem +
-                                
-                                const totalFormatado = item.megasTotal >= 1024 ? 
-                                    `${(item.megasTotal/1024).toFixed(1)}GB` : `${item.megasTotal}MB`;
-                                
-                                mensagem += `👤 @${participantId.replace('@c.us', '')}\n`;
-                                mensagem += `   ⏰ ${item.diasSemComprar} dias sem comprar\n`;
-                                mensagem += `   📊 Total: ${item.totalCompras}x compras (${totalFormatado})\n\n`;
-                                
+                                const nomeExibicao = contact.name || contact.pushname || 'Membro';
+
+                                // Formatar o ID para menção (remover @c.us ou @lid)
+                                const mentionId = String(participantId).replace('@c.us', '').replace('@lid', '');
+
+                                mensagem += `${i + 1}. @${mentionId}\n`;
+
                                 mentions.push(participantId);
                             } catch (error) {
-                                // Se não conseguir obter o contato, usar apenas o número
-                                const totalFormatado = item.megasTotal >= 1024 ? 
-                                    `${(item.megasTotal/1024).toFixed(1)}GB` : `${item.megasTotal}MB`;
-                                
-                                mensagem += `👤 @${participantId.replace('@c.us', '')}\n`;
-                                mensagem += `   ⏰ ${item.diasSemComprar} dias sem comprar\n`;
-                                mensagem += `   📊 Total: ${item.totalCompras}x compras (${totalFormatado})\n\n`;
-                                
+                                // Se não conseguir obter o contato, adicionar mesmo assim
+                                const mentionId = String(participantId).replace('@c.us', '').replace('@lid', '');
+                                mensagem += `${i + 1}. @${mentionId}\n`;
                                 mentions.push(participantId);
                             }
                         }
-                        
-                        if (inativos.length > 20) {
-                            mensagem += `... e mais ${inativos.length - 20} compradores inativos\n\n`;
+
+                        if (nuncaCompraram.length > limite) {
+                            mensagem += `\n... e mais ${nuncaCompraram.length - limite} membros\n`;
                         }
-                        
-                        mensagem += `😴 *Total de inativos: ${inativos.length}*`;
-                        
-                        await client.sendMessage(message.from, mensagem, { mentions: mentions });
+
+                        mensagem += `\n🚫 *Total: ${nuncaCompraram.length} membros que nunca compraram*`;
+
+                        // Validar mentions (aceitar @lid e @c.us)
+                        const mentionsValidos = mentions.filter(id => {
+                            if (!id || typeof id !== 'string') return false;
+                            if (id.startsWith('SAQUE_BONUS_')) return false;
+                            if (!id.includes('@lid') && !id.includes('@c.us')) return false;
+                            return true;
+                        });
+
+                        console.log(`🚫 Inativos: ${nuncaCompraram.length} membros, ${mentionsValidos.length} mentions válidos`);
+
+                        await client.sendMessage(message.from, mensagem, { mentions: mentionsValidos });
                         return;
                     } catch (error) {
                         console.error('❌ Erro ao obter inativos:', error);
