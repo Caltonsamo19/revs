@@ -523,14 +523,14 @@ class SistemaCompras {
         try {
             if (!grupoId) return;
             
-            // Criar array de ranking ordenado por megas do grupo
+            // Criar array de ranking ordenado por megas do grupo (TODOS os compradores registrados)
             const rankingGrupo = Object.entries(this.historicoCompradores)
-                .filter(([numero, dados]) => dados && dados.grupos && dados.grupos[grupoId] && dados.grupos[grupoId].megas > 0)
+                .filter(([numero, dados]) => dados && dados.grupos && dados.grupos[grupoId])
                 .map(([numero, dados]) => ({
                     numero: numero,
-                    megas: dados.grupos[grupoId].megas,
-                    compras: dados.grupos[grupoId].compras,
-                    megasTotal: dados.megasTotal
+                    megas: dados.grupos[grupoId].megas || 0,
+                    compras: dados.grupos[grupoId].compras || 0,
+                    megasTotal: dados.megasTotal || 0
                 }))
                 .sort((a, b) => b.megas - a.megas)
                 .map((item, index) => ({
