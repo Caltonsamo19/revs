@@ -2632,11 +2632,34 @@ client.on('group-join', async (notification) => {
 // === HANDLERS SEPARADOS POR TIPO DE COMANDO ===
 async function handleAdminCommands(message) {
     const autorMensagem = message.author || message.from;
-    const isAdmin = isAdministrador(autorMensagem);
-
-    if (!isAdmin) return false;
-
     const comando = message.body.toLowerCase().trim();
+
+    // Comando .souadmin - QUALQUER pessoa pode usar para verificar se é admin
+    if (comando === '.souadmin') {
+        const isAdmin = isAdministrador(autorMensagem);
+        const contato = await message.getContact();
+        const nome = contato.pushname || contato.name || 'Você';
+
+        let resposta = `🔍 *VERIFICAÇÃO DE ADMINISTRADOR*\n━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        resposta += `👤 Nome: ${nome}\n`;
+        resposta += `📱 ID: ${autorMensagem}\n`;
+        resposta += `👑 Admin: ${isAdmin ? '✅ SIM' : '❌ NÃO'}\n\n`;
+
+        if (autorMensagem.includes('@lid')) {
+            resposta += `ℹ️ Seu ID é do tipo @lid\n`;
+            if (MAPEAMENTO_IDS[autorMensagem]) {
+                resposta += `🔄 Mapeado para: ${MAPEAMENTO_IDS[autorMensagem]}\n`;
+            } else {
+                resposta += `⚠️ Não há mapeamento @lid para seu ID\n`;
+            }
+        }
+
+        await message.reply(resposta);
+        return true;
+    }
+
+    const isAdmin = isAdministrador(autorMensagem);
+    if (!isAdmin) return false;
 
     // Comandos administrativos rápidos
     if (comando === '.ia') {
