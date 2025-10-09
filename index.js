@@ -3201,11 +3201,23 @@ async function processMessage(message) {
                         const compradoresSet = new Set(compradores.map(c => c.numero));
 
                         console.log(`🛒 Total de compradores: ${compradores.length}`);
+                        console.log(`🛒 Compradores IDs (primeiros 5):`, Array.from(compradoresSet).slice(0, 5));
 
-                        // Filtrar participantes que nunca compraram
-                        const nuncaCompraram = participantes
-                            .map(p => p.id._serialized)
-                            .filter(id => !compradoresSet.has(id));
+                        // Obter IDs dos participantes
+                        const participantesIds = participantes.map(p => p.id._serialized);
+                        console.log(`👥 Participantes IDs (primeiros 5):`, participantesIds.slice(0, 5));
+
+                        // Filtrar participantes que nunca compraram (não estão no Set de compradores)
+                        const nuncaCompraram = participantesIds.filter(id => {
+                            // Verificar se o ID está no set de compradores
+                            const isComprador = compradoresSet.has(id);
+
+                            if (!isComprador) {
+                                console.log(`✅ ${id} nunca comprou`);
+                            }
+
+                            return !isComprador;
+                        });
 
                         console.log(`🚫 Membros que nunca compraram: ${nuncaCompraram.length}`);
 
