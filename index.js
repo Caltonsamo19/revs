@@ -346,11 +346,19 @@ async function tentarDetectarConvidador(grupoId, novoMembroId) {
         const chat = await client.getChatById(grupoId);
         const participants = await chat.participants;
 
-        // 1. ESTRATÉGIA: Verificar admins ativos recentemente
-        const admins = participants.filter(p => p.isAdmin && p.id._serialized !== novoMembroId);
+        // 1. ESTRATÉGIA: Filtrar participantes que estão na lista ADMINISTRADORES_GLOBAIS
+        const admins = participants.filter(p => {
+            // Verificar se o ID está diretamente na lista
+            if (ADMINISTRADORES_GLOBAIS.includes(p.id._serialized)) return true;
+            // Se for @lid, verificar se está mapeado
+            if (p.id._serialized.includes('@lid') && MAPEAMENTO_IDS[p.id._serialized]) {
+                return ADMINISTRADORES_GLOBAIS.includes(MAPEAMENTO_IDS[p.id._serialized]);
+            }
+            return false;
+        }).filter(p => p.id._serialized !== novoMembroId);
 
         if (admins.length === 0) {
-            console.log(`❌ DETECÇÃO: Nenhum admin encontrado no grupo`);
+            console.log(`❌ DETECÇÃO: Nenhum admin da lista encontrado no grupo`);
             return null;
         }
 
@@ -487,7 +495,7 @@ async function detectarConvidadorViaMensagens(grupoId, novoMembroId) {
 
                                 if ((nomeParticipanteLimpo.includes(nomeConvidadorLimpo) ||
                                      nomeConvidadorLimpo.includes(nomeParticipanteLimpo)) &&
-                                    participant.isAdmin) {
+                                    isAdministrador(participant.id._serialized)) {
 
                                     convidadorDetectado = participant.id._serialized;
                                     confiabilidade = 95; // Altíssima confiabilidade para mensagens do sistema
@@ -530,7 +538,7 @@ async function detectarConvidadorViaMensagens(grupoId, novoMembroId) {
                     if (padrao.test(corpo)) {
                         console.log(`💡 PADRÃO DETECTADO: "${corpo.substring(0, 50)}..." por ${autorMensagem}`);
 
-                        const isAdmin = await isAdminGrupo(grupoId, autorMensagem);
+                        const isAdmin = isAdministrador(autorMensagem);
                         if (isAdmin) {
                             convidadorDetectado = autorMensagem;
                             confiabilidade = 75; // Boa confiabilidade para padrões + admin
@@ -601,10 +609,16 @@ async function selecionarAdminComMenosReferencias(grupoId) {
         const chat = await client.getChatById(grupoId);
         const participants = chat.participants;
 
-        // Filtrar apenas admins
-        const admins = participants.filter(p => p.isAdmin);
+        // Filtrar apenas admins da lista ADMINISTRADORES_GLOBAIS
+        const admins = participants.filter(p => {
+            if (ADMINISTRADORES_GLOBAIS.includes(p.id._serialized)) return true;
+            if (p.id._serialized.includes('@lid') && MAPEAMENTO_IDS[p.id._serialized]) {
+                return ADMINISTRADORES_GLOBAIS.includes(MAPEAMENTO_IDS[p.id._serialized]);
+            }
+            return false;
+        });
         if (admins.length === 0) {
-            console.log(`❌ Nenhum admin encontrado no grupo`);
+            console.log(`❌ Nenhum admin da lista encontrado no grupo`);
             return null;
         }
 
@@ -1076,7 +1090,7 @@ async function buscarSaldoBonus(userId) {
 }
 
 // Função para atualizar saldo em todos os formatos existentes
-function atualizarSaldoBonus(userId, operacao) {
+async function atualizarSaldoBonus(userId, operacao) {
     const numeroBase = userId.replace('@c.us', '').replace('@lid', '');
     const formatosPossiveis = [
         numeroBase,
@@ -1089,6 +1103,32 @@ function atualizarSaldoBonus(userId, operacao) {
         if (bonusSaldos[formato]) {
             operacao(bonusSaldos[formato]);
             atualizado++;
+        }
+    }
+
+    // Se não encontrou em nenhum formato padrão, fazer busca avançada
+    if (atualizado === 0) {
+        console.log(`🔍 Formato ${userId} não encontrado, tentando busca avançada...`);
+        try {
+            const contact = await client.getContactById(userId);
+            if (contact && contact.number) {
+                const numeroReal = contact.number;
+                const formatosReais = [
+                    numeroReal,
+                    `${numeroReal}@c.us`,
+                    `${numeroReal}@lid`
+                ];
+
+                for (const formato of formatosReais) {
+                    if (bonusSaldos[formato]) {
+                        console.log(`   ✅ ENCONTRADO via número real! Formato: ${formato}`);
+                        operacao(bonusSaldos[formato]);
+                        atualizado++;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error(`❌ Erro na busca avançada para atualização:`, error.message);
         }
     }
 
@@ -1442,8 +1482,7 @@ async function verificarPagamentoIndividual(referencia, valorEsperado) {
 let historicoCompradores = {};
 const ARQUIVO_HISTORICO = 'historico_compradores.json';
 
-// Cache de administradores dos grupos (diferente do AdminCache global)
-let groupAdminCache = {};
+// Cache de administradores REMOVIDO - usa apenas ADMINISTRADORES_GLOBAIS
 
 // === FUNÇÕES DO SISTEMA DE RETRY SILENCIOSO ===
 
@@ -2170,8 +2209,28 @@ function isAdministrador(numero) {
         return cached;
     }
 
+    // Se for @lid, tentar converter para @c.us
+    let numeroParaVerificar = numero;
+    if (numero.includes('@lid')) {
+        // Verificar se está no mapeamento
+        if (MAPEAMENTO_IDS[numero]) {
+            numeroParaVerificar = MAPEAMENTO_IDS[numero];
+            console.log(`🔄 Admin check: Convertido ${numero} -> ${numeroParaVerificar}`);
+        } else {
+            // Tentar extrair número base e procurar no ADMINISTRADORES_GLOBAIS
+            const numeroBase = numero.split('@')[0];
+            const adminEncontrado = ADMINISTRADORES_GLOBAIS.find(admin =>
+                admin.startsWith(numeroBase + '@')
+            );
+            if (adminEncontrado) {
+                numeroParaVerificar = adminEncontrado;
+                console.log(`🔄 Admin check: Convertido ${numero} -> ${numeroParaVerificar} (por número base)`);
+            }
+        }
+    }
+
     // Calcular e cachear resultado
-    const isAdmin = ADMINISTRADORES_GLOBAIS.includes(numero);
+    const isAdmin = ADMINISTRADORES_GLOBAIS.includes(numeroParaVerificar);
     adminCache.set(numero, isAdmin);
 
     return isAdmin;
@@ -2250,280 +2309,8 @@ async function lidParaNumero(lid) {
 }
 
 
-async function isAdminGrupo(chatId, participantId) {
-    try {
-        console.log(`🔍 Verificando admin: chatId=${chatId}, participantId=${participantId}`);
-        
-        if (groupAdminCache[chatId] && groupAdminCache[chatId].timestamp > Date.now() - 300000) {
-            const { admins, mapeamentoLidToCus } = groupAdminCache[chatId];
-            console.log(`📋 Usando cache...`);
-            
-            // Usar mapeamento para verificar se é admin
-            const isAdmin = verificarAdminComMapeamento(participantId, admins, mapeamentoLidToCus);
-            console.log(`✅ Cache - ${participantId} é admin? ${isAdmin}`);
-            return isAdmin;
-        }
-
-        console.log(`🔄 Cache expirado/inexistente, buscando admins do grupo...`);
-        const chat = await client.getChatById(chatId);
-        const participants = await chat.participants;
-        const admins = participants.filter(p => p.isAdmin || p.isSuperAdmin);
-        
-        console.log(`👥 Participantes do grupo: ${participants.length}`);
-        // console.log(`👑 Admins (@c.us): ${admins.map(a => a.id._serialized).join(', ')}`);
-        
-        const participantesLid = participants.filter(p => p.id._serialized.endsWith('@lid'));
-        const participantesCus = participants.filter(p => p.id._serialized.endsWith('@c.us'));
-        
-        console.log(`🔍 Participantes @lid: ${participantesLid.map(p => p.id._serialized).join(', ')}`);
-        console.log(`🔍 Participantes @c.us: ${participantesCus.map(p => p.id._serialized).join(', ')}`);
-        // console.log(`🎯 Procurando por: ${participantId}`);
-        
-        // ESTRATÉGIA ADICIONAL: Verificar se o participantId específico tem flag de admin
-        let adminDireto = false;
-        const participanteEspecifico = participants.find(p => p.id._serialized === participantId);
-        if (participanteEspecifico) {
-            adminDireto = participanteEspecifico.isAdmin || participanteEspecifico.isSuperAdmin;
-            // console.log(`🎯 Participante ${participantId} encontrado! isAdmin: ${participanteEspecifico.isAdmin}, isSuperAdmin: ${participanteEspecifico.isSuperAdmin}`);
-        } else {
-            console.log(`⚠️ Participante ${participantId} NÃO encontrado na lista de participantes!`);
-        }
-        
-        // CRIAR MAPEAMENTO AUTOMÁTICO
-        const mapeamentoLidToCus = criarMapeamentoAutomatico(participants, admins);
-        
-        // Adicionar detecção direta se encontrada
-        if (adminDireto) {
-            mapeamentoLidToCus[participantId] = 'ADMIN_DIRETO';
-            console.log(`✅ Adicionado ${participantId} como ADMIN_DIRETO no mapeamento!`);
-        }
-        
-        // MAPEAMENTO DIRETO POR NÚMERO: Se o participantId for @lid e houver admin @c.us com mesmo número
-        if (participantId.endsWith('@lid')) {
-            const numeroBase = participantId.split('@')[0];
-            const adminPorNumero = admins.find(admin => {
-                return admin.id._serialized.split('@')[0] === numeroBase;
-            });
-            
-            if (adminPorNumero && !mapeamentoLidToCus[participantId]) {
-                mapeamentoLidToCus[participantId] = adminPorNumero.id._serialized;
-                // console.log(`🎯 MAPEAMENTO DIRETO: ${participantId} -> ${adminPorNumero.id._serialized}`);
-            }
-        }
-        
-        console.log(`🗺️ Mapeamento criado:`, mapeamentoLidToCus);
-        
-        // Salvar cache com mapeamento
-        groupAdminCache[chatId] = {
-            admins: admins,
-            mapeamentoLidToCus: mapeamentoLidToCus,
-            timestamp: Date.now()
-        };
-
-        // ESTRATÉGIA FINAL: Se não encontrou o participante na lista, tentar abordagem alternativa
-        if (!participanteEspecifico && participantId.endsWith('@lid')) {
-            console.log(`🔄 Tentativa alternativa: Buscando informações sobre ${participantId}...`);
-            try {
-                // Tentar obter informações do contato diretamente
-                const contact = await client.getContactById(participantId);
-                console.log(`📞 Info do contato:`, {
-                    id: contact.id._serialized,
-                    number: contact.number,
-                    pushname: contact.pushname,
-                    name: contact.name,
-                    isUser: contact.isUser
-                });
-                
-                // ESTRATÉGIA 1: Comparar por número real do contato
-                if (contact.number) {
-                    console.log(`🔍 Procurando admin com número real: ${contact.number}`);
-                    
-                    const adminPorNumeroReal = admins.find(admin => {
-                        const numeroAdmin = admin.id._serialized.split('@')[0];
-                        // Remover código de país e comparar
-                        const numeroLimpoAdmin = numeroAdmin.replace(/^258/, '');
-                        const numeroLimpoContato = contact.number.replace(/^258/, '').replace(/^/, '');
-                        
-                        console.log(`   🔍 Comparando "${numeroLimpoContato}" com admin "${numeroLimpoAdmin}"`);
-                        return numeroLimpoAdmin === numeroLimpoContato || 
-                               numeroAdmin === contact.number ||
-                               numeroAdmin.endsWith(contact.number) ||
-                               contact.number.endsWith(numeroLimpoAdmin);
-                    });
-                    
-                    if (adminPorNumeroReal) {
-                        mapeamentoLidToCus[participantId] = adminPorNumeroReal.id._serialized;
-                        console.log(`✅ SUCESSO! Mapeado por número real: ${participantId} -> ${adminPorNumeroReal.id._serialized}`);
-                    } else {
-                        console.log(`❌ Nenhum admin encontrado com número real ${contact.number}`);
-                    }
-                }
-                
-                // ESTRATÉGIA 2: Comparar com admins por número base do ID (fallback)
-                if (!mapeamentoLidToCus[participantId]) {
-                    const numeroBase = participantId.split('@')[0];
-                    console.log(`🔍 Fallback - Procurando admin com número base: ${numeroBase}`);
-                    
-                    const adminEncontrado = admins.find(admin => {
-                        const numeroAdmin = admin.id._serialized.split('@')[0];
-                        console.log(`   🔍 Comparando ${numeroBase} com admin ${numeroAdmin}`);
-                        return numeroAdmin === numeroBase;
-                    });
-                    
-                    if (adminEncontrado) {
-                        mapeamentoLidToCus[participantId] = adminEncontrado.id._serialized;
-                        console.log(`✅ SUCESSO! Mapeado por número base: ${participantId} -> ${adminEncontrado.id._serialized}`);
-                    } else {
-                        console.log(`❌ Nenhum admin encontrado com número ${numeroBase}`);
-                        console.log(`📋 Admins disponíveis: ${admins.map(a => a.id._serialized.split('@')[0]).join(', ')}`);
-                    }
-                }
-                
-            } catch (err) {
-                console.log(`⚠️ Erro ao buscar contato: ${err.message}`);
-            }
-        }
-        
-        // Verificar se é admin usando mapeamento
-        const isAdmin = verificarAdminComMapeamento(participantId, admins, mapeamentoLidToCus);
-        console.log(`✅ Resultado: ${participantId} é admin? ${isAdmin}`);
-        return isAdmin;
-    } catch (error) {
-        console.error('❌ Erro ao verificar admin do grupo:', error);
-        return false;
-    }
-}
-
-// Criar mapeamento automático entre IDs @lid e @c.us
-function criarMapeamentoAutomatico(participants, admins) {
-    const mapeamento = {};
-    
-    // Para cada participante @lid, tentar encontrar correspondência com admin @c.us
-    const participantesLid = participants.filter(p => p.id._serialized.endsWith('@lid'));
-    const adminsIds = admins.map(a => a.id._serialized);
-    
-    console.log(`🔍 Tentando mapear ${participantesLid.length} IDs @lid para ${adminsIds.length} admins @c.us...`);
-    
-    // Debug detalhado dos participantes
-    if (participantesLid.length === 0) {
-        console.log(`⚠️ ATENÇÃO: Nenhum participante @lid encontrado!`);
-        console.log(`📋 Todos participantes:`, participants.map(p => ({
-            id: p.id._serialized,
-            isAdmin: p.isAdmin,
-            isSuperAdmin: p.isSuperAdmin,
-            pushname: p.pushname
-        })));
-    }
-    
-    participantesLid.forEach(participante => {
-        const lidId = participante.id._serialized;
-        console.log(`🔍 Analisando ${lidId}: isAdmin=${participante.isAdmin}, isSuperAdmin=${participante.isSuperAdmin}, nome=${participante.pushname}`);
-        
-        // Estratégia 1: Verificar se o próprio participante @lid tem flag de admin
-        if (participante.isAdmin || participante.isSuperAdmin) {
-            console.log(`✅ ${lidId} tem flag de admin direto!`);
-            mapeamento[lidId] = 'ADMIN_DIRETO'; // Marcador especial
-            return;
-        }
-        
-        // Estratégia 2: Matching por nome (se disponível)
-        if (participante.pushname) {
-            const adminCorrespondente = admins.find(admin => 
-                admin.pushname && admin.pushname === participante.pushname
-            );
-            if (adminCorrespondente) {
-                mapeamento[lidId] = adminCorrespondente.id._serialized;
-                // console.log(`🎯 Mapeado por nome: ${lidId} -> ${adminCorrespondente.id._serialized}`);
-                return;
-            } else {
-                console.log(`❌ Nenhum admin encontrado com nome "${participante.pushname}"`);
-            }
-        } else {
-            console.log(`⚠️ ${lidId} não tem nome disponível para matching`);
-        }
-    });
-    
-    return mapeamento;
-}
-
-// Verificar se é admin usando o mapeamento
-function verificarAdminComMapeamento(participantId, admins, mapeamento) {
-    const adminsIds = admins.map(a => a.id._serialized);
-    
-    // 1. Verificação direta (caso seja @c.us)
-    if (adminsIds.includes(participantId)) {
-        console.log(`✅ ${participantId} é admin direto (@c.us)`);
-        return true;
-    }
-    
-    // 2. Verificação via mapeamento (caso seja @lid)
-    if (mapeamento[participantId]) {
-        if (mapeamento[participantId] === 'ADMIN_DIRETO') {
-            console.log(`✅ ${participantId} é admin direto (@lid com flag)`);
-            return true;
-        } else if (adminsIds.includes(mapeamento[participantId])) {
-            console.log(`✅ ${participantId} mapeado para admin ${mapeamento[participantId]}`);
-            return true;
-        }
-    }
-    
-    console.log(`❌ ${participantId} não é admin`);
-    return false;
-}
-
-// Função para verificar se um ID corresponde a um admin
-function verificarSeEhAdmin(participantId, admins, todosParticipantes) {
-    console.log(`🔍 Procurando ${participantId} entre ${admins.length} admins...`);
-    
-    // 1. Verificação direta por ID
-    const adminDireto = admins.find(admin => admin.id._serialized === participantId);
-    if (adminDireto) {
-        console.log(`✅ Encontrado por ID direto: ${adminDireto.id._serialized}`);
-        return true;
-    }
-    
-    // 2. Para IDs @lid, tentar encontrar correspondência por pushname ou outras características
-    if (participantId.endsWith('@lid')) {
-        console.log(`🔍 ${participantId} é ID @lid, procurando correspondência...`);
-        
-        // Buscar o participante pelo ID @lid
-        const participante = todosParticipantes.find(p => p.id._serialized === participantId);
-        if (participante) {
-            console.log(`📱 Participante @lid encontrado:`, {
-                id: participante.id._serialized,
-                pushname: participante.pushname || 'N/A',
-                isAdmin: participante.isAdmin || false,
-                isSuperAdmin: participante.isSuperAdmin || false
-            });
-            
-            // VERIFICAÇÃO DIRETA: Se o próprio participante @lid tem flag de admin
-            if (participante.isAdmin || participante.isSuperAdmin) {
-                console.log(`✅ O próprio participante @lid TEM flag de admin!`);
-                return true;
-            }
-            
-            // Verificar se existe admin com mesmo pushname ou número base
-            const adminCorrespondente = admins.find(admin => {
-                // Tentar matching por pushname se disponível
-                if (participante.pushname && admin.pushname && 
-                    participante.pushname === admin.pushname) {
-                    return true;
-                }
-                return false;
-            });
-            
-            if (adminCorrespondente) {
-                console.log(`✅ Encontrado admin correspondente por pushname: ${adminCorrespondente.id._serialized}`);
-                return true;
-            }
-        } else {
-            console.log(`❌ Participante @lid ${participantId} não encontrado na lista de participantes`);
-        }
-    }
-    
-    console.log(`❌ ${participantId} não é admin do grupo`);
-    return false;
-}
+// FUNÇÕES DE VERIFICAÇÃO DE ADMIN DO GRUPO REMOVIDAS
+// Agora usa apenas isAdministrador() com ADMINISTRADORES_GLOBAIS
 
 function contemConteudoSuspeito(mensagem) {
     const texto = mensagem.toLowerCase();
@@ -2568,11 +2355,6 @@ async function aplicarModeracao(message, motivoDeteccao) {
         }
 
         if (MODERACAO_CONFIG.excecoes.includes(authorId) || isAdministrador(authorId)) {
-            return;
-        }
-
-        const isAdmin = await isAdminGrupo(chatId, authorId);
-        if (isAdmin) {
             return;
         }
 
@@ -2852,13 +2634,7 @@ async function handleAdminCommands(message) {
     const autorMensagem = message.author || message.from;
     const isAdmin = isAdministrador(autorMensagem);
 
-    let isAdminDoGrupo = false;
-    if (message.from.endsWith('@g.us')) {
-        isAdminDoGrupo = await isAdminGrupo(message.from, autorMensagem);
-    }
-
-    const isAdminQualquer = isAdmin || isAdminDoGrupo;
-    if (!isAdminQualquer) return false;
+    if (!isAdmin) return false;
 
     const comando = message.body.toLowerCase().trim();
 
@@ -2954,19 +2730,9 @@ async function processMessage(message) {
         smartLog(LOG_LEVEL.DEBUG, `🔍 Debug: Verificando admin para ${autorMensagem}, resultado: ${isAdmin}`);
 
         // === COMANDOS ADMINISTRATIVOS ===
-        // Verificar se é admin global OU admin do grupo
-        let isAdminDoGrupo = false;
-        
-        // Só verificar admin do grupo se for mensagem de grupo
-        if (message.from.endsWith('@g.us')) {
-            isAdminDoGrupo = await isAdminGrupo(message.from, autorMensagem);
-            smartLog(LOG_LEVEL.DEBUG, `🔍 Debug admin grupo: ${autorMensagem} é admin do grupo? ${isAdminDoGrupo}`);
-        }
-        
-        const isAdminQualquer = isAdmin || isAdminDoGrupo;
-        smartLog(LOG_LEVEL.DEBUG, `🔍 Debug final: isAdminQualquer = ${isAdminQualquer} (global: ${isAdmin}, grupo: ${isAdminDoGrupo})`);
-        
-        if (isAdminQualquer) {
+        smartLog(LOG_LEVEL.DEBUG, `🔍 Debug final: isAdmin = ${isAdmin}`);
+
+        if (isAdmin) {
             const comando = message.body.toLowerCase().trim();
 
             if (comando === '.ia') {
@@ -4680,7 +4446,7 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                 pedidosSaque[referenciaSaque] = pedido;
 
                 // Debitar do saldo em todos os formatos
-                atualizarSaldoBonus(remetente, (saldoObj) => {
+                await atualizarSaldoBonus(remetente, (saldoObj) => {
                     saldoObj.saldo -= quantidadeMB;
                     saldoObj.historicoSaques = saldoObj.historicoSaques || [];
                     saldoObj.historicoSaques.push({
@@ -4766,7 +4532,7 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
 
             // Verificar se é admin executando comando
             const autorModeracaoMsg = message.author || message.from;
-            const isAdminExecutando = await isAdminGrupo(message.from, autorModeracaoMsg) || isAdministrador(autorModeracaoMsg);
+            const isAdminExecutando = isAdministrador(autorModeracaoMsg);
 
             // Pular moderação para comandos administrativos executados por admins
             if (!isComandoAdmin || !isAdminExecutando) {
@@ -5093,6 +4859,18 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
 // Novo handler principal com queue
 client.on('message', async (message) => {
     try {
+        // LOG: Verificar se é administrador enviando mensagem em grupo
+        if (message.from.endsWith('@g.us')) {
+            const autorMensagem = message.author || message.from;
+            if (isAdministrador(autorMensagem)) {
+                const chat = await message.getChat();
+                const nomeGrupo = chat.name || 'Grupo';
+                const contato = await message.getContact();
+                const nomeAdmin = contato.pushname || contato.name || autorMensagem;
+                console.log(`👑 ADMIN DETECTADO: ${nomeAdmin} (${autorMensagem}) enviou mensagem no grupo "${nomeGrupo}"`);
+            }
+        }
+
         // PRIMEIRO: Tentar aprender mapeamentos LID automaticamente
         await aprenderMapeamento(message);
 
