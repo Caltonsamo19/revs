@@ -3103,6 +3103,13 @@ async function processMessage(message) {
                         
                         for (let i = 0; i < ranking.length; i++) {
                             const item = ranking[i];
+
+                            // Validar se o item tem dados válidos
+                            if (!item || !item.numero) {
+                                console.log(`⚠️ Item inválido no ranking na posição ${i}`);
+                                continue;
+                            }
+
                             // COPIAR EXATAMENTE A LÓGICA DAS BOAS-VINDAS - SEM CONVERSÃO
                             const participantId = item.numero; // Usar número exatamente como está salvo
 
@@ -3114,25 +3121,31 @@ async function processMessage(message) {
                                 const nomeExibicao = contact.name || contact.pushname || item.numero;
 
                                 const posicaoEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${item.posicao}º`;
-                                const megasFormatados = item.megas >= 1024 ?
-                                    `${(item.megas/1024).toFixed(1)}GB` : `${item.megas}MB`;
+                                const megasFormatados = (item.megas || 0) >= 1024 ?
+                                    `${((item.megas || 0)/1024).toFixed(1)}GB` : `${item.megas || 0}MB`;
+
+                                // Formatar o ID para menção (remover @c.us se existir)
+                                const mentionId = String(participantId).replace('@c.us', '');
 
                                 // Usar exatamente o mesmo padrão das boas-vindas
-                                mensagem += `${posicaoEmoji} @${participantId.replace('@c.us', '')}\n`;
-                                mensagem += `   💾 ${megasFormatados} no grupo (${item.compras}x)\n`;
-                                mensagem += `   📊 Total: ${item.megasTotal >= 1024 ? (item.megasTotal/1024).toFixed(1)+'GB' : item.megasTotal+'MB'}\n\n`;
+                                mensagem += `${posicaoEmoji} @${mentionId}\n`;
+                                mensagem += `   💾 ${megasFormatados} no grupo (${item.compras || 0}x)\n`;
+                                mensagem += `   📊 Total: ${(item.megasTotal || 0) >= 1024 ? ((item.megasTotal || 0)/1024).toFixed(1)+'GB' : (item.megasTotal || 0)+'MB'}\n\n`;
 
                                 mentions.push(participantId);
                             } catch (error) {
                                 // Se não conseguir obter o contato, usar apenas o número com padrão das boas-vindas
                                 const posicaoEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${item.posicao}º`;
-                                const megasFormatados = item.megas >= 1024 ?
-                                    `${(item.megas/1024).toFixed(1)}GB` : `${item.megas}MB`;
+                                const megasFormatados = (item.megas || 0) >= 1024 ?
+                                    `${((item.megas || 0)/1024).toFixed(1)}GB` : `${item.megas || 0}MB`;
+
+                                // Formatar o ID para menção (remover @c.us se existir)
+                                const mentionId = String(participantId).replace('@c.us', '');
 
                                 // Usar exatamente o mesmo padrão das boas-vindas
-                                mensagem += `${posicaoEmoji} @${participantId.replace('@c.us', '')}\n`;
-                                mensagem += `   💾 ${megasFormatados} no grupo (${item.compras}x)\n`;
-                                mensagem += `   📊 Total: ${item.megasTotal >= 1024 ? (item.megasTotal/1024).toFixed(1)+'GB' : item.megasTotal+'MB'}\n\n`;
+                                mensagem += `${posicaoEmoji} @${mentionId}\n`;
+                                mensagem += `   💾 ${megasFormatados} no grupo (${item.compras || 0}x)\n`;
+                                mensagem += `   📊 Total: ${(item.megasTotal || 0) >= 1024 ? ((item.megasTotal || 0)/1024).toFixed(1)+'GB' : (item.megasTotal || 0)+'MB'}\n\n`;
 
                                 mentions.push(participantId);
                             }
