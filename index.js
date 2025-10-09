@@ -1693,6 +1693,71 @@ let gruposLogados = new Set();
 let comandosCustomizados = {};
 const ARQUIVO_COMANDOS = 'comandos_customizados.json';
 
+// === SISTEMA DE REGISTRO DE MENSAGENS ===
+let registroMensagens = {}; // { grupoId: { memberId: timestamp } }
+const ARQUIVO_REGISTRO_MENSAGENS = path.join(__dirname, 'registro_mensagens.json');
+
+// Carregar registro de mensagens
+async function carregarRegistroMensagens() {
+    try {
+        if (fs.existsSync(ARQUIVO_REGISTRO_MENSAGENS)) {
+            const data = await fs.readFile(ARQUIVO_REGISTRO_MENSAGENS, 'utf8');
+            registroMensagens = JSON.parse(data);
+            const totalGrupos = Object.keys(registroMensagens).length;
+            const totalMembros = Object.values(registroMensagens).reduce((sum, grupo) => sum + Object.keys(grupo).length, 0);
+            console.log(`📝 Registro de mensagens carregado: ${totalGrupos} grupos, ${totalMembros} membros`);
+        } else {
+            console.log(`📝 Nenhum registro de mensagens encontrado, iniciando novo`);
+            registroMensagens = {};
+        }
+    } catch (error) {
+        console.error('❌ Erro ao carregar registro de mensagens:', error.message);
+        registroMensagens = {};
+    }
+}
+
+// Salvar registro de mensagens (debounced para não salvar muito frequentemente)
+let salvarRegistroTimeout = null;
+async function salvarRegistroMensagens() {
+    // Cancelar salvamento pendente
+    if (salvarRegistroTimeout) {
+        clearTimeout(salvarRegistroTimeout);
+    }
+
+    // Agendar salvamento para daqui 30 segundos
+    salvarRegistroTimeout = setTimeout(async () => {
+        try {
+            await fs.writeFile(ARQUIVO_REGISTRO_MENSAGENS, JSON.stringify(registroMensagens, null, 2));
+            console.log(`💾 Registro de mensagens salvo`);
+        } catch (error) {
+            console.error('❌ Erro ao salvar registro de mensagens:', error.message);
+        }
+    }, 30000); // 30 segundos
+}
+
+// Registrar primeira mensagem de um membro (se ainda não foi registrada)
+function registrarPrimeiraMensagem(grupoId, membroId) {
+    if (!grupoId || !membroId) return false;
+
+    // Inicializar grupo se não existir
+    if (!registroMensagens[grupoId]) {
+        registroMensagens[grupoId] = {};
+    }
+
+    // Se já registrou, não fazer nada
+    if (registroMensagens[grupoId][membroId]) {
+        return false;
+    }
+
+    // Registrar primeira mensagem
+    registroMensagens[grupoId][membroId] = new Date().toISOString();
+
+    // Agendar salvamento
+    salvarRegistroMensagens();
+
+    return true; // Indica que foi primeira mensagem
+}
+
 // Configuração de administradores GLOBAIS
 const ADMINISTRADORES_GLOBAIS = [
     '258874100607@c.us',
@@ -2576,6 +2641,9 @@ client.on('ready', async () => {
     // Carregar mapeamentos LID salvos
     await carregarMapeamentos();
 
+    // Carregar registro de mensagens
+    await carregarRegistroMensagens();
+
     // === INICIALIZAR SISTEMA DE RELATÓRIOS ===
     try {
         global.sistemaRelatorios = new SistemaRelatorios(client, GOOGLE_SHEETS_CONFIG, PAGAMENTOS_CONFIG);
@@ -2621,7 +2689,7 @@ client.on('ready', async () => {
         console.log(`   📋 ${config.nome} (${grupoId})`);
     });
     
-    console.log('\n🔧 Comandos admin: .ia .stats .sheets .test_sheets .test_grupo .grupos_status .grupos .grupo_atual .addcomando .comandos .delcomando .test_vision .ranking .inativos .semcompra .resetranking .bonus .testreferencia .config-relatorio .list-relatorios .remove-relatorio .test-relatorio');
+    console.log('\n🔧 Comandos admin: .ia .stats .sheets .test_sheets .test_grupo .grupos_status .grupos .grupo_atual .addcomando .comandos .delcomando .test_vision .ranking .inativos .detetives .semcompra .resetranking .bonus .testreferencia .config-relatorio .list-relatorios .remove-relatorio .test-relatorio');
 
     // Monitoramento de novos membros DESATIVADO
     console.log('⏸️ Monitoramento automático de novos membros DESATIVADO');
@@ -3324,7 +3392,111 @@ async function processMessage(message) {
                         return;
                     }
                 }
-                
+
+                // .detetives - Mostrar membros que NUNCA mandaram mensagem no grupo
+                if (comando === '.detetives') {
+                    try {
+                        // Obter todos os participantes do grupo
+                        const chat = await message.getChat();
+                        const participantes = chat.participants || [];
+
+                        console.log(`👥 Total de participantes no grupo: ${participantes.length}`);
+
+                        // Obter registro de mensagens deste grupo
+                        const registroGrupo = registroMensagens[message.from] || {};
+
+                        console.log(`📝 Membros com mensagens registradas: ${Object.keys(registroGrupo).length}`);
+
+                        // Filtrar participantes que nunca mandaram mensagem
+                        const nuncaMandaram = [];
+
+                        for (const participante of participantes) {
+                            const participanteId = participante.id._serialized;
+
+                            // Verificar se está no registro
+                            if (registroGrupo[participanteId]) {
+                                console.log(`✅ ${participanteId} JÁ MANDOU MENSAGEM - filtrado`);
+                                continue;
+                            }
+
+                            // Verificar também pelo número base (caso o formato seja diferente)
+                            const numeroBase = participanteId.split('@')[0];
+                            const temNumeroBase = Object.keys(registroGrupo).some(id => id.startsWith(numeroBase));
+
+                            if (temNumeroBase) {
+                                console.log(`✅ ${participanteId} (base: ${numeroBase}) JÁ MANDOU MENSAGEM - filtrado`);
+                                continue;
+                            }
+
+                            // Nunca mandou mensagem
+                            nuncaMandaram.push(participanteId);
+                        }
+
+                        console.log(`🕵️ Membros que nunca mandaram mensagem: ${nuncaMandaram.length}`);
+
+                        if (nuncaMandaram.length === 0) {
+                            await message.reply(`🎉 *MEMBROS QUE NUNCA MANDARAM MENSAGEM*\n━━━━━━━━━━━━━━━━━━━━━━━\n\n✅ Todos os membros do grupo já mandaram pelo menos uma mensagem!`);
+                            return;
+                        }
+
+                        let mensagem = `🕵️ *MEMBROS QUE NUNCA MANDARAM MENSAGEM*\n━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                        mensagem += `📊 Total: ${nuncaMandaram.length} membros\n\n`;
+                        let mentions = [];
+
+                        // Limitar a 50 membros para não sobrecarregar a mensagem
+                        const limite = Math.min(nuncaMandaram.length, 50);
+
+                        for (let i = 0; i < limite; i++) {
+                            const participanteId = nuncaMandaram[i];
+
+                            // Validar ID
+                            if (!participanteId || participanteId.startsWith('SAQUE_BONUS_')) {
+                                continue;
+                            }
+
+                            try {
+                                const contact = await client.getContactById(participanteId);
+                                const nomeExibicao = contact.name || contact.pushname || 'Membro';
+
+                                // Formatar o ID para menção (remover @c.us ou @lid)
+                                const mentionId = String(participanteId).replace('@c.us', '').replace('@lid', '');
+
+                                mensagem += `${i + 1}. @${mentionId}\n`;
+
+                                mentions.push(participanteId);
+                            } catch (error) {
+                                // Se não conseguir obter o contato, adicionar mesmo assim
+                                const mentionId = String(participanteId).replace('@c.us', '').replace('@lid', '');
+                                mensagem += `${i + 1}. @${mentionId}\n`;
+                                mentions.push(participanteId);
+                            }
+                        }
+
+                        if (nuncaMandaram.length > limite) {
+                            mensagem += `\n... e mais ${nuncaMandaram.length - limite} membros\n`;
+                        }
+
+                        mensagem += `\n🕵️ *Total: ${nuncaMandaram.length} membros que nunca mandaram mensagem*`;
+
+                        // Validar mentions (aceitar @lid e @c.us)
+                        const mentionsValidos = mentions.filter(id => {
+                            if (!id || typeof id !== 'string') return false;
+                            if (id.startsWith('SAQUE_BONUS_')) return false;
+                            if (!id.includes('@lid') && !id.includes('@c.us')) return false;
+                            return true;
+                        });
+
+                        console.log(`🕵️ Detetives: ${nuncaMandaram.length} membros, ${mentionsValidos.length} mentions válidos`);
+
+                        await client.sendMessage(message.from, mensagem, { mentions: mentionsValidos });
+                        return;
+                    } catch (error) {
+                        console.error('❌ Erro ao obter detetives:', error);
+                        await message.reply(`❌ *ERRO*\n\nNão foi possível obter a lista de detetives.\n\n⚠️ Erro: ${error.message}`);
+                        return;
+                    }
+                }
+
                 // .semcompra - Mostrar usuários que nunca compraram
                 if (comando === '.semcompra') {
                     try {
@@ -4667,6 +4839,7 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                 message.body.startsWith('.clear_') ||
                 message.body.startsWith('.ranking') ||
                 message.body.startsWith('.inativos') ||
+                message.body.startsWith('.detetives') ||
                 message.body.startsWith('.semcompra') ||
                 message.body.startsWith('.resetranking')
             );
@@ -5014,6 +5187,12 @@ client.on('message', async (message) => {
 
         // PRIMEIRO: Tentar aprender mapeamentos LID automaticamente
         await aprenderMapeamento(message);
+
+        // Registrar primeira mensagem do membro no grupo (se for grupo)
+        if (message.from.endsWith('@g.us') && !message.fromMe) {
+            const autorMensagem = message.author || message.from;
+            registrarPrimeiraMensagem(message.from, autorMensagem);
+        }
 
         // Segundo: tentar processar comandos administrativos rápidos
         const adminProcessed = await handleAdminCommands(message);
