@@ -3129,8 +3129,8 @@ async function processMessage(message) {
                                 const megasFormatados = (item.megas || 0) >= 1024 ?
                                     `${((item.megas || 0)/1024).toFixed(1)}GB` : `${item.megas || 0}MB`;
 
-                                // Formatar o ID para menção (remover @c.us se existir)
-                                const mentionId = String(participantId).replace('@c.us', '');
+                                // Formatar o ID para menção (remover @c.us ou @lid)
+                                const mentionId = String(participantId).replace('@c.us', '').replace('@lid', '');
 
                                 // Usar exatamente o mesmo padrão das boas-vindas
                                 mensagem += `${posicaoEmoji} @${mentionId}\n`;
@@ -3144,8 +3144,8 @@ async function processMessage(message) {
                                 const megasFormatados = (item.megas || 0) >= 1024 ?
                                     `${((item.megas || 0)/1024).toFixed(1)}GB` : `${item.megas || 0}MB`;
 
-                                // Formatar o ID para menção (remover @c.us se existir)
-                                const mentionId = String(participantId).replace('@c.us', '');
+                                // Formatar o ID para menção (remover @c.us ou @lid)
+                                const mentionId = String(participantId).replace('@c.us', '').replace('@lid', '');
 
                                 // Usar exatamente o mesmo padrão das boas-vindas
                                 mensagem += `${posicaoEmoji} @${mentionId}\n`;
@@ -3158,14 +3158,19 @@ async function processMessage(message) {
 
                         mensagem += `🏆 *Total de compradores no grupo: ${ranking.length}*`;
 
-                        // Validar e limpar array de mentions
+                        // Validar e limpar array de mentions (aceitar @lid e @c.us)
                         const mentionsValidos = mentions.filter(id => {
                             if (!id || typeof id !== 'string') {
                                 console.log(`⚠️ Mention inválido (não é string):`, id);
                                 return false;
                             }
-                            if (!id.includes('@c.us')) {
-                                console.log(`⚠️ Mention sem @c.us:`, id);
+                            // Aceitar @lid e @c.us, mas não IDs genéricos do sistema
+                            if (id.startsWith('SAQUE_BONUS_')) {
+                                console.log(`⚠️ Mention ignorado (sistema):`, id);
+                                return false;
+                            }
+                            if (!id.includes('@lid') && !id.includes('@c.us')) {
+                                console.log(`⚠️ Mention sem @lid ou @c.us:`, id);
                                 return false;
                             }
                             return true;
