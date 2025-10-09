@@ -3198,25 +3198,60 @@ async function processMessage(message) {
 
                         // Obter lista de compradores do grupo
                         const compradores = await sistemaCompras.obterRankingCompletoGrupo(message.from);
-                        const compradoresSet = new Set(compradores.map(c => c.numero));
+
+                        // Criar Set com ambos os formatos (@lid e @c.us convertido)
+                        const compradoresSet = new Set();
+                        compradores.forEach(c => {
+                            compradoresSet.add(c.numero); // Adicionar o formato original (@lid)
+
+                            // Se for @lid, tentar adicionar também o formato @c.us do mapeamento
+                            if (c.numero.includes('@lid') && MAPEAMENTO_IDS[c.numero]) {
+                                compradoresSet.add(MAPEAMENTO_IDS[c.numero]);
+                            }
+
+                            // Se for @c.us, tentar encontrar o @lid correspondente
+                            if (c.numero.includes('@c.us')) {
+                                const lidCorrespondente = Object.keys(MAPEAMENTO_IDS).find(
+                                    lid => MAPEAMENTO_IDS[lid] === c.numero
+                                );
+                                if (lidCorrespondente) {
+                                    compradoresSet.add(lidCorrespondente);
+                                }
+                            }
+                        });
 
                         console.log(`🛒 Total de compradores: ${compradores.length}`);
-                        console.log(`🛒 Compradores IDs (primeiros 5):`, Array.from(compradoresSet).slice(0, 5));
+                        console.log(`🛒 Set de IDs compradores: ${compradoresSet.size} IDs`);
 
                         // Obter IDs dos participantes
                         const participantesIds = participantes.map(p => p.id._serialized);
                         console.log(`👥 Participantes IDs (primeiros 5):`, participantesIds.slice(0, 5));
 
-                        // Filtrar participantes que nunca compraram (não estão no Set de compradores)
+                        // Filtrar participantes que nunca compraram
                         const nuncaCompraram = participantesIds.filter(id => {
-                            // Verificar se o ID está no set de compradores
-                            const isComprador = compradoresSet.has(id);
-
-                            if (!isComprador) {
-                                console.log(`✅ ${id} nunca comprou`);
+                            // Verificar diretamente
+                            if (compradoresSet.has(id)) {
+                                return false; // É comprador
                             }
 
-                            return !isComprador;
+                            // Se for @c.us, verificar se existe @lid correspondente no mapeamento
+                            if (id.includes('@c.us')) {
+                                const lidCorrespondente = Object.keys(MAPEAMENTO_IDS).find(
+                                    lid => MAPEAMENTO_IDS[lid] === id
+                                );
+                                if (lidCorrespondente && compradoresSet.has(lidCorrespondente)) {
+                                    return false; // É comprador (encontrado via @lid)
+                                }
+                            }
+
+                            // Se for @lid, verificar se existe @c.us correspondente
+                            if (id.includes('@lid') && MAPEAMENTO_IDS[id]) {
+                                if (compradoresSet.has(MAPEAMENTO_IDS[id])) {
+                                    return false; // É comprador (encontrado via @c.us)
+                                }
+                            }
+
+                            return true; // Nunca comprou
                         });
 
                         console.log(`🚫 Membros que nunca compraram: ${nuncaCompraram.length}`);
