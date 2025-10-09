@@ -1769,8 +1769,12 @@ const ADMINISTRADORES_GLOBAIS = [
     '251032533737504@lid',
     '203109674577958@c.us',
     '203109674577958@lid',
-    '23450974470333@lid'   // ID interno do WhatsApp para 852118624
-    // Removido temporariamente para testar verificação de grupo: '245075749638206@lid'
+    '23450974470333@lid',   // ID interno do WhatsApp para 852118624
+    // Novos administradores adicionados:
+    '258850401416@c.us',    // +258 85 040 1416
+    '258874100607@c.us',    // +258 87 410 0607 (já existia)
+    '258858891101@c.us',    // +258 85 889 1101
+    '258865627840@c.us'     // +258 86 562 7840
 ];
 
 // Mapeamento de IDs internos (@lid) para números reais (@c.us) - SISTEMA DINÂMICO
@@ -3435,11 +3439,11 @@ async function processMessage(message) {
                         console.log(`🕵️ Membros que nunca mandaram mensagem: ${nuncaMandaram.length}`);
 
                         if (nuncaMandaram.length === 0) {
-                            await message.reply(`🎉 *MEMBROS QUE NUNCA MANDARAM MENSAGEM*\n━━━━━━━━━━━━━━━━━━━━━━━\n\n✅ Todos os membros do grupo já mandaram pelo menos uma mensagem!`);
+                            await message.reply(`🎉 *MEMBROS ESPIÕES*\n━━━━━━━━━━━━━━━━━━━━━━━\n\n✅ Não há espiões! Todos os membros do grupo já mandaram pelo menos uma mensagem!`);
                             return;
                         }
 
-                        let mensagem = `🕵️ *MEMBROS QUE NUNCA MANDARAM MENSAGEM*\n━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                        let mensagem = `🕵️ *MEMBROS ESPIÕES*\n━━━━━━━━━━━━━━━━━━━━━━━\n`;
                         mensagem += `📊 Total: ${nuncaMandaram.length} membros\n\n`;
                         let mentions = [];
 
@@ -3473,10 +3477,10 @@ async function processMessage(message) {
                         }
 
                         if (nuncaMandaram.length > limite) {
-                            mensagem += `\n... e mais ${nuncaMandaram.length - limite} membros\n`;
+                            mensagem += `\n... e mais ${nuncaMandaram.length - limite} espiões\n`;
                         }
 
-                        mensagem += `\n🕵️ *Total: ${nuncaMandaram.length} membros que nunca mandaram mensagem*`;
+                        mensagem += `\n🕵️ *Total de espiões: ${nuncaMandaram.length}*`;
 
                         // Validar mentions (aceitar @lid e @c.us)
                         const mentionsValidos = mentions.filter(id => {
