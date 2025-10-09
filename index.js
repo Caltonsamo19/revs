@@ -2203,14 +2203,9 @@ function detectarPerguntaPorNumero(mensagem) {
 }
 
 function isAdministrador(numero) {
-    // Verificar cache primeiro
-    const cached = adminCache.get(numero);
-    if (cached !== null) {
-        return cached;
-    }
-
-    // Se for @lid, tentar converter para @c.us
+    // Se for @lid, tentar converter para @c.us ANTES de verificar cache
     let numeroParaVerificar = numero;
+
     if (numero.includes('@lid')) {
         // Verificar se está no mapeamento
         if (MAPEAMENTO_IDS[numero]) {
@@ -2229,9 +2224,19 @@ function isAdministrador(numero) {
         }
     }
 
+    // Agora verificar cache com o número convertido
+    const cached = adminCache.get(numeroParaVerificar);
+    if (cached !== undefined && cached !== null) {
+        return cached;
+    }
+
     // Calcular e cachear resultado
     const isAdmin = ADMINISTRADORES_GLOBAIS.includes(numeroParaVerificar);
-    adminCache.set(numero, isAdmin);
+    adminCache.set(numeroParaVerificar, isAdmin);
+    // Cachear também o ID original se foi convertido
+    if (numeroParaVerificar !== numero) {
+        adminCache.set(numero, isAdmin);
+    }
 
     return isAdmin;
 }
