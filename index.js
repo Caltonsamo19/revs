@@ -978,11 +978,15 @@ async function criarReferenciaAutomaticaBackup(convidadorId, convidadoId, grupoI
 
         // Enviar notificação no grupo (com indicação de estimativa)
         try {
+            // CORRIGIDO: Remover @lid e @c.us das menções
+            const convidadorLimpo = convidadorId.replace('@c.us', '').replace('@lid', '');
+            const convidadoLimpo = convidadoId.replace('@c.us', '').replace('@lid', '');
+
             await client.sendMessage(grupoId,
                 `🎉 *NOVO MEMBRO ADICIONADO!*\n\n` +
-                `👋 Bem-vindo @${convidadoId.replace('@c.us', '')}!\n\n` +
-                `📢 Sistema detectou provável adição por: @${convidadorId.replace('@c.us', '')}\n` +
-                `🎁 @${convidadorId.replace('@c.us', '')} ganhará *200MB* a cada compra de @${convidadoId.replace('@c.us', '')}!\n\n` +
+                `👋 Bem-vindo @${convidadoLimpo}!\n\n` +
+                `📢 Sistema detectou provável adição por: @${convidadorLimpo}\n` +
+                `🎁 @${convidadorLimpo} ganhará *200MB* a cada compra de @${convidadoLimpo}!\n\n` +
                 `📋 *Benefícios:*\n` +
                 `• Máximo: 5 compras = 1000MB (1GB)\n` +
                 `• Saque mínimo: 1000MB\n` +
@@ -1087,7 +1091,16 @@ async function carregarDadosReferencia() {
             const dados = await fs.readFile(ARQUIVO_CODIGOS, 'utf8');
             codigosReferencia = JSON.parse(dados);
             console.log(`📋 ${Object.keys(codigosReferencia).length} códigos de referência carregados`);
+
+            // LOGS DETALHADOS para debug
+            if (Object.keys(codigosReferencia).length > 0) {
+                console.log(`🔍 Códigos carregados:`);
+                Object.entries(codigosReferencia).forEach(([codigo, dados]) => {
+                    console.log(`   - ${codigo} → Dono: ${dados.dono} (${dados.nome})`);
+                });
+            }
         } catch (e) {
+            console.log(`⚠️ Arquivo de códigos não encontrado, criando novo: ${e.message}`);
             codigosReferencia = {};
         }
 
@@ -1403,11 +1416,15 @@ async function processarBonusCompra(remetenteCompra, valorCompra) {
         const isAutomatico = referencia.automatico;
         const tipoReferencia = isAutomatico ? 'adicionou ao grupo' : `usou seu código ${referencia.codigo}`;
 
+        // CORRIGIDO: Remover @lid e @c.us das menções
+        const convidadorLimpo = convidador.replace('@c.us', '').replace('@lid', '');
+        const remetenteCompraLimpo = remetenteCompra.replace('@c.us', '').replace('@lid', '');
+
         await client.sendMessage(message.from,
             `🎉 *BÔNUS DE REFERÊNCIA CREDITADO!*\n\n` +
-            `💎 @${convidador.replace('@c.us', '')}, recebeste *${bonusAtual}MB* de bônus!\n\n` +
-            `👤 *Referenciado:* @${remetenteCompra.replace('@c.us', '')}\n` +
-            `📢 *Motivo:* @${remetenteCompra.replace('@c.us', '')} que você ${tipoReferencia} fez uma compra!\n` +
+            `💎 @${convidadorLimpo}, recebeste *${bonusAtual}MB* de bônus!\n\n` +
+            `👤 *Referenciado:* @${remetenteCompraLimpo}\n` +
+            `📢 *Motivo:* @${remetenteCompraLimpo} que você ${tipoReferencia} fez uma compra!\n` +
             `🛒 *Compra:* ${referencia.comprasRealizadas}ª de 5\n` +
             `💰 *Novo saldo:* ${novoSaldoFormatado}\n\n` +
             `${novoSaldo >= 1024 ? '🚀 *Já podes sacar!* Use: *.sacar*' : '⏳ *Continua a convidar amigos para ganhar mais bônus!*'}`, {
@@ -1503,11 +1520,15 @@ async function criarReferenciaAutomatica(convidadorId, convidadoId, grupoId) {
 
         // Enviar notificação no grupo
         try {
+            // CORRIGIDO: Remover @lid e @c.us das menções
+            const convidadorLimpo = convidadorId.replace('@c.us', '').replace('@lid', '');
+            const convidadoLimpo = convidadoId.replace('@c.us', '').replace('@lid', '');
+
             await client.sendMessage(grupoId,
                 `🎉 *NOVO MEMBRO ADICIONADO!*\n\n` +
-                `👋 Bem-vindo @${convidadoId.replace('@c.us', '')}!\n\n` +
-                `📢 Adicionado por: @${convidadorId.replace('@c.us', '')}\n` +
-                `🎁 @${convidadorId.replace('@c.us', '')} ganhará *200MB* a cada compra de @${convidadoId.replace('@c.us', '')}!\n\n` +
+                `👋 Bem-vindo @${convidadoLimpo}!\n\n` +
+                `📢 Adicionado por: @${convidadorLimpo}\n` +
+                `🎁 @${convidadorLimpo} ganhará *200MB* a cada compra de @${convidadoLimpo}!\n\n` +
                 `📋 *Benefícios:*\n` +
                 `• Máximo: 5 compras = 1000MB (1GB)\n` +
                 `• Saque mínimo: 1000MB\n` +
@@ -2781,15 +2802,15 @@ client.on('ready', async () => {
     try {
         global.sistemaRelatorios = new SistemaRelatorios(client, GOOGLE_SHEETS_CONFIG, PAGAMENTOS_CONFIG);
 
-        // Configurar números de relatório (AJUSTAR CONFORME NECESSÁRIO)
-        // sistemaRelatorios.configurarNumeroRelatorio('GRUPO_ID_AQUI', '258847123456');
+        // Carregar configurações salvas
+        await global.sistemaRelatorios.carregarConfiguracoes();
 
         // Iniciar agendamento às 22h
         global.sistemaRelatorios.iniciarAgendamento();
 
         console.log('📊 Sistema de relatórios iniciado!');
         console.log('⏰ Relatórios agendados para 22:00 diariamente');
-        console.log('📞 Configure números com: !config-relatorio');
+        console.log('📞 Comandos: .config-relatorio .list-relatorios .remove-relatorio .test-relatorio');
 
     } catch (error) {
         console.error('❌ Erro ao iniciar sistema de relatórios:', error.message);
@@ -4296,15 +4317,122 @@ async function processMessage(message) {
                 return;
             }
 
+            // === COMANDO PARA CONFIGURAR NÚMERO DE RELATÓRIO ===
+            if (message.body.startsWith('.config-relatorio ')) {
+                const numeroInput = message.body.replace('.config-relatorio ', '').trim();
+
+                // Validar formato do número (deve começar com 258 e ter 12 dígitos)
+                if (!numeroInput.startsWith('258') || numeroInput.length !== 12) {
+                    await message.reply(`❌ *Número inválido!*\n\n✅ *Formato correto:* 258XXXXXXXXX (12 dígitos)\n\n📝 *Exemplo:* \`.config-relatorio 258847123456\``);
+                    return;
+                }
+
+                // Validar se o número existe no mapeamento
+                if (!global.sistemaRelatorios.validarNumeroNoMapeamento(numeroInput, MAPEAMENTO_IDS)) {
+                    await message.reply(`❌ *Número não encontrado no mapeamento!*\n\n⚠️ O número ${numeroInput} não está registrado no sistema.\n\n💡 Apenas números mapeados podem receber relatórios.`);
+                    return;
+                }
+
+                try {
+                    const chat = await message.getChat();
+                    const grupoNome = chat.name || 'Grupo';
+                    const grupoId = message.from;
+
+                    await global.sistemaRelatorios.configurarNumeroRelatorio(grupoId, numeroInput, grupoNome);
+
+                    await message.reply(`✅ *Relatórios configurados com sucesso!*\n\n📊 **Grupo:** ${grupoNome}\n📱 **Número:** ${numeroInput}\n\n🕙 Relatórios diários serão enviados às 22:00\n\n💬 Uma mensagem de confirmação foi enviada para o número configurado.`);
+
+                    console.log(`✅ Admin configurou relatórios do grupo ${grupoNome} para ${numeroInput}`);
+                } catch (error) {
+                    await message.reply(`❌ *Erro ao configurar relatórios*\n\nTente novamente ou contacte o desenvolvedor.`);
+                    console.error('❌ Erro ao configurar relatórios:', error);
+                }
+                return;
+            }
+
+            // === COMANDO PARA LISTAR CONFIGURAÇÕES DE RELATÓRIO ===
+            if (comando === '.list-relatorios') {
+                const grupoId = message.from;
+                const numeroConfigurado = global.sistemaRelatorios.numerosRelatorio[grupoId];
+
+                if (!numeroConfigurado) {
+                    await message.reply(`📋 *Relatórios não configurados*\n\n⚠️ Este grupo ainda não tem número configurado para receber relatórios.\n\n💡 **Para configurar:**\n\`.config-relatorio 258XXXXXXXXX\``);
+                    return;
+                }
+
+                const chat = await message.getChat();
+                const grupoNome = chat.name || 'Grupo';
+
+                let resposta = `📊 *CONFIGURAÇÃO DE RELATÓRIOS*\n\n`;
+                resposta += `👥 **Grupo:** ${grupoNome}\n`;
+                resposta += `📱 **Número:** ${numeroConfigurado}\n`;
+                resposta += `🕙 **Horário:** Diário às 22:00\n\n`;
+                resposta += `✅ Relatórios ativos`;
+
+                await message.reply(resposta);
+                return;
+            }
+
+            // === COMANDO PARA REMOVER CONFIGURAÇÃO DE RELATÓRIO ===
+            if (comando === '.remove-relatorio') {
+                const grupoId = message.from;
+                const numeroConfigurado = global.sistemaRelatorios.numerosRelatorio[grupoId];
+
+                if (!numeroConfigurado) {
+                    await message.reply(`❌ *Nenhuma configuração encontrada*\n\n⚠️ Este grupo não possui relatórios configurados.`);
+                    return;
+                }
+
+                try {
+                    await global.sistemaRelatorios.removerNumeroRelatorio(grupoId);
+
+                    await message.reply(`✅ *Configuração removida!*\n\n📱 **Número removido:** ${numeroConfigurado}\n\n⚠️ Este grupo não receberá mais relatórios automáticos.`);
+
+                    console.log(`✅ Admin removeu configuração de relatórios do grupo ${grupoId}`);
+                } catch (error) {
+                    await message.reply(`❌ *Erro ao remover configuração*\n\nTente novamente ou contacte o desenvolvedor.`);
+                    console.error('❌ Erro ao remover configuração de relatórios:', error);
+                }
+                return;
+            }
+
+            // === COMANDO PARA TESTAR RELATÓRIO ===
+            if (comando === '.test-relatorio') {
+                const grupoId = message.from;
+                const numeroConfigurado = global.sistemaRelatorios.numerosRelatorio[grupoId];
+
+                if (!numeroConfigurado) {
+                    await message.reply(`❌ *Relatórios não configurados*\n\n⚠️ Configure primeiro usando:\n\`.config-relatorio 258XXXXXXXXX\``);
+                    return;
+                }
+
+                try {
+                    await message.reply(`🧪 *Gerando relatório de teste...*\n\n⏳ Aguarde alguns segundos...`);
+
+                    const chat = await message.getChat();
+                    const grupoNome = chat.name || 'Grupo';
+
+                    await global.sistemaRelatorios.gerarRelatorioGrupo(grupoId, grupoNome);
+
+                    await message.reply(`✅ *Relatório enviado!*\n\n📱 Verifique o número ${numeroConfigurado}`);
+
+                    console.log(`✅ Admin solicitou teste de relatório para grupo ${grupoNome}`);
+                } catch (error) {
+                    await message.reply(`❌ *Erro ao gerar relatório*\n\n${error.message}`);
+                    console.error('❌ Erro ao gerar relatório de teste:', error);
+                }
+                return;
+            }
+
             if (comando === '.test_grupo') {
                 const grupoAtual = message.from;
                 const configGrupo = getConfiguracaoGrupo(grupoAtual);
-                
+
                 if (!configGrupo) {
                     await message.reply('❌ Este grupo não está configurado!');
                     return;
                 }
-                
+
                 console.log(`🧪 Testando Google Sheets para grupo: ${configGrupo.nome}`);
                 
                 const resultado = await enviarParaGoogleSheets('TEST999', '88', '847777777', grupoAtual, configGrupo.nome, 'TestAdmin');
@@ -4663,16 +4791,19 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
             const remetente = message.author || message.from;
             let codigo = null;
 
-            // Verificar se já tem código
+            // Verificar se já tem código (buscar em TODOS os códigos)
+            console.log(`🔍 Procurando código existente para: ${remetente}`);
             for (const [cod, dados] of Object.entries(codigosReferencia)) {
                 if (dados.dono === remetente) {
                     codigo = cod;
+                    console.log(`✅ Código existente encontrado: ${codigo}`);
                     break;
                 }
             }
 
             // Se não tem, criar novo
             if (!codigo) {
+                console.log(`📝 Criando NOVO código para: ${remetente}`);
                 codigo = gerarCodigoReferencia(remetente);
                 codigosReferencia[codigo] = {
                     dono: remetente,
@@ -4681,8 +4812,10 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                     ativo: true
                 };
 
-                // CORRIGIDO: Salvar dados ao criar novo código
-                agendarSalvamento();
+                // CORRIGIDO: Salvar IMEDIATAMENTE (não agendar) para garantir persistência
+                console.log(`💾 Salvando código ${codigo} IMEDIATAMENTE...`);
+                await salvarDadosReferencia();
+                console.log(`✅ Código ${codigo} salvo com sucesso!`);
             }
 
             await message.reply(
@@ -4775,21 +4908,26 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                 }
                 bonusSaldos[convidadorId].totalReferencias++;
 
-                // CORRIGIDO: Salvar dados (incluindo membrosEntrada se foi registrado agora)
-                agendarSalvamento();
+                // CORRIGIDO: Salvar IMEDIATAMENTE para garantir persistência
+                console.log(`💾 Salvando uso do código ${codigo} IMEDIATAMENTE...`);
+                await salvarDadosReferencia();
 
                 // Salvar arquivo de membros se foi atualizado
                 try {
                     await fs.writeFile(ARQUIVO_MEMBROS, JSON.stringify(membrosEntrada, null, 2));
+                    console.log(`✅ Membros entrada salvos com sucesso!`);
                 } catch (error) {
                     console.log('⚠️ Erro ao salvar membros entrada:', error.message);
                 }
                 
-                await client.sendMessage(message.from, 
+                // CORRIGIDO: Remover @lid e @c.us das menções
+                const convidadorLimpo = convidadorId.replace('@c.us', '').replace('@lid', '');
+
+                await client.sendMessage(message.from,
                     `✅ *CÓDIGO APLICADO COM SUCESSO!*\n\n` +
-                    `🎉 @${convidadorId.replace('@c.us', '')} te convidou - registrado!\n\n` +
+                    `🎉 @${convidadorLimpo} te convidou - registrado!\n\n` +
                     `💎 *Benefícios:*\n` +
-                    `• Nas tuas próximas 5 compras, @${convidadorId.replace('@c.us', '')} ganha 200MB cada\n` +
+                    `• Nas tuas próximas 5 compras, @${convidadorLimpo} ganha 200MB cada\n` +
                     `• Tu recebes teus megas normalmente\n` +
                     `• Ajudas um amigo a ganhar bônus!\n\n` +
                     `🚀 *Próximo passo:* Faz tua primeira compra!`, {
