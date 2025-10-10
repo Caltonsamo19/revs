@@ -1771,17 +1771,22 @@ const ADMINISTRADORES_GLOBAIS = [
     '203109674577958@lid',
     '23450974470333@lid',   // ID interno do WhatsApp para 852118624
     // Novos administradores adicionados:
-    '258850401416@c.us',    // +258 85 040 1416
-    '258874100607@c.us',    // +258 87 410 0607 (já existia)
-    '258858891101@c.us',    // +258 85 889 1101
-    '258865627840@c.us'     // +258 86 562 7840
+    '258850401416@c.us',    // +258 85 040 1416 - Kelven Junior
+    '216054655656152@lid',  // @lid do Kelven Junior
+    '258858891101@c.us',    // +258 85 889 1101 - Isaac
+    '85307059867830@lid',   // @lid do Isaac
+    '258865627840@c.us',    // +258 86 562 7840 - Ercílio
+    '170725386272876@lid'   // @lid do Ercílio
 ];
 
 // Mapeamento de IDs internos (@lid) para números reais (@c.us) - SISTEMA DINÂMICO
 let MAPEAMENTO_IDS = {
     '23450974470333@lid': '258852118624@c.us',  // Seu ID
     '245075749638206@lid': null,  // Será identificado automaticamente
-    '76991768342659@lid': '258870818180@c.us'  // Joãozinho - corrigido manualmente
+    '76991768342659@lid': '258870818180@c.us',  // Joãozinho - corrigido manualmente
+    '216054655656152@lid': '258850401416@c.us', // Kelven Junior
+    '85307059867830@lid': '258858891101@c.us',  // Isaac
+    '170725386272876@lid': '258865627840@c.us'  // Ercílio
 };
 
 // === SISTEMA AUTOMÁTICO DE MAPEAMENTO LID ===
@@ -1882,65 +1887,56 @@ const MODERACAO_CONFIG = {
 
 // Configuração para cada grupo
 const CONFIGURACAO_GRUPOS = {
-       '258820749141-1441573529@g.us': {
-        nome: 'Data Store - Vodacom',
-        tabela: `SUPER PROMOÇÃO  DE 🛜ⓂEGAS✅ VODACOM A MELHOR PREÇO DO MERCADO - 04-05/09/2025
+      '120363402302455817@g.us': {
+        nome: 'KA-NET',
+        tabela: `SUPER PROMOÇÃO NA VODACOM🛑🔥😍
 
 📆 PACOTES DIÁRIOS
-512MB 💎 10MT 💵💽
-900MB 💎 15MT 💵💽
-1080MB 💎 17MT 💵💽
-1200MB 💎 20MT 💵💽
-2150MB 💎 34MT 💵💽
-3200MB 💎 51MT 💵💽
-4250MB 💎 68MT 💵💽
-5350MB 💎 85MT 💵💽
-10240MB 💎 160MT 💵💽
-20480MB 💎 320MT 💵💽
+512MB = 10MT
+1024MB = 16MT
+1200MB = 20MT
+1560MB = 25MT
+2048MB = 32MT
+3200MB = 54MT 
+4250MB = 68MT 
+5350MB = 90MT 
+10240MB = 160MT
 
-📅PACOTE DIÁRIO PREMIUM (3 Dias)
-2000 + 700MB 💎 44MT 💵💽
-3000 + 700MB 💎 66MT 💵💽
-4000 + 700MB 💎 88MT 💵💽
-5000 + 700MB 💎 109MT 💵💽
-6000 + 700MB 💎 133MT 💵💽
-7000 + 700MB 💎 149MT 💵💽
-10000 + 700MB 💎 219MT 💵💽
+⿣PACOTE DIÁRIO PREMIUM (3 Dias)
+2000MB + 300MB = 40MT
+3000MB + 300MB = 66MT 
+4000MB + 300MB = 72MT 
+5000MB + 300MB = 85MT
+6000MB + 300MB = 110MT 
+7000MB + 300MB = 125MT 
+10000Mb + 300MB = 180MT 
 
-📅 PACOTES SEMANAIS(5 Dias)
-3072 + 700MB 💎 105MT 💵💽
-5120 + 700MB 💎 155MT 💵💽
-10240 + 700MB 💎 300MT 💵💽
-15360 + 700MB 💎 455MT 💵💽
-20480 + 700MB 💎 600MT 💵💽
+⿧PACOTE SEMANAL (7 dias)
+5000MB + 700MB = 95MT
+8000MB + 700MB = 140MT
+10000MB + 500MB = 190MT
+15000MB + 500MB = 290MT
 
-📅 PACOTES MENSAIS
-12.8GB 💎 270MT 💵💽
-22.8GB 💎 435MT 💵💽
-32.8GB 💎 605MT 💵💽
-52.8GB 💎 945MT 💵💽
-102.8GB 💎 1605MT 💵💽
+Mensal (Válido Por 30 Dias)
+5GB = 150MT
+10GB = 250MT
+35GB = 710MT
+50GB = 1030MT
+100GB = 2040MT
 
-
-PACOTES DIAMANTE MENSAIS
-Chamadas + SMS ilimitadas + 11GB 💎 460MT 💵
-Chamadas + SMS ilimitadas + 24GB 💎 820MT 💵
-Chamadas + SMS ilimitadas + 50GB 💎 1550MT 💵
-Chamadas + SMS ilimitadas + 100GB 💎 2250MT 💵
-
-⚠ NB: Válido apenas para Vodacom
+📅 PACOTES DIAMANTE MENSAIS 💎
+Chamadas + SMS ilimitadas + 11GB = 440MT 
+Chamadas + SMS ilimitadas + 24GB = 820MT 
+Chamadas + SMS ilimitadas + 50GB = 1550MT 
+Chamadas + SMS ilimitadas + 100GB = 2250MT
 `,
-
-        pagamento: `FORMAS DE PAGAMENTO ATUALIZADAS
- 
-1- M-PESA 
-NÚMERO: 848715208
-NOME:  NATACHA ALICE
-
-NÚMERO: 871112049
-NOME: NATACHA ALICE`
-    }
-    
+        pagamento: `- 📲 𝗘-𝗠𝗢𝗟𝗔: 864882152💶💰
+- Catia Anabela Nharrava 
+- 📲 𝗠-𝗣𝗘𝗦𝗔: 856268811💷💰 
+- ↪📞Kelven Junior Anabela Nharrava
+`
+    },
+    
 };
 
 
