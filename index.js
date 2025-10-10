@@ -1048,24 +1048,34 @@ async function salvarDadosMembros() {
 // Verificar se usuário é elegível para usar código (últimos 5 dias)
 function isElegivelParaCodigo(participantId, grupoId) {
     try {
+        // CORRIGIDO: Se não tem registro, ASSUMIR que é novo membro (elegível)
         if (!membrosEntrada[grupoId] || !membrosEntrada[grupoId][participantId]) {
-            console.log(`⚠️ Membro sem registro de entrada`);
-            return false; // Se não tem registro, não é elegível
+            console.log(`✅ Membro sem registro de entrada - ASSUMINDO NOVO MEMBRO (elegível)`);
+
+            // Registrar automaticamente agora
+            if (!membrosEntrada[grupoId]) {
+                membrosEntrada[grupoId] = {};
+            }
+            membrosEntrada[grupoId][participantId] = new Date().toISOString();
+
+            return true; // CORRIGIDO: Novo membro É elegível
         }
-        
+
         const dataEntrada = new Date(membrosEntrada[grupoId][participantId]);
         const agora = new Date();
         const limite5Dias = 5 * 24 * 60 * 60 * 1000; // 5 dias em ms
-        
+
         const tempoNoGrupo = agora - dataEntrada;
+        const diasNoGrupo = Math.floor(tempoNoGrupo / (24 * 60 * 60 * 1000));
         const elegivelTempo = tempoNoGrupo <= limite5Dias;
-        
-        console.log(`🔍 Verificando elegibilidade - ${Math.floor(tempoNoGrupo / (24 * 60 * 60 * 1000))} dias no grupo`);
-        
+
+        console.log(`🔍 Verificando elegibilidade - ${diasNoGrupo} dias no grupo - ${elegivelTempo ? 'ELEGÍVEL' : 'NÃO ELEGÍVEL'}`);
+
         return elegivelTempo;
     } catch (error) {
         console.error('❌ Erro ao verificar elegibilidade:', error);
-        return false;
+        // CORRIGIDO: Em caso de erro, permitir (dar benefício da dúvida)
+        return true;
     }
 }
 
@@ -1842,11 +1852,7 @@ async function processarPagamentoConfirmado(pendencia) {
         // Registrar comprador
         await registrarComprador(chatId, numero, messageData.notifyName, megas);
 
-        // Encaminhamento se necessário
-        if (chatId === ENCAMINHAMENTO_CONFIG.grupoOrigem) {
-            const timestampMensagem = new Date().toLocaleString('pt-BR');
-            adicionarNaFila(dadosCompletos, messageData.author, 'Retry Confirmado', timestampMensagem);
-        }
+        // REMOVIDO: Encaminhamento de mensagens (sistema movido para outro bot)
 
         console.log(`✅ RETRY: Pagamento ${pendencia.referencia} processado com sucesso`);
 
@@ -2260,11 +2266,10 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
             message: resultado.message
         };
     } else {
-        // Fallback para WhatsApp se Google Sheets falhar
-        console.log(`🔄 [${grupoNome}] Google Sheets falhou, usando WhatsApp backup...`);
-        enviarViaWhatsAppTasker(linhaCompleta, grupoNome, autorMensagem);
+        // REMOVIDO: Fallback WhatsApp (sistema movido para outro bot)
+        console.log(`❌ [${grupoNome}] Google Sheets falhou - sem fallback disponível`);
         if (cacheTransacoes.has(transacaoKey)) {
-            cacheTransacoes.get(transacaoKey).metodo = 'whatsapp_backup';
+            cacheTransacoes.get(transacaoKey).metodo = 'falhou';
         }
     }
     
@@ -2276,23 +2281,8 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
     return linhaCompleta;
 }
 
-function enviarViaWhatsAppTasker(linhaCompleta, grupoNome, autorMensagem) {
-    const item = {
-        conteudo: linhaCompleta, // Apenas: referencia|valor|numero
-        autor: autorMensagem,
-        grupo: grupoNome,
-        timestamp: Date.now(),
-        id: Date.now() + Math.random(),
-        tipo: 'tasker_data_backup'
-    };
-
-    filaMensagens.push(item);
-    console.log(`📱 WhatsApp Backup → Tasker: ${linhaCompleta}`);
-
-    if (!processandoFila) {
-        processarFila();
-    }
-}
+// REMOVIDO: Função enviarViaWhatsAppTasker
+// (Sistema de encaminhamento movido para outro bot)
 
 // === FUNÇÃO REMOVIDA PARA OTIMIZAÇÃO ===
 // Não salva mais arquivos .txt desnecessários
@@ -4359,8 +4349,8 @@ async function processMessage(message) {
                 resposta += `📈 Total enviado: ${dados.length}\n`;
                 resposta += `📅 Hoje: ${hoje.length}\n`;
                 resposta += `📊 Via Google Sheets: ${sheets}\n`;
-                resposta += `📱 Via WhatsApp: ${whatsapp}\n`;
-                resposta += `📱 Fila atual: ${filaMensagens.length}\n\n`;
+                resposta += `📱 Via WhatsApp: ${whatsapp}\n\n`;
+                // REMOVIDO: Fila de encaminhamento (sistema movido para outro bot)
                 
                 if (dados.length > 0) {
                     resposta += `📋 *Últimos 5 enviados:*\n`;
@@ -4785,8 +4775,15 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                 }
                 bonusSaldos[convidadorId].totalReferencias++;
 
-                // CORRIGIDO: Salvar dados
+                // CORRIGIDO: Salvar dados (incluindo membrosEntrada se foi registrado agora)
                 agendarSalvamento();
+
+                // Salvar arquivo de membros se foi atualizado
+                try {
+                    await fs.writeFile(ARQUIVO_MEMBROS, JSON.stringify(membrosEntrada, null, 2));
+                } catch (error) {
+                    console.log('⚠️ Erro ao salvar membros entrada:', error.message);
+                }
                 
                 await client.sendMessage(message.from, 
                     `✅ *CÓDIGO APLICADO COM SUCESSO!*\n\n` +
@@ -5214,12 +5211,9 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                 }
 
                 await registrarComprador(message.from, numero, nomeContato, megas);
-                
-                if (message.from === ENCAMINHAMENTO_CONFIG.grupoOrigem) {
-                    const timestampMensagem = new Date().toLocaleString('pt-BR');
-                    adicionarNaFila(dadosCompletos, autorMensagem, configGrupo.nome, timestampMensagem);
-                }
-                
+
+                // REMOVIDO: Encaminhamento de mensagens (sistema movido para outro bot)
+
                 // Enviar mensagem normal + aviso da tabela
                 await message.reply(
                     `✅ *Pedido Recebido!*\n\n` +
@@ -5300,12 +5294,9 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                 }
 
                 await registrarComprador(message.from, numero, nomeContato, megas);
-                
-                if (message.from === ENCAMINHAMENTO_CONFIG.grupoOrigem) {
-                    const timestampMensagem = new Date().toLocaleString('pt-BR');
-                    adicionarNaFila(dadosCompletos, autorMensagem, configGrupo.nome, timestampMensagem);
-                }
-                
+
+                // REMOVIDO: Encaminhamento de mensagens (sistema movido para outro bot)
+
                 await message.reply(
                     `✅ *Pedido Recebido!*\n\n` +
                     `💰 Referência: ${referencia}\n` +
