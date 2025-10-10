@@ -1889,70 +1889,9 @@ let gruposLogados = new Set();
 let comandosCustomizados = {};
 const ARQUIVO_COMANDOS = 'comandos_customizados.json';
 
-// === SISTEMA DE REGISTRO DE MENSAGENS ===
-let registroMensagens = {}; // { grupoId: { memberId: timestamp } }
-const ARQUIVO_REGISTRO_MENSAGENS = path.join(__dirname, 'registro_mensagens.json');
+// REMOVIDO: Sistema de registro de mensagens (movido para outro bot)
 
-// Carregar registro de mensagens
-async function carregarRegistroMensagens() {
-    try {
-        if (fs.existsSync(ARQUIVO_REGISTRO_MENSAGENS)) {
-            const data = await fs.readFile(ARQUIVO_REGISTRO_MENSAGENS, 'utf8');
-            registroMensagens = JSON.parse(data);
-            const totalGrupos = Object.keys(registroMensagens).length;
-            const totalMembros = Object.values(registroMensagens).reduce((sum, grupo) => sum + Object.keys(grupo).length, 0);
-            console.log(`📝 Registro de mensagens carregado: ${totalGrupos} grupos, ${totalMembros} membros`);
-        } else {
-            console.log(`📝 Nenhum registro de mensagens encontrado, iniciando novo`);
-            registroMensagens = {};
-        }
-    } catch (error) {
-        console.error('❌ Erro ao carregar registro de mensagens:', error.message);
-        registroMensagens = {};
-    }
-}
-
-// Salvar registro de mensagens (debounced para não salvar muito frequentemente)
-let salvarRegistroTimeout = null;
-async function salvarRegistroMensagens() {
-    // Cancelar salvamento pendente
-    if (salvarRegistroTimeout) {
-        clearTimeout(salvarRegistroTimeout);
-    }
-
-    // Agendar salvamento para daqui 30 segundos
-    salvarRegistroTimeout = setTimeout(async () => {
-        try {
-            await fs.writeFile(ARQUIVO_REGISTRO_MENSAGENS, JSON.stringify(registroMensagens, null, 2));
-            console.log(`💾 Registro de mensagens salvo`);
-        } catch (error) {
-            console.error('❌ Erro ao salvar registro de mensagens:', error.message);
-        }
-    }, 30000); // 30 segundos
-}
-
-// Registrar primeira mensagem de um membro (se ainda não foi registrada)
-function registrarPrimeiraMensagem(grupoId, membroId) {
-    if (!grupoId || !membroId) return false;
-
-    // Inicializar grupo se não existir
-    if (!registroMensagens[grupoId]) {
-        registroMensagens[grupoId] = {};
-    }
-
-    // Se já registrou, não fazer nada
-    if (registroMensagens[grupoId][membroId]) {
-        return false;
-    }
-
-    // Registrar primeira mensagem
-    registroMensagens[grupoId][membroId] = new Date().toISOString();
-
-    // Agendar salvamento
-    salvarRegistroMensagens();
-
-    return true; // Indica que foi primeira mensagem
-}
+// REMOVIDO: Função registrarPrimeiraMensagem (sistema movido para outro bot)
 
 // Configuração de administradores GLOBAIS
 const ADMINISTRADORES_GLOBAIS = [
@@ -2085,52 +2024,67 @@ const MODERACAO_CONFIG = {
 const CONFIGURACAO_GRUPOS = {
        '258820749141-1441573529@g.us': {
         nome: 'Data Store - Vodacom',
-        tabela: `SUPER PROMOÇÃO  DE 🛜ⓂEGAS✅ VODACOM A MELHOR PREÇO DO MERCADO - 04-05/09/2025
+        tabela: `💥 SUPER PROMOÇÃO DE 🛜ⓂEGAS✅ VODACOM – A MELHOR DO MERCADO 💥
+📅 Versão Atualizada: Outubro / 2025
 
-📆 PACOTES DIÁRIOS
-512MB 💎 10MT 💵💽
-900MB 💎 15MT 💵💽
-1080MB 💎 17MT 💵💽
+📆 PACOTES DIÁRIOS (24H⏱)
+1024MB 💎 16MT 💵💽
 1200MB 💎 20MT 💵💽
-2150MB 💎 34MT 💵💽
-3200MB 💎 51MT 💵💽
-4250MB 💎 68MT 💵💽
-5350MB 💎 85MT 💵💽
+2048MB 💎 32MT 💵💽
+2400MB 💎 40MT 💵💽
+3072MB 💎 48MT 💵💽
+4096MB 💎 64MT 💵💽
+5120MB 💎 80MT 💵💽
+6144MB 💎 102MT 💵💽
+7168MB 💎 119MT 💵💽
+8192MB 💎 136MT 💵💽
+9144MB 💎 153MT 💵💽
 10240MB 💎 160MT 💵💽
-20480MB 💎 320MT 💵💽
 
-📅PACOTE DIÁRIO PREMIUM (3 Dias)
-2000 + 700MB 💎 44MT 💵💽
-3000 + 700MB 💎 66MT 💵💽
-4000 + 700MB 💎 88MT 💵💽
-5000 + 700MB 💎 109MT 💵💽
-6000 + 700MB 💎 133MT 💵💽
-7000 + 700MB 💎 149MT 💵💽
-10000 + 700MB 💎 219MT 💵💽
+📅 PACOTES DIÁRIOS PREMIUM (3 Dias 🗓 – Renováveis)
+2000MB 💎 44MT 💵💽
+3000MB 💎 66MT 💵💽
+4000MB 💎 88MT 💵💽
+5000MB 💎 109MT 💵💽
+6000MB 💎 133MT 💵💽
+7000MB 💎 149MT 💵💽
+10000MB 💎 219MT 💵💽
 
-📅 PACOTES SEMANAIS(5 Dias)
-3072 + 700MB 💎 105MT 💵💽
-5120 + 700MB 💎 155MT 💵💽
-10240 + 700MB 💎 300MT 💵💽
-15360 + 700MB 💎 455MT 💵💽
-20480 + 700MB 💎 600MT 💵💽
+📅 PACOTES SEMANAIS (5 Dias 🗓 – Renováveis)
+1700MB 💎 45MT 💵💽
+2900MB 💎 80MT 💵💽
+3400MB 💎 110MT 💵💽
+5500MB 💎 150MT 💵💽
+7800MB 💎 200MT 💵💽
+11400MB 💎 300MT 💵💽
 
-📅 PACOTES MENSAIS
-12.8GB 💎 270MT 💵💽
-22.8GB 💎 435MT 💵💽
-32.8GB 💎 605MT 💵💽
-52.8GB 💎 945MT 💵💽
-102.8GB 💎 1605MT 💵💽
+📅 PACOTES SEMANAIS PREMIUM (15 Dias 🗓 – Renováveis)
+3000MB 💎 100MT 💵💽
+5000MB 💎 149MT 💵💽
+8000MB 💎 201MT 💵💽
+10000MB 💎 231MT 💵💽
+20000MB 💎 352MT 💵💽
 
+📅 PACOTES MENSAIS EXCLUSIVOS (30 Dias 🗓 – Não Renováveis)
+⚠ Não pode ter Txuna Crédito ⚠
 
-PACOTES DIAMANTE MENSAIS
-Chamadas + SMS ilimitadas + 11GB 💎 460MT 💵
-Chamadas + SMS ilimitadas + 24GB 💎 820MT 💵
-Chamadas + SMS ilimitadas + 50GB 💎 1550MT 💵
-Chamadas + SMS ilimitadas + 100GB 💎 2250MT 💵
-
-⚠ NB: Válido apenas para Vodacom
-`,
+2.8GB 💎 100MT 💵💽
+5.8GB 💎 175MT 💵💽
+8.8GB 💎 200MT 💵💽
+10.8GB 💎 249MT 💵💽
+12.8GB 💎 300MT 💵💽
+15.8GB 💎 349MT 💵💽
+18.8GB 💎 400MT 💵💽
+20.8GB 💎 449MT 💵💽
+25.8GB 💎 549MT 💵💽
+32.8GB 💎 649MT 💵💽
+51.2GB 💎 1049MT 💵💽
+60.2GB 💎 1249MT 💵💽
+80.2GB 💎 1450MT 💵💽
+100.2GB 💎 1600MT
+📢 Importante 🚨:
+Envie o valor que consta na tabela! 💰
+Válido apenas para Vodacom.`,
 
         pagamento: `FORMAS DE PAGAMENTO ATUALIZADAS
  
@@ -2795,8 +2749,7 @@ client.on('ready', async () => {
     // Carregar mapeamentos LID salvos
     await carregarMapeamentos();
 
-    // Carregar registro de mensagens
-    await carregarRegistroMensagens();
+    // REMOVIDO: Carregamento de registro de mensagens (sistema movido para outro bot)
 
     // === INICIALIZAR SISTEMA DE RELATÓRIOS ===
     try {
@@ -3556,35 +3509,17 @@ async function processMessage(message) {
 
                         console.log(`👥 Total de participantes no grupo: ${participantes.length}`);
 
-                        // Obter registro de mensagens deste grupo
-                        const registroGrupo = registroMensagens[message.from] || {};
-
-                        console.log(`📝 Membros com mensagens registradas: ${Object.keys(registroGrupo).length}`);
+                        // REMOVIDO: Sistema de registro de mensagens (movido para outro bot)
 
                         // Filtrar participantes que nunca mandaram mensagem
+                        // NOTA: Agora retorna todos os participantes (sem filtro de mensagens)
                         const nuncaMandaram = [];
 
-                        for (const participante of participantes) {
-                            const participanteId = participante.id._serialized;
+                        // REMOVIDO: Verificação de registro de mensagens
+                        // Comando .espioes agora está desabilitado (sistema movido para outro bot)
 
-                            // Verificar se está no registro
-                            if (registroGrupo[participanteId]) {
-                                console.log(`✅ ${participanteId} JÁ MANDOU MENSAGEM - filtrado`);
-                                continue;
-                            }
-
-                            // Verificar também pelo número base (caso o formato seja diferente)
-                            const numeroBase = participanteId.split('@')[0];
-                            const temNumeroBase = Object.keys(registroGrupo).some(id => id.startsWith(numeroBase));
-
-                            if (temNumeroBase) {
-                                console.log(`✅ ${participanteId} (base: ${numeroBase}) JÁ MANDOU MENSAGEM - filtrado`);
-                                continue;
-                            }
-
-                            // Nunca mandou mensagem
-                            nuncaMandaram.push(participanteId);
-                        }
+                        await message.reply(`⚠️ *COMANDO DESABILITADO*\n\nO sistema de registro de mensagens foi movido para outro bot.\nUse o bot de monitoramento para esta funcionalidade.`);
+                        return;
 
                         console.log(`🕵️ Membros que nunca mandaram mensagem: ${nuncaMandaram.length}`);
 
@@ -5480,10 +5415,7 @@ client.on('message', async (message) => {
         await aprenderMapeamento(message);
 
         // Registrar primeira mensagem do membro no grupo (se for grupo)
-        if (message.from.endsWith('@g.us') && !message.fromMe) {
-            const autorMensagem = message.author || message.from;
-            registrarPrimeiraMensagem(message.from, autorMensagem);
-        }
+        // REMOVIDO: Registro de primeira mensagem (sistema movido para outro bot)
 
         // Segundo: tentar processar comandos administrativos rápidos
         const adminProcessed = await handleAdminCommands(message);
