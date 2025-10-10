@@ -2,8 +2,155 @@ require('dotenv').config();
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const fs = require('fs').promises;
+const fssync = require('fs');
 const path = require('path');
 const axios = require('axios'); // npm install axios
+const { spawn } = require('child_process');
+
+// === LIMPEZA AUTOMÁTICA DE CACHE ===
+const CACHE_DIR = path.join(__dirname, '.wwebjs_cache');
+const CACHE_CLEANUP_INTERVAL = 12 * 60 * 60 * 1000; // 12 horas em milissegundos
+const HORARIOS_FIXOS = [18, 20]; // Horários fixos para limpeza (18h e 20h)
+const ARQUIVO_REINICIO = path.join(__dirname, '.reinicio_status.json');
+let ultimaLimpeza = new Date();
+let clienteGlobal = null; // Referência ao cliente para enviar notificações
+
+// Função para enviar notificação em todos os grupos
+async function notificarGrupos(mensagem) {
+    try {
+        if (!clienteGlobal) {
+            console.log('⚠️ Cliente não disponível para notificações');
+            return;
+        }
+
+        // Importar CONFIGURACAO_GRUPOS dinamicamente ou usar a variável global
+        const chats = await clienteGlobal.getChats();
+        const grupos = chats.filter(chat => chat.isGroup);
+
+        for (const grupo of grupos) {
+            try {
+                await grupo.sendMessage(mensagem);
+                console.log(`✅ Notificação enviada para: ${grupo.name}`);
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Delay entre mensagens
+            } catch (error) {
+                console.error(`❌ Erro ao notificar grupo ${grupo.name}:`, error.message);
+            }
+        }
+    } catch (error) {
+        console.error('❌ Erro ao notificar grupos:', error.message);
+    }
+}
+
+// Função para reiniciar o bot
+function reiniciarBot() {
+    console.log('🔄 Reiniciando bot...');
+
+    const child = spawn(process.argv[0], process.argv.slice(1), {
+        detached: true,
+        stdio: 'inherit'
+    });
+
+    child.unref();
+    process.exit(0);
+}
+
+// Função de limpeza com reinício automático
+async function limparCacheWhatsApp(motivo = 'intervalo') {
+    try {
+        console.log(`🧹 Iniciando limpeza da cache do WhatsApp (${motivo})...`);
+
+        // Notificar grupos antes de reiniciar
+        const horaAtual = new Date().toLocaleTimeString('pt-BR');
+        await notificarGrupos(`⚠️ *AVISO DE MANUTENÇÃO*\n\n🔧 O bot será reiniciado para manutenção preventiva\n⏱️ Horário: ${horaAtual}\n🎯 Objetivo: Manter o sistema rápido e saudável\n⏳ Tempo estimado: 1-2 minutos\n\n_Aguarde alguns instantes..._`);
+
+        // Aguardar 3 segundos para garantir que as mensagens foram enviadas
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        // Verifica se a pasta existe
+        if (fssync.existsSync(CACHE_DIR)) {
+            await fs.rm(CACHE_DIR, { recursive: true, force: true });
+            console.log('✅ Cache limpa com sucesso!');
+            ultimaLimpeza = new Date();
+            console.log(`⏰ Última limpeza: ${ultimaLimpeza.toLocaleString('pt-BR')}`);
+        } else {
+            console.log('ℹ️ Pasta de cache não encontrada, pulando limpeza');
+        }
+
+        // Salvar flag de reinício para notificar após o restart
+        await fs.writeFile(ARQUIVO_REINICIO, JSON.stringify({
+            reiniciado: true,
+            motivoLimpeza: motivo,
+            horaLimpeza: new Date().toISOString()
+        }));
+
+        // Aguardar mais 2 segundos antes de reiniciar
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Reiniciar o bot
+        reiniciarBot();
+
+    } catch (error) {
+        console.error('❌ Erro ao limpar cache:', error.message);
+    }
+}
+
+// Verificar se o bot foi reiniciado e notificar
+async function verificarReinicio() {
+    try {
+        if (fssync.existsSync(ARQUIVO_REINICIO)) {
+            const dados = JSON.parse(await fs.readFile(ARQUIVO_REINICIO, 'utf-8'));
+
+            if (dados.reiniciado) {
+                console.log('✅ Bot reiniciado com sucesso após limpeza de cache');
+
+                // Aguardar 5 segundos para garantir que o WhatsApp está conectado
+                await new Promise(resolve => setTimeout(resolve, 5000));
+
+                const horaAtual = new Date().toLocaleTimeString('pt-BR');
+                await notificarGrupos(`✅ *BOT ONLINE*\n\n🎉 Manutenção concluída com sucesso!\n⏰ Horário: ${horaAtual}\n💚 Sistema otimizado e funcionando normalmente\n\n_Todos os serviços estão operacionais!_`);
+
+                // Remover arquivo de status
+                await fs.unlink(ARQUIVO_REINICIO);
+            }
+        }
+    } catch (error) {
+        console.error('❌ Erro ao verificar reinício:', error.message);
+    }
+}
+
+// Verificar se deve limpar nos horários fixos
+function verificarHorarioFixo() {
+    const agora = new Date();
+    const horaAtual = agora.getHours();
+    const minutoAtual = agora.getMinutes();
+
+    // Verifica se está em um horário fixo e se já não limpou nesta hora
+    if (HORARIOS_FIXOS.includes(horaAtual) && minutoAtual === 0) {
+        const ultimaHora = ultimaLimpeza.getHours();
+        const ultimaData = ultimaLimpeza.toDateString();
+        const dataAtual = agora.toDateString();
+
+        // Só limpa se não limpou nesta hora hoje
+        if (!(ultimaHora === horaAtual && ultimaData === dataAtual)) {
+            limparCacheWhatsApp(`horário fixo ${horaAtual}h`);
+        }
+    }
+}
+
+// Agendar limpeza automática
+function iniciarLimpezaAutomatica() {
+    console.log('⚙️ Limpeza automática de cache ativada:');
+    console.log('   - Intervalo: a cada 12 horas');
+    console.log('   - Horários fixos: 18:00 e 20:00');
+
+    // Limpeza a cada 12 horas
+    setInterval(() => {
+        limparCacheWhatsApp('intervalo 12h');
+    }, CACHE_CLEANUP_INTERVAL);
+
+    // Verificar horários fixos a cada minuto
+    setInterval(verificarHorarioFixo, 60 * 1000);
+}
 
 // === AXIOS SIMPLIFICADO (SEGUINDO PADRÃO BOT1) ===
 const axiosInstance = axios.create({
@@ -149,12 +296,8 @@ const ia = new WhatsAppAI(process.env.OPENAI_API_KEY);
 let sistemaPacotes = null;
 let sistemaCompras = null;
 
-// Configuração para encaminhamento
-const ENCAMINHAMENTO_CONFIG = {
-    grupoOrigem: '120363152151047451@g.us', // Phull Megas
-    numeroDestino: '258861645968@c.us',
-    intervaloSegundos: 2
-};
+// REMOVIDO: Sistema de encaminhamento de mensagens
+// (Movido para outro bot)
 
 // === SISTEMA DE FILA ASSÍNCRONA DE MENSAGENS ===
 class MessageQueue {
@@ -226,9 +369,7 @@ class MessageQueue {
 
 const messageQueue = new MessageQueue();
 
-// Fila de mensagens para encaminhar (mantida para compatibilidade)
-let filaMensagens = [];
-let processandoFila = false;
+// REMOVIDO: Fila de mensagens (sistema movido para outro bot)
 
 // === SISTEMA DE CACHE DE DADOS OTIMIZADO COM CLEANUP AUTOMÁTICO ===
 // === CACHE DE TRANSAÇÕES SIMPLIFICADO (SEGUINDO PADRÃO BOT1) ===
@@ -693,6 +834,19 @@ async function criarReferenciaAutomaticaInteligente(convidadorId, convidadoId, g
         // Gerar código único
         const codigo = gerarCodigoReferencia(convidadorId);
 
+        // CORRIGIDO: Registrar código ANTES da referência do cliente (ESTRUTURA PADRONIZADA)
+        codigosReferencia[codigo] = {
+            dono: convidadorId, // CORRIGIDO: usar 'dono' em vez de salvar só o ID
+            nome: nomeConvidador,
+            criado: new Date().toISOString(),
+            ativo: true,
+            usado: true,
+            usadoPor: convidadoId,
+            dataUso: new Date().toISOString(),
+            automatico: true,
+            metodoDeteccao: 'AUTO_INTELIGENTE'
+        };
+
         // Criar referência com indicação de detecção automática
         referenciasClientes[convidadoId] = {
             codigo: codigo,
@@ -707,9 +861,20 @@ async function criarReferenciaAutomaticaInteligente(convidadorId, convidadoId, g
             obs: 'Referência criada por detecção automática inteligente'
         };
 
-        codigosReferencia[codigo] = convidadoId;
-
         console.log(`   ✅ INTELIGENTE: Referência criada: ${codigo} (${nomeConvidador} → ${nomeConvidado})`);
+
+        // CORRIGIDO: Inicializar saldo de bônus do convidador
+        if (!bonusSaldos[convidadorId]) {
+            bonusSaldos[convidadorId] = {
+                saldo: 0,
+                detalhesReferencias: {},
+                historicoSaques: [],
+                totalReferencias: 0
+            };
+        }
+
+        // Salvar dados
+        agendarSalvamento();
 
         // Enviar notificação ao convidador com indicação de auto-detecção
         try {
@@ -722,7 +887,7 @@ async function criarReferenciaAutomaticaInteligente(convidadorId, convidadoId, g
 ⚠️ *Esta referência foi criada automaticamente*
 Se não foi você quem convidou este membro, digite *.cancelar ${codigo}* para cancelar.
 
-💰 Ganhe 10MB por cada 100MT que ele gastar!`;
+💰 Ganhe 200MB a cada compra deles (até 5 compras = 1GB)!`;
 
             await client.sendMessage(convidadorId, mensagemNotificacao);
             console.log(`   ✅ INTELIGENTE: Notificação enviada ao convidador`);
@@ -758,10 +923,12 @@ async function criarReferenciaAutomaticaBackup(convidadorId, convidadoId, grupoI
         // Gerar código único para esta referência
         const codigo = gerarCodigoReferencia(convidadorId);
 
-        // Registrar código de referência
+        // Registrar código de referência (ESTRUTURA PADRONIZADA)
         codigosReferencia[codigo] = {
-            criador: convidadorId,
-            dataCreacao: new Date().toISOString(),
+            dono: convidadorId, // CORRIGIDO: usar 'dono' em vez de 'criador'
+            nome: 'AutoBackup', // Nome simplificado para referências backup
+            criado: new Date().toISOString(),
+            ativo: true,
             usado: true,
             usadoPor: convidadoId,
             dataUso: new Date().toISOString(),
@@ -802,8 +969,8 @@ async function criarReferenciaAutomaticaBackup(convidadorId, convidadoId, grupoI
             backup: true
         };
 
-        // Salvar dados
-        // Sistema de cache otimizado - sem salvamento em arquivos
+        // CORRIGIDO: Salvar dados (reativar salvamento para persistir referências)
+        agendarSalvamento();
 
         // Obter nomes dos participantes para notificação
         const nomeConvidador = await obterNomeContato(convidadorId);
@@ -1274,10 +1441,12 @@ async function criarReferenciaAutomatica(convidadorId, convidadoId, grupoId) {
         // Gerar código único para esta referência (para compatibilidade com sistema antigo)
         const codigo = gerarCodigoReferencia(convidadorId);
 
-        // Registrar código de referência
+        // Registrar código de referência (ESTRUTURA PADRONIZADA)
         codigosReferencia[codigo] = {
-            criador: convidadorId,
-            dataCreacao: new Date().toISOString(),
+            dono: convidadorId, // CORRIGIDO: usar 'dono' em vez de 'criador'
+            nome: 'Auto', // Nome simplificado para referências automáticas
+            criado: new Date().toISOString(),
+            ativo: true,
             usado: true,
             usadoPor: convidadoId,
             dataUso: new Date().toISOString(),
@@ -1315,8 +1484,8 @@ async function criarReferenciaAutomatica(convidadorId, convidadoId, grupoId) {
             automatico: true
         };
 
-        // Salvar dados
-        // Sistema de cache otimizado - sem salvamento em arquivos
+        // CORRIGIDO: Salvar dados (reativar salvamento para persistir referências)
+        agendarSalvamento();
 
         // Obter nomes dos participantes para notificação
         const nomeConvidador = await obterNomeContato(convidadorId);
@@ -1887,56 +2056,65 @@ const MODERACAO_CONFIG = {
 
 // Configuração para cada grupo
 const CONFIGURACAO_GRUPOS = {
-      '120363402302455817@g.us': {
-        nome: 'KA-NET',
-        tabela: `SUPER PROMOÇÃO NA VODACOM🛑🔥😍
+       '258820749141-1441573529@g.us': {
+        nome: 'Data Store - Vodacom',
+        tabela: `SUPER PROMOÇÃO  DE 🛜ⓂEGAS✅ VODACOM A MELHOR PREÇO DO MERCADO - 04-05/09/2025
 
 📆 PACOTES DIÁRIOS
-512MB = 10MT
-1024MB = 16MT
-1200MB = 20MT
-1560MB = 25MT
-2048MB = 32MT
-3200MB = 54MT 
-4250MB = 68MT 
-5350MB = 90MT 
-10240MB = 160MT
+512MB 💎 10MT 💵💽
+900MB 💎 15MT 💵💽
+1080MB 💎 17MT 💵💽
+1200MB 💎 20MT 💵💽
+2150MB 💎 34MT 💵💽
+3200MB 💎 51MT 💵💽
+4250MB 💎 68MT 💵💽
+5350MB 💎 85MT 💵💽
+10240MB 💎 160MT 💵💽
+20480MB 💎 320MT 💵💽
 
-⿣PACOTE DIÁRIO PREMIUM (3 Dias)
-2000MB + 300MB = 40MT
-3000MB + 300MB = 66MT 
-4000MB + 300MB = 72MT 
-5000MB + 300MB = 85MT
-6000MB + 300MB = 110MT 
-7000MB + 300MB = 125MT 
-10000Mb + 300MB = 180MT 
+📅PACOTE DIÁRIO PREMIUM (3 Dias)
+2000 + 700MB 💎 44MT 💵💽
+3000 + 700MB 💎 66MT 💵💽
+4000 + 700MB 💎 88MT 💵💽
+5000 + 700MB 💎 109MT 💵💽
+6000 + 700MB 💎 133MT 💵💽
+7000 + 700MB 💎 149MT 💵💽
+10000 + 700MB 💎 219MT 💵💽
 
-⿧PACOTE SEMANAL (7 dias)
-5000MB + 700MB = 95MT
-8000MB + 700MB = 140MT
-10000MB + 500MB = 190MT
-15000MB + 500MB = 290MT
+📅 PACOTES SEMANAIS(5 Dias)
+3072 + 700MB 💎 105MT 💵💽
+5120 + 700MB 💎 155MT 💵💽
+10240 + 700MB 💎 300MT 💵💽
+15360 + 700MB 💎 455MT 💵💽
+20480 + 700MB 💎 600MT 💵💽
 
-Mensal (Válido Por 30 Dias)
-5GB = 150MT
-10GB = 250MT
-35GB = 710MT
-50GB = 1030MT
-100GB = 2040MT
+📅 PACOTES MENSAIS
+12.8GB 💎 270MT 💵💽
+22.8GB 💎 435MT 💵💽
+32.8GB 💎 605MT 💵💽
+52.8GB 💎 945MT 💵💽
+102.8GB 💎 1605MT 💵💽
 
-📅 PACOTES DIAMANTE MENSAIS 💎
-Chamadas + SMS ilimitadas + 11GB = 440MT 
-Chamadas + SMS ilimitadas + 24GB = 820MT 
-Chamadas + SMS ilimitadas + 50GB = 1550MT 
-Chamadas + SMS ilimitadas + 100GB = 2250MT
+
+PACOTES DIAMANTE MENSAIS
+Chamadas + SMS ilimitadas + 11GB 💎 460MT 💵
+Chamadas + SMS ilimitadas + 24GB 💎 820MT 💵
+Chamadas + SMS ilimitadas + 50GB 💎 1550MT 💵
+Chamadas + SMS ilimitadas + 100GB 💎 2250MT 💵
+
+⚠ NB: Válido apenas para Vodacom
 `,
-        pagamento: `- 📲 𝗘-𝗠𝗢𝗟𝗔: 864882152💶💰
-- Catia Anabela Nharrava 
-- 📲 𝗠-𝗣𝗘𝗦𝗔: 856268811💷💰 
-- ↪📞Kelven Junior Anabela Nharrava
-`
-    },
-    
+
+        pagamento: `FORMAS DE PAGAMENTO ATUALIZADAS
+ 
+1- M-PESA 
+NÚMERO: 848715208
+NOME:  NATACHA ALICE
+
+NÚMERO: 871112049
+NOME: NATACHA ALICE`
+    }
+    
 };
 
 
@@ -2565,52 +2743,8 @@ async function registrarComprador(grupoId, numeroComprador, nomeContato, valorTr
 
 // === FILA DE MENSAGENS ===
 
-function adicionarNaFila(mensagem, autor, nomeGrupo, timestamp) {
-    const item = {
-        conteudo: mensagem,
-        autor: autor,
-        grupo: nomeGrupo,
-        timestamp: timestamp,
-        id: Date.now() + Math.random()
-    };
-
-    filaMensagens.push(item);
-    console.log(`📥 Adicionado à fila: ${filaMensagens.length} mensagens`);
-
-    if (!processandoFila) {
-        processarFila();
-    }
-}
-
-async function processarFila() {
-    if (processandoFila || filaMensagens.length === 0) {
-        return;
-    }
-
-    processandoFila = true;
-    console.log(`🚀 Processando ${filaMensagens.length} mensagens...`);
-
-    while (filaMensagens.length > 0) {
-        const item = filaMensagens.shift();
-
-        try {
-            await client.sendMessage(ENCAMINHAMENTO_CONFIG.numeroDestino, item.conteudo);
-            console.log(`✅ Encaminhado: ${item.conteudo.substring(0, 50)}...`);
-
-            if (filaMensagens.length > 0) {
-                await new Promise(resolve => setTimeout(resolve, ENCAMINHAMENTO_CONFIG.intervaloSegundos * 1000));
-            }
-
-        } catch (error) {
-            console.error(`❌ Erro ao encaminhar:`, error);
-            filaMensagens.unshift(item);
-            await new Promise(resolve => setTimeout(resolve, 10000));
-        }
-    }
-
-    processandoFila = false;
-    console.log(`🎉 Fila processada!`);
-}
+// REMOVIDO: Funções de processamento de fila de encaminhamento
+// (Sistema movido para outro bot)
 
 // === EVENTOS DO BOT ===
 
@@ -2637,6 +2771,15 @@ client.on('ready', async () => {
     console.log('📊 Google Sheets configurado!');
     console.log(`🔗 URL: ${GOOGLE_SHEETS_CONFIG.scriptUrl}`);
     console.log('🤖 Bot Retalho - Lógica simples igual ao Bot Atacado!');
+
+    // Configurar cliente global para notificações
+    clienteGlobal = client;
+
+    // Verificar se o bot acabou de ser reiniciado e notificar grupos
+    await verificarReinicio();
+
+    // Iniciar limpeza automática de cache
+    iniciarLimpezaAutomatica();
 
     // Carregar mapeamentos LID salvos
     await carregarMapeamentos();
@@ -4547,7 +4690,9 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                     criado: new Date().toISOString(),
                     ativo: true
                 };
-                // Sistema de cache otimizado - sem salvamento em arquivos
+
+                // CORRIGIDO: Salvar dados ao criar novo código
+                agendarSalvamento();
             }
 
             await message.reply(
@@ -4620,11 +4765,28 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                     dataRegistro: new Date().toISOString(),
                     comprasRealizadas: 0
                 };
-                
-                // Sistema de cache otimizado - sem salvamento em arquivos
-                
+
                 const convidadorId = codigosReferencia[codigo].dono;
                 const nomeConvidador = codigosReferencia[codigo].nome;
+
+                // CORRIGIDO: Marcar código como usado
+                codigosReferencia[codigo].usado = true;
+                codigosReferencia[codigo].usadoPor = remetente;
+                codigosReferencia[codigo].dataUso = new Date().toISOString();
+
+                // CORRIGIDO: Inicializar saldo de bônus do convidador
+                if (!bonusSaldos[convidadorId]) {
+                    bonusSaldos[convidadorId] = {
+                        saldo: 0,
+                        detalhesReferencias: {},
+                        historicoSaques: [],
+                        totalReferencias: 0
+                    };
+                }
+                bonusSaldos[convidadorId].totalReferencias++;
+
+                // CORRIGIDO: Salvar dados
+                agendarSalvamento();
                 
                 await client.sendMessage(message.from, 
                     `✅ *CÓDIGO APLICADO COM SUCESSO!*\n\n` +
