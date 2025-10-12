@@ -4404,21 +4404,50 @@ async function processMessage(message) {
 
             // === COMANDO PARA CONFIGURAR NÚMERO DE RELATÓRIO ===
             if (message.body.startsWith('.config-relatorio ')) {
-                const args = message.body.replace('.config-relatorio ', '').trim().split(/\s+/);
+                console.log(`\n======= DEBUG CONFIG-RELATORIO =======`);
+                console.log(`📥 Mensagem completa: "${message.body}"`);
+
+                const textoSemComando = message.body.replace('.config-relatorio ', '');
+                console.log(`📝 Texto sem comando: "${textoSemComando}"`);
+
+                const args = textoSemComando.trim().split(/\s+/);
+                console.log(`📋 Args array:`, args);
+                console.log(`📋 Args[0]: "${args[0]}" (type: ${typeof args[0]})`);
+                console.log(`📋 Args[1]: "${args[1]}" (type: ${typeof args[1]})`);
+
                 const numeroInput = args[0];
                 const precoRevenda = args[1] ? parseFloat(args[1]) : 16;
 
-                console.log(`🔍 DEBUG config-relatorio: args =`, args);
-                console.log(`🔍 DEBUG: numeroInput = "${numeroInput}" (length: ${numeroInput ? numeroInput.length : 0}), precoRevenda = ${precoRevenda}`);
-                console.log(`🔍 DEBUG: startsWith 258? ${numeroInput ? numeroInput.startsWith('258') : false}`);
-                console.log(`🔍 DEBUG: isNaN? ${isNaN(parseInt(numeroInput))}`);
+                console.log(`\n🔍 VALIDAÇÕES:`);
+                console.log(`  numeroInput = "${numeroInput}"`);
+                console.log(`  length = ${numeroInput ? numeroInput.length : 0}`);
+                console.log(`  precoRevenda = ${precoRevenda}`);
+                console.log(`  startsWith('258') = ${numeroInput ? numeroInput.startsWith('258') : false}`);
 
                 // Validar formato do número (deve começar com 258 e ter 12 dígitos)
                 const numeroLimpo = numeroInput ? numeroInput.trim() : '';
                 const apenasDigitos = /^\d+$/.test(numeroLimpo);
 
+                console.log(`  numeroLimpo = "${numeroLimpo}"`);
+                console.log(`  apenasDigitos = ${apenasDigitos}`);
+                console.log(`  numeroLimpo.length = ${numeroLimpo.length}`);
+                console.log(`  numeroLimpo.startsWith('258') = ${numeroLimpo.startsWith('258')}`);
+
+                console.log(`\n✅ CHECKS:`);
+                console.log(`  !numeroLimpo = ${!numeroLimpo}`);
+                console.log(`  !numeroLimpo.startsWith('258') = ${!numeroLimpo.startsWith('258')}`);
+                console.log(`  numeroLimpo.length !== 12 = ${numeroLimpo.length !== 12}`);
+                console.log(`  !apenasDigitos = ${!apenasDigitos}`);
+                console.log(`======================================\n`);
+
                 if (!numeroLimpo || !numeroLimpo.startsWith('258') || numeroLimpo.length !== 12 || !apenasDigitos) {
-                    await message.reply(`❌ *Número inválido!*\n\n✅ *Formato correto:* 258XXXXXXXXX PREÇO\n\n📝 *Exemplos:*\n\`.config-relatorio 258847123456 17\` (17 MT/GB)\n\`.config-relatorio 258852118624 16\` (16 MT/GB)\n\n⚠️ Se não especificar preço, será usado 16 MT/GB\n\n📊 *Seu número:* "${numeroInput}" (${numeroInput ? numeroInput.length : 0} dígitos)\n*Esperado:* 12 dígitos começando com 258`);
+                    let motivoErro = [];
+                    if (!numeroLimpo) motivoErro.push('número vazio');
+                    if (numeroLimpo && !numeroLimpo.startsWith('258')) motivoErro.push('não começa com 258');
+                    if (numeroLimpo && numeroLimpo.length !== 12) motivoErro.push(`tem ${numeroLimpo.length} dígitos (esperado: 12)`);
+                    if (numeroLimpo && !apenasDigitos) motivoErro.push('contém caracteres não numéricos');
+
+                    await message.reply(`❌ *Número inválido!*\n\n🔍 *Motivo:* ${motivoErro.join(', ')}\n\n✅ *Formato correto:* 258XXXXXXXXX PREÇO\n\n📝 *Exemplos:*\n\`.config-relatorio 258847123456 17\`\n\`.config-relatorio 258852118624 16\`\n\n📊 *Debug info:*\nSeu número: "${numeroInput}"\nLength: ${numeroInput ? numeroInput.length : 0}\nApenas dígitos: ${apenasDigitos}`);
                     return;
                 }
 
