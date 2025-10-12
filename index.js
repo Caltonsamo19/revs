@@ -4404,13 +4404,16 @@ async function processMessage(message) {
 
             // === COMANDO PARA CONFIGURAR NÚMERO DE RELATÓRIO ===
             if (message.body.startsWith('.config-relatorio ')) {
-                const args = message.body.replace('.config-relatorio ', '').trim().split(' ');
+                const args = message.body.replace('.config-relatorio ', '').trim().split(/\s+/);
                 const numeroInput = args[0];
                 const precoRevenda = args[1] ? parseFloat(args[1]) : 16;
 
+                console.log(`🔍 DEBUG config-relatorio: args =`, args);
+                console.log(`🔍 DEBUG: numeroInput = "${numeroInput}", precoRevenda = ${precoRevenda}`);
+
                 // Validar formato do número (deve começar com 258 e ter 12 dígitos)
-                if (!numeroInput.startsWith('258') || numeroInput.length !== 12) {
-                    await message.reply(`❌ *Número inválido!*\n\n✅ *Formato correto:* 258XXXXXXXXX PREÇO\n\n📝 *Exemplos:*\n\`.config-relatorio 258847123456 16\` (16 MT/GB)\n\`.config-relatorio 258847123456 17\` (17 MT/GB)\n\`.config-relatorio 258847123456 18\` (18 MT/GB)\n\n⚠️ Se não especificar preço, será usado 16 MT/GB`);
+                if (!numeroInput || !numeroInput.startsWith('258') || numeroInput.length !== 12 || isNaN(parseInt(numeroInput))) {
+                    await message.reply(`❌ *Número inválido!*\n\n✅ *Formato correto:* 258XXXXXXXXX PREÇO\n\n📝 *Exemplos:*\n\`.config-relatorio 258847123456 16\` (16 MT/GB)\n\`.config-relatorio 258847123456 17\` (17 MT/GB)\n\`.config-relatorio 258847123456 18\` (18 MT/GB)\n\n⚠️ Se não especificar preço, será usado 16 MT/GB\n\n⚠️ *ATENÇÃO:* Use apenas o número, NÃO cole o ID do grupo!`);
                     return;
                 }
 
