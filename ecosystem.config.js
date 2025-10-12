@@ -5,7 +5,7 @@ module.exports = {
     {
       name: 'scheduler-restart',
       script: 'schedule-restart.js',
-      cwd: '/root/bot-revendedores1',
+      cwd: '/root/bot-revededores1',
       instances: 1,
       autorestart: true,
       watch: false,
@@ -13,8 +13,8 @@ module.exports = {
       env: {
         NODE_ENV: 'production'
       },
-      error_file: '/root/bot-revendedores1/logs/scheduler-error.log',
-      out_file: '/root/bot-revendedores1/logs/scheduler-out.log',
+      error_file: '/root/bot-revededores1/logs/scheduler-error.log',
+      out_file: '/root/bot-revededores1/logs/scheduler-out.log',
       time: true
     }
   ]
