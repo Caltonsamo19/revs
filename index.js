@@ -4409,23 +4409,28 @@ async function processMessage(message) {
                 const precoRevenda = args[1] ? parseFloat(args[1]) : 16;
 
                 console.log(`🔍 DEBUG config-relatorio: args =`, args);
-                console.log(`🔍 DEBUG: numeroInput = "${numeroInput}", precoRevenda = ${precoRevenda}`);
+                console.log(`🔍 DEBUG: numeroInput = "${numeroInput}" (length: ${numeroInput ? numeroInput.length : 0}), precoRevenda = ${precoRevenda}`);
+                console.log(`🔍 DEBUG: startsWith 258? ${numeroInput ? numeroInput.startsWith('258') : false}`);
+                console.log(`🔍 DEBUG: isNaN? ${isNaN(parseInt(numeroInput))}`);
 
                 // Validar formato do número (deve começar com 258 e ter 12 dígitos)
-                if (!numeroInput || !numeroInput.startsWith('258') || numeroInput.length !== 12 || isNaN(parseInt(numeroInput))) {
-                    await message.reply(`❌ *Número inválido!*\n\n✅ *Formato correto:* 258XXXXXXXXX PREÇO\n\n📝 *Exemplos:*\n\`.config-relatorio 258847123456 16\` (16 MT/GB)\n\`.config-relatorio 258847123456 17\` (17 MT/GB)\n\`.config-relatorio 258847123456 18\` (18 MT/GB)\n\n⚠️ Se não especificar preço, será usado 16 MT/GB\n\n⚠️ *ATENÇÃO:* Use apenas o número, NÃO cole o ID do grupo!`);
+                const numeroLimpo = numeroInput ? numeroInput.trim() : '';
+                const apenasDigitos = /^\d+$/.test(numeroLimpo);
+
+                if (!numeroLimpo || !numeroLimpo.startsWith('258') || numeroLimpo.length !== 12 || !apenasDigitos) {
+                    await message.reply(`❌ *Número inválido!*\n\n✅ *Formato correto:* 258XXXXXXXXX PREÇO\n\n📝 *Exemplos:*\n\`.config-relatorio 258847123456 17\` (17 MT/GB)\n\`.config-relatorio 258852118624 16\` (16 MT/GB)\n\n⚠️ Se não especificar preço, será usado 16 MT/GB\n\n📊 *Seu número:* "${numeroInput}" (${numeroInput ? numeroInput.length : 0} dígitos)\n*Esperado:* 12 dígitos começando com 258`);
                     return;
                 }
 
                 // Validar preço de revenda (16-18 MT/GB)
-                if (precoRevenda < 16 || precoRevenda > 18) {
-                    await message.reply(`❌ *Preço inválido!*\n\n✅ O preço deve estar entre 16 e 18 MT/GB\n\n📝 *Exemplo:* \`.config-relatorio 258847123456 17\``);
+                if (isNaN(precoRevenda) || precoRevenda < 16 || precoRevenda > 18) {
+                    await message.reply(`❌ *Preço inválido!*\n\n✅ O preço deve estar entre 16 e 18 MT/GB\n\n📝 *Exemplo:* \`.config-relatorio 258847123456 17\`\n\n📊 *Seu preço:* ${precoRevenda}`);
                     return;
                 }
 
                 // Validar se o número existe no mapeamento
-                if (!global.sistemaRelatorios.validarNumeroNoMapeamento(numeroInput, MAPEAMENTO_IDS)) {
-                    await message.reply(`❌ *Número não encontrado no mapeamento!*\n\n⚠️ O número ${numeroInput} não está registrado no sistema.\n\n💡 Apenas números mapeados podem receber relatórios.`);
+                if (!global.sistemaRelatorios.validarNumeroNoMapeamento(numeroLimpo, MAPEAMENTO_IDS)) {
+                    await message.reply(`❌ *Número não encontrado no mapeamento!*\n\n⚠️ O número ${numeroLimpo} não está registrado no sistema.\n\n💡 Apenas números mapeados podem receber relatórios.`);
                     return;
                 }
 
@@ -4434,7 +4439,7 @@ async function processMessage(message) {
                     const grupoNome = chat.name || 'Grupo';
                     const grupoId = message.from;
 
-                    await global.sistemaRelatorios.configurarNumeroRelatorio(grupoId, numeroInput, grupoNome, precoRevenda);
+                    await global.sistemaRelatorios.configurarNumeroRelatorio(grupoId, numeroLimpo, grupoNome, precoRevenda);
 
                     await message.reply(`✅ *Relatórios configurados com sucesso!*\n\n📊 **Grupo:** ${grupoNome}\n📱 **Número:** ${numeroInput}\n💸 **Preço revenda:** ${precoRevenda} MT/GB\n💰 **Lucro por GB:** ${precoRevenda - 12} MT\n\n🕙 Relatórios diários serão enviados às 22:00\n\n💬 Uma mensagem de confirmação foi enviada para o número configurado.`);
 
