@@ -6,23 +6,20 @@ const fssync = require('fs');
 const path = require('path');
 const axios = require('axios'); // npm install axios
 
-// === LIMPEZA AUTOMÁTICA DE CACHE ===
-const CACHE_DIR = path.join(__dirname, '.wwebjs_cache');
-const HORARIOS_FIXOS = [6, 12, 18, 21]; // Horários fixos para limpeza (6h, 12h, 18h e 21h)
-let ultimaLimpeza = new Date();
-let clienteGlobal = null; // Referência ao cliente para enviar notificações
+// === GERENCIAMENTO VIA PM2 ===
+// A limpeza de cache e reinicialização agora são feitas pelo PM2
+// através do script restart-bots.js
+
+// === SISTEMA DE NOTIFICAÇÕES DE REINICIALIZAÇÃO ===
+const ARQUIVO_SINAL_RESTART = path.join(__dirname, '.restart_signal.json');
 
 // Função para enviar notificação em todos os grupos
 async function notificarGrupos(mensagem) {
     try {
-        if (!clienteGlobal) {
-            console.log('⚠️ Cliente não disponível para notificações');
-            return;
-        }
-
-        // Importar CONFIGURACAO_GRUPOS dinamicamente ou usar a variável global
-        const chats = await clienteGlobal.getChats();
+        const chats = await client.getChats();
         const grupos = chats.filter(chat => chat.isGroup);
+
+        console.log(`📢 Enviando notificação para ${grupos.length} grupos...`);
 
         for (const grupo of grupos) {
             try {
@@ -38,194 +35,62 @@ async function notificarGrupos(mensagem) {
     }
 }
 
-// Função para limpar cache e reiniciar sessão (sem perder autenticação)
-async function limparCacheWhatsApp(motivo = 'intervalo') {
+// Verificar se há sinal para notificar antes de desligar
+async function verificarSinalRestart() {
     try {
-        console.log(`🧹 Iniciando limpeza da cache do WhatsApp (${motivo})...`);
+        if (fssync.existsSync(ARQUIVO_SINAL_RESTART)) {
+            const sinal = JSON.parse(await fs.readFile(ARQUIVO_SINAL_RESTART, 'utf-8'));
 
-        // Notificar grupos antes de desconectar
-        const horaAtual = new Date().toLocaleTimeString('pt-BR');
-        await notificarGrupos(`⚠️ *AVISO DE MANUTENÇÃO*\n\n🔧 O bot será reiniciado para manutenção preventiva\n⏱️ Horário: ${horaAtual}\n🎯 Objetivo: Manter o sistema rápido e saudável\n⏳ Tempo estimado: 30-60 segundos\n\n_Aguarde alguns instantes..._`);
+            if (sinal.tipo === 'pre-restart') {
+                console.log('🔔 Sinal de pré-reinicialização detectado!');
 
-        // Aguardar 3 segundos para garantir que as mensagens foram enviadas
-        await new Promise(resolve => setTimeout(resolve, 3000));
+                const horaAtual = new Date().toLocaleTimeString('pt-BR');
+                await notificarGrupos(`⚠️ *AVISO DE MANUTENÇÃO*\n\n🔧 O bot será reiniciado para manutenção preventiva\n⏱️ Horário: ${horaAtual}\n🎯 Objetivo: Manter o sistema rápido e saudável\n⏳ Tempo estimado: 1-2 minutos\n\n_Aguarde alguns instantes..._`);
 
-        // Marcar que está aguardando notificação após reconexão
-        aguardandoNotificacaoReconexao = true;
+                // Aguardar 3 segundos para garantir que as mensagens foram enviadas
+                await new Promise(resolve => setTimeout(resolve, 3000));
 
-        console.log('🔌 Desconectando cliente WhatsApp...');
+                // Marcar como notificado e aguardando restart
+                await fs.writeFile(ARQUIVO_SINAL_RESTART, JSON.stringify({
+                    tipo: 'aguardando-restart',
+                    horaNotificacao: new Date().toISOString()
+                }));
 
-        // Destruir a sessão atual (libera memória RAM e cache)
-        await client.destroy();
-
-        console.log('🧹 Limpando cache do disco...');
-
-        // Limpar cache do disco
-        if (fssync.existsSync(CACHE_DIR)) {
-            await fs.rm(CACHE_DIR, { recursive: true, force: true });
-            console.log('✅ Cache do disco limpa!');
-        }
-
-        // Forçar garbage collection se disponível (limpa memória RAM)
-        if (global.gc) {
-            global.gc();
-            console.log('♻️ Garbage collection executado!');
-        }
-
-        ultimaLimpeza = new Date();
-        console.log(`⏰ Última limpeza: ${ultimaLimpeza.toLocaleString('pt-BR')}`);
-
-        // Aguardar 2 segundos antes de reconectar
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        console.log('🔄 Reinicializando cliente WhatsApp...');
-
-        // Reinicializar cliente (reconecta sem perder autenticação)
-        await client.initialize();
-
-        // Iniciar monitoramento de reconexão (4 minutos)
-        iniciarMonitoramentoReconexao();
-
-        // A notificação de "BOT ONLINE" será enviada automaticamente
-        // quando o evento 'ready' for disparado novamente
-
-    } catch (error) {
-        console.error('❌ Erro ao limpar cache e reiniciar sessão:', error.message);
-
-        // Tentar reinicializar mesmo se houver erro
-        try {
-            console.log('⚠️ Tentando reinicializar cliente após erro...');
-            await client.initialize();
-        } catch (retryError) {
-            console.error('❌ Falha crítica ao reinicializar:', retryError.message);
-        }
-    }
-}
-
-// Variável para controlar se deve notificar após reconexão
-let aguardandoNotificacaoReconexao = false;
-let timeoutReconexao = null;
-let tentativasReconexao = 0;
-const MAX_TENTATIVAS_RECONEXAO = 2;
-const TEMPO_LIMITE_RECONEXAO = 4 * 60 * 1000; // 4 minutos
-
-// Verificar se deve notificar após reconexão automática
-async function verificarNotificacaoReconexao() {
-    try {
-        if (aguardandoNotificacaoReconexao) {
-            console.log('✅ Bot reconectado com sucesso após manutenção');
-
-            // Limpar timeout de monitoramento
-            if (timeoutReconexao) {
-                clearTimeout(timeoutReconexao);
-                timeoutReconexao = null;
+                console.log('✅ Grupos notificados, aguardando PM2 reiniciar...');
             }
-
-            // Aguardar 3 segundos para garantir que o WhatsApp está estável
-            await new Promise(resolve => setTimeout(resolve, 3000));
-
-            const horaAtual = new Date().toLocaleTimeString('pt-BR');
-            const mensagemBase = `✅ *BOT ONLINE*\n\n🎉 Manutenção concluída com sucesso!\n⏰ Horário: ${horaAtual}\n💚 Sistema otimizado e funcionando normalmente`;
-
-            if (tentativasReconexao > 0) {
-                await notificarGrupos(`${mensagemBase}\n\n_Reconectado após ${tentativasReconexao} tentativa(s)_`);
-            } else {
-                await notificarGrupos(`${mensagemBase}\n\n_Todos os serviços estão operacionais!_`);
-            }
-
-            aguardandoNotificacaoReconexao = false;
-            tentativasReconexao = 0;
         }
     } catch (error) {
-        console.error('❌ Erro ao notificar reconexão:', error.message);
+        console.error('❌ Erro ao verificar sinal de restart:', error.message);
     }
 }
 
-// Função para tentar reconexão forçada
-async function tentarReconexaoForcada() {
+// Verificar se acabou de reiniciar e notificar
+async function verificarPosRestart() {
     try {
-        tentativasReconexao++;
-        console.log(`⚠️ Tentando reconexão forçada (tentativa ${tentativasReconexao}/${MAX_TENTATIVAS_RECONEXAO})...`);
+        if (fssync.existsSync(ARQUIVO_SINAL_RESTART)) {
+            const sinal = JSON.parse(await fs.readFile(ARQUIVO_SINAL_RESTART, 'utf-8'));
 
-        // Notificar grupos sobre o retry
-        if (clienteGlobal) {
-            const horaAtual = new Date().toLocaleTimeString('pt-BR');
-            await notificarGrupos(`⚠️ *TENTANDO RECONECTAR*\n\n🔄 O bot está tentando reconectar (tentativa ${tentativasReconexao}/${MAX_TENTATIVAS_RECONEXAO})\n⏰ Horário: ${horaAtual}\n\n_Por favor, aguarde..._`).catch(() => {});
-        }
+            if (sinal.tipo === 'aguardando-restart') {
+                console.log('✅ Bot reiniciado! Notificando grupos...');
 
-        // Tentar destruir e reinicializar novamente
-        try {
-            await client.destroy();
-        } catch (e) {
-            console.log('Cliente já estava destruído');
-        }
+                // Aguardar 5 segundos para garantir que o WhatsApp está conectado
+                await new Promise(resolve => setTimeout(resolve, 5000));
 
-        await new Promise(resolve => setTimeout(resolve, 3000));
+                const horaAtual = new Date().toLocaleTimeString('pt-BR');
+                await notificarGrupos(`✅ *BOT ONLINE*\n\n🎉 Manutenção concluída com sucesso!\n⏰ Horário: ${horaAtual}\n💚 Sistema otimizado e funcionando normalmente\n\n_Todos os serviços estão operacionais!_`);
 
-        await client.initialize();
-
-        // Configurar novo timeout de monitoramento
-        iniciarMonitoramentoReconexao();
-
-    } catch (error) {
-        console.error('❌ Erro na tentativa de reconexão forçada:', error.message);
-
-        if (tentativasReconexao >= MAX_TENTATIVAS_RECONEXAO) {
-            console.error('❌ FALHA CRÍTICA: Máximo de tentativas atingido!');
-            if (clienteGlobal) {
-                await notificarGrupos(`❌ *ERRO CRÍTICO*\n\n⚠️ O bot não conseguiu reconectar após ${MAX_TENTATIVAS_RECONEXAO} tentativas\n🔧 Por favor, verifique o servidor manualmente\n\n_Contate o administrador do sistema_`).catch(() => {});
+                // Remover arquivo de sinal
+                await fs.unlink(ARQUIVO_SINAL_RESTART);
+                console.log('✅ Grupos notificados sobre reconexão!');
             }
-            aguardandoNotificacaoReconexao = false;
-            tentativasReconexao = 0;
-        } else {
-            // Tentar novamente após 4 minutos
-            console.log('⏰ Próxima tentativa em 4 minutos...');
-            setTimeout(tentarReconexaoForcada, TEMPO_LIMITE_RECONEXAO);
         }
+    } catch (error) {
+        console.error('❌ Erro ao verificar pós-restart:', error.message);
     }
 }
 
-// Função para iniciar monitoramento de reconexão
-function iniciarMonitoramentoReconexao() {
-    if (timeoutReconexao) {
-        clearTimeout(timeoutReconexao);
-    }
-
-    timeoutReconexao = setTimeout(() => {
-        if (aguardandoNotificacaoReconexao) {
-            console.log('⚠️ Bot não reconectou dentro de 4 minutos. Iniciando retry...');
-            tentarReconexaoForcada();
-        }
-    }, TEMPO_LIMITE_RECONEXAO);
-}
-
-// Verificar se deve limpar nos horários fixos
-function verificarHorarioFixo() {
-    const agora = new Date();
-    const horaAtual = agora.getHours();
-    const minutoAtual = agora.getMinutes();
-
-    // Verifica se está em um horário fixo e se já não limpou nesta hora
-    if (HORARIOS_FIXOS.includes(horaAtual) && minutoAtual === 0) {
-        const ultimaHora = ultimaLimpeza.getHours();
-        const ultimaData = ultimaLimpeza.toDateString();
-        const dataAtual = agora.toDateString();
-
-        // Só limpa se não limpou nesta hora hoje
-        if (!(ultimaHora === horaAtual && ultimaData === dataAtual)) {
-            limparCacheWhatsApp(`horário fixo ${horaAtual}h`);
-        }
-    }
-}
-
-// Agendar limpeza automática
-function iniciarLimpezaAutomatica() {
-    console.log('⚙️ Limpeza automática de cache ativada:');
-    console.log('   - Horários fixos: 6:00, 12:00, 18:00 e 21:00');
-
-    // Verificar horários fixos a cada minuto
-    setInterval(verificarHorarioFixo, 60 * 1000);
-}
+// Verificar sinais periodicamente (a cada 10 segundos)
+setInterval(verificarSinalRestart, 10000);
 
 // === AXIOS SIMPLIFICADO (SEGUINDO PADRÃO BOT1) ===
 const axiosInstance = axios.create({
@@ -2884,16 +2749,8 @@ client.on('ready', async () => {
     console.log(`🔗 URL: ${GOOGLE_SHEETS_CONFIG.scriptUrl}`);
     console.log('🤖 Bot Retalho - Lógica simples igual ao Bot Atacado!');
 
-    // Configurar cliente global para notificações
-    clienteGlobal = client;
-
-    // Verificar se deve notificar após reconexão automática
-    await verificarNotificacaoReconexao();
-
-    // Iniciar limpeza automática de cache (só na primeira vez)
-    if (!aguardandoNotificacaoReconexao) {
-        iniciarLimpezaAutomatica();
-    }
+    // Verificar se acabou de reiniciar e notificar grupos
+    await verificarPosRestart();
 
     // Carregar mapeamentos LID salvos
     await carregarMapeamentos();
