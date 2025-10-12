@@ -4325,7 +4325,7 @@ async function processMessage(message) {
 
                     await global.sistemaRelatorios.configurarNumeroRelatorio(grupoId, numeroLimpo, grupoNome, precoRevenda);
 
-                    await message.reply(`✅ *Relatórios configurados com sucesso!*\n\n📊 **Grupo:** ${grupoNome}\n📱 **Número:** ${numeroInput}\n💸 **Preço revenda:** ${precoRevenda} MT/GB\n💰 **Lucro por GB:** ${precoRevenda - 12} MT\n\n🕙 Relatórios diários serão enviados às 22:00\n\n💬 Uma mensagem de confirmação foi enviada para o número configurado.`);
+                    await message.reply(`✅ *Relatórios configurados com sucesso!*\n\n📊 **Grupo:** ${grupoNome}\n📱 **Número:** ${numeroInput}\n\n🕙 Relatórios diários serão enviados às 22:00\n\n💬 Uma mensagem de confirmação com detalhes foi enviada para o número configurado.`);
 
                     console.log(`✅ Admin configurou relatórios do grupo ${grupoNome} para ${numeroInput} - Preço: ${precoRevenda} MT/GB`);
                 } catch (error) {
@@ -5126,6 +5126,10 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                 pedidosSaque[referenciaSaque] = pedido;
                 console.log(`✅ Pedido ${referenciaSaque} criado no sistema`);
 
+                // === SALVAMENTO IMEDIATO #1: PEDIDO CRIADO ===
+                console.log(`💾 Salvando pedido de saque imediatamente...`);
+                await salvarDadosReferencia();
+
                 // Debitar do saldo em todos os formatos
                 await atualizarSaldoBonus(remetente, (saldoObj) => {
                     saldoObj.saldo -= quantidadeMB;
@@ -5138,8 +5142,9 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                 });
                 console.log(`✅ Saldo debitado: -${quantidadeMB}MB`);
 
-                // Salvar dados após criar saque
-                agendarSalvamento();
+                // === SALVAMENTO IMEDIATO #2: SALDO DEBITADO ===
+                console.log(`💾 Salvando saldo atualizado imediatamente...`);
+                await salvarDadosReferencia();
 
                 // Enviar para Tasker/Planilha com validação e RETRY automático em caso de duplicata
                 const quantidadeFormatada = quantidadeMB >= 1024 ? `${(quantidadeMB/1024).toFixed(2)}GB` : `${quantidadeMB}MB`;
@@ -5166,35 +5171,8 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                         if (resultadoEnvio && resultadoEnvio.duplicado) {
                             console.warn(`⚠️ DUPLICATA DETECTADA na planilha: ${referenciaFinal} (Status: ${resultadoEnvio.status_existente})`);
 
-                            // Se está PROCESSADO, é realmente duplicata - reverter tudo
-                            if (resultadoEnvio.status_existente === 'PROCESSADO') {
-                                console.error(`❌ Saque ${referenciaFinal} já foi PROCESSADO anteriormente!`);
-
-                                // Reverter débito
-                                await atualizarSaldoBonus(remetente, (saldoObj) => {
-                                    saldoObj.saldo += quantidadeMB;
-                                    if (saldoObj.historicoSaques && saldoObj.historicoSaques.length > 0) {
-                                        saldoObj.historicoSaques.pop();
-                                    }
-                                });
-
-                                // Remover pedido
-                                delete pedidosSaque[referenciaFinal];
-                                agendarSalvamento();
-
-                                await message.reply(
-                                    `⚠️ *SAQUE JÁ PROCESSADO*\n\n` +
-                                    `🔖 Referência: ${referenciaFinal}\n` +
-                                    `📋 Status: ${resultadoEnvio.status_existente}\n\n` +
-                                    `✅ Este saque já foi processado anteriormente.\n` +
-                                    `💰 Seu saldo foi restaurado.\n\n` +
-                                    `📞 Se você não reconhece este saque, contate o suporte.`
-                                );
-                                return;
-                            }
-
-                            // Se está PENDENTE, gerar nova referência e tentar novamente
-                            console.log(`🔄 Gerando nova referência para evitar duplicata...`);
+                            // Gerar nova referência independente do status
+                            console.log(`🔄 Gerando nova referência para evitar duplicata (Status: ${resultadoEnvio.status_existente})...`);
 
                             // Remover pedido antigo
                             delete pedidosSaque[referenciaFinal];
@@ -5225,8 +5203,11 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                                 grupo: message.from
                             };
 
-                            agendarSalvamento();
                             console.log(`✅ Pedido recriado com nova referência: ${novaRef}`);
+
+                            // === SALVAMENTO IMEDIATO #5: NOVA REFERÊNCIA GERADA ===
+                            console.log(`💾 Salvando nova referência imediatamente...`);
+                            await salvarDadosReferencia();
 
                             // Continuar loop para tentar enviar com nova referência
                             continue;
@@ -5268,8 +5249,11 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
 
                     // Remover pedido da lista
                     delete pedidosSaque[referenciaFinal];
-                    agendarSalvamento();
                     console.log(`✅ Saldo restaurado e pedido removido`);
+
+                    // === SALVAMENTO IMEDIATO #4: REVERSÃO DE SALDO ===
+                    console.log(`💾 Salvando reversão de saldo imediatamente...`);
+                    await salvarDadosReferencia();
 
                     await message.reply(
                         `❌ *ERRO AO PROCESSAR SAQUE*\n\n` +
@@ -5314,24 +5298,59 @@ Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codig
                 if (pedidosSaque[referenciaFinal]) {
                     pedidosSaque[referenciaFinal].status = 'enviado';
                     pedidosSaque[referenciaFinal].dataEnvio = new Date().toISOString();
-                    agendarSalvamento();
+
+                    // === SALVAMENTO IMEDIATO #3: PEDIDO ENVIADO ===
+                    console.log(`💾 Salvando status 'enviado' imediatamente...`);
+                    await salvarDadosReferencia();
                 }
 
-                const saldoAtualizado = await buscarSaldoBonus(remetente);
-                const novoSaldo = saldoAtualizado ? saldoAtualizado.saldo : 0;
-                const nomeCliente = sanitizeText(message._data.notifyName || 'N/A');
+                // Enviar mensagem de confirmação ao cliente
+                try {
+                    const saldoAtualizado = await buscarSaldoBonus(remetente);
+                    const novoSaldo = saldoAtualizado ? saldoAtualizado.saldo : 0;
 
-                await message.reply(
-                    `✅ *SOLICITAÇÃO DE SAQUE CRIADA*\n\n` +
-                    `👤 Cliente: ${nomeCliente}\n` +
-                    `📱 Número: ${numeroDestino}\n` +
-                    `💎 Quantidade: ${quantidadeFormatada}\n` +
-                    `🔖 Referência: *${referenciaFinal}*\n` +
-                    `⏰ Processamento: até 24h\n\n` +
-                    `💰 *Novo saldo:* ${novoSaldo}MB\n\n` +
-                    `✅ Pedido enviado para processamento!\n` +
-                    `✅ Obrigado por usar nosso sistema de referências!`
-                );
+                    // Sanitizar nome do cliente (fallback para nome original se falhar)
+                    let nomeCliente = message._data.notifyName || 'N/A';
+                    try {
+                        nomeCliente = sanitizeText(nomeCliente);
+                    } catch (e) {
+                        console.warn('⚠️ Erro ao sanitizar nome, usando original');
+                    }
+
+                    const mensagemSucesso = `✅ *SOLICITAÇÃO DE SAQUE CRIADA*\n\n` +
+                        `👤 Cliente: ${nomeCliente}\n` +
+                        `📱 Número: ${numeroDestino}\n` +
+                        `💎 Quantidade: ${quantidadeFormatada}\n` +
+                        `🔖 Referência: *${referenciaFinal}*\n` +
+                        `⏰ Processamento: até 24h\n\n` +
+                        `💰 *Novo saldo:* ${novoSaldo}MB\n\n` +
+                        `✅ Pedido enviado para processamento!\n` +
+                        `✅ Obrigado por usar nosso sistema de referências!`;
+
+                    console.log(`📤 Enviando confirmação de saque no GRUPO...`);
+
+                    // Enviar no GRUPO (reply na mensagem original)
+                    await message.reply(mensagemSucesso);
+                    console.log(`✅ Confirmação de saque enviada no GRUPO com sucesso!`);
+
+                } catch (errorMensagem) {
+                    console.error('❌ ERRO ao enviar mensagem de confirmação:', errorMensagem);
+                    console.error('Stack:', errorMensagem.stack);
+
+                    // Tentar enviar versão simplificada
+                    try {
+                        await client.sendMessage(message.from,
+                            `✅ *SAQUE CRIADO*\n\n` +
+                            `🔖 Referência: ${referenciaFinal}\n` +
+                            `💎 Quantidade: ${quantidadeFormatada}\n` +
+                            `📱 Número: ${numeroDestino}\n\n` +
+                            `✅ Pedido em processamento!`
+                        );
+                        console.log(`✅ Mensagem simplificada enviada`);
+                    } catch (errorSimples) {
+                        console.error('❌ Falha também na mensagem simplificada:', errorSimples.message);
+                    }
+                }
                 return;
             }
         }
