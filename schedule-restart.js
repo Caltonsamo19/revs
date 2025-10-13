@@ -4,7 +4,12 @@ const { exec } = require('child_process');
 const path = require('path');
 
 // === CONFIGURAÇÃO ===
-const HORARIO_RESTART = { hora: 18, minuto: 0 }; // 18:00
+const HORARIOS_RESTART = [
+    { hora: 6, minuto: 0 },   // 06:00
+    { hora: 12, minuto: 0 },  // 12:00
+    { hora: 18, minuto: 0 },  // 18:00
+    { hora: 20, minuto: 0 }   // 20:00
+];
 const SCRIPT_RESTART = path.join(__dirname, 'restart-bots.js');
 
 function log(mensagem, tipo = 'INFO') {
@@ -22,19 +27,39 @@ function log(mensagem, tipo = 'INFO') {
 
 function calcularProximaExecucao() {
     const agora = new Date();
-    const proxima = new Date();
+    let proximaExecucao = null;
+    let menorDiferenca = Infinity;
 
-    proxima.setHours(HORARIO_RESTART.hora);
-    proxima.setMinutes(HORARIO_RESTART.minuto);
-    proxima.setSeconds(0);
-    proxima.setMilliseconds(0);
+    // Verificar todos os horários de hoje
+    for (const horario of HORARIOS_RESTART) {
+        const execucao = new Date();
+        execucao.setHours(horario.hora);
+        execucao.setMinutes(horario.minuto);
+        execucao.setSeconds(0);
+        execucao.setMilliseconds(0);
 
-    // Se já passou da hora hoje, agendar para amanhã
-    if (proxima <= agora) {
-        proxima.setDate(proxima.getDate() + 1);
+        // Se ainda não passou, calcular diferença
+        if (execucao > agora) {
+            const diferenca = execucao - agora;
+            if (diferenca < menorDiferenca) {
+                menorDiferenca = diferenca;
+                proximaExecucao = execucao;
+            }
+        }
     }
 
-    return proxima;
+    // Se não encontrou nenhum horário hoje, pegar o primeiro de amanhã
+    if (!proximaExecucao) {
+        const primeiroHorario = HORARIOS_RESTART[0];
+        proximaExecucao = new Date();
+        proximaExecucao.setDate(proximaExecucao.getDate() + 1);
+        proximaExecucao.setHours(primeiroHorario.hora);
+        proximaExecucao.setMinutes(primeiroHorario.minuto);
+        proximaExecucao.setSeconds(0);
+        proximaExecucao.setMilliseconds(0);
+    }
+
+    return proximaExecucao;
 }
 
 function calcularTempoRestante(proximaExecucao) {
@@ -79,7 +104,10 @@ function agendarProximaExecucao() {
 function iniciar() {
     log('========================================', 'INFO');
     log('AGENDADOR DE REINICIALIZAÇÃO DE BOTS', 'INFO');
-    log(`Horário configurado: ${HORARIO_RESTART.hora}:${String(HORARIO_RESTART.minuto).padStart(2, '0')}`, 'INFO');
+    log('Horários configurados:', 'INFO');
+    HORARIOS_RESTART.forEach(h => {
+        log(`  - ${String(h.hora).padStart(2, '0')}:${String(h.minuto).padStart(2, '0')}`, 'INFO');
+    });
     log('========================================', 'INFO');
 
     agendarProximaExecucao();
