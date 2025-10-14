@@ -171,6 +171,9 @@ const SistemaCompras = require('./sistema_compras');
 // === IMPORTAR SISTEMA DE RELATÓRIOS ===
 const SistemaRelatorios = require('./sistema_relatorios');
 
+// === IMPORTAR SISTEMA DE BÔNUS ===
+const SistemaBonus = require('./sistema_bonus');
+
 // === CONFIGURAÇÃO GOOGLE SHEETS - BOT RETALHO (SCRIPT PRÓPRIO) ===
 const GOOGLE_SHEETS_CONFIG = {
     scriptUrl: process.env.GOOGLE_SHEETS_SCRIPT_URL_RETALHO || 'https://script.google.com/macros/s/AKfycbyMilUC5bYKGXV95LR4MmyaRHzMf6WCmXeuztpN0tDpQ9_2qkgCxMipSVqYK_Q6twZG/exec',
@@ -232,9 +235,10 @@ const client = new Client({
 require('dotenv').config();
 const ia = new WhatsAppAI(process.env.OPENAI_API_KEY);
 
-// === SISTEMA DE PACOTES (será inicializado após WhatsApp conectar) ===
+// === SISTEMA DE PACOTES E BÔNUS (serão inicializados após WhatsApp conectar) ===
 let sistemaPacotes = null;
 let sistemaCompras = null;
+let sistemaBonus = null;
 
 // REMOVIDO: Sistema de encaminhamento de mensagens
 // (Movido para outro bot)
@@ -1151,6 +1155,12 @@ function agendarSalvamento() {
 
 // Função para buscar saldo de bônus em todos os formatos possíveis
 async function buscarSaldoBonus(userId) {
+    // Usar sistemaBonus se disponível
+    if (sistemaBonus) {
+        return sistemaBonus.buscarSaldo(userId);
+    }
+
+    // Fallback para método antigo (caso sistemaBonus não esteja inicializado)
     console.log(`\n🔍 === BUSCA DE SALDO DETALHADA ===`);
     console.log(`📱 Buscando saldo para userId: "${userId}"`);
 
@@ -1221,6 +1231,13 @@ async function buscarSaldoBonus(userId) {
 
 // Função para atualizar saldo em todos os formatos existentes
 async function atualizarSaldoBonus(userId, operacao) {
+    // Usar sistemaBonus se disponível
+    if (sistemaBonus) {
+        await sistemaBonus.atualizarSaldo(userId, operacao);
+        return;
+    }
+
+    // Fallback para método antigo
     const numeroBase = userId.replace('@c.us', '').replace('@lid', '');
     const formatosPossiveis = [
         numeroBase,
@@ -2041,9 +2058,300 @@ NOME:  NATACHA ALICE
 
 NÚMERO: 871112049
 NOME: NATACHA ALICE`
-    }
-    
+    },
+    '258840161370-1471468657@g.us': {
+        nome: 'Venda Automática 24/7',
+        tabela: `TABELA ATUALIZADA 
+Outubro 2025🥳🥳
+Pacotes exclusivos apenas para Vodacom🔴🔴
+Pacotes Diários, Semanais (Renováveis) e Mensal 
+___________________________
+
+ PACOTE DIÁRIO BÁSICO( 24H⏱) 
+1024MB    - 17,00 MT
+1200MB    - 20,00 MT
+2048MB   - 34,00 MT
+2200MB    - 40,00 MT
+3096MB    - 51,00 MT
+4096MB    - 68,00 MT
+5120MB     - 85,00 MT
+6144MB    - 102,00 MT
+7168MB    - 119,00 MT
+8192MB    - 136,00 MT
+9144MB    - 153,00 MT
+10240MB  - 170,00 MT
+
+ PACOTE DIÁRIO PREMIUM ( 3 DIAS 🗓) 
+Megabyte Renováveis! 
+2000MB  - 44,00 MT
+3000MB  - 66,00 MT
+4000MB  - 88,00 MT
+5000MB - 109,00 MT
+6000MB  - 133,00 MT
+7000MB  - 149,00 MT
+10000MB  - 219,00 MT
+
+PACOTE SEMANAL BÁSICO (5 Dias🗓)
+Megabyte Renováveis!
+1700MB - 45,00MT
+2900MB - 80,00MT
+3400MB - 110,00MT
+5500MB - 150,00MT
+7800MB - 200,00MT
+11400MB - 300,00MT 
+
+ PACOTE SEMANAL PREMIUM ( 15 DIAS 🗓 ) 
+Megabyte Renováveis!
+3000MB - 100,00 MT
+5000MB - 149,00 MT
+8000MB - 201,00 MT
+10000MB - 231,00 MT
+20000MB - 352,00 MT
+
+PACOTE MENSAL EXCLUSIVO (30 dias🗓) 
+Não Renováveis 
+Não pode ter xtuna crédito
+
+
+2.8GB   - 100,00MT
+5.8GB   - 175,00MT
+8.8GB    - 200,00MT
+10.8GB  - 249,00MT
+12.8GB   - 300,00MT
+15.8GB    - 349,00MT
+18.8GB    - 400,00MT
+20.8GB    - 449,00MT
+25.8GB    - 549,00MT
+32.8GB   - 649,00MT
+51.2GB   - 1049,00MT
+60.2GB   - 124900MT
+80.2GB   - 1449,00MT
+100.2GB   - 1700,00MT
+
+🔴🔴 VODACOM
+➖Chamadas +SMS ILIMITADAS ➖p/todas as redes +GB➖
+
+➖ SEMANAL (7dias)➖
+280mt = Ilimitado+ 7.5GB
+
+Mensal(30dias):
+450MT - Ilimitado + 11.5GB.
+500MT - Ilimitado + 14.5GB.
+700MT - Ilimitado + 26.5GB.
+1000MT - Ilimitado + 37.5GB.
+1500MT - Ilimitado + 53.5GB
+2150MT - Ilimitado + 102.5GB
+
+PARA OS PACOTES MENSAIS, NÃO PODE TER TXUNA CRÉDITO.
+
+🟠🟠 MOVITEL
+➖Chamadas +SMS ILIMITADAS ➖p/todas as redes +GB➖
+
+➖ SEMANAL (7dias)➖
+280mt = Ilimitado+ 7.1GB
+
+➖ MENSAL (30dias)➖ p./tds redes
+450mt = Ilimitado+ 9GB
+950mt = Ilimitado+ 23GB
+1450mt = Ilimitado+ 38GB
+1700mt = Ilimitado+ 46GB
+1900mt = Ilimitado+ 53GB
+2400mt = ilimitado+ 68GB
+
+Importante 🚨: Envie o valor que consta na tabela!
+`,
+
+        pagamento: `╭━━━┛ 💸  ＦＯＲＭＡＳ ＤＥ ＰＡＧＡＭＥＮＴＯ: 
+┃
+┃ 🪙 E-Mola: (Glória) 👩‍💻
+┃     860186270  
+┃
+┃ 🪙 M-Pesa:  (Leonor)👨‍💻
+┃     857451196  
+┃
+┃
+┃ ⚠ IMPORTANTE:  
+┃     ▪ Envie o comprovativo em forma de mensagem e o número para receber rápido!
+┃
+┃┃
+╰⚠ NB: Válido apenas para Vodacom━━━━━━  
+       🚀 O futuro é agora. Vamos?`
+    },
+    '120363020570328377@g.us': {
+        nome: ' NET VODACOM ACESSÍVEL',
+        tabela: `🚨📱 INTERNET VODACOM COM OS MELHORES PREÇOS!
+Mega Promoção da NET DA VODACOM ACESSÍVEL — Conecte-se já! 🚀
+
+📅 PACOTES DIÁRIOS (24h de validade)
+
+✅ 1GB - 17MT
+✅ 2GB - 34MT
+✅ 3GB - 51MT
+✅ 4GB - 68MT
+✅ 5GB - 85MT
+✅ 6GB - 102MT
+✅ 7GB - 119MT
+✅ 8GB - 136MT
+✅ 9GB - 153MT
+✅ 10GB - 170MT
+
+
+
+🚨QUANDO PRECISAREM PACOTE MENSAL, ENTRA EM CONTACTO ATRAVÉS DO LINK ABAIXO 👇👇🚨
+
+https://wa.me/258858891101?text=%20Quero%20pacote%20mensal!%20
+
+
+QUANDO PRECISAREM DO  ILIMITADO, EMTREM EM CONTACTO COM O LINK 
+https://wa.me/258858891101?text=%20Quero%20pacote%20ilimitado!%20
+
+
+FORMAS DE PAGAMENTO💰💶
+
+📌 M-PESA:  858891101
+   Nome:  ISAC DA LURDES
+
+📌 E-MOLA: 866291101
+    Nome:   ISAC LURDES 
+
+🚀 O futuro é agora! Vamos? 🔥🛒
+
+
+`,
+
+        pagamento: `FORMAS DE PAGAMENTO💰💶
+
+📌 M-PESA:  858891101
+   Nome:  ISAC DA LURDES
+
+📌 E-MOLA: 866291101
+    Nome:  ISAC LURDES 
+
+📮 Após a transferência enviei o comprovante em forma do cópia junto com seu número.
+ 
+> 1. 🚨Não mande comprovativo em formato de imagem 📸🚨
+
+> 2.  🚨 Não mande valor que não têm na tabela🚨
+
+🚀 O futuro é agora! Vamos? 🔥🛒
+`
+    },
+    '120363022366545020@g.us': {
+        nome: 'MNGmegas Elite Net',
+        tabela: `🚨MB DA VODACOM 📶🌐
+
+🔥 Imperdível! Nosso pacote diário e semanal, txuna! Não leva💸
+⚡ Aproveite já, pode acabar a qualquer momento! 🚀
+
+⏰PACOTE DIÁRIO🛒📦
+🌐256MB = 7MT
+🌐512MB = 10MT
+🌐1024MB = 17MT
+🌐1280MB = 25MT
+🌐2048MB = 34MT
+🌐3072MB = 51MT
+🌐4096MB = 68MT
+🌐5120MB = 85MT
+🌐6144MB = 102MT
+🌐7168MB = 119MT
+🌐8192MB = 136MT
+🌐9216MB = 153MT
+🌐10240MB = 170MT
+
+ 📅PACOTE SEMANAL🛒📦
+⚠ Vai receber 100MB por dia durante 6 dias, totalizando +0.6GB. ⚠
+
+📡3.0GB = 89MT 
+📡5.0GB = 133MT
+📡6.0GB = 158MT 
+📡7.0GB = 175MT 
+📡10.0GB = 265MT
+
+> PARA VER TABELA DO PACOTE MENSAL DIGITE: Mensal
+
+> PARA VER TABELA DO PACOTE  ILIMITADO DIGITE: Ilimitado
+
+
+💳FORMA DE PAGAMENTO:
+
+M-Pesa: 853529033 📱
+- Ercílio UANELA 
+e-Mola: 865627840 📱
+- Alexandre UANELA 
+
+✨ Mais Rápido, Mais Barato, Mais Confiável! ✨
+
+`,
+
+        pagamento: `formas de pagamento💰💶
+
+📌 m-pesa: 853529033 
+   nome: ercílio uanela 
+
+📌 e-mola: 865627840 
+    nome: alexandre uanela  
+
+📮 após a transferência enviei o comprovante em forma do cópia junto com seu número.
+ 
+> 1. 🚨não mande comprovativo em formato de imagem 📸🚨
+
+> 2.  🚨 não mande valor que não têm na tabela🚨
+
+🚀 o futuro é agora! vamos? 🔥🛒
+`
+    },
+    '120363402302455817@g.us': {
+        nome: 'KA-NET',
+        tabela: `SUPER PROMOÇÃO NA VODACOM🛑🔥😍
+
+📆 PACOTES DIÁRIOS
+512MB = 10MT
+1024MB = 16MT
+1200MB = 20MT
+1560MB = 25MT
+2048MB = 32MT
+3200MB = 54MT 
+4250MB = 68MT 
+5350MB = 90MT 
+10240MB = 160MT
+
+⿣PACOTE DIÁRIO PREMIUM (3 Dias)
+300MB + 2000MB = 40MT
+300MB + 3000MB = 66MT 
+300MB + 4000MB = 72MT 
+300MB + 5000MB = 85MT
+300MB + 6000MB = 110MT 
+300MB + 7000MB = 125MT 
+300MB + 10000MB = 180MT 
+
+⿧PACOTE SEMANAL (5 dias)
+500MB + 5000MB = 95MT
+500MB + 8000MB = 140MT
+500MB + 10000MB = 190MT
+500MB + 15000MB = 290MT
+
+Mensal (Válido Por 30 Dias)
+5GB = 150MT
+10GB = 250MT
+35GB = 710MT
+50GB = 1030MT
+100GB = 2040MT
+
+📅 PACOTES DIAMANTE MENSAIS 💎
+Chamadas + SMS ilimitadas + 11GB = 440MT 
+Chamadas + SMS ilimitadas + 24GB = 820MT 
+Chamadas + SMS ilimitadas + 50GB = 1550MT 
+Chamadas + SMS ilimitadas + 100GB = 2250MT
+`,
+        pagamento: `- 📲 𝗘-𝗠𝗢𝗟𝗔: 864882152💶💰
+- Catia Anabela Nharrava 
+- 📲 𝗠-𝗣𝗘𝗦𝗔: 856268811💷💰 
+- ↪📞Kelven Junior Anabela Nharrava
+`
+    }
+    
 };
+
 
 
 // === FUNÇÃO GOOGLE SHEETS ===
@@ -2810,8 +3118,13 @@ client.on('ready', async () => {
     // === INICIALIZAR SISTEMA DE COMPRAS ===
     sistemaCompras = new SistemaCompras();
     console.log('🛒 Sistema de Registro de Compras ATIVADO');
-    
-    // Carregar dados de referência
+
+    // === INICIALIZAR SISTEMA DE BÔNUS ===
+    sistemaBonus = new SistemaBonus();
+    await sistemaBonus.carregarDados();
+    console.log('💰 Sistema de Bônus ATIVADO');
+
+    // Carregar dados de referência (legado - será migrado)
     await carregarDadosReferencia();
     
     await carregarHistorico();
