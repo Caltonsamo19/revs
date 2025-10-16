@@ -4139,16 +4139,23 @@ async function processMessage(message) {
                                         const ultimos9 = numeroMencionado.slice(-9);
                                         console.log(`🔍 Buscando por últimos 9 dígitos: ${ultimos9}`);
 
-                                        // Buscar participante que tenha os mesmos últimos 9 dígitos
-                                        const participanteEncontrado = chat.participants.find(p => {
+                                        // Buscar TODOS os participantes que correspondem (pode haver @c.us E @lid)
+                                        const participantesEncontrados = [];
+                                        chat.participants.forEach(p => {
                                             const pNumero = p.id._serialized.replace('@c.us', '').replace('@lid', '');
                                             const pUltimos9 = pNumero.slice(-9);
-                                            return pUltimos9 === ultimos9 && ultimos9.length === 9;
+                                            if (pUltimos9 === ultimos9 && ultimos9.length === 9) {
+                                                participantesEncontrados.push(p.id._serialized);
+                                            }
                                         });
 
-                                        if (participanteEncontrado) {
-                                            idParaSalvar = participanteEncontrado.id._serialized;
-                                            console.log(`✅ PARTICIPANTE ENCONTRADO: ${idParaSalvar}`);
+                                        console.log(`📋 Participantes encontrados (${participantesEncontrados.length}): ${participantesEncontrados.join(', ')}`);
+
+                                        if (participantesEncontrados.length > 0) {
+                                            // Priorizar @lid sobre @c.us (ID real do WhatsApp)
+                                            const idLid = participantesEncontrados.find(id => id.includes('@lid'));
+                                            idParaSalvar = idLid || participantesEncontrados[0];
+                                            console.log(`✅ USANDO ID: ${idParaSalvar} ${idLid ? '(@lid prioritário)' : ''}`);
                                         } else {
                                             idParaSalvar = mencaoId;
                                             console.log(`⚠️ Participante não encontrado, usando ID da menção: ${idParaSalvar}`);
