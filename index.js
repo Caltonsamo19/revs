@@ -4125,9 +4125,43 @@ async function processMessage(message) {
                         if (numeroDestino.startsWith('@')) {
                             console.log(`🔍 Detectada menção (@)`);
                             if (message.mentionedIds && message.mentionedIds.length > 0) {
-                                // USAR DIRETAMENTE O ID DA MENÇÃO (igual ao ranking)
-                                idParaSalvar = message.mentionedIds[0];
-                                console.log(`✅ ID da menção (igual sistema de compras): ${idParaSalvar}`);
+                                const mencaoId = message.mentionedIds[0];
+                                console.log(`📱 ID da menção inicial: ${mencaoId}`);
+
+                                // BUSCAR O PARTICIPANTE REAL NO GRUPO
+                                try {
+                                    const chat = await message.getChat();
+                                    if (chat.isGroup && chat.participants) {
+                                        console.log(`🔍 Buscando participante real no grupo (${chat.participants.length} participantes)...`);
+
+                                        // Extrair últimos 9 dígitos do número mencionado
+                                        const numeroMencionado = mencaoId.replace('@c.us', '').replace('@lid', '');
+                                        const ultimos9 = numeroMencionado.slice(-9);
+                                        console.log(`🔍 Buscando por últimos 9 dígitos: ${ultimos9}`);
+
+                                        // Buscar participante que tenha os mesmos últimos 9 dígitos
+                                        const participanteEncontrado = chat.participants.find(p => {
+                                            const pNumero = p.id._serialized.replace('@c.us', '').replace('@lid', '');
+                                            const pUltimos9 = pNumero.slice(-9);
+                                            return pUltimos9 === ultimos9 && ultimos9.length === 9;
+                                        });
+
+                                        if (participanteEncontrado) {
+                                            idParaSalvar = participanteEncontrado.id._serialized;
+                                            console.log(`✅ PARTICIPANTE ENCONTRADO: ${idParaSalvar}`);
+                                        } else {
+                                            idParaSalvar = mencaoId;
+                                            console.log(`⚠️ Participante não encontrado, usando ID da menção: ${idParaSalvar}`);
+                                        }
+                                    } else {
+                                        idParaSalvar = mencaoId;
+                                        console.log(`⚠️ Não é grupo, usando ID da menção: ${idParaSalvar}`);
+                                    }
+                                } catch (error) {
+                                    console.error(`❌ Erro ao buscar participante:`, error);
+                                    idParaSalvar = mencaoId;
+                                    console.log(`⚠️ Usando ID da menção por erro: ${idParaSalvar}`);
+                                }
 
                                 // Extrair número para exibição
                                 numeroDestino = idParaSalvar.replace('@c.us', '').replace('@lid', '');
