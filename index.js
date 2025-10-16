@@ -4116,6 +4116,9 @@ async function processMessage(message) {
                         console.log(`📱 Número destino: ${numeroDestino}`);
                         console.log(`💎 Quantidade: ${quantidadeStr}`);
 
+                        // CRUCIAL: Guardar o ID real do WhatsApp para uso correto
+                        let idRealWhatsApp = null;
+
                         // Verificar se é menção ou número direto
                         if (numeroDestino.startsWith('@')) {
                             console.log(`🔍 Detectada menção (@)`);
@@ -4123,11 +4126,13 @@ async function processMessage(message) {
                             const numeroMencao = numeroDestino.substring(1);
                             if (message.mentionedIds && message.mentionedIds.length > 0) {
                                 console.log(`✅ Menções encontradas: ${message.mentionedIds.join(', ')}`);
-                                // Usar a primeira menção encontrada
-                                const mencaoId = message.mentionedIds[0];
-                                // Remover AMBOS os sufixos possíveis (@c.us e @lid)
-                                numeroDestino = mencaoId.replace('@c.us', '').replace('@lid', '');
-                                console.log(`📱 Número extraído da menção: ${numeroDestino}`);
+                                // GUARDAR O ID REAL DO WHATSAPP (pode ser @lid ou @c.us)
+                                idRealWhatsApp = message.mentionedIds[0];
+                                console.log(`🎯 ID REAL DO WHATSAPP: ${idRealWhatsApp}`);
+
+                                // Extrair número para exibição apenas
+                                numeroDestino = idRealWhatsApp.replace('@c.us', '').replace('@lid', '');
+                                console.log(`📱 Número extraído para exibição: ${numeroDestino}`);
                             } else {
                                 console.log(`⚠️ Nenhuma menção encontrada, usando número após @`);
                                 // Tentar usar o número após @
@@ -4135,24 +4140,30 @@ async function processMessage(message) {
                             }
                         }
 
-                        console.log(`🔎 Validando número: "${numeroDestino}"`);
-                        console.log(`   - Tem 9 dígitos? ${/^\d{9}$/.test(numeroDestino)}`);
-                        console.log(`   - Tem 12 dígitos? ${/^\d{12}$/.test(numeroDestino)}`);
-                        console.log(`   - É ID @lid? ${/^\d+$/.test(numeroDestino)}`);
+                        // Se não veio de menção, validar o número
+                        if (!idRealWhatsApp) {
+                            console.log(`🔎 Validando número: "${numeroDestino}"`);
+                            console.log(`   - Tem 9 dígitos? ${/^\d{9}$/.test(numeroDestino)}`);
+                            console.log(`   - Tem 12 dígitos? ${/^\d{12}$/.test(numeroDestino)}`);
+                            console.log(`   - É ID @lid? ${/^\d+$/.test(numeroDestino)}`);
 
-                        // Validar número - aceitar 9 dígitos, 12 dígitos ou IDs @lid (15 dígitos)
-                        if (!/^\d{9,15}$/.test(numeroDestino)) {
-                            console.log(`❌ Número INVÁLIDO: ${numeroDestino}`);
-                            await message.reply(`❌ *NÚMERO INVÁLIDO*\n\n✅ Use formato:\n• *.bonus @usuario 500MB* (com menção)\n• *.bonus @848715208 500MB* (9 dígitos)\n• *.bonus @258848715208 500MB* (12 dígitos)\n• *.bonus 848715208 500MB* (número direto)`);
-                            return;
-                        }
+                            // Validar número - aceitar 9 dígitos, 12 dígitos ou IDs @lid (15 dígitos)
+                            if (!/^\d{9,15}$/.test(numeroDestino)) {
+                                console.log(`❌ Número INVÁLIDO: ${numeroDestino}`);
+                                await message.reply(`❌ *NÚMERO INVÁLIDO*\n\n✅ Use formato:\n• *.bonus @usuario 500MB* (com menção)\n• *.bonus @848715208 500MB* (9 dígitos)\n• *.bonus @258848715208 500MB* (12 dígitos)\n• *.bonus 848715208 500MB* (número direto)`);
+                                return;
+                            }
 
-                        console.log(`✅ Número válido (${numeroDestino.length} dígitos)`);
+                            console.log(`✅ Número válido (${numeroDestino.length} dígitos)`);
 
-                        // Converter para formato completo se necessário (apenas para números de 9 dígitos)
-                        if (numeroDestino.length === 9) {
-                            numeroDestino = '258' + numeroDestino;
-                            console.log(`🔄 Convertido para 12 dígitos: ${numeroDestino}`);
+                            // Converter para formato completo se necessário (apenas para números de 9 dígitos)
+                            if (numeroDestino.length === 9) {
+                                numeroDestino = '258' + numeroDestino;
+                                console.log(`🔄 Convertido para 12 dígitos: ${numeroDestino}`);
+                            }
+
+                            // Criar ID @c.us para números digitados
+                            idRealWhatsApp = `${numeroDestino}@c.us`;
                         }
 
                         // Converter quantidade para MB
@@ -4182,27 +4193,21 @@ async function processMessage(message) {
 
                         console.log(`✅ Quantidade final: ${quantidadeMB}MB`);
 
-                        // IMPORTANTE: Salvar com AMBOS os formatos (@c.us e @lid) para compatibilidade total
-                        const participantIdCus = `${numeroDestino}@c.us`;
-                        const participantIdLid = `${numeroDestino}@lid`;
-                        console.log(`🎯 Salvando em ambos formatos:`);
-                        console.log(`   - @c.us: ${participantIdCus}`);
-                        console.log(`   - @lid: ${participantIdLid}`);
+                        // USAR O ID REAL DO WHATSAPP (que veio de mentionedIds)
+                        console.log(`🎯 Usando ID real do WhatsApp: ${idRealWhatsApp}`);
 
-                        // Inicializar saldo para AMBOS os formatos (para garantir compatibilidade)
-                        for (const participantId of [participantIdCus, participantIdLid]) {
-                            if (!bonusSaldos[participantId]) {
-                                console.log(`🆕 Criando novo registro de bônus para ${participantId}`);
-                                bonusSaldos[participantId] = {
-                                    saldo: 0,
-                                    detalhesReferencias: {},
-                                    historicoSaques: [],
-                                    totalReferencias: 0,
-                                    bonusAdmin: []
-                                };
-                            } else {
-                                console.log(`✅ Registro existente encontrado para ${participantId} (saldo: ${bonusSaldos[participantId].saldo}MB)`);
-                            }
+                        // Inicializar saldo se necessário
+                        if (!bonusSaldos[idRealWhatsApp]) {
+                            console.log(`🆕 Criando novo registro de bônus para ${idRealWhatsApp}`);
+                            bonusSaldos[idRealWhatsApp] = {
+                                saldo: 0,
+                                detalhesReferencias: {},
+                                historicoSaques: [],
+                                totalReferencias: 0,
+                                bonusAdmin: []
+                            };
+                        } else {
+                            console.log(`✅ Registro existente encontrado para ${idRealWhatsApp} (saldo: ${bonusSaldos[idRealWhatsApp].saldo}MB)`);
                         }
 
                         // === ADICIONAR BÔNUS USANDO SISTEMABONUS ===
@@ -4215,7 +4220,7 @@ async function processMessage(message) {
                         if (sistemaBonus) {
                             console.log(`✅ Usando SistemaBonus (método robusto)`);
 
-                            await sistemaBonus.atualizarSaldo(participantIdCus, (saldoObj) => {
+                            await sistemaBonus.atualizarSaldo(idRealWhatsApp, (saldoObj) => {
                                 saldoAnterior = saldoObj.saldo;
                                 saldoObj.saldo += quantidadeMB;
 
@@ -4241,30 +4246,24 @@ async function processMessage(message) {
                             // Fallback para método antigo
                             console.log(`⚠️ SistemaBonus não disponível, usando método antigo`);
 
-                            for (const participantId of [participantIdCus, participantIdLid]) {
-                                if (!bonusSaldos[participantId]) {
-                                    bonusSaldos[participantId] = { saldo: 0, detalhesReferencias: {} };
-                                }
+                            saldoAnterior = bonusSaldos[idRealWhatsApp].saldo;
+                            bonusSaldos[idRealWhatsApp].saldo += quantidadeMB;
 
-                                saldoAnterior = bonusSaldos[participantId].saldo;
-                                bonusSaldos[participantId].saldo += quantidadeMB;
-
-                                // Registrar histórico de bônus admin
-                                if (!bonusSaldos[participantId].bonusAdmin) {
-                                    bonusSaldos[participantId].bonusAdmin = [];
-                                }
-
-                                bonusSaldos[participantId].bonusAdmin.push({
-                                    quantidade: quantidadeMB,
-                                    data: new Date().toISOString(),
-                                    admin: autorMensagem,
-                                    motivo: 'Bônus administrativo'
-                                });
-
-                                novoSaldo = bonusSaldos[participantId].saldo;
+                            // Registrar histórico de bônus admin
+                            if (!bonusSaldos[idRealWhatsApp].bonusAdmin) {
+                                bonusSaldos[idRealWhatsApp].bonusAdmin = [];
                             }
 
-                            console.log(`💰 Saldo atualizado em ambos formatos: ${saldoAnterior}MB → ${novoSaldo}MB (+${quantidadeMB}MB)`);
+                            bonusSaldos[idRealWhatsApp].bonusAdmin.push({
+                                quantidade: quantidadeMB,
+                                data: new Date().toISOString(),
+                                admin: autorMensagem,
+                                motivo: 'Bônus administrativo'
+                            });
+
+                            novoSaldo = bonusSaldos[idRealWhatsApp].saldo;
+
+                            console.log(`💰 Saldo atualizado: ${saldoAnterior}MB → ${novoSaldo}MB (+${quantidadeMB}MB)`);
 
                             // Salvar dados IMEDIATAMENTE
                             console.log(`💾 Salvando dados de bônus imediatamente...`);
@@ -4291,19 +4290,19 @@ async function processMessage(message) {
                         try {
                             // SEGUIR PADRÃO DO RANKING (linha 3650-3657)
                             // mentionId = ID sem @c.us e @lid
-                            const mentionId = String(participantIdCus).replace('@c.us', '').replace('@lid', '');
+                            const mentionId = String(idRealWhatsApp).replace('@c.us', '').replace('@lid', '');
 
                             // Mensagem usa @mentionId (apenas o número)
                             const mensagemFinal = mensagemBonus.replace('@NOME_PLACEHOLDER', `@${mentionId}`);
 
-                            // Array mentions recebe o participantId completo (com @c.us)
+                            // Array mentions recebe o idRealWhatsApp completo
                             await client.sendMessage(message.from, mensagemFinal, {
-                                mentions: [participantIdCus]
+                                mentions: [idRealWhatsApp]
                             });
                         } catch (notificationError) {
                             console.error('❌ Erro ao enviar notificação de bônus admin:', notificationError);
                             // Fallback: enviar sem menção
-                            const mentionId = String(participantIdCus).replace('@c.us', '').replace('@lid', '');
+                            const mentionId = String(idRealWhatsApp).replace('@c.us', '').replace('@lid', '');
                             const mensagemFallback = mensagemBonus.replace('@NOME_PLACEHOLDER', mentionId);
                             await message.reply(mensagemFallback);
                         }
