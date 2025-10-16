@@ -2065,90 +2065,90 @@ NOME: NATACHA ALICE`
 Internet e Chamadas Ilimitadas – Vodacom
 Pacotes Diários | Semanais | Mensais
 
-                   OFERTA ESPECIAL – 24 HORAS ⏱
-                     15MT → 750MB
-                     17MT → 1024MB
-                     20MT → 1200MB
-                     34MT → 2048MB
+OFERTA ESPECIAL – 24 HORAS ⏱
+15MT — 750MB
+17MT — 1024MB
+20MT — 1200MB
+34MT — 2048MB
 
-                     PACOTES DIÁRIOS (24H ⏱)
-                     2400MB → 40MT
-                     3072MB → 51MT
-                     4096MB → 68MT
-                     5120MB → 85MT
-                     6144MB → 102MT
-                     7168MB → 119MT
-                     8192MB → 136MT
-                     9144MB → 153MT
-                     10240MB → 170MT
+PACOTES DIÁRIOS (24H ⏱)
+2400MB — 40MT
+3072MB — 51MT
+4096MB — 68MT
+5120MB — 85MT
+6144MB — 102MT
+7168MB — 119MT
+8192MB — 136MT
+9144MB — 153MT
+10240MB — 170MT
 
-                 PACOTES PREMIUM (3 DIAS 🗓 – RENOVÁVEIS)
-                     2000MB → 44MT
-                     3000MB → 66MT
-                     4000MB → 88MT
-                     5000MB → 109MT
-                     6000MB → 133MT
-                     7000MB → 149MT
-                     10000MB → 219MT
-                 Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 3 dias
+PACOTES PREMIUM (3 DIAS 🗓 – RENOVÁVEIS)
+2000MB — 44MT
+3000MB — 66MT
+4000MB — 88MT
+5000MB — 109MT
+6000MB — 133MT
+7000MB — 149MT
+10000MB — 219MT
+Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 3 dias
 
-                 SEMANAIS BÁSICOS (5 DIAS 🗓 – RENOVÁVEIS)
-                     1700MB → 45MT
-                     2900MB → 80MT
-                     3400MB → 110MT
-                     5500MB → 150MT
-                     7800MB → 200MT
-                     11400MB → 300MT
-                 Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 5 dias
+SEMANAIS BÁSICOS (5 DIAS 🗓 – RENOVÁVEIS)
+1700MB — 45MT
+2900MB — 80MT
+3400MB — 110MT
+5500MB — 150MT
+7800MB — 200MT
+11400MB — 300MT
+Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 5 dias
 
-                 SEMANAIS PREMIUM (15 DIAS 🗓 – RENOVÁVEIS)
-                     3000MB → 100MT
-                     5000MB → 149MT
-                     8000MB → 201MT
-                     10000MB → 231MT
-                     20000MB → 352MT
-                 Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 15 dias
+SEMANAIS PREMIUM (15 DIAS 🗓 – RENOVÁVEIS)
+3000MB — 100MT
+5000MB — 149MT
+8000MB — 201MT
+10000MB — 231MT
+20000MB — 352MT
+Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 15 dias
 
-                PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
-                     2.8GB → 100MT
-                     5.8GB → 175MT
-                     8.8GB → 200MT
-                     10.8GB → 249MT
-                     12.8GB → 300MT
-                     15.8GB → 349MT
-                     18.8GB → 400MT
-                     20.8GB → 449MT
-                     25.8GB → 549MT
-                     32.8GB → 649MT
-                     51.2GB → 1049MT
-                     60.2GB → 1249MT
-                     80.2GB → 1449MT
-                     100.2GB → 1700MT
-                Observação: Pacotes mensais não compatíveis com Txuna
+PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
+2.8GB — 100MT
+5.8GB — 175MT
+8.8GB — 200MT
+10.8GB — 249MT
+12.8GB — 300MT
+15.8GB — 349MT
+18.8GB — 400MT
+20.8GB — 449MT
+25.8GB — 549MT
+32.8GB — 649MT
+51.2GB — 1049MT
+60.2GB — 1249MT
+80.2GB — 1449MT
+100.2GB — 1700MT
+Observação: Pacotes mensais não compatíveis com Txuna
 
-                 CHAMADAS ILIMITADAS — VODACOM 📞 ♾
-Semanal (7 dias):    280MT → Ilimitadas + 7.5GB
-Mensais (30 dias):   449MT → Ilimitadas + 11GB ✨
-                     500MT → Ilimitadas + 14.5GB
-                     700MT → Ilimitadas + 26.5GB
-                     1000MT → Ilimitadas + 37.5GB
-                     1500MT → Ilimitadas + 53.5GB
-                     2150MT → Ilimitadas + 102.5GB
+CHAMADAS ILIMITADAS — VODACOM 📞 ♾
+Semanal (7 dias) — 280MT — Ilimitadas + 7.5GB
+Mensais (30 dias) — 449MT — Ilimitadas + 11GB ✨
+500MT — Ilimitadas + 14.5GB
+700MT — Ilimitadas + 26.5GB
+1000MT — Ilimitadas + 37.5GB
+1500MT — Ilimitadas + 53.5GB
+2150MT — Ilimitadas + 102.5GB
 Inclui chamadas e SMS ilimitadas para todas as redes
 
-                 CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
-Semanal (7 dias):    280MT → Ilimitadas + 7.1GB
-Mensais (30 dias):   449MT → Ilimitadas + 9GB ✨
-                     950MT → Ilimitadas + 23GB
-                     1450MT → Ilimitadas + 38GB
-                     1700MT → Ilimitadas + 46GB
-                     1900MT → Ilimitadas + 53GB
-                     2400MT → Ilimitadas + 68GB
+CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
+Semanal (7 dias) — 280MT — Ilimitadas + 7.1GB
+Mensais (30 dias) — 449MT — Ilimitadas + 9GB ✨
+950MT — Ilimitadas + 23GB
+1450MT — Ilimitadas + 38GB
+1700MT — Ilimitadas + 46GB
+1900MT — Ilimitadas + 53GB
+2400MT — Ilimitadas + 68GB
 Inclui chamadas e SMS ilimitadas para todas as redes
 
-                 🔹 CONEXÃO SEM LIMITES 🔹
-Internet rápida, chamadas e SMS ilimitadas.  
-Pacotes exclusivos Vodacom e Movitel.  
+🔹 CONEXÃO SEM LIMITES 🔹
+Internet rápida, chamadas e SMS ilimitadas.
+Pacotes exclusivos Vodacom e Movitel.
 Sempre conectado, sempre no controle!
 `,
 
