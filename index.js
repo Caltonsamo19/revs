@@ -4126,9 +4126,38 @@ async function processMessage(message) {
                             const numeroMencao = numeroDestino.substring(1);
                             if (message.mentionedIds && message.mentionedIds.length > 0) {
                                 console.log(`✅ Menções encontradas: ${message.mentionedIds.join(', ')}`);
-                                // GUARDAR O ID REAL DO WHATSAPP (pode ser @lid ou @c.us)
-                                idRealWhatsApp = message.mentionedIds[0];
-                                console.log(`🎯 ID REAL DO WHATSAPP: ${idRealWhatsApp}`);
+
+                                // BUSCAR O ID REAL DO PARTICIPANTE NO GRUPO
+                                const mencaoId = message.mentionedIds[0];
+                                console.log(`📱 ID da menção: ${mencaoId}`);
+
+                                try {
+                                    // Tentar obter o chat do grupo para buscar o participante real
+                                    const chat = await message.getChat();
+                                    if (chat.isGroup) {
+                                        // Buscar o participante no grupo
+                                        const numeroSemSufixo = mencaoId.replace('@c.us', '').replace('@lid', '');
+                                        const participante = chat.participants.find(p => {
+                                            const pNumero = p.id._serialized.replace('@c.us', '').replace('@lid', '');
+                                            return pNumero === numeroSemSufixo || p.id._serialized === mencaoId;
+                                        });
+
+                                        if (participante) {
+                                            idRealWhatsApp = participante.id._serialized;
+                                            console.log(`🎯 ID REAL DO PARTICIPANTE NO GRUPO: ${idRealWhatsApp}`);
+                                        } else {
+                                            idRealWhatsApp = mencaoId;
+                                            console.log(`⚠️ Participante não encontrado no grupo, usando ID da menção: ${idRealWhatsApp}`);
+                                        }
+                                    } else {
+                                        idRealWhatsApp = mencaoId;
+                                        console.log(`⚠️ Não é grupo, usando ID da menção: ${idRealWhatsApp}`);
+                                    }
+                                } catch (error) {
+                                    console.error(`❌ Erro ao buscar participante:`, error);
+                                    idRealWhatsApp = mencaoId;
+                                    console.log(`⚠️ Usando ID da menção por fallback: ${idRealWhatsApp}`);
+                                }
 
                                 // Extrair número para exibição apenas
                                 numeroDestino = idRealWhatsApp.replace('@c.us', '').replace('@lid', '');
