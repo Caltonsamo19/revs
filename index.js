@@ -4135,16 +4135,41 @@ async function processMessage(message) {
                                     // Tentar obter o chat do grupo para buscar o participante real
                                     const chat = await message.getChat();
                                     if (chat.isGroup) {
-                                        // Buscar o participante no grupo
+                                        // Buscar o participante no grupo - TENTAR TODAS AS CORRESPONDÊNCIAS POSSÍVEIS
                                         const numeroSemSufixo = mencaoId.replace('@c.us', '').replace('@lid', '');
+
+                                        // Buscar por correspondência exata de número OU por ID
                                         const participante = chat.participants.find(p => {
-                                            const pNumero = p.id._serialized.replace('@c.us', '').replace('@lid', '');
-                                            return pNumero === numeroSemSufixo || p.id._serialized === mencaoId;
+                                            const pId = p.id._serialized;
+                                            const pNumero = pId.replace('@c.us', '').replace('@lid', '');
+
+                                            // Tentar correspondência direta
+                                            if (pId === mencaoId) return true;
+                                            if (pNumero === numeroSemSufixo) return true;
+
+                                            // Verificar se o número sem sufixo termina com os últimos 9 dígitos
+                                            const ultimos9Mencao = numeroSemSufixo.slice(-9);
+                                            const ultimos9Participante = pNumero.slice(-9);
+                                            if (ultimos9Mencao === ultimos9Participante && ultimos9Mencao.length === 9) {
+                                                console.log(`🔍 Correspondência por últimos 9 dígitos: ${pId} <-> ${mencaoId}`);
+                                                return true;
+                                            }
+
+                                            return false;
                                         });
 
                                         if (participante) {
                                             idRealWhatsApp = participante.id._serialized;
                                             console.log(`🎯 ID REAL DO PARTICIPANTE NO GRUPO: ${idRealWhatsApp}`);
+
+                                            // Criar mapeamento para referência futura
+                                            const numeroMencao = mencaoId.replace('@c.us', '').replace('@lid', '');
+                                            const numeroReal = idRealWhatsApp.replace('@c.us', '').replace('@lid', '');
+                                            if (numeroMencao !== numeroReal) {
+                                                console.log(`📝 Criando mapeamento: ${mencaoId} -> ${idRealWhatsApp}`);
+                                                MAPEAMENTO_IDS[mencaoId] = idRealWhatsApp;
+                                                await salvarMapeamentos();
+                                            }
                                         } else {
                                             idRealWhatsApp = mencaoId;
                                             console.log(`⚠️ Participante não encontrado no grupo, usando ID da menção: ${idRealWhatsApp}`);
@@ -4222,25 +4247,33 @@ async function processMessage(message) {
 
                         console.log(`✅ Quantidade final: ${quantidadeMB}MB`);
 
-                        // USAR O ID REAL DO WHATSAPP (que veio de mentionedIds)
-                        console.log(`🎯 Usando ID real do WhatsApp: ${idRealWhatsApp}`);
+                        // SALVAR EM AMBOS OS FORMATOS (@c.us e @lid) como o sistema de bônus faz
+                        const numeroBase = idRealWhatsApp.replace('@c.us', '').replace('@lid', '');
+                        const idComCus = `${numeroBase}@c.us`;
+                        const idComLid = `${numeroBase}@lid`;
 
-                        // Inicializar saldo se necessário
-                        if (!bonusSaldos[idRealWhatsApp]) {
-                            console.log(`🆕 Criando novo registro de bônus para ${idRealWhatsApp}`);
-                            bonusSaldos[idRealWhatsApp] = {
-                                saldo: 0,
-                                detalhesReferencias: {},
-                                historicoSaques: [],
-                                totalReferencias: 0,
-                                bonusAdmin: []
-                            };
-                        } else {
-                            console.log(`✅ Registro existente encontrado para ${idRealWhatsApp} (saldo: ${bonusSaldos[idRealWhatsApp].saldo}MB)`);
+                        console.log(`🎯 Salvando em ambos os formatos:`);
+                        console.log(`   - @c.us: ${idComCus}`);
+                        console.log(`   - @lid: ${idComLid}`);
+
+                        // Inicializar saldo para AMBOS os formatos
+                        for (const idFormat of [idComCus, idComLid]) {
+                            if (!bonusSaldos[idFormat]) {
+                                console.log(`🆕 Criando novo registro de bônus para ${idFormat}`);
+                                bonusSaldos[idFormat] = {
+                                    saldo: 0,
+                                    detalhesReferencias: {},
+                                    historicoSaques: [],
+                                    totalReferencias: 0,
+                                    bonusAdmin: []
+                                };
+                            } else {
+                                console.log(`✅ Registro existente encontrado para ${idFormat} (saldo: ${bonusSaldos[idFormat].saldo}MB)`);
+                            }
                         }
 
-                        // === ADICIONAR BÔNUS USANDO SISTEMABONUS ===
-                        console.log(`💰 Adicionando ${quantidadeMB}MB ao beneficiário...`);
+                        // === ADICIONAR BÔNUS USANDO SISTEMABONUS EM AMBOS OS FORMATOS ===
+                        console.log(`💰 Adicionando ${quantidadeMB}MB ao beneficiário em ambos formatos...`);
 
                         let saldoAnterior = 0;
                         let novoSaldo = 0;
@@ -4249,7 +4282,9 @@ async function processMessage(message) {
                         if (sistemaBonus) {
                             console.log(`✅ Usando SistemaBonus (método robusto)`);
 
-                            await sistemaBonus.atualizarSaldo(idRealWhatsApp, (saldoObj) => {
+                            // Atualizar AMBOS os formatos
+                            for (const idFormat of [idComCus, idComLid]) {
+                                await sistemaBonus.atualizarSaldo(idFormat, (saldoObj) => {
                                 saldoAnterior = saldoObj.saldo;
                                 saldoObj.saldo += quantidadeMB;
 
@@ -4266,31 +4301,34 @@ async function processMessage(message) {
                                 });
 
                                 novoSaldo = saldoObj.saldo;
-                            });
+                                });
+                            }
 
-                            console.log(`💰 Saldo atualizado: ${saldoAnterior}MB → ${novoSaldo}MB (+${quantidadeMB}MB)`);
+                            console.log(`💰 Saldo atualizado em ambos formatos: ${saldoAnterior}MB → ${novoSaldo}MB (+${quantidadeMB}MB)`);
                             console.log(`✅ Dados salvos automaticamente pelo SistemaBonus`);
 
                         } else {
-                            // Fallback para método antigo
+                            // Fallback para método antigo - atualizar AMBOS os formatos
                             console.log(`⚠️ SistemaBonus não disponível, usando método antigo`);
 
-                            saldoAnterior = bonusSaldos[idRealWhatsApp].saldo;
-                            bonusSaldos[idRealWhatsApp].saldo += quantidadeMB;
+                            for (const idFormat of [idComCus, idComLid]) {
+                                saldoAnterior = bonusSaldos[idFormat].saldo;
+                                bonusSaldos[idFormat].saldo += quantidadeMB;
 
-                            // Registrar histórico de bônus admin
-                            if (!bonusSaldos[idRealWhatsApp].bonusAdmin) {
-                                bonusSaldos[idRealWhatsApp].bonusAdmin = [];
+                                // Registrar histórico de bônus admin
+                                if (!bonusSaldos[idFormat].bonusAdmin) {
+                                    bonusSaldos[idFormat].bonusAdmin = [];
+                                }
+
+                                bonusSaldos[idFormat].bonusAdmin.push({
+                                    quantidade: quantidadeMB,
+                                    data: new Date().toISOString(),
+                                    admin: autorMensagem,
+                                    motivo: 'Bônus administrativo'
+                                });
+
+                                novoSaldo = bonusSaldos[idFormat].saldo;
                             }
-
-                            bonusSaldos[idRealWhatsApp].bonusAdmin.push({
-                                quantidade: quantidadeMB,
-                                data: new Date().toISOString(),
-                                admin: autorMensagem,
-                                motivo: 'Bônus administrativo'
-                            });
-
-                            novoSaldo = bonusSaldos[idRealWhatsApp].saldo;
 
                             console.log(`💰 Saldo atualizado: ${saldoAnterior}MB → ${novoSaldo}MB (+${quantidadeMB}MB)`);
 
