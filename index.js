@@ -4289,20 +4289,22 @@ async function processMessage(message) {
                             `${novoSaldo >= 1024 ? '🚀 *Já podes sacar!* Use: *.sacar*' : '💡 *Continua a acumular para sacar!*'}`;
 
                         try {
-                            // Garantir que participantId tem @c.us para menção funcionar
-                            const contactIdMencao = participantId.includes('@c.us') ? participantId : `${participantId}@c.us`;
+                            // SEGUIR PADRÃO DO RANKING (linha 3650-3657)
+                            // mentionId = ID sem @c.us e @lid
+                            const mentionId = String(participantIdCus).replace('@c.us', '').replace('@lid', '');
 
-                            // COPIAR EXATAMENTE O PADRÃO DAS CONFIRMAÇÕES (linha 5081)
-                            const mensagemFinal = mensagemBonus.replace('@NOME_PLACEHOLDER', `@${participantId.replace('@c.us', '').replace('@lid', '')}`);
+                            // Mensagem usa @mentionId (apenas o número)
+                            const mensagemFinal = mensagemBonus.replace('@NOME_PLACEHOLDER', `@${mentionId}`);
 
-                            // Enviar com menção igual às confirmações de compra (linha 5084-5086)
+                            // Array mentions recebe o participantId completo (com @c.us)
                             await client.sendMessage(message.from, mensagemFinal, {
-                                mentions: [contactIdMencao]
+                                mentions: [participantIdCus]
                             });
                         } catch (notificationError) {
                             console.error('❌ Erro ao enviar notificação de bônus admin:', notificationError);
-                            // Fallback: enviar sem menção (igual às confirmações linha 5091-5092)
-                            const mensagemFallback = mensagemBonus.replace('@NOME_PLACEHOLDER', `@${participantId.replace('@c.us', '').replace('@lid', '')}`);
+                            // Fallback: enviar sem menção
+                            const mentionId = String(participantIdCus).replace('@c.us', '').replace('@lid', '');
+                            const mensagemFallback = mensagemBonus.replace('@NOME_PLACEHOLDER', mentionId);
                             await message.reply(mensagemFallback);
                         }
 
@@ -4951,32 +4953,8 @@ async function processMessage(message) {
                 }
             }
 
-            // Se não encontrou padrão direto, usar IA apenas em casos específicos
-            if (texto.includes('codigo') || texto.includes('código') ||
-                texto.includes('referencia') || texto.includes('referência') ||
-                texto.includes('meu') || texto.includes('ver')) {
-
-                try {
-                    // Usar IA apenas quando necessário (economia de tokens)
-                    const prompt = `Responda apenas SIM ou NÃO. O usuário quer ver/gerar seu código de referência?
-Texto: "${texto}"
-
-Contexto: comando normal é ".meucodigo" mas aceitar variações como "meu codigo", ".meu codigo", "ver meu código", etc.`;
-
-                    const resposta = await ia.obterResposta(prompt, { maxTokens: 10 });
-                    const resultado = resposta.toLowerCase().includes('sim');
-
-                    if (resultado) {
-                        console.log(`🧠 IA DETECTOU: "${texto}" → comando meucodigo`);
-                    }
-
-                    return resultado;
-                } catch (error) {
-                    console.error('❌ Erro na detecção IA:', error);
-                    return false;
-                }
-            }
-
+            // Detecção por IA desativada (função obterResposta não implementada)
+            // A detecção por padrões acima já é suficiente
             return false;
         }
 
