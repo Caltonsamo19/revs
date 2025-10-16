@@ -4205,48 +4205,75 @@ async function processMessage(message) {
                             }
                         }
 
-                        // Adicionar bônus em AMBOS os formatos (sincronizados)
-                        let saldoAnterior = 0;
-                        for (const participantId of [participantIdCus, participantIdLid]) {
-                            saldoAnterior = bonusSaldos[participantId].saldo;
-                            bonusSaldos[participantId].saldo += quantidadeMB;
+                        // === ADICIONAR BÔNUS USANDO SISTEMABONUS ===
+                        console.log(`💰 Adicionando ${quantidadeMB}MB ao beneficiário...`);
 
-                            // Registrar histórico de bônus admin
-                            if (!bonusSaldos[participantId].bonusAdmin) {
-                                bonusSaldos[participantId].bonusAdmin = [];
+                        let saldoAnterior = 0;
+                        let novoSaldo = 0;
+
+                        // Usar sistemaBonus se disponível (método robusto)
+                        if (sistemaBonus) {
+                            console.log(`✅ Usando SistemaBonus (método robusto)`);
+
+                            await sistemaBonus.atualizarSaldo(participantIdCus, (saldoObj) => {
+                                saldoAnterior = saldoObj.saldo;
+                                saldoObj.saldo += quantidadeMB;
+
+                                // Registrar histórico de bônus admin
+                                if (!saldoObj.bonusAdmin) {
+                                    saldoObj.bonusAdmin = [];
+                                }
+
+                                saldoObj.bonusAdmin.push({
+                                    quantidade: quantidadeMB,
+                                    data: new Date().toISOString(),
+                                    admin: autorMensagem,
+                                    motivo: 'Bônus administrativo'
+                                });
+
+                                novoSaldo = saldoObj.saldo;
+                            });
+
+                            console.log(`💰 Saldo atualizado: ${saldoAnterior}MB → ${novoSaldo}MB (+${quantidadeMB}MB)`);
+                            console.log(`✅ Dados salvos automaticamente pelo SistemaBonus`);
+
+                        } else {
+                            // Fallback para método antigo
+                            console.log(`⚠️ SistemaBonus não disponível, usando método antigo`);
+
+                            for (const participantId of [participantIdCus, participantIdLid]) {
+                                if (!bonusSaldos[participantId]) {
+                                    bonusSaldos[participantId] = { saldo: 0, detalhesReferencias: {} };
+                                }
+
+                                saldoAnterior = bonusSaldos[participantId].saldo;
+                                bonusSaldos[participantId].saldo += quantidadeMB;
+
+                                // Registrar histórico de bônus admin
+                                if (!bonusSaldos[participantId].bonusAdmin) {
+                                    bonusSaldos[participantId].bonusAdmin = [];
+                                }
+
+                                bonusSaldos[participantId].bonusAdmin.push({
+                                    quantidade: quantidadeMB,
+                                    data: new Date().toISOString(),
+                                    admin: autorMensagem,
+                                    motivo: 'Bônus administrativo'
+                                });
+
+                                novoSaldo = bonusSaldos[participantId].saldo;
                             }
 
-                            bonusSaldos[participantId].bonusAdmin.push({
-                                quantidade: quantidadeMB,
-                                data: new Date().toISOString(),
-                                admin: autorMensagem,
-                                motivo: 'Bônus administrativo'
-                            });
-                        }
+                            console.log(`💰 Saldo atualizado em ambos formatos: ${saldoAnterior}MB → ${novoSaldo}MB (+${quantidadeMB}MB)`);
 
-                        console.log(`💰 Saldo atualizado em ambos formatos: ${saldoAnterior}MB → ${bonusSaldos[participantIdCus].saldo}MB (+${quantidadeMB}MB)`);
-                        console.log(`📝 Histórico de bônus admin atualizado (${bonusSaldos[participantIdCus].bonusAdmin.length} registros)`);
-
-                        // DEBUG: Verificar como o beneficiário pode consultar
-                        console.log(`\n🔍 === DEBUG: COMO CONSULTAR O BÔNUS ===`);
-                        console.log(`📋 Beneficiário pode consultar com qualquer formato:`);
-                        console.log(`   1. .saldo (se estiver como ${participantIdCus})`);
-                        console.log(`   2. .saldo (se estiver como ${participantIdLid})`);
-                        console.log(`   3. .saldo (se estiver como ${numeroDestino})`);
-                        console.log(`💡 Saldos salvos:`);
-                        console.log(`   - ${participantIdCus}: ${bonusSaldos[participantIdCus]?.saldo || 0}MB`);
-                        console.log(`   - ${participantIdLid}: ${bonusSaldos[participantIdLid]?.saldo || 0}MB`);
-
-                        // Usar @c.us como principal para referência
-                        const participantId = participantIdCus;
-
-                        // Salvar dados IMEDIATAMENTE após conceder bônus (crítico!)
-                        console.log(`💾 Salvando dados de bônus imediatamente...`);
-                        try {
-                            await salvarDadosReferencia();
-                            console.log(`✅ Dados de bônus salvos com sucesso!`);
-                        } catch (erroSalvamento) {
-                            console.error(`❌ ERRO CRÍTICO ao salvar bônus:`, erroSalvamento);
+                            // Salvar dados IMEDIATAMENTE
+                            console.log(`💾 Salvando dados de bônus imediatamente...`);
+                            try {
+                                await salvarDadosReferencia();
+                                console.log(`✅ Dados de bônus salvos com sucesso!`);
+                            } catch (erroSalvamento) {
+                                console.error(`❌ ERRO CRÍTICO ao salvar bônus:`, erroSalvamento);
+                            }
                         }
 
                         const quantidadeFormatada = quantidadeMB >= 1024 ? `${(quantidadeMB/1024).toFixed(2)}GB` : `${quantidadeMB}MB`;
