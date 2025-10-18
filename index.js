@@ -1988,10 +1988,10 @@ const MODERACAO_CONFIG = {
     },
     detectarLinks: true,
     apagarMensagem: true,
-    removerUsuario: true,
+    removerUsuario: false, // DESATIVADO: não remove mais usuários, apenas apaga a mensagem
     excecoes: [
         '258861645968@c.us',
-        '258871112049@c.us', 
+        '258871112049@c.us',
         '258852118624@c.us'
     ]
 };
@@ -2344,6 +2344,7 @@ Internet e Chamadas Ilimitadas – Vodacom
 Pacotes Diários | Semanais | Mensais
 
 OFERTA ESPECIAL – 24 HORAS ⏱
+512MB - 10MT
 750MB - 15MT
 1024MB - 17MT
 1200MB - 20MT
@@ -2960,8 +2961,11 @@ async function lidParaNumero(lid) {
 
 function contemConteudoSuspeito(mensagem) {
     const texto = mensagem.toLowerCase();
-    const temLink = /(?:https?:\/\/|www\.|\.com|\.net|\.org|\.br|\.mz|bit\.ly|tinyurl|t\.me|wa\.me|whatsapp\.com|telegram\.me|link|url)/i.test(texto);
-    
+
+    // Detectar apenas URLs reais, não a palavra "link"
+    // Regex atualizado para detectar apenas links reais (http://, https://, www., ou domínios completos)
+    const temLink = /(?:https?:\/\/[^\s]+|www\.[^\s]+|(?:bit\.ly|tinyurl\.com|t\.me|wa\.me|whatsapp\.com|telegram\.me)\/[^\s]+)/i.test(texto);
+
     return {
         temLink: MODERACAO_CONFIG.detectarLinks && temLink,
         suspeito: MODERACAO_CONFIG.detectarLinks && temLink
