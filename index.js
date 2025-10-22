@@ -6082,6 +6082,103 @@ async function processMessage(message) {
                     `_⏳Processando... Aguarde enquanto o Sistema executa a transferência_`
                 );
                 return;
+
+            } else if (resultadoIA.tipo === 'divisao_blocos') {
+                // === PROCESSAR DIVISÃO EM BLOCOS ===
+                console.log(`🔧 Processando divisão em blocos...`);
+
+                const dadosCompletos = resultadoIA.dadosCompletos;
+                const blocos = dadosCompletos.split('\n');
+                const valorComprovante = resultadoIA.valorComprovante;
+                const nomeContato = message._data.notifyName || 'N/A';
+                const autorMensagem = message.author || 'Desconhecido';
+
+                console.log(`📦 Total de blocos a enviar: ${blocos.length}`);
+
+                // Verificar pagamento antes de processar
+                const primeiraLinha = blocos[0].split('|');
+                const referenciaOriginal = primeiraLinha[0];
+
+                const pagamentoConfirmado = await verificarPagamentoIndividual(referenciaOriginal, valorComprovante);
+
+                if (pagamentoConfirmado === 'JA_PROCESSADO') {
+                    console.log(`⚠️ REVENDEDORES: Pagamento ${referenciaOriginal} já foi processado anteriormente!`);
+                    await message.reply(
+                        `⚠️ *PAGAMENTO JÁ PROCESSADO*\n\n` +
+                        `💰 Referência: ${referenciaOriginal}\n` +
+                        `📊 Total: ${resultadoIA.megasPorNumero}MB\n` +
+                        `📦 Blocos: ${blocos.length}\n\n` +
+                        `❌ Este pagamento já foi processado anteriormente.\n\n` +
+                        `⏰ ${new Date().toLocaleString('pt-BR')}`
+                    );
+                    return;
+                }
+
+                if (!pagamentoConfirmado) {
+                    console.log(`❌ REVENDEDORES: Pagamento não confirmado para divisão - ${referenciaOriginal} (${valorComprovante}MT)`);
+                    await message.reply(
+                        `⏳ *AGUARDANDO CONFIRMAÇÃO DE PAGAMENTO*\n\n` +
+                        `💰 Referência: ${referenciaOriginal}\n` +
+                        `📊 Total: ${resultadoIA.megasPorNumero}MB\n` +
+                        `📦 Blocos: ${blocos.length}\n` +
+                        `💳 Valor: ${valorComprovante}MT\n\n` +
+                        `📨 A mensagem de confirmação ainda não foi recebida no sistema.\n` +
+                        `🔄 Verificação automática ativa - você será notificado quando confirmado!\n` +
+                        `⏰ ${new Date().toLocaleString('pt-BR')}`
+                    );
+                    return;
+                }
+
+                console.log(`✅ REVENDEDORES: Pagamento confirmado! Enviando ${blocos.length} blocos...`);
+
+                // Enviar cada bloco para a planilha
+                let sucessos = 0;
+                let falhas = 0;
+
+                for (let i = 0; i < blocos.length; i++) {
+                    const bloco = blocos[i];
+                    const [refBloco, megasBloco, numeroBloco] = bloco.split('|');
+
+                    console.log(`📤 Enviando bloco ${i + 1}/${blocos.length}: ${refBloco} - ${megasBloco}MB`);
+
+                    const resultadoEnvio = await enviarParaTasker(refBloco, megasBloco, numeroBloco, message.from, autorMensagem);
+
+                    if (resultadoEnvio && resultadoEnvio.sucesso) {
+                        sucessos++;
+                    } else if (resultadoEnvio && resultadoEnvio.duplicado) {
+                        console.log(`⚠️ Bloco ${refBloco} já existe, continuando...`);
+                        sucessos++; // Contar como sucesso se já existe
+                    } else {
+                        falhas++;
+                        console.error(`❌ Falha ao enviar bloco ${refBloco}`);
+                    }
+
+                    // Pequeno delay entre envios
+                    if (i < blocos.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                    }
+                }
+
+                // Marcar pagamento como processado após todos os blocos
+                if (sucessos > 0) {
+                    await marcarPagamentoComoProcessado(referenciaOriginal, valorComprovante);
+                }
+
+                // Registrar comprador (com megas totais)
+                const primeiroNumero = blocos[0].split('|')[2];
+                await registrarComprador(message.from, primeiroNumero, nomeContato, resultadoIA.megasPorNumero);
+
+                // Responder ao cliente (mesma mensagem padrão, sem mencionar divisão)
+                await message.reply(
+                    `✅ *Pedido Recebido!*\n\n` +
+                    `💰 Referência: ${referenciaOriginal}\n` +
+                    `📊 Megas: ${resultadoIA.megasPorNumero}\n` +
+                    `📱 Número: ${primeiroNumero}\n\n` +
+                    `_⏳Processando... Aguarde enquanto o Sistema executa a transferência_`
+                );
+
+                console.log(`✅ Divisão concluída: ${sucessos} sucessos, ${falhas} falhas`);
+                return;
             }
         }
 
