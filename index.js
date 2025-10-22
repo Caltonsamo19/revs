@@ -2000,14 +2000,14 @@ const MODERACAO_CONFIG = {
 const CONFIGURACAO_GRUPOS = {
        '258820749141-1441573529@g.us': {
         nome: 'Data Store - Vodacom',
-        tabela: `✅🔥🚨PROMOÇÃO  DE 🛜MEGAS VODACOM A MELHOR PREÇO DO MERCADO - Outubro - 2025🚨🔥✅
+        tabela: `✅🔥🚨PROMOÇÃO DE 🛜MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - OUTUBRO 2025🚨🔥✅
 
 📆 PACOTES DIÁRIOS
 1024MB 💎 17MT 💵💽
 1200MB 💎 20MT 💵💽
 2048MB 💎 34MT 💵💽
 2200MB 💎 40MT 💵💽
-3096MB 💎 51MT 💵💽
+3072MB 💎 51MT 💵💽
 4096MB 💎 68MT 💵💽
 5120MB 💎 85MT 💵💽
 6144MB 💎 102MT 💵💽
@@ -2016,38 +2016,50 @@ const CONFIGURACAO_GRUPOS = {
 9144MB 💎 153MT 💵💽
 10240MB 💎 170MT 💵💽
 
-📅 PACOTES DIÁRIOS PREMIUM (3 Dias – Renováveis)
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
 2000MB 💎 44MT 💵💽
 3000MB 💎 66MT 💵💽
 4000MB 💎 88MT 💵💽
 5000MB 💎 109MT 💵💽
 6000MB 💎 133MT 💵💽
 7000MB 💎 149MT 💵💽
-10000MB 💎 219MT 💵💽
+10000MB 💎 219MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
 
-📅 PACOTES SEMANAIS PREMIUM (15 Dias – Renováveis)
+📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
+1700MB 💎 45MT 💵💽
+2900MB 💎 80MT 💵💽
+3400MB 💎 110MT 💵💽
+5500MB 💎 150MT 💵💽
+7800MB 💎 200MT 💵💽
+11400MB 💎 300MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
+
+📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
 3000MB 💎 100MT 💵💽
 5000MB 💎 149MT 💵💽
 8000MB 💎 201MT 💵💽
 10000MB 💎 231MT 💵💽
-20000MB 💎 352MT 💵💽
+20000MB 💎 352MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
 
 📅 PACOTES MENSAIS
 12.8GB 💎 270MT 💵💽
 22.8GB 💎 435MT 💵💽
 32.8GB 💎 605MT 💵💽
 52.8GB 💎 945MT 💵💽
-102.8GB 💎 1605MT 💵💽
+60.2GB 💎 1249MT 💵💽
+80.2GB 💎 1449MT 💵💽
+100.2GB 💎 1700MT 💵💽
 
-
-PACOTES DIAMANTE MENSAIS
+💎 PACOTES DIAMANTE MENSAIS
 Chamadas + SMS ilimitadas + 11GB 💎 460MT 💵
 Chamadas + SMS ilimitadas + 24GB 💎 820MT 💵
 Chamadas + SMS ilimitadas + 50GB 💎 1550MT 💵
 Chamadas + SMS ilimitadas + 100GB 💎 2250MT 💵
 
-📍NB: Válido apenas para Vodacom
-📍Para o Pacote Mensal e Diamante, não deve ter txuna crédito ativo!
+📍 NB: Válido apenas para Vodacom  
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!
 `,
 
         pagamento: `FORMAS DE PAGAMENTO ATUALIZADAS
