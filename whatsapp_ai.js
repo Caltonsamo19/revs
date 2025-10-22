@@ -1437,33 +1437,74 @@ Se não conseguires extrair os dados:
       }
       
       // Processamento normal (sem divisão automática)
+      // Calcular megas totais baseado no valor e tabela do grupo
+      const megasTotais = configGrupo ? this.calcularMegasPorValor(comprovante.valor, configGrupo.tabela) : comprovante.valor;
+      const LIMITE_BLOCO = 10240; // 10GB
+
+      console.log(`   📊 Megas totais (imediato): ${megasTotais}MB para ${numeros.length} número(s)`);
+
+      // === VERIFICAR SE PRECISA DIVIDIR EM BLOCOS DE 10GB ===
+      if (megasTotais > LIMITE_BLOCO || (numeros.length > 1 && (megasTotais / numeros.length) > LIMITE_BLOCO)) {
+        console.log(`   🔧 Transferência > 10GB - DIVIDINDO EM BLOCOS (fluxo imediato)`);
+
+        const tabelaPrecos = configGrupo ? configGrupo.tabela : null;
+        const divisao = this.dividirEmBlocos(comprovante.referencia, megasTotais, numeros, tabelaPrecos);
+
+        if (!divisao.sucesso) {
+          console.error(`   ❌ Erro na divisão em blocos:`, divisao.erro);
+          return {
+            sucesso: false,
+            tipo: 'erro_divisao',
+            erro: divisao.erro
+          };
+        }
+
+        // Criar dadosCompletos a partir dos blocos
+        const dadosCompletos = divisao.pedidos.map(p =>
+          `${p.referencia}|${p.megas}|${p.numero}`
+        ).join('\n');
+
+        console.log(`   ✅ DIVISÃO CONCLUÍDA (imediato): ${divisao.totalBlocos} blocos criados`);
+
+        return {
+          sucesso: true,
+          dadosCompletos: dadosCompletos,
+          tipo: 'divisao_blocos',
+          numeros: numeros,
+          totalBlocos: divisao.totalBlocos,
+          megasPorNumero: divisao.megasPorNumero,
+          valorTotal: divisao.valorTotal,
+          divisao: divisao,
+          valorComprovante: comprovante.valor,
+          origem: 'comprovante_numero_imediato_com_divisao'
+        };
+      }
+
+      // === PROCESSAMENTO NORMAL (SEM DIVISÃO) ===
       if (numeros.length === 1) {
-        // Calcular megas baseado no valor e tabela do grupo
-        const megas = configGrupo ? this.calcularMegasPorValor(comprovante.valor, configGrupo.tabela) : comprovante.valor;
-        // DEBUG removido para performance
-        const resultado = `${comprovante.referencia}|${megas}|${numeros[0]}`;
-        console.log(`   ✅ PEDIDO COMPLETO IMEDIATO: ${resultado} (${comprovante.valor}MT → ${megas}MB)`);
-        return { 
-          sucesso: true, 
+        const resultado = `${comprovante.referencia}|${megasTotais}|${numeros[0]}`;
+        console.log(`   ✅ PEDIDO COMPLETO IMEDIATO: ${resultado} (${comprovante.valor}MT → ${megasTotais}MB)`);
+        return {
+          sucesso: true,
           dadosCompletos: resultado,
           tipo: 'numero_processado',
           numero: numeros[0],
           valorComprovante: comprovante.valor,
           valorPago: comprovante.valor,
-          megas: megas
+          megas: megasTotais
         };
       } else {
         // Múltiplos números - dividir valor igualmente
         const valorTotal = parseFloat(comprovante.valor);
         const valorPorNumero = (valorTotal / numeros.length).toFixed(2);
-        
-        const resultados = numeros.map(numero => 
+
+        const resultados = numeros.map(numero =>
           `${comprovante.referencia}|${valorPorNumero}|${numero}`
         );
-        
+
         console.log(`   ✅ PEDIDOS MÚLTIPLOS IMEDIATOS: ${resultados.join(' + ')}`);
-        return { 
-          sucesso: true, 
+        return {
+          sucesso: true,
           dadosCompletos: resultados.join('\n'),
           tipo: 'numeros_multiplos_processados',
           numeros: numeros,
