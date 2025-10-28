@@ -2078,7 +2078,8 @@ Internet e Chamadas Ilimitadas – Vodacom
 Pacotes Diários | Semanais | Mensais
 
 OFERTA ESPECIAL – 24 HORAS ⏱
-750MB - 15MT
+600MB - 10MT
+800MB - 15MT
 1024MB - 17MT
 1200MB - 20MT
 2048MB - 34MT
@@ -2139,7 +2140,7 @@ PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
 Observação: Pacotes mensais não compatíveis com Txuna
 
 CHAMADAS ILIMITADAS — VODACOM 📞 ♾
-7.5GB - 280MT - Ilimitadas
+
 11GB - 449MT - Ilimitadas ✨
 14.5GB - 500MT - Ilimitadas
 26.5GB - 700MT - Ilimitadas
@@ -2149,8 +2150,8 @@ CHAMADAS ILIMITADAS — VODACOM 📞 ♾
 Inclui chamadas e SMS ilimitadas para todas as redes
 
 CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
-7.1GB - 280MT - Ilimitadas
-9GB - 449MT - Ilimitadas ✨
+
+9GB - 469MT - Ilimitadas ✨
 23GB - 950MT - Ilimitadas
 38GB - 1450MT - Ilimitadas
 46GB - 1700MT - Ilimitadas
@@ -2356,8 +2357,8 @@ Internet e Chamadas Ilimitadas – Vodacom
 Pacotes Diários | Semanais | Mensais
 
 OFERTA ESPECIAL – 24 HORAS ⏱
-512MB - 10MT
-750MB - 15MT
+600MB - 10MT
+800MB - 15MT
 1024MB - 17MT
 1200MB - 20MT
 2048MB - 34MT
@@ -2418,7 +2419,7 @@ PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
 Observação: Pacotes mensais não compatíveis com Txuna
 
 CHAMADAS ILIMITADAS — VODACOM 📞 ♾
-7.5GB - 280MT - Ilimitadas
+
 11GB - 449MT - Ilimitadas ✨
 14.5GB - 500MT - Ilimitadas
 26.5GB - 700MT - Ilimitadas
@@ -2428,8 +2429,8 @@ CHAMADAS ILIMITADAS — VODACOM 📞 ♾
 Inclui chamadas e SMS ilimitadas para todas as redes
 
 CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
-7.1GB - 280MT - Ilimitadas
-9GB - 449MT - Ilimitadas ✨
+
+9GB - 469MT - Ilimitadas ✨
 23GB - 950MT - Ilimitadas
 38GB - 1450MT - Ilimitadas
 46GB - 1700MT - Ilimitadas
