@@ -1988,7 +1988,7 @@ const MODERACAO_CONFIG = {
     },
     detectarLinks: true,
     apagarMensagem: true,
-    removerUsuario: false, // DESATIVADO: não remove mais usuários, apenas apaga a mensagem
+    removerUsuario: true, // DESATIVADO: não remove mais usuários, apenas apaga a mensagem
     excecoes: [
         '258861645968@c.us',
         '258871112049@c.us',
