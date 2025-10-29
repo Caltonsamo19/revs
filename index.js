@@ -2978,7 +2978,12 @@ function contemConteudoSuspeito(mensagem) {
 
     // Detectar apenas URLs reais, não a palavra "link"
     // Regex atualizado para detectar apenas links reais (http://, https://, www., ou domínios completos)
-    const temLink = /(?:https?:\/\/[^\s]+|www\.[^\s]+|(?:bit\.ly|tinyurl\.com|t\.me|wa\.me|whatsapp\.com|telegram\.me)\/[^\s]+)/i.test(texto);
+    // Explicação:
+    // - https?://...  -> URLs com esquema
+    // - www....       -> URLs começando com www
+    // - domínio.tld    -> detectar padrões como example.com (lista de TLDs comuns)
+    // - encurtadores  -> bit.ly, tinyurl.com, t.me, wa.me, whatsapp.com, telegram.me
+    const temLink = /(?:https?:\/\/[\S]+|www\.[\S]+|(?:bit\.ly|tinyurl\.com|t\.me|wa\.me|whatsapp\.com|telegram\.me)\/[\S]+|[a-z0-9\-]+\.(?:com|net|org|io|br|co|xyz|online|info|biz|me|us|edu|gov)(?:[\/\s]|$))/i.test(texto);
 
     return {
         temLink: MODERACAO_CONFIG.detectarLinks && temLink,
@@ -3014,9 +3019,12 @@ async function aplicarModeracao(message, motivoDeteccao) {
     const authorId = message.author || message.from;
     
     try {
-        if (!MODERACAO_CONFIG.ativado[chatId]) {
-            return;
-        }
+        // Ativar moderação para todos os grupos que estiverem em CONFIGURACAO_GRUPOS.
+        // Se o grupo está listado em CONFIGURACAO_GRUPOS a moderação será aplicada independente de entradas conflitantes em MODERACAO_CONFIG.ativado.
+        const ativadoExplicit = CONFIGURACAO_GRUPOS.hasOwnProperty(chatId) ||
+            (MODERACAO_CONFIG.ativado && MODERACAO_CONFIG.ativado[chatId]);
+
+        if (!ativadoExplicit) return;
 
         if (MODERACAO_CONFIG.excecoes.includes(authorId) || isAdministrador(authorId)) {
             return;
@@ -3029,7 +3037,37 @@ async function aplicarModeracao(message, motivoDeteccao) {
         }
 
         if (MODERACAO_CONFIG.removerUsuario) {
-            await removerParticipante(chatId, authorId, motivoDeteccao);
+            // Tentar obter informações do contato para menção/nomes
+            let mentionId = String(authorId).replace('@c.us', '').replace('@lid', '');
+            let nomeExibicao = mentionId;
+            try {
+                const contato = await client.getContactById(authorId);
+                if (contato) {
+                    nomeExibicao = contato.pushname || contato.name || contato.number || mentionId;
+                }
+            } catch (err) {
+                // ignora erro de obtenção de contato, usaremos o ID reduzido
+            }
+
+            // Enviar aviso ao grupo antes/depois da remoção
+            try {
+                const aviso = `🚫 @${mentionId} foi removido(a) do grupo por enviar link.`;
+                await client.sendMessage(chatId, aviso, { mentions: [authorId] });
+            } catch (errAviso) {
+                // Se o envio do aviso falhar, não interromper a remoção
+                console.log('⚠️ Não foi possível enviar aviso de remoção:', errAviso.message);
+            }
+
+            const removido = await removerParticipante(chatId, authorId, motivoDeteccao);
+
+            if (!removido) {
+                try {
+                    const avisoErro = `⚠️ Não foi possível remover @${mentionId}. Verifique se o bot tem permissões de administrador.`;
+                    await client.sendMessage(chatId, avisoErro, { mentions: [authorId] });
+                } catch (err2) {
+                    console.log('⚠️ Falha ao notificar sobre remoção mal-sucedida:', err2.message);
+                }
+            }
         }
 
     } catch (error) {
