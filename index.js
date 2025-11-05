@@ -2072,112 +2072,58 @@ NOME:  NATACHA ALICE
 NÚMERO: 871112049
 NOME: NATACHA ALICE`
     },
-    '258840161370-1471468657@g.us': {
-        nome: 'Venda Automática 24/7',
-        tabela: `📢🔥 TABELA ATUALIZADA – OUTUBRO 2025 🔥📢
-Internet e Chamadas Ilimitadas – Vodacom
-Pacotes Diários | Semanais | Mensais
+    '120363402609218031@g.us': {
+        nome: 'NET PROMOÇÃO 17MT V12',
+        tabela: `NB: SOMENTE MEGAS DA VODACOM👇🏼👇🏼👇🏼 E CHAMADAS PARA TODAS REDES📞📞📞
 
-OFERTA ESPECIAL – 24 HORAS ⏱
-600MB - 10MT
-800MB - 15MT
-1024MB - 17MT
-1200MB - 20MT
-2048MB - 34MT
+📆 PLANO DIÁRIO (24H)
+17MT  =  1024MB
+23MT  =  1250MB
+34MT  =  2048MB
+51MT  =  3072MB
+68MT  =  4096MB
+85MT  =  5120MB
+170MT =  10100MB
+390MT =  20400MB
 
-PACOTES DIÁRIOS (24H ⏱)
-2400MB - 40MT
-3072MB - 51MT
-4096MB - 68MT
-5120MB - 85MT
-6144MB - 102MT
-7168MB - 119MT
-8192MB - 136MT
-9144MB - 153MT
-10240MB - 170MT
+📅 PLANO SEMANAL (7 DIAS)
+47MT  =  1.7GB
+97MT  =  3.4GB
+147MT =  5.2GB
+196MT =  7.1GB
+296MT =  10.7GB
+396MT =  14.3GB
 
-PACOTES PREMIUM (3 DIAS 🗓 – RENOVÁVEIS)
-2000MB - 44MT
-3000MB - 66MT
-4000MB - 88MT
-5000MB - 109MT
-6000MB - 133MT
-7000MB - 149MT
-10000MB - 219MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 3 dias
+📅 DIAMANTE SEMANAL TUDO TOP ILIMITADO
+265MT =  7.5GB + Chamadas e SMS Ilimitado para todas redes
 
-SEMANAIS BÁSICOS (5 DIAS 🗓 – RENOVÁVEIS)
-1700MB - 45MT
-2900MB - 80MT
-3400MB - 110MT
-5500MB - 150MT
-7800MB - 200MT
-11400MB - 300MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 5 dias
+📅 PLANO MENSAL (30 DIAS)
+170MT =  5GB
+320MT =  10GB
+440MT =  15GB
+540MT =  20GB
+720MT =  25GB
+850MT =  30GB
 
-SEMANAIS PREMIUM (15 DIAS 🗓 – RENOVÁVEIS)
-3000MB - 100MT
-5000MB - 149MT
-8000MB - 201MT
-10000MB - 231MT
-20000MB - 352MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 15 dias
+📅 DIAMANTE TUDO TOP ILIMITADO (30 DIAS)
+445MT =  11GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM
+545MT =  13GB + Chamadas e SMS ilimitadas para todas redes
+900MT =  20GB + Chamadas e SMS ilimitadas + 20min + 80MB ROAM
 
-PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
-2.8GB - 100MT
-5.8GB - 175MT
-8.8GB - 200MT
-10.8GB - 249MT
-12.8GB - 300MT
-15.8GB - 349MT
-18.8GB - 400MT
-20.8GB - 449MT
-25.8GB - 549MT
-32.8GB - 649MT
-51.2GB - 1049MT
-60.2GB - 1249MT
-80.2GB - 1449MT
-100.2GB - 1700MT
-Observação: Pacotes mensais não compatíveis com Txuna
-
-CHAMADAS ILIMITADAS — VODACOM 📞 ♾
-
-11GB - 449MT - Ilimitadas ✨
-14.5GB - 500MT - Ilimitadas
-26.5GB - 700MT - Ilimitadas
-37.5GB - 1000MT - Ilimitadas
-53.5GB - 1500MT - Ilimitadas
-102.5GB - 2150MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
-
-CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
-
-9GB - 469MT - Ilimitadas ✨
-23GB - 950MT - Ilimitadas
-38GB - 1450MT - Ilimitadas
-46GB - 1700MT - Ilimitadas
-53GB - 1900MT - Ilimitadas
-68GB - 2400MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
-
-🔹 CONEXÃO SEM LIMITES 🔹
-Internet rápida, chamadas e SMS ilimitadas.
-Pacotes exclusivos Vodacom e Movitel.
-Sempre conectado, sempre no controle!
+📞 CHAMADAS PARA TODAS REDES SEMANAL
+98MT  =  140 MIN + 1.5GB + 500 SMS (7 DIAS)
+48MT  =  119 MIN
 `,
 
-        pagamento: `💸 FORMAS DE PAGAMENTO
+        pagamento: `🤖 Formas de Pagamento
 
-🟠 E-Mola – Glória | 📲 860186270  
-🔴 M-Pesa – Leonor | 📲 857451196  
+🟧E-mola:870718396__[FREDERICO FELICIANO SIMANGO]
 
-⚠ ATENÇÃO  
-▪ Após o pagamento, envie a confirmação ✉ ** e o seu número para receber o seu pacote 📲  
-▪ Envie ** o valor exato da tabela 💰  
+🟥M-Pesa:857013922__[SHAT TERCIANA]
 
-NB: Válido apenas para Vodacom  
-🚀 Garanta seus Megabytes agora!
-`
+
+Em seguida mande a mensagem de comprovativo
+Aqui no grupo`
     },
     '120363020570328377@g.us': {
         nome: ' NET VODACOM ACESSÍVEL',
@@ -2351,111 +2297,55 @@ Chamadas + SMS ilimitadas + 100GB = 2250MT
 - ↪📞Kelven Junior Anabela Nharrava
 `
     }, 
-'258876291014-1634575097@g.us': {
-        nome: '🪐V2 Megabytes NetConnect 🌍',
-        tabela: `📢🔥 TABELA ATUALIZADA – OUTUBRO 2025 🔥📢
-Internet e Chamadas Ilimitadas – Vodacom
-Pacotes Diários | Semanais | Mensais
+'120363043964227338@g.us': {
+        nome: 'ASTRO BOOSTING I',
+        tabela: `📢 SUPER PROMOÇÃO DE INTERNET - VODACOM  
 
-OFERTA ESPECIAL – 24 HORAS ⏱
-600MB - 10MT
-800MB - 15MT
-1024MB - 17MT
-1200MB - 20MT
-2048MB - 34MT
+📋 TABELA DE MEGAS DIÁRIOS
+1GB  =  18MT  
+2GB  =  36MT  
+3GB  =  54MT  
+4GB  =  72MT  
+5GB  =  90MT  
+6GB  =  108MT  
+7GB  =  126MT  
+8GB  =  144MT  
+9GB  =  162MT  
+10GB =  180MT  (Para Patrões 🤩)  
 
-PACOTES DIÁRIOS (24H ⏱)
-2400MB - 40MT
-3072MB - 51MT
-4096MB - 68MT
-5120MB - 85MT
-6144MB - 102MT
-7168MB - 119MT
-8192MB - 136MT
-9144MB - 153MT
-10240MB - 170MT
+📅 MEGAS SEMANAIS
+4.36GB =  110MT  
+6.50GB =  180MT  
+9.76GB =  250MT  
 
-PACOTES PREMIUM (3 DIAS 🗓 – RENOVÁVEIS)
-2000MB - 44MT
-3000MB - 66MT
-4000MB - 88MT
-5000MB - 109MT
-6000MB - 133MT
-7000MB - 149MT
-10000MB - 219MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 3 dias
+📅 MEGAS MENSAIS
+3GB  =  160MT  
+6GB  =  200MT  
+10GB =  300MT  
 
-SEMANAIS BÁSICOS (5 DIAS 🗓 – RENOVÁVEIS)
-1700MB - 45MT
-2900MB - 80MT
-3400MB - 110MT
-5500MB - 150MT
-7800MB - 200MT
-11400MB - 300MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 5 dias
-
-SEMANAIS PREMIUM (15 DIAS 🗓 – RENOVÁVEIS)
-3000MB - 100MT
-5000MB - 149MT
-8000MB - 201MT
-10000MB - 231MT
-20000MB - 352MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 15 dias
-
-PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
-2.8GB - 100MT
-5.8GB - 175MT
-8.8GB - 200MT
-10.8GB - 249MT
-12.8GB - 300MT
-15.8GB - 349MT
-18.8GB - 400MT
-20.8GB - 449MT
-25.8GB - 549MT
-32.8GB - 649MT
-51.2GB - 1049MT
-60.2GB - 1249MT
-80.2GB - 1449MT
-100.2GB - 1700MT
-Observação: Pacotes mensais não compatíveis com Txuna
-
-CHAMADAS ILIMITADAS — VODACOM 📞 ♾
-
-11GB - 449MT - Ilimitadas ✨
-14.5GB - 500MT - Ilimitadas
-26.5GB - 700MT - Ilimitadas
-37.5GB - 1000MT - Ilimitadas
-53.5GB - 1500MT - Ilimitadas
-102.5GB - 2150MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
-
-CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
-
-9GB - 469MT - Ilimitadas ✨
-23GB - 950MT - Ilimitadas
-38GB - 1450MT - Ilimitadas
-46GB - 1700MT - Ilimitadas
-53GB - 1900MT - Ilimitadas
-68GB - 2400MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
-
-🔹 CONEXÃO SEM LIMITES 🔹
-Internet rápida, chamadas e SMS ilimitadas.
-Pacotes exclusivos Vodacom e Movitel.
-Sempre conectado, sempre no controle!
+= PACOTES DIAMANTE
+11GB + Chamadas e SMS Ilimitadas + 10min Internacionais + 30MB Roaming  =  450MT
 `,
 
-        pagamento: `💸 FORMAS DE PAGAMENTO
-
-🟠 E-Mola – Glória | 📲 860186270  
-🔴 M-Pesa – Leonor | 📲 857451196  
-
-⚠ ATENÇÃO  
-▪ Após o pagamento, envie a confirmação ✉ ** e o seu número para receber o seu pacote 📲  
-▪ Envie ** o valor exato da tabela 💰  
-
-NB: Válido apenas para Vodacom  
-🚀 Garanta seus Megabytes agora!
+        pagamento: `╭━━━┛ 💸  𝗙𝗢𝗥𝗠𝗔𝗦 𝗗𝗘 𝗣𝗔𝗚𝗔𝗠𝗘𝗡𝗧𝗢:  
+┃  
+┃ 🪙 𝗘-𝗠𝗼𝗹𝗮:  
+┃    879833297  
+┃     👤 𝗧𝗶𝘁𝘂𝗹𝗮𝗿: 𝗖𝗵𝗲𝗹𝘁𝗼𝗻 𝗱𝗼𝘀 𝗦𝗮𝗻𝘁𝗼𝘀  
+┃  
+┃ 🪙 𝗠-𝗣𝗲𝘀𝗮:  
+┃    846418280  
+┃     👤 𝗧𝗶𝘁𝘂𝗹𝗮𝗿: 𝗩𝗮𝗹𝘁𝗲𝗿 𝗱𝗼𝘀 𝗔𝗻𝗷𝗼𝘀  
+┃   
+┃  
+┃ ⚠ 𝗜𝗠𝗣𝗢𝗥𝗧𝗔𝗡𝗧𝗘:  
+┃     ▪ 𝗣𝗮𝗿𝗮 𝗮𝗾𝘂𝗶𝘀𝗶𝗰̧𝗮̃𝗼, 𝗲𝗻𝘃𝗶𝗲:  
+┃         𝟭⃣ 𝗢 𝘃𝗮𝗹𝗼𝗿  
+┃         𝟮⃣ 𝗢 𝗰𝗼𝗺𝗽𝗿𝗼𝘃𝗮𝘁𝗶𝘃𝗼  
+┃         𝟯⃣ 𝗢 𝗻𝘂́𝗺𝗲𝗿𝗼 𝗾𝘂𝗲 𝘃𝗮𝗶 𝗿𝗲𝗰𝗲𝗯𝗲𝗿 𝗼𝘀 𝗺𝗲𝗴𝗮𝘀  
+┃  
+╰━━━━━━━━━━━━━━━━━━━━━  
+        🚀 𝗢 𝗳𝘂𝘁𝘂𝗿𝗼 𝗲́ 𝗮𝗴𝗼𝗿𝗮. 𝗩𝗮𝗺𝗼𝘀?
 `
     }
     
@@ -5784,12 +5674,14 @@ async function processMessage(message) {
             const autorModeracaoMsg = message.author || message.from;
             const isAdminExecutando = isAdministrador(autorModeracaoMsg);
 
-            // Pular moderação para comandos administrativos executados por admins
-            if (!isComandoAdmin || !isAdminExecutando) {
+            // Pular moderação SOMENTE para comandos administrativos executados por admins
+            const isPularModeracao = isComandoAdmin && isAdminExecutando;
+
+            if (!isPularModeracao) {
                 const analise = contemConteudoSuspeito(message.body);
-                
+
                 if (analise.suspeito) {
-                    console.log(`🚨 Conteúdo suspeito detectado`);
+                    console.log(`🚨 Conteúdo suspeito detectado de ${autorModeracaoMsg}`);
                     await aplicarModeracao(message, "Link detectado");
                     return;
                 }
