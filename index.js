@@ -2074,45 +2074,45 @@ NOME: NATACHA ALICE`
     },
     '120363402609218031@g.us': {
         nome: 'NET PROMOÇÃO 17MT V12',
-        tabela: `NB: SOMENTE MEGAS DA VODACOM👇🏼👇🏼👇🏼 E CHAMADAS PARA TODAS REDES📞📞📞
+        tabela: `NB: SOMENTE MEGAS DA VODACOM 👇🏼👇🏼👇🏼 E CHAMADAS PARA TODAS REDES 📞📞📞
 
 📆 PLANO DIÁRIO (24H)
-17MT  =  1024MB
-23MT  =  1250MB
-34MT  =  2048MB
-51MT  =  3072MB
-68MT  =  4096MB
-85MT  =  5120MB
-170MT =  10100MB
-390MT =  20400MB
+1024MB  =  17MT  
+1250MB  =  23MT  
+2048MB  =  34MT  
+3072MB  =  51MT  
+4096MB  =  68MT  
+5120MB  =  85MT  
+10100MB =  170MT  
+20400MB =  390MT  
 
 📅 PLANO SEMANAL (7 DIAS)
-47MT  =  1.7GB
-97MT  =  3.4GB
-147MT =  5.2GB
-196MT =  7.1GB
-296MT =  10.7GB
-396MT =  14.3GB
+1.7GB  =  47MT  
+3.4GB  =  97MT  
+5.2GB  =  147MT  
+7.1GB  =  196MT  
+10.7GB =  296MT  
+14.3GB =  396MT  
 
 📅 DIAMANTE SEMANAL TUDO TOP ILIMITADO
-265MT =  7.5GB + Chamadas e SMS Ilimitado para todas redes
+7.5GB + Chamadas e SMS Ilimitado para todas redes  =  265MT  
 
 📅 PLANO MENSAL (30 DIAS)
-170MT =  5GB
-320MT =  10GB
-440MT =  15GB
-540MT =  20GB
-720MT =  25GB
-850MT =  30GB
+5GB  =  170MT  
+10GB =  320MT  
+15GB =  440MT  
+20GB =  540MT  
+25GB =  720MT  
+30GB =  850MT  
 
 📅 DIAMANTE TUDO TOP ILIMITADO (30 DIAS)
-445MT =  11GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM
-545MT =  13GB + Chamadas e SMS ilimitadas para todas redes
-900MT =  20GB + Chamadas e SMS ilimitadas + 20min + 80MB ROAM
+11GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  445MT  
+13GB + Chamadas e SMS ilimitadas para todas redes  =  545MT  
+20GB + Chamadas e SMS ilimitadas + 20min + 80MB ROAM  =  900MT  
 
 📞 CHAMADAS PARA TODAS REDES SEMANAL
-98MT  =  140 MIN + 1.5GB + 500 SMS (7 DIAS)
-48MT  =  119 MIN
+1.5GB + 140 MIN + 500 SMS (7 DIAS)  =  98MT  
+119 MIN  =  48MT
 `,
 
         pagamento: `🤖 Formas de Pagamento
