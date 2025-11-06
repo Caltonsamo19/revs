@@ -323,9 +323,18 @@ let cacheTransacoes = new Map();
 let pagamentosPendentes = {}; // {id: {dados do pedido}}
 let timerRetryPagamentos = null;
 const ARQUIVO_PAGAMENTOS_PENDENTES = './pagamentos_pendentes.json';
-const RETRY_INTERVAL = 60000; // 60 segundos
-const RETRY_TIMEOUT = 30 * 60 * 1000; // 30 minutos
-const MAX_RETRY_ATTEMPTS = 3; // Máximo 3 tentativas por pagamento
+const RETRY_INTERVAL = 30000; // 30 segundos - verificação rápida
+const RETRY_TIMEOUT = 5 * 60 * 1000; // 5 minutos - tempo máximo de tentativas
+const MAX_RETRY_ATTEMPTS = 10; // 10 tentativas em 5 minutos (1 a cada 30s)
+
+// === CONTROLE DE RATE LIMITING ===
+let ultimaRequisicao = 0;
+const DELAY_ENTRE_REQUISICOES = 2000; // 2 segundos entre cada verificação (reduzido)
+const MAX_REQUISICOES_POR_MINUTO = 20; // Aumentado para 20 req/min
+let requisicoesUltimoMinuto = [];
+let erros429Consecutivos = 0;
+const MAX_ERROS_429 = 3; // Após 3 erros 429, pausar temporariamente
+let timeoutSalvamentoPagamentos = null; // Timer para debounce de salvamento
 
 // === SISTEMA DE REFERÊNCIAS E BÔNUS ===
 let codigosReferencia = {}; // codigo -> dados do dono
@@ -1315,9 +1324,9 @@ function gerarCodigoReferencia(remetente) {
 }
 
 // Processar bônus de compra
-async function processarBonusCompra(remetenteCompra, valorCompra) {
+async function processarBonusCompra(remetenteCompra, valorCompra, grupoId = null) {
     console.log(`🎁 Verificando bônus para compra`);
-    
+
     // Verificar se cliente tem referência
     const referencia = referenciasClientes[remetenteCompra];
     if (!referencia) {
@@ -1333,7 +1342,7 @@ async function processarBonusCompra(remetenteCompra, valorCompra) {
 
     // Atualizar contador de compras
     referencia.comprasRealizadas++;
-    
+
     // Creditar bônus ao convidador
     const convidador = referencia.convidadoPor;
     if (!bonusSaldos[convidador]) {
@@ -1348,7 +1357,7 @@ async function processarBonusCompra(remetenteCompra, valorCompra) {
     // Adicionar 200MB ao saldo
     const bonusAtual = 200;
     bonusSaldos[convidador].saldo += bonusAtual;
-    
+
     // Atualizar detalhes da referência
     if (!bonusSaldos[convidador].detalhesReferencias[remetenteCompra]) {
         bonusSaldos[convidador].detalhesReferencias[remetenteCompra] = {
@@ -1358,10 +1367,10 @@ async function processarBonusCompra(remetenteCompra, valorCompra) {
             ativo: true
         };
     }
-    
+
     bonusSaldos[convidador].detalhesReferencias[remetenteCompra].compras = referencia.comprasRealizadas;
     bonusSaldos[convidador].detalhesReferencias[remetenteCompra].bonusGanho += bonusAtual;
-    
+
     // Enviar notificação de bônus por referência
     try {
         const nomeComprador = await obterNomeContato(remetenteCompra);
@@ -1377,7 +1386,10 @@ async function processarBonusCompra(remetenteCompra, valorCompra) {
         const convidadorLimpo = convidador.replace('@c.us', '').replace('@lid', '');
         const remetenteCompraLimpo = remetenteCompra.replace('@c.us', '').replace('@lid', '');
 
-        await client.sendMessage(message.from,
+        // CORRIGIDO: Usar grupoId ou convidador como destino da mensagem
+        const destinoMensagem = grupoId || convidador;
+
+        await client.sendMessage(destinoMensagem,
             `🎉 *BÔNUS DE REFERÊNCIA CREDITADO!*\n\n` +
             `💎 @${convidadorLimpo}, recebeste *${bonusAtual}MB* de bônus!\n\n` +
             `👤 *Referenciado:* @${remetenteCompraLimpo}\n` +
@@ -1563,9 +1575,46 @@ function calcularValorPedido(megas, precosGrupo) {
     return Math.round(megasNum * valorPorMB);
 }
 
+// === FUNÇÃO PARA VERIFICAR RATE LIMIT ===
+async function aguardarRateLimit() {
+    const agora = Date.now();
+
+    // Limpar requisições antigas (mais de 1 minuto) - LIMITA TAMANHO DO ARRAY
+    requisicoesUltimoMinuto = requisicoesUltimoMinuto.filter(timestamp => agora - timestamp < 60000);
+
+    // IMPORTANTE: Limitar tamanho do array para evitar uso excessivo de memória
+    if (requisicoesUltimoMinuto.length > 50) {
+        requisicoesUltimoMinuto = requisicoesUltimoMinuto.slice(-30); // Manter apenas últimos 30
+    }
+
+    // Verificar se atingiu limite de requisições por minuto
+    if (requisicoesUltimoMinuto.length >= MAX_REQUISICOES_POR_MINUTO) {
+        const maisAntiga = requisicoesUltimoMinuto[0];
+        const tempoEspera = 60000 - (agora - maisAntiga);
+        if (tempoEspera > 0) {
+            console.log(`⏳ RATE LIMIT: Aguardando ${Math.ceil(tempoEspera/1000)}s antes de continuar...`);
+            await new Promise(resolve => setTimeout(resolve, tempoEspera));
+        }
+    }
+
+    // Aguardar delay mínimo entre requisições
+    const tempoDesdeUltima = agora - ultimaRequisicao;
+    if (tempoDesdeUltima < DELAY_ENTRE_REQUISICOES) {
+        const delayNecessario = DELAY_ENTRE_REQUISICOES - tempoDesdeUltima;
+        await new Promise(resolve => setTimeout(resolve, delayNecessario));
+    }
+
+    // Registrar requisição
+    ultimaRequisicao = Date.now();
+    requisicoesUltimoMinuto.push(ultimaRequisicao);
+}
+
 // === FUNÇÃO PARA VERIFICAR PAGAMENTO (SÓ BUSCA, NÃO MARCA) ===
 async function verificarPagamentoIndividual(referencia, valorEsperado) {
     try {
+        // AGUARDAR RATE LIMIT ANTES DE FAZER REQUISIÇÃO
+        await aguardarRateLimit();
+
         const valorNormalizado = normalizarValor(valorEsperado);
 
         console.log(`🔍 REVENDEDORES: Verificando pagamento ${referencia} - ${valorNormalizado}MT (original: ${valorEsperado})`);
@@ -1594,13 +1643,34 @@ async function verificarPagamentoIndividual(referencia, valorEsperado) {
             }
 
             console.log(`✅ REVENDEDORES: Pagamento encontrado e PENDENTE (valor exato)!`);
+            erros429Consecutivos = 0; // Resetar contador de erros 429
             return true;
         }
 
         console.log(`❌ REVENDEDORES: Pagamento não encontrado`);
+        erros429Consecutivos = 0; // Resetar contador de erros 429
         return false;
 
     } catch (error) {
+        // Detectar erro 429 (Too Many Requests)
+        if (error.response && error.response.status === 429) {
+            erros429Consecutivos++;
+            console.error(`🚨 REVENDEDORES: Rate limit atingido (429) - Erro ${erros429Consecutivos}/${MAX_ERROS_429}`);
+
+            // Pausar progressivamente baseado no número de erros
+            if (erros429Consecutivos >= MAX_ERROS_429) {
+                const pausaEmergencia = 2 * 60 * 1000; // 2 minutos (reduzido de 5)
+                console.error(`⏸️ REVENDEDORES: Pausando verificações por ${pausaEmergencia/1000}s devido a múltiplos erros 429`);
+                await new Promise(resolve => setTimeout(resolve, pausaEmergencia));
+                erros429Consecutivos = 0; // Resetar após pausa
+            } else {
+                // Pausa menor para primeiro ou segundo erro
+                const pausaCurta = 10000; // 10 segundos
+                await new Promise(resolve => setTimeout(resolve, pausaCurta));
+            }
+            return false;
+        }
+
         const ehTimeout = error.code === 'ECONNABORTED' || error.message.includes('timeout');
         if (ehTimeout) {
             console.error(`⏰ REVENDEDORES: Timeout ao verificar pagamento ${referencia} - planilha demorou muito para responder`);
@@ -1615,6 +1685,9 @@ async function verificarPagamentoIndividual(referencia, valorEsperado) {
 // === FUNÇÃO PARA MARCAR PAGAMENTO COMO PROCESSADO ===
 async function marcarPagamentoComoProcessado(referencia, valor) {
     try {
+        // AGUARDAR RATE LIMIT ANTES DE FAZER REQUISIÇÃO
+        await aguardarRateLimit();
+
         const valorNormalizado = normalizarValor(valor);
 
         console.log(`✅ REVENDEDORES: Marcando pagamento ${referencia} como PROCESSADO`);
@@ -1668,11 +1741,32 @@ async function carregarPagamentosPendentes() {
     }
 }
 
-// Salvar pagamentos pendentes no arquivo
+// Salvar pagamentos pendentes no arquivo (com debounce)
 async function salvarPagamentosPendentes() {
+    // Limpar timeout anterior
+    if (timeoutSalvamentoPagamentos) {
+        clearTimeout(timeoutSalvamentoPagamentos);
+    }
+
+    // Aguardar 2 segundos antes de salvar (agrupar múltiplas mudanças)
+    timeoutSalvamentoPagamentos = setTimeout(async () => {
+        try {
+            await fs.writeFile(ARQUIVO_PAGAMENTOS_PENDENTES, JSON.stringify(pagamentosPendentes, null, 2));
+            console.log(`💾 RETRY: Pagamentos pendentes salvos - ${Object.keys(pagamentosPendentes).length} pendências`);
+        } catch (error) {
+            console.error(`❌ RETRY: Erro ao salvar pendências:`, error);
+        }
+    }, 2000);
+}
+
+// Forçar salvamento imediato (para casos críticos)
+async function salvarPagamentosPendentesImediato() {
+    if (timeoutSalvamentoPagamentos) {
+        clearTimeout(timeoutSalvamentoPagamentos);
+    }
     try {
         await fs.writeFile(ARQUIVO_PAGAMENTOS_PENDENTES, JSON.stringify(pagamentosPendentes, null, 2));
-        console.log(`💾 RETRY: Pagamentos pendentes salvos - ${Object.keys(pagamentosPendentes).length} pendências`);
+        console.log(`💾 RETRY: Salvamento imediato - ${Object.keys(pagamentosPendentes).length} pendências`);
     } catch (error) {
         console.error(`❌ RETRY: Erro ao salvar pendências:`, error);
     }
@@ -1755,23 +1849,41 @@ async function verificarPagamentosPendentes() {
     }
 
     console.log(`🔍 RETRY: Verificando ${pendencias.length} pagamentos pendentes...`);
+    console.log(`⏱️ RATE LIMIT: Verificações com delay de ${DELAY_ENTRE_REQUISICOES/1000}s entre cada uma`);
+
+    // PROCESSAR MAIS PAGAMENTOS POR VEZ (10 em vez de 5)
+    const LOTE_MAXIMO = 10;
+    let processados = 0;
 
     for (const pendencia of pendencias) {
-        // Verificar se expirou
+        // Parar se já processou o lote máximo
+        if (processados >= LOTE_MAXIMO) {
+            console.log(`⏸️ RETRY: Processados ${processados} pagamentos neste ciclo. Restantes serão verificados no próximo.`);
+            break;
+        }
+
+        // Verificar se expirou (5 minutos)
         if (agora > pendencia.expira) {
-            console.log(`⏰ RETRY: Pagamento ${pendencia.referencia} expirou após 30min`);
+            const tempoDecorrido = Math.floor((agora - pendencia.timestamp) / 1000 / 60);
+            console.log(`⏰ RETRY: Pagamento ${pendencia.referencia} expirou após ${tempoDecorrido}min sem confirmação`);
+
+            // NOTIFICAR USUÁRIO SOBRE FALHA
+            await notificarPagamentoExpirado(pendencia);
             await removerPagamentoPendente(pendencia.id);
             continue;
         }
 
         // Verificar se atingiu limite de tentativas
         if (pendencia.tentativas >= MAX_RETRY_ATTEMPTS) {
-            console.log(`❌ RETRY: Pagamento ${pendencia.referencia} atingiu limite de ${MAX_RETRY_ATTEMPTS} tentativas - removendo da fila`);
+            console.log(`❌ RETRY: Pagamento ${pendencia.referencia} atingiu limite de ${MAX_RETRY_ATTEMPTS} tentativas`);
+
+            // NOTIFICAR USUÁRIO SOBRE FALHA
+            await notificarPagamentoExpirado(pendencia);
             await removerPagamentoPendente(pendencia.id);
             continue;
         }
 
-        // Verificar pagamento
+        // Verificar pagamento (COM RATE LIMIT AUTOMÁTICO)
         pendencia.tentativas++;
         console.log(`🔍 RETRY: Tentativa ${pendencia.tentativas}/${MAX_RETRY_ATTEMPTS} para ${pendencia.referencia}`);
 
@@ -1782,11 +1894,48 @@ async function verificarPagamentosPendentes() {
             await processarPagamentoConfirmado(pendencia);
             await removerPagamentoPendente(pendencia.id);
         }
+
+        processados++;
+    }
+
+    // Salvar progresso apenas UMA VEZ ao final (em vez de a cada verificação)
+    if (processados > 0) {
+        await salvarPagamentosPendentes();
     }
 
     // Se não há mais pendências, parar timer
     if (Object.keys(pagamentosPendentes).length === 0) {
         pararTimerRetryPagamentos();
+    }
+}
+
+// Notificar usuário quando pagamento expirar sem confirmação
+async function notificarPagamentoExpirado(pendencia) {
+    try {
+        const { chatId, referencia, valorComprovante, tentativas } = pendencia;
+        const tempoDecorrido = Math.floor((Date.now() - pendencia.timestamp) / 1000 / 60);
+
+        console.log(`📢 RETRY: Notificando usuário sobre pagamento expirado ${referencia}`);
+
+        await client.sendMessage(chatId,
+            `❌ *NÃO FOI POSSÍVEL CONFIRMAR O PAGAMENTO*\n\n` +
+            `💳 Referência: ${referencia}\n` +
+            `💰 Valor: ${valorComprovante}MT\n` +
+            `🔄 Tentativas: ${tentativas}\n` +
+            `⏰ Tempo: ${tempoDecorrido} minutos\n\n` +
+            `⚠️ *Possíveis causas:*\n` +
+            `• A mensagem de confirmação ainda não foi recebida pelo sistema\n` +
+            `• Referência incorreta no comprovante\n` +
+            `• Valor diferente do esperado\n\n` +
+            `💡 *O que fazer:*\n` +
+            `1. Aguarde mais alguns minutos e envie o comprovante novamente\n` +
+            `2. Verifique se a referência está correta\n` +
+            `3. Entre em contato com o suporte se o problema persistir\n\n` +
+            `🕐 ${new Date().toLocaleString('pt-BR')}`
+        );
+
+    } catch (error) {
+        console.error(`❌ RETRY: Erro ao notificar pagamento expirado:`, error.message);
     }
 }
 
@@ -1825,7 +1974,7 @@ async function processarPagamentoConfirmado(pendencia) {
         );
 
         // Processar bônus de referência
-        const bonusInfo = await processarBonusCompra(chatId, megas);
+        const bonusInfo = await processarBonusCompra(chatId, megas, chatId);
 
         // Enviar para Tasker/Planilha
         const resultadoEnvio = await enviarParaTasker(referencia, megas, numero, chatId, messageData.author);
@@ -2347,6 +2496,53 @@ Chamadas + SMS ilimitadas + 100GB = 2250MT
 ╰━━━━━━━━━━━━━━━━━━━━━  
         🚀 𝗢 𝗳𝘂𝘁𝘂𝗿𝗼 𝗲́ 𝗮𝗴𝗼𝗿𝗮. 𝗩𝗮𝗺𝗼𝘀?
 `
+    }, 
+'120363419388089635@g.us': {
+        nome: 'NET VODACOM 18MT',
+        tabela: `TABELA DE MEGAS ⚙🥶
+
+🚀 MEGAS DIÁRIOS 🕔
+1024MB  =  18MT  
+2048MB  =  36MT  
+3072MB  =  54MT  
+4096MB  =  72MT  
+5120MB  =  90MT  
+6144MB  =  108MT  
+7168MB  =  126MT  
+8192MB  =  144MT  
+9216MB  =  162MT  
+10240MB =  180MT  
+
+🌐🚀 PACOTE MENSAL (APENAS MEGAS)
+5.5GB  =  175MT  
+10.5GB =  290MT  
+16.1GB =  425MT  
+21.5GB =  555MT  
+25.5GB =  720MT  
+37.5GB =  835MT  
+54GB   =  995MT 🤩  
+64GB   =  1245MT  
+74GB   =  1445MT  
+100GB  =  1795MT 🚀  
+
+💎 DIAMANTE MENSAL TUDO TOP ILIMITADO
+11GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  460MT  
+14.5GB + Chamadas e SMS ilimitadas para todas redes  =  540MT  
+20GB + Chamadas e SMS ilimitadas + 10min int + 30MB ROAM  =  640MT  
+31.1GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  820MT  
+41.1GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  995MT  
+51.1GB + Chamadas e SMS ilimitadas + 10min int + 30MB ROAM  =  1245MT  
+64.1GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  1445MT  
+100GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  2145MT
+`,
+
+        pagamento: `💳 Formas de Pagamento:  
+
+💵 M-Pesa: 844093189 (Leonel Amâncio Nhantumbo)  
+
+💵 E-Mola: 878184842 (Leonel Amâncio Nhantumbo)  
+
+📤 Envie o comprovativo em (screenshot) da transferência + o número  84 que deverá receber os GB's.`
     }
     
 };
@@ -2373,9 +2569,12 @@ async function tentarComRetry(funcao, maxTentativas = 3, delay = 2000) {
     }
 }
 async function enviarParaGoogleSheets(referencia, valor, numero, grupoId, grupoNome, autorMensagem) {
+    // AGUARDAR RATE LIMIT ANTES DE ENVIAR
+    await aguardarRateLimit();
+
     // Formato igual ao Bot Atacado: transacao já concatenada
     const transacaoFormatada = `${referencia}|${valor}|${numero}`;
-    
+
     const dados = {
         transacao: transacaoFormatada,  // Formato concatenado igual ao Bot Atacado
         grupo_id: grupoId,
@@ -2383,7 +2582,7 @@ async function enviarParaGoogleSheets(referencia, valor, numero, grupoId, grupoN
         message: `Dados enviados pelo Bot: ${transacaoFormatada}`,
         timestamp: new Date().toISOString()
     };
-    
+
     try {
         console.log(`📊 Enviando para Google Sheets: ${referencia}`);
         console.log(`🔍 Dados enviados:`, JSON.stringify(dados, null, 2));
@@ -2433,8 +2632,23 @@ async function enviarParaGoogleSheets(referencia, valor, numero, grupoId, grupoN
                 throw new Error(`Resposta inesperada: ${responseText}`);
             }
         }
-        
+
     } catch (error) {
+        // Tratar erro 429 especificamente
+        if (error.response && error.response.status === 429) {
+            erros429Consecutivos++;
+            console.error(`🚨 Google Sheets: Rate limit atingido (429) - Erro ${erros429Consecutivos}/${MAX_ERROS_429}`);
+
+            // Pausar se necessário
+            if (erros429Consecutivos >= MAX_ERROS_429) {
+                const pausaEmergencia = 2 * 60 * 1000;
+                console.error(`⏸️ Google Sheets: Pausando envios por ${pausaEmergencia/1000}s devido a múltiplos erros 429`);
+                await new Promise(resolve => setTimeout(resolve, pausaEmergencia));
+                erros429Consecutivos = 0;
+            }
+            return { sucesso: false, erro: 'Rate limit atingido, tentando novamente em instantes...' };
+        }
+
         console.error(`❌ Erro Google Sheets [${grupoNome}]: ${error.message}`);
         return { sucesso: false, erro: error.message };
     }
@@ -5834,7 +6048,7 @@ async function processMessage(message) {
                 }
 
                 // PROCESSAR BÔNUS DE REFERÊNCIA
-                const bonusInfo = await processarBonusCompra(remetente, megas);
+                const bonusInfo = await processarBonusCompra(remetente, megas, message.from);
 
                 // VERIFICAR PAGAMENTO ANTES DE ENVIAR PARA PLANILHA
                 // Usar o valor real do comprovante (não o valor calculado dos megas)
@@ -5937,7 +6151,7 @@ async function processMessage(message) {
                 }
 
                 // PROCESSAR BÔNUS DE REFERÊNCIA
-                const bonusInfo = await processarBonusCompra(remetente, megas);
+                const bonusInfo = await processarBonusCompra(remetente, megas, message.from);
 
                 // VERIFICAR PAGAMENTO ANTES DE ENVIAR PARA PLANILHA
                 // Usar o valor real do comprovante (não o valor calculado dos megas)
