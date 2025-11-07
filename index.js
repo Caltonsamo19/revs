@@ -6315,7 +6315,33 @@ async function processMessage(message) {
         }
 
         if (resultadoIA.sucesso) {
-            
+
+            // === NOVO: TRATAMENTO DE PACOTE DIAMANTE DETECTADO ===
+            if (resultadoIA.tipo === 'comprovante_diamante_detectado') {
+                console.log(`💎 PROCESSANDO PACOTE DIAMANTE NO INDEX.JS`);
+
+                const { referencia, valor, numero, pacoteDiamante } = resultadoIA;
+
+                // Processar pacote diamante
+                const resultado = await processarPacoteDiamante(
+                    { referencia, valor, numero },
+                    { grupoId: message.from, nome: configGrupo.nome, tabela: configGrupo.tabela },
+                    pacoteDiamante
+                );
+
+                if (resultado.sucesso) {
+                    await message.reply(resultado.mensagem);
+                } else {
+                    await message.reply(
+                        `❌ *ERRO AO PROCESSAR PACOTE DIAMANTE*\n\n` +
+                        `💰 Referência: ${referencia}\n` +
+                        `⚠️ Erro: ${resultado.erro}\n\n` +
+                        `📞 Entre em contato com o suporte.`
+                    );
+                }
+                return;
+            }
+
             if (resultadoIA.tipo === 'comprovante_recebido' || resultadoIA.tipo === 'comprovante_imagem_recebido') {
                 const metodoInfo = resultadoIA.metodo ? ` (${resultadoIA.metodo})` : '';
                 await message.reply(
@@ -6325,7 +6351,7 @@ async function processMessage(message) {
                     `📱 *Envie UM número que vai receber ${resultadoIA.megas}!*`
                 );
                 return;
-                
+
             } else if (resultadoIA.tipo === 'numero_processado_com_aviso') {
                 const dadosCompletos = resultadoIA.dadosCompletos;
                 const [referencia, megas, numero] = dadosCompletos.split('|');
