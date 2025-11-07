@@ -184,13 +184,21 @@ const GOOGLE_SHEETS_CONFIG = {
     retryDelay: 2000
 };
 
+// === CONFIGURAÇÃO GOOGLE SHEETS - PACOTES DIAMANTE ===
+const GOOGLE_SHEETS_CONFIG_DIAMANTE = {
+    scriptUrl: process.env.GOOGLE_SHEETS_SCRIPT_URL_DIAMANTE || 'https://script.google.com/macros/s/AKfycbw_wHnKiZROpl720GduLz-KvVw4pEtS8njzPvHCnqdWgYHFRIoXlUCxrNpqt7OnZsr8/exec',
+    timeout: 30000,
+    retryAttempts: 3,
+    retryDelay: 2000
+};
+
 // === CONFIGURAÇÃO DE PAGAMENTOS (MESMA PLANILHA DO BOT ATACADO) ===
 const PAGAMENTOS_CONFIG = {
     scriptUrl: 'https://script.google.com/macros/s/AKfycbzzifHGu1JXc2etzG3vqK5Jd3ihtULKezUTQQIDJNsr6tXx3CmVmKkOlsld0x1Feo0H/exec',
     timeout: 30000
 };
 
-console.log(`📊 Google Sheets configurado`);
+console.log(`📊 Google Sheets configurado (Comum + Diamante)`);
 
 // Função helper para reply com fallback
 async function safeReply(message, client, texto) {
@@ -318,6 +326,23 @@ const messageQueue = new MessageQueue();
 // === SISTEMA DE CACHE DE DADOS OTIMIZADO COM CLEANUP AUTOMÁTICO ===
 // === CACHE DE TRANSAÇÕES SIMPLIFICADO (SEGUINDO PADRÃO BOT1) ===
 let cacheTransacoes = new Map();
+
+// === CACHE DE PACOTES DIAMANTE PENDENTES (SISTEMA PARALELO) ===
+let pacotesDiamantePendentes = {};
+// Formato: {
+//     'PP250924.1129': {
+//         referencia: 'PP250924.1129',
+//         numero: '842223344',
+//         totalGB: 24,
+//         gbDiamante: 11,
+//         gbExtras: 13,
+//         divisoes: ['PP250924.112901', 'PP250924.112902'],
+//         confirmacoesRecebidas: [],
+//         grupoId: '...',
+//         grupoNome: '...',
+//         timestamp: Date.now()
+//     }
+// }
 
 // === SISTEMA DE RETRY SILENCIOSO PARA PAGAMENTOS ===
 let pagamentosPendentes = {}; // {id: {dados do pedido}}
@@ -2147,7 +2172,7 @@ const MODERACAO_CONFIG = {
 
 // Configuração para cada grupo
 const CONFIGURACAO_GRUPOS = {
-       '258820749141-1441573529@g.us': {
+    '258820749141-1441573529@g.us': {
         nome: 'Data Store - Vodacom',
         tabela: `✅🔥🚨PROMOÇÃO DE 🛜MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - OUTUBRO 2025🚨🔥✅
 
@@ -2355,7 +2380,7 @@ FORMAS DE PAGAMENTO💰💶
 🌐9216MB = 153MT
 🌐10240MB = 170MT
 
- 📅PACOTE SEMANAL🛒📦
+ 📅PACOTE SEMANAL BÁSICO 🛒📦
 ⚠ Vai receber 100MB por dia durante 6 dias, totalizando +0.6GB. ⚠
 
 📡3.0GB = 89MT 
@@ -2363,6 +2388,16 @@ FORMAS DE PAGAMENTO💰💶
 📡6.0GB = 158MT 
 📡7.0GB = 175MT 
 📡10.0GB = 265MT
+
+🗓PACOTE SEMANAL PREMIUM (15 Dias – Renováveis) 🛒📦
+⚠ Vai receber 100MB por dia durante 14 dias, totalizando +1.4GB. ⚠
+
+📡4096MB = 143MT 
+📡4608MB = 156MT 
+📡5120MB = 186MT 
+📡8192MB = 238MT 
+📡9150MB = 259MT
+📡10240MB = 278MT 
 
 > PARA VER TABELA DO PACOTE MENSAL DIGITE: Mensal
 
@@ -2376,9 +2411,7 @@ M-Pesa: 853529033 📱
 e-Mola: 865627840 📱
 - Alexandre UANELA 
 
-✨ Mais Rápido, Mais Barato, Mais Confiável! ✨
-
-`,
+✨ Mais Rápido, Mais Barato, Mais Confiável! ✨`,
 
         pagamento: `formas de pagamento💰💶
 
@@ -2445,7 +2478,7 @@ Chamadas + SMS ilimitadas + 100GB = 2250MT
 - 📲 𝗠-𝗣𝗘𝗦𝗔: 856268811💷💰 
 - ↪📞Kelven Junior Anabela Nharrava
 `
-    }, 
+    },
 '120363043964227338@g.us': {
         nome: 'ASTRO BOOSTING I',
         tabela: `📢 SUPER PROMOÇÃO DE INTERNET - VODACOM  
@@ -2496,7 +2529,7 @@ Chamadas + SMS ilimitadas + 100GB = 2250MT
 ╰━━━━━━━━━━━━━━━━━━━━━  
         🚀 𝗢 𝗳𝘂𝘁𝘂𝗿𝗼 𝗲́ 𝗮𝗴𝗼𝗿𝗮. 𝗩𝗮𝗺𝗼𝘀?
 `
-    }, 
+    },
 '120363419388089635@g.us': {
         nome: 'NET VODACOM 18MT',
         tabela: `TABELA DE MEGAS ⚙🥶
@@ -2544,7 +2577,6 @@ Chamadas + SMS ilimitadas + 100GB = 2250MT
 
 📤 Envie o comprovativo em (screenshot) da transferência + o número  84 que deverá receber os GB's.`
     }
-    
 };
 
 
@@ -2651,6 +2683,214 @@ async function enviarParaGoogleSheets(referencia, valor, numero, grupoId, grupoN
 
         console.error(`❌ Erro Google Sheets [${grupoNome}]: ${error.message}`);
         return { sucesso: false, erro: error.message };
+    }
+}
+
+// === FUNÇÃO PARA ENVIAR PACOTES DIAMANTE ===
+async function enviarParaGoogleSheetsDiamante(referencia, numero, grupoId, grupoNome, autorMensagem) {
+    // AGUARDAR RATE LIMIT ANTES DE ENVIAR
+    await aguardarRateLimit();
+
+    // Formato: REF|NUMERO (sem megas)
+    const transacaoFormatada = `${referencia}|${numero}`;
+
+    const dados = {
+        transacao: transacaoFormatada,
+        grupo_id: grupoId,
+        sender: 'WhatsApp-Bot-Diamante',
+        message: `Pedido Diamante enviado pelo Bot: ${transacaoFormatada}`,
+        timestamp: new Date().toISOString()
+    };
+
+    try {
+        console.log(`💎 Enviando para Google Sheets DIAMANTE: ${referencia}`);
+        console.log(`🔍 Dados enviados:`, JSON.stringify(dados, null, 2));
+        console.log(`🔗 URL destino:`, GOOGLE_SHEETS_CONFIG_DIAMANTE.scriptUrl);
+
+        // Usar axios COM RETRY para Google Sheets Diamante
+        const response = await axiosComRetry({
+            method: 'post',
+            url: GOOGLE_SHEETS_CONFIG_DIAMANTE.scriptUrl,
+            data: dados,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Bot-Source': 'WhatsApp-Bot-Diamante'
+            }
+        }, 3); // 3 tentativas
+
+        const responseData = response.data;
+        console.log(`📥 Resposta Google Sheets Diamante:`, JSON.stringify(responseData, null, 2));
+
+        // Verificar se é uma resposta JSON válida
+        if (typeof responseData === 'object') {
+            if (responseData.success) {
+                console.log(`✅ Google Sheets Diamante: Dados enviados!`);
+                return { sucesso: true, referencia: responseData.referencia, duplicado: false };
+            } else if (responseData.duplicado) {
+                console.log(`⚠️ Google Sheets Diamante: Pedido duplicado detectado - ${responseData.referencia} (Status: ${responseData.status_existente})`);
+                return {
+                    sucesso: false,
+                    duplicado: true,
+                    referencia: responseData.referencia,
+                    status_existente: responseData.status_existente,
+                    message: responseData.message
+                };
+            } else {
+                throw new Error(responseData.message || 'Erro desconhecido');
+            }
+        } else {
+            // Fallback para compatibilidade com resposta em texto
+            const responseText = String(responseData);
+            if (responseText.includes('Sucesso!')) {
+                console.log(`✅ Google Sheets Diamante: Dados enviados!`);
+                return { sucesso: true, row: 'N/A', duplicado: false };
+            } else if (responseText.includes('Erro:')) {
+                throw new Error(responseText);
+            } else {
+                throw new Error(`Resposta inesperada: ${responseText}`);
+            }
+        }
+
+    } catch (error) {
+        // Tratar erro 429 especificamente
+        if (error.response && error.response.status === 429) {
+            erros429Consecutivos++;
+            console.error(`🚨 Google Sheets Diamante: Rate limit atingido (429) - Erro ${erros429Consecutivos}/${MAX_ERROS_429}`);
+
+            // Pausar se necessário
+            if (erros429Consecutivos >= MAX_ERROS_429) {
+                const pausaEmergencia = 2 * 60 * 1000;
+                console.error(`⏸️ Google Sheets Diamante: Pausando envios por ${pausaEmergencia/1000}s devido a múltiplos erros 429`);
+                await new Promise(resolve => setTimeout(resolve, pausaEmergencia));
+                erros429Consecutivos = 0;
+            }
+            return { sucesso: false, erro: 'Rate limit atingido, tentando novamente em instantes...' };
+        }
+
+        console.error(`❌ Erro Google Sheets Diamante [${grupoNome}]: ${error.message}`);
+        return { sucesso: false, erro: error.message };
+    }
+}
+
+// === FUNÇÃO PARA PROCESSAR PACOTE DIAMANTE ===
+async function processarPacoteDiamante(comprovante, configGrupo, pacoteDiamante) {
+    try {
+        const { referencia, valor, numero } = comprovante;
+        const grupoId = configGrupo.grupoId;
+        const grupoNome = configGrupo.nome;
+
+        console.log(`💎 DIAMANTE: Processando pacote diamante`);
+        console.log(`💎 Ref: ${referencia} | Valor: ${valor}MT | Número: ${numero}`);
+        console.log(`💎 Pacote: ${pacoteDiamante.descricao} (${pacoteDiamante.quantidade}MB)`);
+
+        // Converter MB para GB
+        const totalGB = Math.round(pacoteDiamante.quantidade / 1024);
+        console.log(`💎 Total GB: ${totalGB}GB`);
+
+        // === CASO 1: Pacote com 11GB ou menos (SIMPLES) ===
+        if (totalGB <= 11) {
+            console.log(`💎 DIAMANTE: Pacote ≤11GB, enviando direto para planilha diamante`);
+
+            // Enviar direto para planilha diamante
+            const resultado = await enviarParaGoogleSheetsDiamante(
+                referencia,
+                numero,
+                grupoId,
+                grupoNome,
+                'WhatsApp-Bot'
+            );
+
+            if (resultado.sucesso) {
+                console.log(`✅ DIAMANTE: Pacote enviado com sucesso para planilha diamante`);
+                return {
+                    sucesso: true,
+                    mensagem: `💎 *PACOTE DIAMANTE PROCESSADO*\n\n✅ Seu pacote foi enviado para processamento!\n\n📱 Número: ${numero}\n💎 Pacote: ${pacoteDiamante.descricao}\n🔖 Referência: ${referencia}\n\n⏰ Aguarde a ativação em instantes!`
+                };
+            } else {
+                throw new Error(resultado.erro || 'Erro ao enviar para planilha diamante');
+            }
+        }
+
+        // === CASO 2: Pacote > 11GB (COMPLEXO - COM DIVISÃO) ===
+        console.log(`💎 DIAMANTE: Pacote >11GB, iniciando divisão`);
+
+        const gbDiamante = 11;
+        const gbExtras = totalGB - gbDiamante;
+        console.log(`💎 DIAMANTE: ${totalGB}GB = ${gbDiamante}GB (diamante) + ${gbExtras}GB (extras)`);
+
+        // Calcular divisões dos GB extras (limite 10GB por transação)
+        const divisoes = [];
+        let gbRestante = gbExtras * 1024; // Converter para MB
+        let contadorDivisao = 1;
+
+        while (gbRestante > 0) {
+            const mbDivisao = Math.min(gbRestante, 10240); // Máximo 10GB por transação
+            const refDivisao = `${referencia}${String(contadorDivisao).padStart(2, '0')}`;
+
+            divisoes.push({
+                referencia: refDivisao,
+                megas: mbDivisao,
+                numero: numero
+            });
+
+            gbRestante -= mbDivisao;
+            contadorDivisao++;
+        }
+
+        console.log(`💎 DIAMANTE: ${gbExtras}GB divididos em ${divisoes.length} transação(ões):`);
+        divisoes.forEach((div, i) => {
+            console.log(`   ${i + 1}. ${div.referencia} = ${div.megas}MB`);
+        });
+
+        // Adicionar ao cache de pacotes diamante pendentes
+        pacotesDiamantePendentes[referencia] = {
+            referencia: referencia,
+            numero: numero,
+            totalGB: totalGB,
+            gbDiamante: gbDiamante,
+            gbExtras: gbExtras,
+            divisoes: divisoes.map(d => d.referencia),
+            confirmacoesRecebidas: [],
+            grupoId: grupoId,
+            grupoNome: grupoNome,
+            timestamp: Date.now()
+        };
+
+        console.log(`💎 DIAMANTE: Adicionado ao cache de pendentes`);
+
+        // Enviar divisões para planilha comum (sistema existente)
+        for (const divisao of divisoes) {
+            console.log(`📤 Enviando divisão: ${divisao.referencia} = ${divisao.megas}MB`);
+
+            const resultado = await enviarParaGoogleSheets(
+                divisao.referencia,
+                divisao.megas,
+                divisao.numero,
+                grupoId,
+                grupoNome,
+                'WhatsApp-Bot-Diamante-Divisao'
+            );
+
+            if (!resultado.sucesso) {
+                console.error(`❌ Erro ao enviar divisão ${divisao.referencia}`);
+                // Continuar enviando outras divisões
+            }
+        }
+
+        console.log(`✅ DIAMANTE: Todas as divisões enviadas para planilha comum`);
+        console.log(`⏳ DIAMANTE: Aguardando confirmações do bot secundário...`);
+
+        return {
+            sucesso: true,
+            mensagem: `💎 *PACOTE DIAMANTE PROCESSADO*\n\n✅ Seu pacote está sendo processado!\n\n📱 Número: ${numero}\n💎 Pacote: ${pacoteDiamante.descricao}\n🔖 Referência: ${referencia}\n\n📊 *Divisão:*\n• ${gbExtras}GB de megas comuns (processando...)\n• ${gbDiamante}GB + Chamadas/SMS ilimitados (aguardando)\n\n⏰ O pacote diamante será ativado assim que os megas extras forem confirmados!`
+        };
+
+    } catch (error) {
+        console.error(`❌ DIAMANTE: Erro ao processar pacote:`, error.message);
+        return {
+            sucesso: false,
+            erro: error.message
+        };
     }
 }
 
@@ -6003,6 +6243,68 @@ async function processMessage(message) {
             }
         }
 
+        // === MONITORAMENTO ADICIONAL PARA PACOTES DIAMANTE ===
+        // (Só executa se não foi processado pelo sistema de compras acima)
+        if (message.body.includes('✅') && message.body.includes('Transação Concluída Com Sucesso')) {
+            const regexReferencia = /🔖\s*\*?Referência:\*?\s*([A-Za-z0-9._-]+)/i;
+            const matchReferencia = message.body.match(regexReferencia);
+
+            if (matchReferencia) {
+                const refConfirmada = matchReferencia[1];
+                console.log(`💎 DIAMANTE: Verificando se ${refConfirmada} é divisão de pacote diamante...`);
+
+                // Verificar se é divisão de pacote diamante
+                const pacoteDiamante = Object.values(pacotesDiamantePendentes).find(
+                    p => p.divisoes.includes(refConfirmada)
+                );
+
+                if (pacoteDiamante) {
+                    console.log(`💎 DIAMANTE: Confirmação de divisão detectada!`);
+                    console.log(`💎 Ref Divisão: ${refConfirmada} | Pacote Original: ${pacoteDiamante.referencia}`);
+
+                    // Adicionar à lista de confirmações recebidas (evitar duplicatas)
+                    if (!pacoteDiamante.confirmacoesRecebidas.includes(refConfirmada)) {
+                        pacoteDiamante.confirmacoesRecebidas.push(refConfirmada);
+                        console.log(`💎 DIAMANTE: Confirmação adicionada (${pacoteDiamante.confirmacoesRecebidas.length}/${pacoteDiamante.divisoes.length})`);
+                    }
+
+                    // Verificar se TODAS as divisões foram confirmadas
+                    if (pacoteDiamante.confirmacoesRecebidas.length === pacoteDiamante.divisoes.length) {
+                        console.log(`💎 DIAMANTE: TODAS as divisões confirmadas! Enviando para planilha diamante...`);
+
+                        // Enviar para planilha diamante
+                        const resultado = await enviarParaGoogleSheetsDiamante(
+                            pacoteDiamante.referencia,
+                            pacoteDiamante.numero,
+                            pacoteDiamante.grupoId,
+                            pacoteDiamante.grupoNome,
+                            'WhatsApp-Bot-Diamante'
+                        );
+
+                        if (resultado.sucesso) {
+                            console.log(`✅ DIAMANTE: Pacote ${pacoteDiamante.referencia} enviado com sucesso!`);
+
+                            // Enviar mensagem ao usuário
+                            try {
+                                const mensagemFinal = `💎 *PACOTE DIAMANTE ATIVADO!*\n\n✅ Todos os megas extras foram confirmados!\n\n📱 Número: ${pacoteDiamante.numero}\n💎 Total: ${pacoteDiamante.totalGB}GB + Chamadas/SMS ilimitados\n🔖 Referência: ${pacoteDiamante.referencia}\n\n🎉 Seu pacote diamante completo está sendo ativado agora!`;
+                                await client.sendMessage(message.from, mensagemFinal);
+                            } catch (error) {
+                                console.error(`❌ Erro ao enviar mensagem de ativação:`, error);
+                            }
+
+                            // Remover do cache
+                            delete pacotesDiamantePendentes[pacoteDiamante.referencia];
+                            console.log(`💎 DIAMANTE: Pacote removido do cache de pendentes`);
+                        } else {
+                            console.error(`❌ DIAMANTE: Erro ao enviar para planilha: ${resultado.erro}`);
+                        }
+                    } else {
+                        console.log(`⏳ DIAMANTE: Aguardando mais confirmações (${pacoteDiamante.confirmacoesRecebidas.length}/${pacoteDiamante.divisoes.length})`);
+                    }
+                }
+            }
+        }
+
         // === PROCESSAMENTO COM IA (LÓGICA SIMPLES IGUAL AO BOT ATACADO) ===
         const remetente = message.author || message.from;
         const resultadoIA = await ia.processarMensagemBot(message.body, remetente, 'texto', configGrupo);
@@ -6091,6 +6393,35 @@ async function processMessage(message) {
 
                 console.log(`✅ REVENDEDORES: Pagamento confirmado para texto! Processando...`);
 
+                // === VERIFICAR SE É PACOTE DIAMANTE ===
+                const precos = ia.extrairPrecosTabela(configGrupo.tabela);
+                const pacoteDiamante = precos.find(p => p.preco === valorComprovante && p.isDiamante === true);
+
+                if (pacoteDiamante) {
+                    console.log(`💎 DIAMANTE DETECTADO: ${pacoteDiamante.descricao} (${valorComprovante}MT)`);
+
+                    // Processar pacote diamante
+                    const resultado = await processarPacoteDiamante(
+                        { referencia, valor: valorComprovante, numero },
+                        { grupoId: message.from, nome: configGrupo.nome, tabela: configGrupo.tabela },
+                        pacoteDiamante
+                    );
+
+                    if (resultado.sucesso) {
+                        await message.reply(resultado.mensagem);
+                        await marcarPagamentoComoProcessado(referencia, valorComprovante);
+                    } else {
+                        await message.reply(
+                            `❌ *ERRO AO PROCESSAR PACOTE DIAMANTE*\n\n` +
+                            `💰 Referência: ${referencia}\n` +
+                            `⚠️ Erro: ${resultado.erro}\n\n` +
+                            `📞 Entre em contato com o suporte.`
+                        );
+                    }
+                    return; // NÃO enviar para planilha comum
+                }
+
+                // Continuar fluxo normal (pedidos comuns)
                 const resultadoEnvio = await enviarParaTasker(referencia, megas, numero, message.from, autorMensagem);
 
                 // Verificar se é pedido duplicado
@@ -6194,6 +6525,35 @@ async function processMessage(message) {
 
                 console.log(`✅ REVENDEDORES: Pagamento confirmado para texto! Processando...`);
 
+                // === VERIFICAR SE É PACOTE DIAMANTE ===
+                const precos = ia.extrairPrecosTabela(configGrupo.tabela);
+                const pacoteDiamante = precos.find(p => p.preco === valorComprovante && p.isDiamante === true);
+
+                if (pacoteDiamante) {
+                    console.log(`💎 DIAMANTE DETECTADO: ${pacoteDiamante.descricao} (${valorComprovante}MT)`);
+
+                    // Processar pacote diamante
+                    const resultado = await processarPacoteDiamante(
+                        { referencia, valor: valorComprovante, numero },
+                        { grupoId: message.from, nome: configGrupo.nome, tabela: configGrupo.tabela },
+                        pacoteDiamante
+                    );
+
+                    if (resultado.sucesso) {
+                        await message.reply(resultado.mensagem);
+                        await marcarPagamentoComoProcessado(referencia, valorComprovante);
+                    } else {
+                        await message.reply(
+                            `❌ *ERRO AO PROCESSAR PACOTE DIAMANTE*\n\n` +
+                            `💰 Referência: ${referencia}\n` +
+                            `⚠️ Erro: ${resultado.erro}\n\n` +
+                            `📞 Entre em contato com o suporte.`
+                        );
+                    }
+                    return; // NÃO enviar para planilha comum
+                }
+
+                // Continuar fluxo normal (pedidos comuns)
                 const resultadoEnvio = await enviarParaTasker(referencia, megas, numero, message.from, autorMensagem);
 
                 // Verificar se é pedido duplicado

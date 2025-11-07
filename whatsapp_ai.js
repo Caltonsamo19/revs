@@ -593,23 +593,30 @@ Se não conseguires extrair os dados:
           
           // Determinar tipo de pacote
           let tipo = 'diario';
-          if (linhaLower.includes('mensal') || linhaLower.includes('30 dias')) {
+          let isDiamante = false;
+
+          // Detectar pacote DIAMANTE (pelos critérios definidos)
+          if (linha.includes('💎') ||
+              linhaLower.includes('diamante') ||
+              (linhaLower.includes('chamadas') && linhaLower.includes('sms') && linhaLower.includes('ilimitad'))) {
+            tipo = 'diamante';
+            isDiamante = true;
+          } else if (linhaLower.includes('mensal') || linhaLower.includes('30 dias')) {
             tipo = 'mensal';
           } else if (linhaLower.includes('semanal') || linhaLower.includes('7 dias')) {
             tipo = 'semanal';
-          } else if (linhaLower.includes('diamante')) {
-            tipo = 'diamante';
           } else if (linha.includes('💫')) {
             tipo = 'saldo';
           }
           
           // console.log(`     ✅ Processado: ${descricao} = ${preco}MT (${quantidadeMB}MB, ${tipo})`);
-          
+
           precos.push({
             quantidade: quantidadeMB,
             preco: preco,
             descricao: descricao,
             tipo: tipo,
+            isDiamante: isDiamante,
             original: linha.trim()
           });
         }
