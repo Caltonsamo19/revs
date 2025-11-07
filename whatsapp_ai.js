@@ -1006,8 +1006,21 @@ Se não conseguires extrair os dados:
       }
       
       const valorNumerico = parseFloat(valorPago);
-      
-      // Verificar se o valor é exatamente um pacote
+
+      // === VERIFICAR SE É PACOTE DIAMANTE ANTES DE TUDO ===
+      const pacoteDiamante = precos.find(p => p.preco === valorNumerico && p.isDiamante === true);
+      if (pacoteDiamante) {
+        console.log(`   💎 DIAMANTE DETECTADO: ${pacoteDiamante.descricao} (${valorNumerico}MT)`);
+        console.log(`   🚫 Divisão automática BLOQUEADA para pacote diamante`);
+        return {
+          deveDividir: false,
+          isDiamante: true,
+          pacoteDiamante: pacoteDiamante,
+          motivo: `Pacote Diamante: ${pacoteDiamante.descricao}`
+        };
+      }
+
+      // Verificar se o valor é exatamente um pacote (comum)
       const pacoteExato = precos.find(p => p.preco === valorNumerico);
       if (pacoteExato) {
         console.log(`   ⚡ Valor exato para: ${pacoteExato.descricao}`);
@@ -1429,6 +1442,23 @@ Se não conseguires extrair os dados:
       // Processar imediatamente como pedido completo
       if (configGrupo && parseFloat(comprovante.valor) >= 32) {
         const analiseAutomatica = await this.analisarDivisaoAutomatica(comprovante.valor, configGrupo);
+
+        // === VERIFICAR SE É PACOTE DIAMANTE ===
+        if (analiseAutomatica.isDiamante && analiseAutomatica.pacoteDiamante) {
+          console.log(`   💎 Retornando pacote diamante detectado automaticamente`);
+          return {
+            sucesso: true,
+            tipo: 'comprovante_diamante_detectado',
+            referencia: comprovante.referencia,
+            valor: comprovante.valor,
+            valorComprovante: comprovante.valor,
+            megas: analiseAutomatica.pacoteDiamante.quantidade,
+            numero: numeros[0],
+            pacoteDiamante: analiseAutomatica.pacoteDiamante,
+            mensagem: `💎 Pacote Diamante detectado: ${analiseAutomatica.pacoteDiamante.descricao}`
+          };
+        }
+
         if (analiseAutomatica.deveDividir) {
           const comprovanteComDivisao = {
             referencia: comprovante.referencia,
@@ -1438,7 +1468,7 @@ Se não conseguires extrair os dados:
             tipo: 'divisao_automatica',
             analiseAutomatica: analiseAutomatica
           };
-          
+
           return await this.processarNumerosComDivisaoAutomatica(numeros, remetente, comprovanteComDivisao);
         }
       }
