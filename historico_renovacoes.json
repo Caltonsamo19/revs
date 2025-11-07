@@ -1,0 +1,4472 @@
+[
+  {
+    "clienteId": "857482525_CJE7HPKOSS5",
+    "numero": "857482525",
+    "referenciaOriginal": "CJE7HPKOSS5",
+    "novaReferencia": "CJE7HPKOSS5D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-17T02:53:16.215Z",
+    "timestamp": "2025-10-16T04:53:16.215Z"
+  },
+  {
+    "clienteId": "855508847_CJE2HPKK76C",
+    "numero": "855508847",
+    "referenciaOriginal": "CJE2HPKK76C",
+    "novaReferencia": "CJE2HPKK76CD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-17T02:53:28.970Z",
+    "timestamp": "2025-10-16T04:53:28.970Z"
+  },
+  {
+    "clienteId": "852581307_CJE5HPJH9S5",
+    "numero": "852581307",
+    "referenciaOriginal": "CJE5HPJH9S5",
+    "novaReferencia": "CJE5HPJH9S5D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-17T02:53:42.772Z",
+    "timestamp": "2025-10-16T04:53:42.772Z"
+  },
+  {
+    "clienteId": "852082250_PP251012.1746.y73585",
+    "numero": "852082250",
+    "referenciaOriginal": "PP251012.1746.y73585",
+    "novaReferencia": "PP251012.1746.y73585D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-17T02:53:53.379Z",
+    "timestamp": "2025-10-16T04:53:53.379Z"
+  },
+  {
+    "clienteId": "842393529_CJF0HPPKRSI",
+    "numero": "842393529",
+    "referenciaOriginal": "CJF0HPPKRSI",
+    "novaReferencia": "CJF0HPPKRSID3",
+    "dia": 3,
+    "diasRestantes": 13,
+    "proximaRenovacao": "2025-10-17T06:53:16.219Z",
+    "timestamp": "2025-10-16T08:53:16.219Z"
+  },
+  {
+    "clienteId": "850659986_CJE5HPHR0NV",
+    "numero": "850659986",
+    "referenciaOriginal": "CJE5HPHR0NV",
+    "novaReferencia": "CJE5HPHR0NVD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-17T06:53:27.975Z",
+    "timestamp": "2025-10-16T08:53:27.975Z"
+  },
+  {
+    "clienteId": "849906023_CJF0HPSGLN0",
+    "numero": "849906023",
+    "referenciaOriginal": "CJF0HPSGLN0",
+    "novaReferencia": "CJF0HPSGLN0D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-17T10:10:28.303Z",
+    "timestamp": "2025-10-16T12:10:28.303Z"
+  },
+  {
+    "clienteId": "841161395_CJF8HPWLDT6",
+    "numero": "841161395",
+    "referenciaOriginal": "CJF8HPWLDT6",
+    "novaReferencia": "CJF8HPWLDT6D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-17T15:39:47.969Z",
+    "timestamp": "2025-10-16T17:39:47.969Z"
+  },
+  {
+    "clienteId": "845911743_CJF2HPXP5S4",
+    "numero": "845911743",
+    "referenciaOriginal": "CJF2HPXP5S4",
+    "novaReferencia": "CJF2HPXP5S4D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-17T16:39:47.968Z",
+    "timestamp": "2025-10-16T18:39:47.968Z"
+  },
+  {
+    "clienteId": "857482525_CJE7HPKOSS5",
+    "numero": "857482525",
+    "referenciaOriginal": "CJE7HPKOSS5",
+    "novaReferencia": "CJE7HPKOSS5D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-17T02:53:16.215Z",
+    "timestamp": "2025-10-17T03:39:47.974Z"
+  },
+  {
+    "clienteId": "855508847_CJE2HPKK76C",
+    "numero": "855508847",
+    "referenciaOriginal": "CJE2HPKK76C",
+    "novaReferencia": "CJE2HPKK76CD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-17T02:53:28.970Z",
+    "timestamp": "2025-10-17T03:40:01.867Z"
+  },
+  {
+    "clienteId": "852581307_CJE5HPJH9S5",
+    "numero": "852581307",
+    "referenciaOriginal": "CJE5HPJH9S5",
+    "novaReferencia": "CJE5HPJH9S5D4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-18T01:40:16.084Z",
+    "timestamp": "2025-10-17T03:40:16.084Z"
+  },
+  {
+    "clienteId": "852082250_PP251012.1746.y73585",
+    "numero": "852082250",
+    "referenciaOriginal": "PP251012.1746.y73585",
+    "novaReferencia": "PP251012.1746.y73585D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-17T02:53:53.379Z",
+    "timestamp": "2025-10-17T03:40:31.087Z"
+  },
+  {
+    "clienteId": "845581415_CJG3HQ17QKB",
+    "numero": "845581415",
+    "referenciaOriginal": "CJG3HQ17QKB",
+    "novaReferencia": "CJG3HQ17QKBD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-18T04:39:47.976Z",
+    "timestamp": "2025-10-17T06:39:47.976Z"
+  },
+  {
+    "clienteId": "842393529_CJF0HPPKRSI",
+    "numero": "842393529",
+    "referenciaOriginal": "CJF0HPPKRSI",
+    "novaReferencia": "CJF0HPPKRSID4",
+    "dia": 4,
+    "diasRestantes": 12,
+    "proximaRenovacao": "2025-10-18T05:39:47.975Z",
+    "timestamp": "2025-10-17T07:39:47.975Z"
+  },
+  {
+    "clienteId": "850659986_CJE5HPHR0NV",
+    "numero": "850659986",
+    "referenciaOriginal": "CJE5HPHR0NV",
+    "novaReferencia": "CJE5HPHR0NVD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-18T05:40:03.765Z",
+    "timestamp": "2025-10-17T07:40:03.765Z"
+  },
+  {
+    "clienteId": "849633399_CJG5HQ44KUJ",
+    "numero": "849633399",
+    "referenciaOriginal": "CJG5HQ44KUJ",
+    "novaReferencia": "CJG5HQ44KUJD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-18T07:39:47.976Z",
+    "timestamp": "2025-10-17T09:39:47.976Z"
+  },
+  {
+    "clienteId": "849906023_CJF0HPSGLN0",
+    "numero": "849906023",
+    "referenciaOriginal": "CJF0HPSGLN0",
+    "novaReferencia": "CJF0HPSGLN0D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-17T10:10:28.303Z",
+    "timestamp": "2025-10-17T10:39:47.978Z"
+  },
+  {
+    "clienteId": "848212586_CJG1HQ4SMVN.l",
+    "numero": "848212586",
+    "referenciaOriginal": "CJG1HQ4SMVN.l",
+    "novaReferencia": "CJG1HQ4SMVN.lD3",
+    "dia": 3,
+    "diasRestantes": 13,
+    "proximaRenovacao": "2025-10-18T08:40:02.426Z",
+    "timestamp": "2025-10-17T10:40:02.426Z"
+  },
+  {
+    "clienteId": "852581307_CJG9HQ4S0U9",
+    "numero": "852581307",
+    "referenciaOriginal": "CJG9HQ4S0U9",
+    "novaReferencia": "CJG9HQ4S0U9D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-18T08:40:19.081Z",
+    "timestamp": "2025-10-17T10:40:19.081Z"
+  },
+  {
+    "clienteId": "841161395_CJF8HPWLDT6",
+    "numero": "841161395",
+    "referenciaOriginal": "CJF8HPWLDT6",
+    "novaReferencia": "CJF8HPWLDT6D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-17T15:39:47.969Z",
+    "timestamp": "2025-10-17T16:34:16.390Z"
+  },
+  {
+    "clienteId": "CJG7HQAIKX3_",
+    "numero": "CJG7HQAIKX3",
+    "referenciaOriginal": "",
+    "novaReferencia": "D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-18T14:34:30.844Z",
+    "timestamp": "2025-10-17T16:34:30.844Z"
+  },
+  {
+    "clienteId": "845911743_CJF2HPXP5S4",
+    "numero": "845911743",
+    "referenciaOriginal": "CJF2HPXP5S4",
+    "novaReferencia": "CJF2HPXP5S4D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-17T16:39:47.968Z",
+    "timestamp": "2025-10-17T17:33:46.384Z"
+  },
+  {
+    "clienteId": "849232903_CJG1HQBQO25",
+    "numero": "849232903",
+    "referenciaOriginal": "CJG1HQBQO25",
+    "novaReferencia": "CJG1HQBQO25D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-18T16:33:46.382Z",
+    "timestamp": "2025-10-17T18:33:46.382Z"
+  },
+  {
+    "clienteId": "852581307_CJE5HPJH9S5",
+    "numero": "852581307",
+    "referenciaOriginal": "CJE5HPJH9S5",
+    "novaReferencia": "CJE5HPJH9S5D5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-19T01:09:56.976Z",
+    "timestamp": "2025-10-18T03:09:56.976Z"
+  },
+  {
+    "clienteId": "845581415_CJG3HQ17QKB",
+    "numero": "845581415",
+    "referenciaOriginal": "CJG3HQ17QKB",
+    "novaReferencia": "CJG3HQ17QKBD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-18T04:39:47.976Z",
+    "timestamp": "2025-10-18T05:09:56.978Z"
+  },
+  {
+    "clienteId": "842393529_CJF0HPPKRSI",
+    "numero": "842393529",
+    "referenciaOriginal": "CJF0HPPKRSI",
+    "novaReferencia": "CJF0HPPKRSID5",
+    "dia": 5,
+    "diasRestantes": 11,
+    "proximaRenovacao": "2025-10-19T04:09:56.980Z",
+    "timestamp": "2025-10-18T06:09:56.980Z"
+  },
+  {
+    "clienteId": "850659986_CJE5HPHR0NV",
+    "numero": "850659986",
+    "referenciaOriginal": "CJE5HPHR0NV",
+    "novaReferencia": "CJE5HPHR0NVD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-19T04:10:08.370Z",
+    "timestamp": "2025-10-18T06:10:08.370Z"
+  },
+  {
+    "clienteId": "845127443_CJH5HQDZAGX",
+    "numero": "845127443",
+    "referenciaOriginal": "CJH5HQDZAGX",
+    "novaReferencia": "CJH5HQDZAGXD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-19T04:10:19.403Z",
+    "timestamp": "2025-10-18T06:10:19.403Z"
+  },
+  {
+    "clienteId": "849011348_CJH7HQFAZNB",
+    "numero": "849011348",
+    "referenciaOriginal": "CJH7HQFAZNB",
+    "novaReferencia": "CJH7HQFAZNBD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-19T05:09:56.984Z",
+    "timestamp": "2025-10-18T07:09:56.984Z"
+  },
+  {
+    "clienteId": "849633399_CJG5HQ44KUJ",
+    "numero": "849633399",
+    "referenciaOriginal": "CJG5HQ44KUJ",
+    "novaReferencia": "CJG5HQ44KUJD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-19T06:09:56.980Z",
+    "timestamp": "2025-10-18T08:09:56.980Z"
+  },
+  {
+    "clienteId": "848212586_CJG1HQ4SMVN.l",
+    "numero": "848212586",
+    "referenciaOriginal": "CJG1HQ4SMVN.l",
+    "novaReferencia": "CJG1HQ4SMVN.lD4",
+    "dia": 4,
+    "diasRestantes": 12,
+    "proximaRenovacao": "2025-10-19T07:13:07.342Z",
+    "timestamp": "2025-10-18T09:13:07.342Z"
+  },
+  {
+    "clienteId": "852581307_CJG9HQ4S0U9",
+    "numero": "852581307",
+    "referenciaOriginal": "CJG9HQ4S0U9",
+    "novaReferencia": "CJG9HQ4S0U9D4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-19T07:13:18.194Z",
+    "timestamp": "2025-10-18T09:13:18.194Z"
+  },
+  {
+    "clienteId": "841985459_CJH2HQIMXD8",
+    "numero": "841985459",
+    "referenciaOriginal": "CJH2HQIMXD8",
+    "novaReferencia": "CJH2HQIMXD8D3",
+    "dia": 3,
+    "diasRestantes": 13,
+    "proximaRenovacao": "2025-10-19T08:12:37.332Z",
+    "timestamp": "2025-10-18T10:12:37.332Z"
+  },
+  {
+    "clienteId": "846149766_CJH6HQK8YRO",
+    "numero": "846149766",
+    "referenciaOriginal": "CJH6HQK8YRO",
+    "novaReferencia": "CJH6HQK8YROD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-19T11:10:35.571Z",
+    "timestamp": "2025-10-18T13:10:35.571Z"
+  },
+  {
+    "clienteId": "843709373_CJH7HQKBFPD",
+    "numero": "843709373",
+    "referenciaOriginal": "CJH7HQKBFPD",
+    "novaReferencia": "CJH7HQKBFPDD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-19T11:10:49.766Z",
+    "timestamp": "2025-10-18T13:10:49.766Z"
+  },
+  {
+    "clienteId": "CJG7HQAIKX3_",
+    "numero": "CJG7HQAIKX3",
+    "referenciaOriginal": "",
+    "novaReferencia": "D4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-19T13:10:35.572Z",
+    "timestamp": "2025-10-18T15:10:35.572Z"
+  },
+  {
+    "clienteId": "855508847_CJH7HQO7AFX",
+    "numero": "855508847",
+    "referenciaOriginal": "CJH7HQO7AFX",
+    "novaReferencia": "CJH7HQO7AFXD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-19T14:10:35.582Z",
+    "timestamp": "2025-10-18T16:10:35.582Z"
+  },
+  {
+    "clienteId": "849232903_CJG1HQBQO25",
+    "numero": "849232903",
+    "referenciaOriginal": "CJG1HQBQO25",
+    "novaReferencia": "CJG1HQBQO25D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-18T16:33:46.382Z",
+    "timestamp": "2025-10-18T17:10:35.577Z"
+  },
+  {
+    "clienteId": "849906023_CJH1HQPM40H",
+    "numero": "849906023",
+    "referenciaOriginal": "CJH1HQPM40H",
+    "novaReferencia": "CJH1HQPM40HD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-19T16:16:29.484Z",
+    "timestamp": "2025-10-18T18:16:29.484Z"
+  },
+  {
+    "clienteId": "852581307_CJE5HPJH9S5",
+    "numero": "852581307",
+    "referenciaOriginal": "CJE5HPJH9S5",
+    "novaReferencia": "CJE5HPJH9S5D6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-19T01:09:56.976Z",
+    "timestamp": "2025-10-19T01:39:21.800Z"
+  },
+  {
+    "clienteId": "844107099_CJI2HQR2NES",
+    "numero": "844107099",
+    "referenciaOriginal": "CJI2HQR2NES",
+    "novaReferencia": "CJI2HQR2NESD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-20T00:39:21.801Z",
+    "timestamp": "2025-10-19T02:39:21.801Z"
+  },
+  {
+    "clienteId": "842393529_CJF0HPPKRSI",
+    "numero": "842393529",
+    "referenciaOriginal": "CJF0HPPKRSI",
+    "novaReferencia": "CJF0HPPKRSID6",
+    "dia": 6,
+    "diasRestantes": 10,
+    "proximaRenovacao": "2025-10-20T02:38:17.410Z",
+    "timestamp": "2025-10-19T04:38:17.410Z"
+  },
+  {
+    "clienteId": "850659986_CJE5HPHR0NV",
+    "numero": "850659986",
+    "referenciaOriginal": "CJE5HPHR0NV",
+    "novaReferencia": "CJE5HPHR0NVD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-19T04:10:08.370Z",
+    "timestamp": "2025-10-19T04:38:31.126Z"
+  },
+  {
+    "clienteId": "845127443_CJH5HQDZAGX",
+    "numero": "845127443",
+    "referenciaOriginal": "CJH5HQDZAGX",
+    "novaReferencia": "CJH5HQDZAGXD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-19T04:10:19.403Z",
+    "timestamp": "2025-10-19T04:38:43.818Z"
+  },
+  {
+    "clienteId": "849011348_CJH7HQFAZNB",
+    "numero": "849011348",
+    "referenciaOriginal": "CJH7HQFAZNB",
+    "novaReferencia": "CJH7HQFAZNBD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-20T03:38:17.411Z",
+    "timestamp": "2025-10-19T05:38:17.411Z"
+  },
+  {
+    "clienteId": "849633399_CJG5HQ44KUJ",
+    "numero": "849633399",
+    "referenciaOriginal": "CJG5HQ44KUJ",
+    "novaReferencia": "CJG5HQ44KUJD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-20T04:38:17.413Z",
+    "timestamp": "2025-10-19T06:38:17.413Z"
+  },
+  {
+    "clienteId": "848212586_CJG1HQ4SMVN.l",
+    "numero": "848212586",
+    "referenciaOriginal": "CJG1HQ4SMVN.l",
+    "novaReferencia": "CJG1HQ4SMVN.lD5",
+    "dia": 5,
+    "diasRestantes": 11,
+    "proximaRenovacao": "2025-10-20T05:38:17.413Z",
+    "timestamp": "2025-10-19T07:38:17.413Z"
+  },
+  {
+    "clienteId": "852581307_CJG9HQ4S0U9",
+    "numero": "852581307",
+    "referenciaOriginal": "CJG9HQ4S0U9",
+    "novaReferencia": "CJG9HQ4S0U9D5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-20T05:38:31.080Z",
+    "timestamp": "2025-10-19T07:38:31.080Z"
+  },
+  {
+    "clienteId": "841985459_CJH2HQIMXD8",
+    "numero": "841985459",
+    "referenciaOriginal": "CJH2HQIMXD8",
+    "novaReferencia": "CJH2HQIMXD8D4",
+    "dia": 4,
+    "diasRestantes": 12,
+    "proximaRenovacao": "2025-10-20T06:38:17.418Z",
+    "timestamp": "2025-10-19T08:38:17.418Z"
+  },
+  {
+    "clienteId": "846149766_CJH6HQK8YRO",
+    "numero": "846149766",
+    "referenciaOriginal": "CJH6HQK8YRO",
+    "novaReferencia": "CJH6HQK8YROD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-19T11:10:35.571Z",
+    "timestamp": "2025-10-19T11:38:17.415Z"
+  },
+  {
+    "clienteId": "843709373_CJH7HQKBFPD",
+    "numero": "843709373",
+    "referenciaOriginal": "CJH7HQKBFPD",
+    "novaReferencia": "CJH7HQKBFPDD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-19T11:10:49.766Z",
+    "timestamp": "2025-10-19T11:38:24.953Z"
+  },
+  {
+    "clienteId": "CJG7HQAIKX3_",
+    "numero": "CJG7HQAIKX3",
+    "referenciaOriginal": "",
+    "novaReferencia": "D5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-20T11:38:17.416Z",
+    "timestamp": "2025-10-19T13:38:17.416Z"
+  },
+  {
+    "clienteId": "855508847_CJH7HQO7AFX",
+    "numero": "855508847",
+    "referenciaOriginal": "CJH7HQO7AFX",
+    "novaReferencia": "CJH7HQO7AFXD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-19T14:10:35.582Z",
+    "timestamp": "2025-10-19T14:38:17.416Z"
+  },
+  {
+    "clienteId": "845289852_CJI4HR16B20",
+    "numero": "845289852",
+    "referenciaOriginal": "CJI4HR16B20",
+    "novaReferencia": "CJI4HR16B20D3",
+    "dia": 3,
+    "diasRestantes": 13,
+    "proximaRenovacao": "2025-10-20T12:38:28.959Z",
+    "timestamp": "2025-10-19T14:38:28.959Z"
+  },
+  {
+    "clienteId": "849906023_CJH1HQPM40H",
+    "numero": "849906023",
+    "referenciaOriginal": "CJH1HQPM40H",
+    "novaReferencia": "CJH1HQPM40HD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-19T16:16:29.484Z",
+    "timestamp": "2025-10-19T16:38:17.418Z"
+  },
+  {
+    "clienteId": "844107099_CJI2HQR2NES",
+    "numero": "844107099",
+    "referenciaOriginal": "CJI2HQR2NES",
+    "novaReferencia": "CJI2HQR2NESD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-20T23:19:12.817Z",
+    "timestamp": "2025-10-20T01:19:12.817Z"
+  },
+  {
+    "clienteId": "842393529_CJF0HPPKRSI",
+    "numero": "842393529",
+    "referenciaOriginal": "CJF0HPPKRSI",
+    "novaReferencia": "CJF0HPPKRSID7",
+    "dia": 7,
+    "diasRestantes": 9,
+    "proximaRenovacao": "2025-10-21T01:19:12.818Z",
+    "timestamp": "2025-10-20T03:19:12.818Z"
+  },
+  {
+    "clienteId": "849011348_CJH7HQFAZNB",
+    "numero": "849011348",
+    "referenciaOriginal": "CJH7HQFAZNB",
+    "novaReferencia": "CJH7HQFAZNBD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-21T02:19:12.819Z",
+    "timestamp": "2025-10-20T04:19:12.819Z"
+  },
+  {
+    "clienteId": "849633399_CJG5HQ44KUJ",
+    "numero": "849633399",
+    "referenciaOriginal": "CJG5HQ44KUJ",
+    "novaReferencia": "CJG5HQ44KUJD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-20T04:38:17.413Z",
+    "timestamp": "2025-10-20T05:19:12.819Z"
+  },
+  {
+    "clienteId": "848212586_CJG1HQ4SMVN.l",
+    "numero": "848212586",
+    "referenciaOriginal": "CJG1HQ4SMVN.l",
+    "novaReferencia": "CJG1HQ4SMVN.lD6",
+    "dia": 6,
+    "diasRestantes": 10,
+    "proximaRenovacao": "2025-10-21T04:19:12.819Z",
+    "timestamp": "2025-10-20T06:19:12.819Z"
+  },
+  {
+    "clienteId": "852581307_CJG9HQ4S0U9",
+    "numero": "852581307",
+    "referenciaOriginal": "CJG9HQ4S0U9",
+    "novaReferencia": "CJG9HQ4S0U9D6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-20T05:38:31.080Z",
+    "timestamp": "2025-10-20T06:19:25.570Z"
+  },
+  {
+    "clienteId": "848212586_CJJ7HR634QJ",
+    "numero": "848212586",
+    "referenciaOriginal": "CJJ7HR634QJ",
+    "novaReferencia": "CJJ7HR634QJD3",
+    "dia": 3,
+    "diasRestantes": 13,
+    "proximaRenovacao": "2025-10-21T04:19:38.898Z",
+    "timestamp": "2025-10-20T06:19:38.898Z"
+  },
+  {
+    "clienteId": "841985459_CJH2HQIMXD8",
+    "numero": "841985459",
+    "referenciaOriginal": "CJH2HQIMXD8",
+    "novaReferencia": "CJH2HQIMXD8D5",
+    "dia": 5,
+    "diasRestantes": 11,
+    "proximaRenovacao": "2025-10-21T05:19:12.821Z",
+    "timestamp": "2025-10-20T07:19:12.821Z"
+  },
+  {
+    "clienteId": "843917997_PP251019.1323.d60569",
+    "numero": "843917997",
+    "referenciaOriginal": "PP251019.1323.d60569",
+    "novaReferencia": "PP251019.1323.d60569D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-21T08:19:12.823Z",
+    "timestamp": "2025-10-20T10:19:12.823Z"
+  },
+  {
+    "clienteId": "CJG7HQAIKX3_",
+    "numero": "CJG7HQAIKX3",
+    "referenciaOriginal": "",
+    "novaReferencia": "D6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-20T11:38:17.416Z",
+    "timestamp": "2025-10-20T11:58:46.223Z"
+  },
+  {
+    "clienteId": "845289852_CJI4HR16B20",
+    "numero": "845289852",
+    "referenciaOriginal": "CJI4HR16B20",
+    "novaReferencia": "CJI4HR16B20D4",
+    "dia": 4,
+    "diasRestantes": 12,
+    "proximaRenovacao": "2025-10-21T10:58:46.223Z",
+    "timestamp": "2025-10-20T12:58:46.223Z"
+  },
+  {
+    "clienteId": "841985459_CJJ0HRC7BCY",
+    "numero": "841985459",
+    "referenciaOriginal": "CJJ0HRC7BCY",
+    "novaReferencia": "CJJ0HRC7BCYD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-21T10:59:05.498Z",
+    "timestamp": "2025-10-20T12:59:05.498Z"
+  },
+  {
+    "clienteId": "855508847_CJJ5HRGGMD9",
+    "numero": "855508847",
+    "referenciaOriginal": "CJJ5HRGGMD9",
+    "novaReferencia": "CJJ5HRGGMD9D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-21T16:26:04.060Z",
+    "timestamp": "2025-10-20T18:26:04.060Z"
+  },
+  {
+    "clienteId": "844107099_CJI2HQR2NES",
+    "numero": "844107099",
+    "referenciaOriginal": "CJI2HQR2NES",
+    "novaReferencia": "CJI2HQR2NESD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-21T21:26:04.062Z",
+    "timestamp": "2025-10-20T23:26:04.062Z"
+  },
+  {
+    "clienteId": "842393529_CJF0HPPKRSI",
+    "numero": "842393529",
+    "referenciaOriginal": "CJF0HPPKRSI",
+    "novaReferencia": "CJF0HPPKRSID8",
+    "dia": 8,
+    "diasRestantes": 8,
+    "proximaRenovacao": "2025-10-21T23:26:04.061Z",
+    "timestamp": "2025-10-21T01:26:04.061Z"
+  },
+  {
+    "clienteId": "849011348_CJH7HQFAZNB",
+    "numero": "849011348",
+    "referenciaOriginal": "CJH7HQFAZNB",
+    "novaReferencia": "CJH7HQFAZNBD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-21T02:19:12.819Z",
+    "timestamp": "2025-10-21T02:26:04.062Z"
+  },
+  {
+    "clienteId": "848212586_CJG1HQ4SMVN.l",
+    "numero": "848212586",
+    "referenciaOriginal": "CJG1HQ4SMVN.l",
+    "novaReferencia": "CJG1HQ4SMVN.lD7",
+    "dia": 7,
+    "diasRestantes": 9,
+    "proximaRenovacao": "2025-10-22T02:26:04.062Z",
+    "timestamp": "2025-10-21T04:26:04.062Z"
+  },
+  {
+    "clienteId": "848212586_CJJ7HR634QJ",
+    "numero": "848212586",
+    "referenciaOriginal": "CJJ7HR634QJ",
+    "novaReferencia": "CJJ7HR634QJD4",
+    "dia": 4,
+    "diasRestantes": 12,
+    "proximaRenovacao": "2025-10-22T02:26:18.592Z",
+    "timestamp": "2025-10-21T04:26:18.592Z"
+  },
+  {
+    "clienteId": "841985459_CJH2HQIMXD8",
+    "numero": "841985459",
+    "referenciaOriginal": "CJH2HQIMXD8",
+    "novaReferencia": "CJH2HQIMXD8D6",
+    "dia": 6,
+    "diasRestantes": 10,
+    "proximaRenovacao": "2025-10-22T03:26:04.063Z",
+    "timestamp": "2025-10-21T05:26:04.063Z"
+  },
+  {
+    "clienteId": "843917997_PP251019.1323.d60569",
+    "numero": "843917997",
+    "referenciaOriginal": "PP251019.1323.d60569",
+    "novaReferencia": "PP251019.1323.d60569D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-21T08:19:12.823Z",
+    "timestamp": "2025-10-21T08:43:19.667Z"
+  },
+  {
+    "clienteId": "858856738_CJK0HRLV7O8",
+    "numero": "858856738",
+    "referenciaOriginal": "CJK0HRLV7O8",
+    "novaReferencia": "CJK0HRLV7O8D3",
+    "dia": 3,
+    "diasRestantes": 13,
+    "proximaRenovacao": "2025-10-22T06:43:35.396Z",
+    "timestamp": "2025-10-21T08:43:35.396Z"
+  },
+  {
+    "clienteId": "848987053_CJK7HRMKUBF",
+    "numero": "848987053",
+    "referenciaOriginal": "CJK7HRMKUBF",
+    "novaReferencia": "CJK7HRMKUBFD3",
+    "dia": 3,
+    "diasRestantes": 13,
+    "proximaRenovacao": "2025-10-22T07:43:19.666Z",
+    "timestamp": "2025-10-21T09:43:19.666Z"
+  },
+  {
+    "clienteId": "845289852_CJI4HR16B20",
+    "numero": "845289852",
+    "referenciaOriginal": "CJI4HR16B20",
+    "novaReferencia": "CJI4HR16B20D5",
+    "dia": 5,
+    "diasRestantes": 11,
+    "proximaRenovacao": "2025-10-22T09:43:19.668Z",
+    "timestamp": "2025-10-21T11:43:19.668Z"
+  },
+  {
+    "clienteId": "841985459_CJJ0HRC7BCY",
+    "numero": "841985459",
+    "referenciaOriginal": "CJJ0HRC7BCY",
+    "novaReferencia": "CJJ0HRC7BCYD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-21T10:59:05.498Z",
+    "timestamp": "2025-10-21T11:43:36.653Z"
+  },
+  {
+    "clienteId": "855508847_CJJ5HRGGMD9",
+    "numero": "855508847",
+    "referenciaOriginal": "CJJ5HRGGMD9",
+    "novaReferencia": "CJJ5HRGGMD9D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-21T16:26:04.060Z",
+    "timestamp": "2025-10-21T16:43:19.669Z"
+  },
+  {
+    "clienteId": "842381603_CJK7HRTLB43",
+    "numero": "842381603",
+    "referenciaOriginal": "CJK7HRTLB43",
+    "novaReferencia": "CJK7HRTLB43D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-22T14:43:33.449Z",
+    "timestamp": "2025-10-21T16:43:33.449Z"
+  },
+  {
+    "clienteId": "856866325_CJK4HRTPXEE",
+    "numero": "856866325",
+    "referenciaOriginal": "CJK4HRTPXEE",
+    "novaReferencia": "CJK4HRTPXEED3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-22T14:43:44.558Z",
+    "timestamp": "2025-10-21T16:43:44.558Z"
+  },
+  {
+    "clienteId": "857451196_CJK4HRUKMVC",
+    "numero": "857451196",
+    "referenciaOriginal": "CJK4HRUKMVC",
+    "novaReferencia": "CJK4HRUKMVCD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-22T16:43:19.670Z",
+    "timestamp": "2025-10-21T18:43:19.670Z"
+  },
+  {
+    "clienteId": "844107099_CJI2HQR2NES",
+    "numero": "844107099",
+    "referenciaOriginal": "CJI2HQR2NES",
+    "novaReferencia": "CJI2HQR2NESD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-21T21:26:04.062Z",
+    "timestamp": "2025-10-21T21:43:19.670Z"
+  },
+  {
+    "clienteId": "842393529_CJF0HPPKRSI",
+    "numero": "842393529",
+    "referenciaOriginal": "CJF0HPPKRSI",
+    "novaReferencia": "CJF0HPPKRSID9",
+    "dia": 9,
+    "diasRestantes": 7,
+    "proximaRenovacao": "2025-10-22T21:43:19.671Z",
+    "timestamp": "2025-10-21T23:43:19.671Z"
+  },
+  {
+    "clienteId": "848212586_CJG1HQ4SMVN.l",
+    "numero": "848212586",
+    "referenciaOriginal": "CJG1HQ4SMVN.l",
+    "novaReferencia": "CJG1HQ4SMVN.lD8",
+    "dia": 8,
+    "diasRestantes": 8,
+    "proximaRenovacao": "2025-10-23T00:43:19.674Z",
+    "timestamp": "2025-10-22T02:43:19.674Z"
+  },
+  {
+    "clienteId": "848212586_CJJ7HR634QJ",
+    "numero": "848212586",
+    "referenciaOriginal": "CJJ7HR634QJ",
+    "novaReferencia": "CJJ7HR634QJD5",
+    "dia": 5,
+    "diasRestantes": 11,
+    "proximaRenovacao": "2025-10-23T00:43:37.816Z",
+    "timestamp": "2025-10-22T02:43:37.816Z"
+  },
+  {
+    "clienteId": "841985459_CJH2HQIMXD8",
+    "numero": "841985459",
+    "referenciaOriginal": "CJH2HQIMXD8",
+    "novaReferencia": "CJH2HQIMXD8D7",
+    "dia": 7,
+    "diasRestantes": 9,
+    "proximaRenovacao": "2025-10-23T01:43:19.673Z",
+    "timestamp": "2025-10-22T03:43:19.673Z"
+  },
+  {
+    "clienteId": "849011348_PP251021.0746.w42907",
+    "numero": "849011348",
+    "referenciaOriginal": "PP251021.0746.w42907",
+    "novaReferencia": "PP251021.0746.w42907D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-23T02:43:19.674Z",
+    "timestamp": "2025-10-22T04:43:19.674Z"
+  },
+  {
+    "clienteId": "846036182_CJK8HRO506Y",
+    "numero": "846036182",
+    "referenciaOriginal": "CJK8HRO506Y",
+    "novaReferencia": "CJK8HRO506YD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-23T03:43:19.673Z",
+    "timestamp": "2025-10-22T05:43:19.673Z"
+  },
+  {
+    "clienteId": "858856738_CJK0HRLV7O8",
+    "numero": "858856738",
+    "referenciaOriginal": "CJK0HRLV7O8",
+    "novaReferencia": "CJK0HRLV7O8D4",
+    "dia": 4,
+    "diasRestantes": 12,
+    "proximaRenovacao": "2025-10-23T05:43:19.678Z",
+    "timestamp": "2025-10-22T07:43:19.678Z"
+  },
+  {
+    "clienteId": "848987053_CJK7HRMKUBF",
+    "numero": "848987053",
+    "referenciaOriginal": "CJK7HRMKUBF",
+    "novaReferencia": "CJK7HRMKUBFD4",
+    "dia": 4,
+    "diasRestantes": 12,
+    "proximaRenovacao": "2025-10-23T05:43:29.108Z",
+    "timestamp": "2025-10-22T07:43:29.108Z"
+  },
+  {
+    "clienteId": "845289852_CJI4HR16B20",
+    "numero": "845289852",
+    "referenciaOriginal": "CJI4HR16B20",
+    "novaReferencia": "CJI4HR16B20D6",
+    "dia": 6,
+    "diasRestantes": 10,
+    "proximaRenovacao": "2025-10-23T07:43:19.678Z",
+    "timestamp": "2025-10-22T09:43:19.678Z"
+  },
+  {
+    "clienteId": "842381603_CJK7HRTLB43",
+    "numero": "842381603",
+    "referenciaOriginal": "CJK7HRTLB43",
+    "novaReferencia": "CJK7HRTLB43D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-22T14:43:33.449Z",
+    "timestamp": "2025-10-22T14:48:36.442Z"
+  },
+  {
+    "clienteId": "856866325_CJK4HRTPXEE",
+    "numero": "856866325",
+    "referenciaOriginal": "CJK4HRTPXEE",
+    "novaReferencia": "CJK4HRTPXEED4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-22T14:43:44.558Z",
+    "timestamp": "2025-10-22T14:48:53.940Z"
+  },
+  {
+    "clienteId": "857451196_CJK4HRUKMVC",
+    "numero": "857451196",
+    "referenciaOriginal": "CJK4HRUKMVC",
+    "novaReferencia": "CJK4HRUKMVCD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-23T14:48:36.444Z",
+    "timestamp": "2025-10-22T16:48:36.444Z"
+  },
+  {
+    "clienteId": "\n853453683_CJK9HRNZ539",
+    "numero": "\n853453683",
+    "referenciaOriginal": "CJK9HRNZ539",
+    "novaReferencia": "CJK9HRNZ539D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-23T14:48:50.813Z",
+    "timestamp": "2025-10-22T16:48:50.813Z"
+  },
+  {
+    "clienteId": "847392499_CJL7HS8L6KR",
+    "numero": "847392499",
+    "referenciaOriginal": "CJL7HS8L6KR",
+    "novaReferencia": "CJL7HS8L6KRD3",
+    "dia": 3,
+    "diasRestantes": 13,
+    "proximaRenovacao": "2025-10-23T18:01:48.037Z",
+    "timestamp": "2025-10-22T20:01:48.037Z"
+  },
+  {
+    "clienteId": "842393529_CJF0HPPKRSI",
+    "numero": "842393529",
+    "referenciaOriginal": "CJF0HPPKRSI",
+    "novaReferencia": "CJF0HPPKRSID10",
+    "dia": 10,
+    "diasRestantes": 6,
+    "proximaRenovacao": "2025-10-23T20:01:48.037Z",
+    "timestamp": "2025-10-22T22:01:48.037Z"
+  },
+  {
+    "clienteId": "848212586_CJG1HQ4SMVN.l",
+    "numero": "848212586",
+    "referenciaOriginal": "CJG1HQ4SMVN.l",
+    "novaReferencia": "CJG1HQ4SMVN.lD9",
+    "dia": 9,
+    "diasRestantes": 7,
+    "proximaRenovacao": "2025-10-23T23:17:35.900Z",
+    "timestamp": "2025-10-23T01:17:35.900Z"
+  },
+  {
+    "clienteId": "848212586_CJJ7HR634QJ",
+    "numero": "848212586",
+    "referenciaOriginal": "CJJ7HR634QJ",
+    "novaReferencia": "CJJ7HR634QJD6",
+    "dia": 6,
+    "diasRestantes": 10,
+    "proximaRenovacao": "2025-10-23T23:17:49.246Z",
+    "timestamp": "2025-10-23T01:17:49.246Z"
+  },
+  {
+    "clienteId": "841985459_CJH2HQIMXD8",
+    "numero": "841985459",
+    "referenciaOriginal": "CJH2HQIMXD8",
+    "novaReferencia": "CJH2HQIMXD8D8",
+    "dia": 8,
+    "diasRestantes": 8,
+    "proximaRenovacao": "2025-10-24T00:17:35.900Z",
+    "timestamp": "2025-10-23T02:17:35.900Z"
+  },
+  {
+    "clienteId": "849011348_PP251021.0746.w42907",
+    "numero": "849011348",
+    "referenciaOriginal": "PP251021.0746.w42907",
+    "novaReferencia": "PP251021.0746.w42907D4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-24T01:17:35.900Z",
+    "timestamp": "2025-10-23T03:17:35.900Z"
+  },
+  {
+    "clienteId": "846036182_CJK8HRO506Y",
+    "numero": "846036182",
+    "referenciaOriginal": "CJK8HRO506Y",
+    "novaReferencia": "CJK8HRO506YD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-24T02:17:35.900Z",
+    "timestamp": "2025-10-23T04:17:35.900Z"
+  },
+  {
+    "clienteId": "848554715_CHLSTKDYGK",
+    "numero": "848554715",
+    "referenciaOriginal": "CHLSTKDYGK",
+    "novaReferencia": "CHLSTKDYGKD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-24T03:32:13.050Z",
+    "timestamp": "2025-10-23T05:32:13.050Z"
+  },
+  {
+    "clienteId": "858856738_CJK0HRLV7O8",
+    "numero": "858856738",
+    "referenciaOriginal": "CJK0HRLV7O8",
+    "novaReferencia": "CJK0HRLV7O8D5",
+    "dia": 5,
+    "diasRestantes": 11,
+    "proximaRenovacao": "2025-10-24T04:32:13.049Z",
+    "timestamp": "2025-10-23T06:32:13.049Z"
+  },
+  {
+    "clienteId": "848987053_CJK7HRMKUBF",
+    "numero": "848987053",
+    "referenciaOriginal": "CJK7HRMKUBF",
+    "novaReferencia": "CJK7HRMKUBFD5",
+    "dia": 5,
+    "diasRestantes": 11,
+    "proximaRenovacao": "2025-10-24T04:32:27.094Z",
+    "timestamp": "2025-10-23T06:32:27.094Z"
+  },
+  {
+    "clienteId": "845289852_CJI4HR16B20",
+    "numero": "845289852",
+    "referenciaOriginal": "CJI4HR16B20",
+    "novaReferencia": "CJI4HR16B20D7",
+    "dia": 7,
+    "diasRestantes": 9,
+    "proximaRenovacao": "2025-10-24T06:32:13.051Z",
+    "timestamp": "2025-10-23T08:32:13.051Z"
+  },
+  {
+    "clienteId": "858856738_CJM5HSHWKX3",
+    "numero": "858856738",
+    "referenciaOriginal": "CJM5HSHWKX3",
+    "novaReferencia": "CJM5HSHWKX3D3",
+    "dia": 3,
+    "diasRestantes": 13,
+    "proximaRenovacao": "2025-10-24T11:32:13.055Z",
+    "timestamp": "2025-10-23T13:32:13.055Z"
+  },
+  {
+    "clienteId": "842381603_CJM4HSI7TZ0",
+    "numero": "842381603",
+    "referenciaOriginal": "CJM4HSI7TZ0",
+    "novaReferencia": "CJM4HSI7TZ0D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-24T12:32:13.056Z",
+    "timestamp": "2025-10-23T14:32:13.056Z"
+  },
+  {
+    "clienteId": "849906023_CJM3HSIE097",
+    "numero": "849906023",
+    "referenciaOriginal": "CJM3HSIE097",
+    "novaReferencia": "CJM3HSIE097D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-24T12:32:30.184Z",
+    "timestamp": "2025-10-23T14:32:30.184Z"
+  },
+  {
+    "clienteId": "\n853453683_CJK9HRNZ539",
+    "numero": "\n853453683",
+    "referenciaOriginal": "CJK9HRNZ539",
+    "novaReferencia": "CJK9HRNZ539D4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-24T13:33:13.071Z",
+    "timestamp": "2025-10-23T15:33:13.071Z"
+  },
+  {
+    "clienteId": "847280463_CJM1HSKI0DP",
+    "numero": "847280463",
+    "referenciaOriginal": "CJM1HSKI0DP",
+    "novaReferencia": "CJM1HSKI0DPD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-24T14:33:29.591Z",
+    "timestamp": "2025-10-23T16:33:29.591Z"
+  },
+  {
+    "clienteId": "852552083_CJM1HSKG2V7",
+    "numero": "852552083",
+    "referenciaOriginal": "CJM1HSKG2V7",
+    "novaReferencia": "CJM1HSKG2V7D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-24T14:33:50.982Z",
+    "timestamp": "2025-10-23T16:33:50.982Z"
+  },
+  {
+    "clienteId": "855508847_CJM5HSKTDS5",
+    "numero": "855508847",
+    "referenciaOriginal": "CJM5HSKTDS5",
+    "novaReferencia": "CJM5HSKTDS5D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-24T14:34:05.743Z",
+    "timestamp": "2025-10-23T16:34:05.743Z"
+  },
+  {
+    "clienteId": "857451196_CJK4HRUKMVC",
+    "numero": "857451196",
+    "referenciaOriginal": "CJK4HRUKMVC",
+    "novaReferencia": "CJK4HRUKMVCD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-24T14:45:20.604Z",
+    "timestamp": "2025-10-23T16:45:20.604Z"
+  },
+  {
+    "clienteId": "842259367_PP251022.2037.d62201",
+    "numero": "842259367",
+    "referenciaOriginal": "PP251022.2037.d62201",
+    "novaReferencia": "PP251022.2037.d62201D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-24T15:44:50.604Z",
+    "timestamp": "2025-10-23T17:44:50.604Z"
+  },
+  {
+    "clienteId": "849571460_CJM9HSLF733",
+    "numero": "849571460",
+    "referenciaOriginal": "CJM9HSLF733",
+    "novaReferencia": "CJM9HSLF733D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-24T15:45:03.905Z",
+    "timestamp": "2025-10-23T17:45:03.905Z"
+  },
+  {
+    "clienteId": "_CJM8HSAW8PI",
+    "numero": "",
+    "referenciaOriginal": "CJM8HSAW8PI",
+    "novaReferencia": "CJM8HSAW8PID3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-24T15:45:17.000Z",
+    "timestamp": "2025-10-23T17:45:17.000Z"
+  },
+  {
+    "clienteId": "CJM8HSAW8PI_853140762",
+    "numero": "CJM8HSAW8PI",
+    "referenciaOriginal": "853140762",
+    "novaReferencia": "853140762D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-24T15:45:36.443Z",
+    "timestamp": "2025-10-23T17:45:36.443Z"
+  },
+  {
+    "clienteId": "847392499_CJL7HS8L6KR",
+    "numero": "847392499",
+    "referenciaOriginal": "CJL7HS8L6KR",
+    "novaReferencia": "CJL7HS8L6KRD4",
+    "dia": 4,
+    "diasRestantes": 12,
+    "proximaRenovacao": "2025-10-24T16:32:48.441Z",
+    "timestamp": "2025-10-23T18:32:48.441Z"
+  },
+  {
+    "clienteId": "853140762_CJM0HSLV4G9",
+    "numero": "853140762",
+    "referenciaOriginal": "CJM0HSLV4G9",
+    "novaReferencia": "CJM0HSLV4G9D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-24T16:33:00.088Z",
+    "timestamp": "2025-10-23T18:33:00.088Z"
+  },
+  {
+    "clienteId": "842393529_CJF0HPPKRSI",
+    "numero": "842393529",
+    "referenciaOriginal": "CJF0HPPKRSI",
+    "novaReferencia": "CJF0HPPKRSID11",
+    "dia": 11,
+    "diasRestantes": 5,
+    "proximaRenovacao": "2025-10-24T18:32:18.440Z",
+    "timestamp": "2025-10-23T20:32:18.440Z"
+  },
+  {
+    "clienteId": "848212586_CJG1HQ4SMVN.l",
+    "numero": "848212586",
+    "referenciaOriginal": "CJG1HQ4SMVN.l",
+    "novaReferencia": "CJG1HQ4SMVN.lD10",
+    "dia": 10,
+    "diasRestantes": 6,
+    "proximaRenovacao": "2025-10-24T21:32:18.440Z",
+    "timestamp": "2025-10-23T23:32:18.440Z"
+  },
+  {
+    "clienteId": "848212586_CJJ7HR634QJ",
+    "numero": "848212586",
+    "referenciaOriginal": "CJJ7HR634QJ",
+    "novaReferencia": "CJJ7HR634QJD7",
+    "dia": 7,
+    "diasRestantes": 9,
+    "proximaRenovacao": "2025-10-24T21:32:30.285Z",
+    "timestamp": "2025-10-23T23:32:30.285Z"
+  },
+  {
+    "clienteId": "841985459_CJH2HQIMXD8",
+    "numero": "841985459",
+    "referenciaOriginal": "CJH2HQIMXD8",
+    "novaReferencia": "CJH2HQIMXD8D9",
+    "dia": 9,
+    "diasRestantes": 7,
+    "proximaRenovacao": "2025-10-24T22:32:18.440Z",
+    "timestamp": "2025-10-24T00:32:18.440Z"
+  },
+  {
+    "clienteId": "849011348_PP251021.0746.w42907",
+    "numero": "849011348",
+    "referenciaOriginal": "PP251021.0746.w42907",
+    "novaReferencia": "PP251021.0746.w42907D5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-24T23:32:18.439Z",
+    "timestamp": "2025-10-24T01:32:18.439Z"
+  },
+  {
+    "clienteId": "846036182_CJK8HRO506Y",
+    "numero": "846036182",
+    "referenciaOriginal": "CJK8HRO506Y",
+    "novaReferencia": "CJK8HRO506YD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-25T00:32:18.440Z",
+    "timestamp": "2025-10-24T02:32:18.440Z"
+  },
+  {
+    "clienteId": "848554715_CHLSTKDYGK",
+    "numero": "848554715",
+    "referenciaOriginal": "CHLSTKDYGK",
+    "novaReferencia": "CHLSTKDYGKD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-24T03:32:13.050Z",
+    "timestamp": "2025-10-24T03:32:18.440Z"
+  },
+  {
+    "clienteId": "858856738_CJK0HRLV7O8",
+    "numero": "858856738",
+    "referenciaOriginal": "CJK0HRLV7O8",
+    "novaReferencia": "CJK0HRLV7O8D6",
+    "dia": 6,
+    "diasRestantes": 10,
+    "proximaRenovacao": "2025-10-25T02:32:18.443Z",
+    "timestamp": "2025-10-24T04:32:18.443Z"
+  },
+  {
+    "clienteId": "848987053_CJK7HRMKUBF",
+    "numero": "848987053",
+    "referenciaOriginal": "CJK7HRMKUBF",
+    "novaReferencia": "CJK7HRMKUBFD6",
+    "dia": 6,
+    "diasRestantes": 10,
+    "proximaRenovacao": "2025-10-25T03:32:18.442Z",
+    "timestamp": "2025-10-24T05:32:18.442Z"
+  },
+  {
+    "clienteId": "845289852_CJI4HR16B20",
+    "numero": "845289852",
+    "referenciaOriginal": "CJI4HR16B20",
+    "novaReferencia": "CJI4HR16B20D8",
+    "dia": 8,
+    "diasRestantes": 8,
+    "proximaRenovacao": "2025-10-25T04:32:18.443Z",
+    "timestamp": "2025-10-24T06:32:18.443Z"
+  },
+  {
+    "clienteId": "858856738_CJM5HSHWKX3",
+    "numero": "858856738",
+    "referenciaOriginal": "CJM5HSHWKX3",
+    "novaReferencia": "CJM5HSHWKX3D4",
+    "dia": 4,
+    "diasRestantes": 12,
+    "proximaRenovacao": "2025-10-25T09:32:18.450Z",
+    "timestamp": "2025-10-24T11:32:18.450Z"
+  },
+  {
+    "clienteId": "853861605_CJN6HSSNC3A",
+    "numero": "853861605",
+    "referenciaOriginal": "CJN6HSSNC3A",
+    "novaReferencia": "CJN6HSSNC3AD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-25T09:32:36.074Z",
+    "timestamp": "2025-10-24T11:32:36.074Z"
+  },
+  {
+    "clienteId": "842381603_CJM4HSI7TZ0",
+    "numero": "842381603",
+    "referenciaOriginal": "CJM4HSI7TZ0",
+    "novaReferencia": "CJM4HSI7TZ0D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-24T12:32:13.056Z",
+    "timestamp": "2025-10-24T12:32:18.450Z"
+  },
+  {
+    "clienteId": "848212586_CJN4HSTEAJ2",
+    "numero": "848212586",
+    "referenciaOriginal": "CJN4HSTEAJ2",
+    "novaReferencia": "CJN4HSTEAJ2D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-25T10:32:33.248Z",
+    "timestamp": "2025-10-24T12:32:33.248Z"
+  },
+  {
+    "clienteId": "849906023_CJM3HSIE097",
+    "numero": "849906023",
+    "referenciaOriginal": "CJM3HSIE097",
+    "novaReferencia": "CJM3HSIE097D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-24T12:32:30.184Z",
+    "timestamp": "2025-10-24T13:32:18.452Z"
+  },
+  {
+    "clienteId": "\n853453683_CJK9HRNZ539",
+    "numero": "\n853453683",
+    "referenciaOriginal": "CJK9HRNZ539",
+    "novaReferencia": "CJK9HRNZ539D5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-25T12:32:18.458Z",
+    "timestamp": "2025-10-24T14:32:18.458Z"
+  },
+  {
+    "clienteId": "857451196_CJK4HRUKMVC",
+    "numero": "857451196",
+    "referenciaOriginal": "CJK4HRUKMVC",
+    "novaReferencia": "CJK4HRUKMVCD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-24T14:45:20.604Z",
+    "timestamp": "2025-10-24T15:31:14.234Z"
+  },
+  {
+    "clienteId": "847280463_CJM1HSKI0DP",
+    "numero": "847280463",
+    "referenciaOriginal": "CJM1HSKI0DP",
+    "novaReferencia": "CJM1HSKI0DPD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-24T14:33:29.591Z",
+    "timestamp": "2025-10-24T15:31:31.382Z"
+  },
+  {
+    "clienteId": "852552083_CJM1HSKG2V7",
+    "numero": "852552083",
+    "referenciaOriginal": "CJM1HSKG2V7",
+    "novaReferencia": "CJM1HSKG2V7D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-24T14:33:50.982Z",
+    "timestamp": "2025-10-24T15:31:47.376Z"
+  },
+  {
+    "clienteId": "855508847_CJM5HSKTDS5",
+    "numero": "855508847",
+    "referenciaOriginal": "CJM5HSKTDS5",
+    "novaReferencia": "CJM5HSKTDS5D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-24T14:34:05.743Z",
+    "timestamp": "2025-10-24T15:32:05.969Z"
+  },
+  {
+    "clienteId": "852535767_CJN9HSWODHD",
+    "numero": "852535767",
+    "referenciaOriginal": "CJN9HSWODHD",
+    "novaReferencia": "CJN9HSWODHDD3",
+    "dia": 3,
+    "diasRestantes": 13,
+    "proximaRenovacao": "2025-10-25T13:32:19.250Z",
+    "timestamp": "2025-10-24T15:32:19.250Z"
+  },
+  {
+    "clienteId": "842259367_PP251022.2037.d62201",
+    "numero": "842259367",
+    "referenciaOriginal": "PP251022.2037.d62201",
+    "novaReferencia": "PP251022.2037.d62201D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-24T15:44:50.604Z",
+    "timestamp": "2025-10-24T16:30:44.232Z"
+  },
+  {
+    "clienteId": "849571460_CJM9HSLF733",
+    "numero": "849571460",
+    "referenciaOriginal": "CJM9HSLF733",
+    "novaReferencia": "CJM9HSLF733D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-24T15:45:03.905Z",
+    "timestamp": "2025-10-24T16:30:58.558Z"
+  },
+  {
+    "clienteId": "_CJM8HSAW8PI",
+    "numero": "",
+    "referenciaOriginal": "CJM8HSAW8PI",
+    "novaReferencia": "CJM8HSAW8PID4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-25T14:31:13.960Z",
+    "timestamp": "2025-10-24T16:31:13.960Z"
+  },
+  {
+    "clienteId": "CJM8HSAW8PI_853140762",
+    "numero": "CJM8HSAW8PI",
+    "referenciaOriginal": "853140762",
+    "novaReferencia": "853140762D4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-25T14:31:26.776Z",
+    "timestamp": "2025-10-24T16:31:26.776Z"
+  },
+  {
+    "clienteId": "847392499_CJL7HS8L6KR",
+    "numero": "847392499",
+    "referenciaOriginal": "CJL7HS8L6KR",
+    "novaReferencia": "CJL7HS8L6KRD5",
+    "dia": 5,
+    "diasRestantes": 11,
+    "proximaRenovacao": "2025-10-25T15:30:44.233Z",
+    "timestamp": "2025-10-24T17:30:44.233Z"
+  },
+  {
+    "clienteId": "853140762_CJM0HSLV4G9",
+    "numero": "853140762",
+    "referenciaOriginal": "CJM0HSLV4G9",
+    "novaReferencia": "CJM0HSLV4G9D4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-25T15:30:58.472Z",
+    "timestamp": "2025-10-24T17:30:58.472Z"
+  },
+  {
+    "clienteId": "843650815_CJN0HSZ9RJU",
+    "numero": "843650815",
+    "referenciaOriginal": "CJN0HSZ9RJU",
+    "novaReferencia": "CJN0HSZ9RJUD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-25T15:31:14.548Z",
+    "timestamp": "2025-10-24T17:31:14.548Z"
+  },
+  {
+    "clienteId": "842393529_CJF0HPPKRSI",
+    "numero": "842393529",
+    "referenciaOriginal": "CJF0HPPKRSI",
+    "novaReferencia": "CJF0HPPKRSID12",
+    "dia": 12,
+    "diasRestantes": 4,
+    "proximaRenovacao": "2025-10-25T17:30:44.235Z",
+    "timestamp": "2025-10-24T19:30:44.235Z"
+  },
+  {
+    "clienteId": "848212586_CJG1HQ4SMVN.l",
+    "numero": "848212586",
+    "referenciaOriginal": "CJG1HQ4SMVN.l",
+    "novaReferencia": "CJG1HQ4SMVN.lD11",
+    "dia": 11,
+    "diasRestantes": 5,
+    "proximaRenovacao": "2025-10-25T20:30:44.235Z",
+    "timestamp": "2025-10-24T22:30:44.235Z"
+  },
+  {
+    "clienteId": "848212586_CJJ7HR634QJ",
+    "numero": "848212586",
+    "referenciaOriginal": "CJJ7HR634QJ",
+    "novaReferencia": "CJJ7HR634QJD8",
+    "dia": 8,
+    "diasRestantes": 8,
+    "proximaRenovacao": "2025-10-25T20:31:03.372Z",
+    "timestamp": "2025-10-24T22:31:03.372Z"
+  },
+  {
+    "clienteId": "841985459_CJH2HQIMXD8",
+    "numero": "841985459",
+    "referenciaOriginal": "CJH2HQIMXD8",
+    "novaReferencia": "CJH2HQIMXD8D10",
+    "dia": 10,
+    "diasRestantes": 6,
+    "proximaRenovacao": "2025-10-25T21:30:44.235Z",
+    "timestamp": "2025-10-24T23:30:44.235Z"
+  },
+  {
+    "clienteId": "849011348_PP251021.0746.w42907",
+    "numero": "849011348",
+    "referenciaOriginal": "PP251021.0746.w42907",
+    "novaReferencia": "PP251021.0746.w42907D6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-24T23:32:18.439Z",
+    "timestamp": "2025-10-25T00:30:44.238Z"
+  },
+  {
+    "clienteId": "846036182_CJK8HRO506Y",
+    "numero": "846036182",
+    "referenciaOriginal": "CJK8HRO506Y",
+    "novaReferencia": "CJK8HRO506YD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-25T00:32:18.440Z",
+    "timestamp": "2025-10-25T01:30:44.238Z"
+  },
+  {
+    "clienteId": "858856738_CJK0HRLV7O8",
+    "numero": "858856738",
+    "referenciaOriginal": "CJK0HRLV7O8",
+    "novaReferencia": "CJK0HRLV7O8D7",
+    "dia": 7,
+    "diasRestantes": 9,
+    "proximaRenovacao": "2025-10-26T02:30:44.240Z",
+    "timestamp": "2025-10-25T03:30:44.240Z"
+  },
+  {
+    "clienteId": "848987053_CJK7HRMKUBF",
+    "numero": "848987053",
+    "referenciaOriginal": "CJK7HRMKUBF",
+    "novaReferencia": "CJK7HRMKUBFD7",
+    "dia": 7,
+    "diasRestantes": 9,
+    "proximaRenovacao": "2025-10-26T03:30:44.241Z",
+    "timestamp": "2025-10-25T04:30:44.241Z"
+  },
+  {
+    "clienteId": "845289852_CJI4HR16B20",
+    "numero": "845289852",
+    "referenciaOriginal": "CJI4HR16B20",
+    "novaReferencia": "CJI4HR16B20D9",
+    "dia": 9,
+    "diasRestantes": 7,
+    "proximaRenovacao": "2025-10-26T04:30:44.242Z",
+    "timestamp": "2025-10-25T05:30:44.242Z"
+  },
+  {
+    "clienteId": "858856738_CJM5HSHWKX3",
+    "numero": "858856738",
+    "referenciaOriginal": "CJM5HSHWKX3",
+    "novaReferencia": "CJM5HSHWKX3D5",
+    "dia": 5,
+    "diasRestantes": 11,
+    "proximaRenovacao": "2025-10-26T09:30:44.247Z",
+    "timestamp": "2025-10-25T10:30:44.247Z"
+  },
+  {
+    "clienteId": "853861605_CJN6HSSNC3A",
+    "numero": "853861605",
+    "referenciaOriginal": "CJN6HSSNC3A",
+    "novaReferencia": "CJN6HSSNC3AD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-25T09:32:36.074Z",
+    "timestamp": "2025-10-25T10:30:58.828Z"
+  },
+  {
+    "clienteId": "848212586_CJN4HSTEAJ2",
+    "numero": "848212586",
+    "referenciaOriginal": "CJN4HSTEAJ2",
+    "novaReferencia": "CJN4HSTEAJ2D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-25T10:32:33.248Z",
+    "timestamp": "2025-10-25T11:30:44.244Z"
+  },
+  {
+    "clienteId": "\n853453683_CJK9HRNZ539",
+    "numero": "\n853453683",
+    "referenciaOriginal": "CJK9HRNZ539",
+    "novaReferencia": "CJK9HRNZ539D6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-25T12:32:18.458Z",
+    "timestamp": "2025-10-25T12:43:29.894Z"
+  },
+  {
+    "clienteId": "852535767_CJN9HSWODHD",
+    "numero": "852535767",
+    "referenciaOriginal": "CJN9HSWODHD",
+    "novaReferencia": "CJN9HSWODHDD4",
+    "dia": 4,
+    "diasRestantes": 12,
+    "proximaRenovacao": "2025-10-26T12:42:59.894Z",
+    "timestamp": "2025-10-25T13:42:59.894Z"
+  },
+  {
+    "clienteId": "849011348_PP251024.1636.C02904",
+    "numero": "849011348",
+    "referenciaOriginal": "PP251024.1636.C02904",
+    "novaReferencia": "PP251024.1636.C02904D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-26T12:43:13.501Z",
+    "timestamp": "2025-10-25T13:43:13.501Z"
+  },
+  {
+    "clienteId": "849011348_PP251024.1636.C0265",
+    "numero": "849011348",
+    "referenciaOriginal": "PP251024.1636.C0265",
+    "novaReferencia": "PP251024.1636.C0265D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-26T12:43:25.058Z",
+    "timestamp": "2025-10-25T13:43:25.058Z"
+  },
+  {
+    "clienteId": "_CJM8HSAW8PI",
+    "numero": "",
+    "referenciaOriginal": "CJM8HSAW8PI",
+    "novaReferencia": "CJM8HSAW8PID5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-26T13:42:59.895Z",
+    "timestamp": "2025-10-25T14:42:59.895Z"
+  },
+  {
+    "clienteId": "CJM8HSAW8PI_853140762",
+    "numero": "CJM8HSAW8PI",
+    "referenciaOriginal": "853140762",
+    "novaReferencia": "853140762D5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-26T13:43:11.690Z",
+    "timestamp": "2025-10-25T14:43:11.690Z"
+  },
+  {
+    "clienteId": "847392499_CJL7HS8L6KR",
+    "numero": "847392499",
+    "referenciaOriginal": "CJL7HS8L6KR",
+    "novaReferencia": "CJL7HS8L6KRD6",
+    "dia": 6,
+    "diasRestantes": 10,
+    "proximaRenovacao": "2025-10-26T14:42:59.897Z",
+    "timestamp": "2025-10-25T15:42:59.897Z"
+  },
+  {
+    "clienteId": "853140762_CJM0HSLV4G9",
+    "numero": "853140762",
+    "referenciaOriginal": "CJM0HSLV4G9",
+    "novaReferencia": "CJM0HSLV4G9D5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-26T14:43:13.273Z",
+    "timestamp": "2025-10-25T15:43:13.273Z"
+  },
+  {
+    "clienteId": "843650815_CJN0HSZ9RJU",
+    "numero": "843650815",
+    "referenciaOriginal": "CJN0HSZ9RJU",
+    "novaReferencia": "CJN0HSZ9RJUD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-26T14:43:25.789Z",
+    "timestamp": "2025-10-25T15:43:25.789Z"
+  },
+  {
+    "clienteId": "847132373_CJO3HTC4FKL",
+    "numero": "847132373",
+    "referenciaOriginal": "CJO3HTC4FKL",
+    "novaReferencia": "CJO3HTC4FKLD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-26T14:43:37.663Z",
+    "timestamp": "2025-10-25T15:43:37.663Z"
+  },
+  {
+    "clienteId": "848554715_CLAGDUWJG",
+    "numero": "848554715",
+    "referenciaOriginal": "CLAGDUWJG",
+    "novaReferencia": "CLAGDUWJGD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-26T15:42:59.907Z",
+    "timestamp": "2025-10-25T16:42:59.907Z"
+  },
+  {
+    "clienteId": "842393529_CJF0HPPKRSI",
+    "numero": "842393529",
+    "referenciaOriginal": "CJF0HPPKRSI",
+    "novaReferencia": "CJF0HPPKRSID13",
+    "dia": 13,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-26T16:42:59.897Z",
+    "timestamp": "2025-10-25T17:42:59.897Z"
+  },
+  {
+    "clienteId": "848212586_CJG1HQ4SMVN.l",
+    "numero": "848212586",
+    "referenciaOriginal": "CJG1HQ4SMVN.l",
+    "novaReferencia": "CJG1HQ4SMVN.lD12",
+    "dia": 12,
+    "diasRestantes": 4,
+    "proximaRenovacao": "2025-10-26T20:29:27.697Z",
+    "timestamp": "2025-10-25T21:29:27.697Z"
+  },
+  {
+    "clienteId": "848212586_CJJ7HR634QJ",
+    "numero": "848212586",
+    "referenciaOriginal": "CJJ7HR634QJ",
+    "novaReferencia": "CJJ7HR634QJD9",
+    "dia": 9,
+    "diasRestantes": 7,
+    "proximaRenovacao": "2025-10-26T20:29:44.062Z",
+    "timestamp": "2025-10-25T21:29:44.062Z"
+  },
+  {
+    "clienteId": "841985459_CJH2HQIMXD8",
+    "numero": "841985459",
+    "referenciaOriginal": "CJH2HQIMXD8",
+    "novaReferencia": "CJH2HQIMXD8D11",
+    "dia": 11,
+    "diasRestantes": 5,
+    "proximaRenovacao": "2025-10-26T21:29:27.695Z",
+    "timestamp": "2025-10-25T22:29:27.695Z"
+  },
+  {
+    "clienteId": "858856738_CJK0HRLV7O8",
+    "numero": "858856738",
+    "referenciaOriginal": "CJK0HRLV7O8",
+    "novaReferencia": "CJK0HRLV7O8D8",
+    "dia": 8,
+    "diasRestantes": 8,
+    "proximaRenovacao": "2025-10-27T01:29:27.698Z",
+    "timestamp": "2025-10-26T03:29:27.698Z"
+  },
+  {
+    "clienteId": "848987053_CJK7HRMKUBF",
+    "numero": "848987053",
+    "referenciaOriginal": "CJK7HRMKUBF",
+    "novaReferencia": "CJK7HRMKUBFD8",
+    "dia": 8,
+    "diasRestantes": 8,
+    "proximaRenovacao": "2025-10-27T02:29:27.698Z",
+    "timestamp": "2025-10-26T04:29:27.698Z"
+  },
+  {
+    "clienteId": "845289852_CJI4HR16B20",
+    "numero": "845289852",
+    "referenciaOriginal": "CJI4HR16B20",
+    "novaReferencia": "CJI4HR16B20D10",
+    "dia": 10,
+    "diasRestantes": 6,
+    "proximaRenovacao": "2025-10-27T03:29:27.699Z",
+    "timestamp": "2025-10-26T05:29:27.699Z"
+  },
+  {
+    "clienteId": "858856738_CJM5HSHWKX3",
+    "numero": "858856738",
+    "referenciaOriginal": "CJM5HSHWKX3",
+    "novaReferencia": "CJM5HSHWKX3D6",
+    "dia": 6,
+    "diasRestantes": 10,
+    "proximaRenovacao": "2025-10-27T08:29:27.705Z",
+    "timestamp": "2025-10-26T10:29:27.705Z"
+  },
+  {
+    "clienteId": "852535767_CJN9HSWODHD",
+    "numero": "852535767",
+    "referenciaOriginal": "CJN9HSWODHD",
+    "novaReferencia": "CJN9HSWODHDD5",
+    "dia": 5,
+    "diasRestantes": 11,
+    "proximaRenovacao": "2025-10-27T11:29:27.706Z",
+    "timestamp": "2025-10-26T13:29:27.706Z"
+  },
+  {
+    "clienteId": "849011348_PP251024.1636.C02904",
+    "numero": "849011348",
+    "referenciaOriginal": "PP251024.1636.C02904",
+    "novaReferencia": "PP251024.1636.C02904D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-26T12:43:13.501Z",
+    "timestamp": "2025-10-26T13:29:42.532Z"
+  },
+  {
+    "clienteId": "849011348_PP251024.1636.C0265",
+    "numero": "849011348",
+    "referenciaOriginal": "PP251024.1636.C0265",
+    "novaReferencia": "PP251024.1636.C0265D4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-27T11:29:56.086Z",
+    "timestamp": "2025-10-26T13:29:56.086Z"
+  },
+  {
+    "clienteId": "_CJM8HSAW8PI",
+    "numero": "",
+    "referenciaOriginal": "CJM8HSAW8PI",
+    "novaReferencia": "CJM8HSAW8PID6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-26T13:42:59.895Z",
+    "timestamp": "2025-10-26T14:29:27.706Z"
+  },
+  {
+    "clienteId": "CJM8HSAW8PI_853140762",
+    "numero": "CJM8HSAW8PI",
+    "referenciaOriginal": "853140762",
+    "novaReferencia": "853140762D6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-26T13:43:11.690Z",
+    "timestamp": "2025-10-26T14:29:45.989Z"
+  },
+  {
+    "clienteId": "847392499_CJL7HS8L6KR",
+    "numero": "847392499",
+    "referenciaOriginal": "CJL7HS8L6KR",
+    "novaReferencia": "CJL7HS8L6KRD7",
+    "dia": 7,
+    "diasRestantes": 9,
+    "proximaRenovacao": "2025-10-27T13:34:04.671Z",
+    "timestamp": "2025-10-26T15:34:04.671Z"
+  },
+  {
+    "clienteId": "853140762_CJM0HSLV4G9",
+    "numero": "853140762",
+    "referenciaOriginal": "CJM0HSLV4G9",
+    "novaReferencia": "CJM0HSLV4G9D6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-26T14:43:13.273Z",
+    "timestamp": "2025-10-26T15:34:20.789Z"
+  },
+  {
+    "clienteId": "843650815_CJN0HSZ9RJU",
+    "numero": "843650815",
+    "referenciaOriginal": "CJN0HSZ9RJU",
+    "novaReferencia": "CJN0HSZ9RJUD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-27T13:34:33.218Z",
+    "timestamp": "2025-10-26T15:34:33.218Z"
+  },
+  {
+    "clienteId": "847132373_CJO3HTC4FKL",
+    "numero": "847132373",
+    "referenciaOriginal": "CJO3HTC4FKL",
+    "novaReferencia": "CJO3HTC4FKLD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-27T13:34:47.543Z",
+    "timestamp": "2025-10-26T15:34:47.543Z"
+  },
+  {
+    "clienteId": "842538088_CJP0HTPIM9U",
+    "numero": "842538088",
+    "referenciaOriginal": "CJP0HTPIM9U",
+    "novaReferencia": "CJP0HTPIM9UD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-27T13:35:01.541Z",
+    "timestamp": "2025-10-26T15:35:01.541Z"
+  },
+  {
+    "clienteId": "848554715_CLAGDUWJG",
+    "numero": "848554715",
+    "referenciaOriginal": "CLAGDUWJG",
+    "novaReferencia": "CLAGDUWJGD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-27T14:34:04.685Z",
+    "timestamp": "2025-10-26T16:34:04.685Z"
+  },
+  {
+    "clienteId": "842393529_CJF0HPPKRSI",
+    "numero": "842393529",
+    "referenciaOriginal": "CJF0HPPKRSI",
+    "novaReferencia": "CJF0HPPKRSID14",
+    "dia": 14,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-27T15:34:04.675Z",
+    "timestamp": "2025-10-26T17:34:04.675Z"
+  },
+  {
+    "clienteId": "843426292_CJP6HTRJ6KS",
+    "numero": "843426292",
+    "referenciaOriginal": "CJP6HTRJ6KS",
+    "novaReferencia": "CJP6HTRJ6KSD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-27T15:34:23.776Z",
+    "timestamp": "2025-10-26T17:34:23.776Z"
+  },
+  {
+    "clienteId": "848212586_CJG1HQ4SMVN.l",
+    "numero": "848212586",
+    "referenciaOriginal": "CJG1HQ4SMVN.l",
+    "novaReferencia": "CJG1HQ4SMVN.lD13",
+    "dia": 13,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-27T18:42:18.443Z",
+    "timestamp": "2025-10-26T20:42:18.443Z"
+  },
+  {
+    "clienteId": "848212586_CJJ7HR634QJ",
+    "numero": "848212586",
+    "referenciaOriginal": "CJJ7HR634QJ",
+    "novaReferencia": "CJJ7HR634QJD10",
+    "dia": 10,
+    "diasRestantes": 6,
+    "proximaRenovacao": "2025-10-27T18:42:31.703Z",
+    "timestamp": "2025-10-26T20:42:31.703Z"
+  },
+  {
+    "clienteId": "841985459_CJH2HQIMXD8",
+    "numero": "841985459",
+    "referenciaOriginal": "CJH2HQIMXD8",
+    "novaReferencia": "CJH2HQIMXD8D12",
+    "dia": 12,
+    "diasRestantes": 4,
+    "proximaRenovacao": "2025-10-27T19:42:18.444Z",
+    "timestamp": "2025-10-26T21:42:18.444Z"
+  },
+  {
+    "clienteId": "846610914_CJP4HTT4HQW",
+    "numero": "846610914",
+    "referenciaOriginal": "CJP4HTT4HQW",
+    "novaReferencia": "CJP4HTT4HQWD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-27T19:42:30.821Z",
+    "timestamp": "2025-10-26T21:42:30.821Z"
+  },
+  {
+    "clienteId": "847189063_CJP4HTT4HQP",
+    "numero": "847189063",
+    "referenciaOriginal": "CJP4HTT4HQP",
+    "novaReferencia": "CJP4HTT4HQPD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-27T19:42:44.556Z",
+    "timestamp": "2025-10-26T21:42:44.556Z"
+  },
+  {
+    "clienteId": "858856738_CJK0HRLV7O8",
+    "numero": "858856738",
+    "referenciaOriginal": "CJK0HRLV7O8",
+    "novaReferencia": "CJK0HRLV7O8D9",
+    "dia": 9,
+    "diasRestantes": 7,
+    "proximaRenovacao": "2025-10-27T23:42:18.446Z",
+    "timestamp": "2025-10-27T01:42:18.446Z"
+  },
+  {
+    "clienteId": "848987053_CJK7HRMKUBF",
+    "numero": "848987053",
+    "referenciaOriginal": "CJK7HRMKUBF",
+    "novaReferencia": "CJK7HRMKUBFD9",
+    "dia": 9,
+    "diasRestantes": 7,
+    "proximaRenovacao": "2025-10-28T00:42:18.447Z",
+    "timestamp": "2025-10-27T02:42:18.447Z"
+  },
+  {
+    "clienteId": "845289852_CJI4HR16B20",
+    "numero": "845289852",
+    "referenciaOriginal": "CJI4HR16B20",
+    "novaReferencia": "CJI4HR16B20D11",
+    "dia": 11,
+    "diasRestantes": 5,
+    "proximaRenovacao": "2025-10-28T01:42:18.448Z",
+    "timestamp": "2025-10-27T03:42:18.448Z"
+  },
+  {
+    "clienteId": "848985453_CJQ1HTV7H7X",
+    "numero": "848985453",
+    "referenciaOriginal": "CJQ1HTV7H7X",
+    "novaReferencia": "CJQ1HTV7H7XD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-28T02:42:18.447Z",
+    "timestamp": "2025-10-27T04:42:18.447Z"
+  },
+  {
+    "clienteId": "858856738_CJM5HSHWKX3",
+    "numero": "858856738",
+    "referenciaOriginal": "CJM5HSHWKX3",
+    "novaReferencia": "CJM5HSHWKX3D7",
+    "dia": 7,
+    "diasRestantes": 9,
+    "proximaRenovacao": "2025-10-28T07:21:52.207Z",
+    "timestamp": "2025-10-27T09:21:52.207Z"
+  },
+  {
+    "clienteId": "852535767_CJN9HSWODHD",
+    "numero": "852535767",
+    "referenciaOriginal": "CJN9HSWODHD",
+    "novaReferencia": "CJN9HSWODHDD6",
+    "dia": 6,
+    "diasRestantes": 10,
+    "proximaRenovacao": "2025-10-28T10:21:52.208Z",
+    "timestamp": "2025-10-27T12:21:52.208Z"
+  },
+  {
+    "clienteId": "849011348_PP251024.1636.C0265",
+    "numero": "849011348",
+    "referenciaOriginal": "PP251024.1636.C0265",
+    "novaReferencia": "PP251024.1636.C0265D5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-28T10:22:09.194Z",
+    "timestamp": "2025-10-27T12:22:09.194Z"
+  },
+  {
+    "clienteId": "847392499_CJL7HS8L6KR",
+    "numero": "847392499",
+    "referenciaOriginal": "CJL7HS8L6KR",
+    "novaReferencia": "CJL7HS8L6KRD8",
+    "dia": 8,
+    "diasRestantes": 8,
+    "proximaRenovacao": "2025-10-28T12:21:52.210Z",
+    "timestamp": "2025-10-27T14:21:52.210Z"
+  },
+  {
+    "clienteId": "843650815_CJN0HSZ9RJU",
+    "numero": "843650815",
+    "referenciaOriginal": "CJN0HSZ9RJU",
+    "novaReferencia": "CJN0HSZ9RJUD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-27T13:34:33.218Z",
+    "timestamp": "2025-10-27T14:22:12.228Z"
+  },
+  {
+    "clienteId": "847132373_CJO3HTC4FKL",
+    "numero": "847132373",
+    "referenciaOriginal": "CJO3HTC4FKL",
+    "novaReferencia": "CJO3HTC4FKLD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-28T12:22:39.714Z",
+    "timestamp": "2025-10-27T14:22:39.714Z"
+  },
+  {
+    "clienteId": "842538088_CJP0HTPIM9U",
+    "numero": "842538088",
+    "referenciaOriginal": "CJP0HTPIM9U",
+    "novaReferencia": "CJP0HTPIM9UD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-27T13:35:01.541Z",
+    "timestamp": "2025-10-27T14:22:54.389Z"
+  },
+  {
+    "clienteId": "848554715_CLAGDUWJG",
+    "numero": "848554715",
+    "referenciaOriginal": "CLAGDUWJG",
+    "novaReferencia": "CLAGDUWJGD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-28T13:22:40.100Z",
+    "timestamp": "2025-10-27T15:22:40.100Z"
+  },
+  {
+    "clienteId": "842393529_CJF0HPPKRSI",
+    "numero": "842393529",
+    "referenciaOriginal": "CJF0HPPKRSI",
+    "novaReferencia": "CJF0HPPKRSID15",
+    "dia": 15,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-28T14:22:10.101Z",
+    "timestamp": "2025-10-27T16:22:10.101Z"
+  },
+  {
+    "clienteId": "843426292_CJP6HTRJ6KS",
+    "numero": "843426292",
+    "referenciaOriginal": "CJP6HTRJ6KS",
+    "novaReferencia": "CJP6HTRJ6KSD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-28T14:22:33.735Z",
+    "timestamp": "2025-10-27T16:22:33.735Z"
+  },
+  {
+    "clienteId": "845824579_CJQ6HU4QRES",
+    "numero": "845824579",
+    "referenciaOriginal": "CJQ6HU4QRES",
+    "novaReferencia": "CJQ6HU4QRESD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-28T15:22:10.098Z",
+    "timestamp": "2025-10-27T17:22:10.098Z"
+  },
+  {
+    "clienteId": "848212586_CJG1HQ4SMVN.l",
+    "numero": "848212586",
+    "referenciaOriginal": "CJG1HQ4SMVN.l",
+    "novaReferencia": "CJG1HQ4SMVN.lD14",
+    "dia": 14,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-28T17:22:10.099Z",
+    "timestamp": "2025-10-27T19:22:10.099Z"
+  },
+  {
+    "clienteId": "842393529_CJQ8HU6BIVK",
+    "numero": "842393529",
+    "referenciaOriginal": "CJQ8HU6BIVK",
+    "novaReferencia": "CJQ8HU6BIVKD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-28T17:23:22.502Z",
+    "timestamp": "2025-10-27T19:23:22.502Z"
+  },
+  {
+    "clienteId": "841985459_CJH2HQIMXD8",
+    "numero": "841985459",
+    "referenciaOriginal": "CJH2HQIMXD8",
+    "novaReferencia": "CJH2HQIMXD8D13",
+    "dia": 13,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-28T18:22:10.100Z",
+    "timestamp": "2025-10-27T20:22:10.100Z"
+  },
+  {
+    "clienteId": "848212586_CJJ7HR634QJ",
+    "numero": "848212586",
+    "referenciaOriginal": "CJJ7HR634QJ",
+    "novaReferencia": "CJJ7HR634QJD11",
+    "dia": 11,
+    "diasRestantes": 5,
+    "proximaRenovacao": "2025-10-28T18:22:31.728Z",
+    "timestamp": "2025-10-27T20:22:31.728Z"
+  },
+  {
+    "clienteId": "846610914_CJP4HTT4HQW",
+    "numero": "846610914",
+    "referenciaOriginal": "CJP4HTT4HQW",
+    "novaReferencia": "CJP4HTT4HQWD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-28T18:22:43.160Z",
+    "timestamp": "2025-10-27T20:22:43.160Z"
+  },
+  {
+    "clienteId": "847189063_CJP4HTT4HQP",
+    "numero": "847189063",
+    "referenciaOriginal": "CJP4HTT4HQP",
+    "novaReferencia": "CJP4HTT4HQPD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-28T18:22:58.654Z",
+    "timestamp": "2025-10-27T20:22:58.654Z"
+  },
+  {
+    "clienteId": "858856738_CJK0HRLV7O8",
+    "numero": "858856738",
+    "referenciaOriginal": "CJK0HRLV7O8",
+    "novaReferencia": "CJK0HRLV7O8D10",
+    "dia": 10,
+    "diasRestantes": 6,
+    "proximaRenovacao": "2025-10-28T22:22:10.103Z",
+    "timestamp": "2025-10-28T00:22:10.103Z"
+  },
+  {
+    "clienteId": "848987053_CJK7HRMKUBF",
+    "numero": "848987053",
+    "referenciaOriginal": "CJK7HRMKUBF",
+    "novaReferencia": "CJK7HRMKUBFD10",
+    "dia": 10,
+    "diasRestantes": 6,
+    "proximaRenovacao": "2025-10-28T23:22:10.104Z",
+    "timestamp": "2025-10-28T01:22:10.104Z"
+  },
+  {
+    "clienteId": "845289852_CJI4HR16B20",
+    "numero": "845289852",
+    "referenciaOriginal": "CJI4HR16B20",
+    "novaReferencia": "CJI4HR16B20D12",
+    "dia": 12,
+    "diasRestantes": 4,
+    "proximaRenovacao": "2025-10-29T00:22:10.105Z",
+    "timestamp": "2025-10-28T02:22:10.105Z"
+  },
+  {
+    "clienteId": "848985453_CJQ1HTV7H7X",
+    "numero": "848985453",
+    "referenciaOriginal": "CJQ1HTV7H7X",
+    "novaReferencia": "CJQ1HTV7H7XD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-28T02:42:18.447Z",
+    "timestamp": "2025-10-28T03:22:10.105Z"
+  },
+  {
+    "clienteId": "846610914_CJP4HTT4HQK",
+    "numero": "846610914",
+    "referenciaOriginal": "CJP4HTT4HQK",
+    "novaReferencia": "CJP4HTT4HQKD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-29T02:22:10.105Z",
+    "timestamp": "2025-10-28T04:22:10.105Z"
+  },
+  {
+    "clienteId": "847189063_CJP4HTT4HK",
+    "numero": "847189063",
+    "referenciaOriginal": "CJP4HTT4HK",
+    "novaReferencia": "CJP4HTT4HKD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-29T02:22:23.814Z",
+    "timestamp": "2025-10-28T04:22:23.814Z"
+  },
+  {
+    "clienteId": "849011348_PP251024.1636.C0266",
+    "numero": "849011348",
+    "referenciaOriginal": "PP251024.1636.C0266",
+    "novaReferencia": "PP251024.1636.C0266D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-29T02:22:38.502Z",
+    "timestamp": "2025-10-28T04:22:38.502Z"
+  },
+  {
+    "clienteId": "848554715_CLAGDUWJGA124",
+    "numero": "848554715",
+    "referenciaOriginal": "CLAGDUWJGA124",
+    "novaReferencia": "CLAGDUWJGA124D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-29T03:22:10.105Z",
+    "timestamp": "2025-10-28T05:22:10.105Z"
+  },
+  {
+    "clienteId": "858856738_CJM5HSHWKX3",
+    "numero": "858856738",
+    "referenciaOriginal": "CJM5HSHWKX3",
+    "novaReferencia": "CJM5HSHWKX3D8",
+    "dia": 8,
+    "diasRestantes": 8,
+    "proximaRenovacao": "2025-10-29T05:22:10.106Z",
+    "timestamp": "2025-10-28T07:22:10.106Z"
+  },
+  {
+    "clienteId": "852535767_CJN9HSWODHD",
+    "numero": "852535767",
+    "referenciaOriginal": "CJN9HSWODHD",
+    "novaReferencia": "CJN9HSWODHDD7",
+    "dia": 7,
+    "diasRestantes": 9,
+    "proximaRenovacao": "2025-10-29T08:44:41.437Z",
+    "timestamp": "2025-10-28T10:44:41.437Z"
+  },
+  {
+    "clienteId": "849011348_PP251024.1636.C0265",
+    "numero": "849011348",
+    "referenciaOriginal": "PP251024.1636.C0265",
+    "novaReferencia": "PP251024.1636.C0265D6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-28T10:22:09.194Z",
+    "timestamp": "2025-10-28T10:44:54.713Z"
+  },
+  {
+    "clienteId": "847392499_CJL7HS8L6KR",
+    "numero": "847392499",
+    "referenciaOriginal": "CJL7HS8L6KR",
+    "novaReferencia": "CJL7HS8L6KRD9",
+    "dia": 9,
+    "diasRestantes": 7,
+    "proximaRenovacao": "2025-10-29T10:44:41.438Z",
+    "timestamp": "2025-10-28T12:44:41.438Z"
+  },
+  {
+    "clienteId": "847132373_CJO3HTC4FKL",
+    "numero": "847132373",
+    "referenciaOriginal": "CJO3HTC4FKL",
+    "novaReferencia": "CJO3HTC4FKLD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-28T12:22:39.714Z",
+    "timestamp": "2025-10-28T12:44:56.157Z"
+  },
+  {
+    "clienteId": "848554715_CLAGDUWJG",
+    "numero": "848554715",
+    "referenciaOriginal": "CLAGDUWJG",
+    "novaReferencia": "CLAGDUWJGD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-28T13:22:40.100Z",
+    "timestamp": "2025-10-28T13:44:41.439Z"
+  },
+  {
+    "clienteId": "847715828_CJR9HUGDLAR",
+    "numero": "847715828",
+    "referenciaOriginal": "CJR9HUGDLAR",
+    "novaReferencia": "CJR9HUGDLARD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-29T11:44:56.770Z",
+    "timestamp": "2025-10-28T13:44:56.770Z"
+  },
+  {
+    "clienteId": "842393529_CJF0HPPKRSI",
+    "numero": "842393529",
+    "referenciaOriginal": "CJF0HPPKRSI",
+    "novaReferencia": "CJF0HPPKRSID16",
+    "dia": 16,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-28T14:22:10.101Z",
+    "timestamp": "2025-10-28T14:26:49.787Z"
+  },
+  {
+    "clienteId": "843426292_CJP6HTRJ6KS",
+    "numero": "843426292",
+    "referenciaOriginal": "CJP6HTRJ6KS",
+    "novaReferencia": "CJP6HTRJ6KSD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-29T12:27:11.845Z",
+    "timestamp": "2025-10-28T14:27:11.845Z"
+  },
+  {
+    "clienteId": "853257250_CJR6HUHRLUO",
+    "numero": "853257250",
+    "referenciaOriginal": "CJR6HUHRLUO",
+    "novaReferencia": "CJR6HUHRLUOD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-29T13:26:31.494Z",
+    "timestamp": "2025-10-28T15:26:31.494Z"
+  },
+  {
+    "clienteId": "853861605_CJR2HUI74Z6",
+    "numero": "853861605",
+    "referenciaOriginal": "CJR2HUI74Z6",
+    "novaReferencia": "CJR2HUI74Z6D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-29T13:26:47.394Z",
+    "timestamp": "2025-10-28T15:26:47.394Z"
+  },
+  {
+    "clienteId": "845824579_CJQ6HU4QRES",
+    "numero": "845824579",
+    "referenciaOriginal": "CJQ6HU4QRES",
+    "novaReferencia": "CJQ6HU4QRESD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-28T15:22:10.098Z",
+    "timestamp": "2025-10-28T16:26:19.784Z"
+  },
+  {
+    "clienteId": "853074154_CJR4HUH7HWE",
+    "numero": "853074154",
+    "referenciaOriginal": "CJR4HUH7HWE",
+    "novaReferencia": "CJR4HUH7HWED3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-29T14:26:33.875Z",
+    "timestamp": "2025-10-28T16:26:33.875Z"
+  },
+  {
+    "clienteId": "849219753_CJR4HUHNWOG",
+    "numero": "849219753",
+    "referenciaOriginal": "CJR4HUHNWOG",
+    "novaReferencia": "CJR4HUHNWOGD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-29T14:26:46.804Z",
+    "timestamp": "2025-10-28T16:26:46.804Z"
+  },
+  {
+    "clienteId": "855508847_CJR8HUIYFP4",
+    "numero": "855508847",
+    "referenciaOriginal": "CJR8HUIYFP4",
+    "novaReferencia": "CJR8HUIYFP4D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-29T14:27:03.657Z",
+    "timestamp": "2025-10-28T16:27:03.657Z"
+  },
+  {
+    "clienteId": "848212586_CJG1HQ4SMVN.l",
+    "numero": "848212586",
+    "referenciaOriginal": "CJG1HQ4SMVN.l",
+    "novaReferencia": "CJG1HQ4SMVN.lD15",
+    "dia": 15,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-29T15:58:33.680Z",
+    "timestamp": "2025-10-28T17:58:33.680Z"
+  },
+  {
+    "clienteId": "842393529_CJQ8HU6BIVK",
+    "numero": "842393529",
+    "referenciaOriginal": "CJQ8HU6BIVK",
+    "novaReferencia": "CJQ8HU6BIVKD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-28T17:23:22.502Z",
+    "timestamp": "2025-10-28T17:58:46.528Z"
+  },
+  {
+    "clienteId": "841985459_CJH2HQIMXD8",
+    "numero": "841985459",
+    "referenciaOriginal": "CJH2HQIMXD8",
+    "novaReferencia": "CJH2HQIMXD8D14",
+    "dia": 14,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-29T16:58:33.680Z",
+    "timestamp": "2025-10-28T18:58:33.680Z"
+  },
+  {
+    "clienteId": "848212586_CJJ7HR634QJ",
+    "numero": "848212586",
+    "referenciaOriginal": "CJJ7HR634QJ",
+    "novaReferencia": "CJJ7HR634QJD12",
+    "dia": 12,
+    "diasRestantes": 4,
+    "proximaRenovacao": "2025-10-29T16:58:49.786Z",
+    "timestamp": "2025-10-28T18:58:49.786Z"
+  },
+  {
+    "clienteId": "846610914_CJP4HTT4HQW",
+    "numero": "846610914",
+    "referenciaOriginal": "CJP4HTT4HQW",
+    "novaReferencia": "CJP4HTT4HQWD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-29T16:59:02.587Z",
+    "timestamp": "2025-10-28T18:59:02.587Z"
+  },
+  {
+    "clienteId": "847189063_CJP4HTT4HQP",
+    "numero": "847189063",
+    "referenciaOriginal": "CJP4HTT4HQP",
+    "novaReferencia": "CJP4HTT4HQPD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-29T16:59:20.145Z",
+    "timestamp": "2025-10-28T18:59:20.145Z"
+  },
+  {
+    "clienteId": "858856738_CJK0HRLV7O8",
+    "numero": "858856738",
+    "referenciaOriginal": "CJK0HRLV7O8",
+    "novaReferencia": "CJK0HRLV7O8D11",
+    "dia": 11,
+    "diasRestantes": 5,
+    "proximaRenovacao": "2025-10-29T20:58:33.685Z",
+    "timestamp": "2025-10-28T22:58:33.685Z"
+  },
+  {
+    "clienteId": "848987053_CJK7HRMKUBF",
+    "numero": "848987053",
+    "referenciaOriginal": "CJK7HRMKUBF",
+    "novaReferencia": "CJK7HRMKUBFD11",
+    "dia": 11,
+    "diasRestantes": 5,
+    "proximaRenovacao": "2025-10-29T21:58:33.687Z",
+    "timestamp": "2025-10-28T23:58:33.687Z"
+  },
+  {
+    "clienteId": "845289852_CJI4HR16B20",
+    "numero": "845289852",
+    "referenciaOriginal": "CJI4HR16B20",
+    "novaReferencia": "CJI4HR16B20D13",
+    "dia": 13,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-29T22:58:33.687Z",
+    "timestamp": "2025-10-29T00:58:33.687Z"
+  },
+  {
+    "clienteId": "846610914_CJP4HTT4HQK",
+    "numero": "846610914",
+    "referenciaOriginal": "CJP4HTT4HQK",
+    "novaReferencia": "CJP4HTT4HQKD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-30T00:58:33.688Z",
+    "timestamp": "2025-10-29T02:58:33.688Z"
+  },
+  {
+    "clienteId": "847189063_CJP4HTT4HK",
+    "numero": "847189063",
+    "referenciaOriginal": "CJP4HTT4HK",
+    "novaReferencia": "CJP4HTT4HKD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-30T00:58:51.686Z",
+    "timestamp": "2025-10-29T02:58:51.686Z"
+  },
+  {
+    "clienteId": "849011348_PP251024.1636.C0266",
+    "numero": "849011348",
+    "referenciaOriginal": "PP251024.1636.C0266",
+    "novaReferencia": "PP251024.1636.C0266D4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-30T01:58:33.689Z",
+    "timestamp": "2025-10-29T03:58:33.689Z"
+  },
+  {
+    "clienteId": "848554715_CLAGDUWJGA124",
+    "numero": "848554715",
+    "referenciaOriginal": "CLAGDUWJGA124",
+    "novaReferencia": "CLAGDUWJGA124D4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-30T01:58:48.926Z",
+    "timestamp": "2025-10-29T03:58:48.926Z"
+  },
+  {
+    "clienteId": "858856738_CJM5HSHWKX3",
+    "numero": "858856738",
+    "referenciaOriginal": "CJM5HSHWKX3",
+    "novaReferencia": "CJM5HSHWKX3D9",
+    "dia": 9,
+    "diasRestantes": 7,
+    "proximaRenovacao": "2025-10-30T03:58:33.692Z",
+    "timestamp": "2025-10-29T05:58:33.692Z"
+  },
+  {
+    "clienteId": "841079447_PP251028.0925.Q17963",
+    "numero": "841079447",
+    "referenciaOriginal": "PP251028.0925.Q17963",
+    "novaReferencia": "PP251028.0925.Q17963D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-30T04:58:33.692Z",
+    "timestamp": "2025-10-29T06:58:33.692Z"
+  },
+  {
+    "clienteId": "852535767_CJN9HSWODHD",
+    "numero": "852535767",
+    "referenciaOriginal": "CJN9HSWODHD",
+    "novaReferencia": "CJN9HSWODHDD8",
+    "dia": 8,
+    "diasRestantes": 8,
+    "proximaRenovacao": "2025-10-30T06:58:33.694Z",
+    "timestamp": "2025-10-29T08:58:33.694Z"
+  },
+  {
+    "clienteId": "847392499_CJL7HS8L6KR",
+    "numero": "847392499",
+    "referenciaOriginal": "CJL7HS8L6KR",
+    "novaReferencia": "CJL7HS8L6KRD10",
+    "dia": 10,
+    "diasRestantes": 6,
+    "proximaRenovacao": "2025-10-30T08:58:33.701Z",
+    "timestamp": "2025-10-29T10:58:33.701Z"
+  },
+  {
+    "clienteId": "847715828_CJR9HUGDLAR",
+    "numero": "847715828",
+    "referenciaOriginal": "CJR9HUGDLAR",
+    "novaReferencia": "CJR9HUGDLARD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-30T09:58:33.699Z",
+    "timestamp": "2025-10-29T11:58:33.699Z"
+  },
+  {
+    "clienteId": "843426292_CJP6HTRJ6KS",
+    "numero": "843426292",
+    "referenciaOriginal": "CJP6HTRJ6KS",
+    "novaReferencia": "CJP6HTRJ6KSD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-29T12:27:11.845Z",
+    "timestamp": "2025-10-29T12:37:24.372Z"
+  },
+  {
+    "clienteId": "843426292_CJS9HUTH9YX",
+    "numero": "843426292",
+    "referenciaOriginal": "CJS9HUTH9YX",
+    "novaReferencia": "CJS9HUTH9YXD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-30T10:37:49.391Z",
+    "timestamp": "2025-10-29T12:37:49.391Z"
+  },
+  {
+    "clienteId": "853257250_CJR6HUHRLUO",
+    "numero": "853257250",
+    "referenciaOriginal": "CJR6HUHRLUO",
+    "novaReferencia": "CJR6HUHRLUOD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-29T13:26:31.494Z",
+    "timestamp": "2025-10-29T13:36:54.371Z"
+  },
+  {
+    "clienteId": "853861605_CJR2HUI74Z6",
+    "numero": "853861605",
+    "referenciaOriginal": "CJR2HUI74Z6",
+    "novaReferencia": "CJR2HUI74Z6D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-29T13:26:47.394Z",
+    "timestamp": "2025-10-29T13:37:20.147Z"
+  },
+  {
+    "clienteId": "853074154_CJR4HUH7HWE",
+    "numero": "853074154",
+    "referenciaOriginal": "CJR4HUH7HWE",
+    "novaReferencia": "CJR4HUH7HWED4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-29T14:26:33.875Z",
+    "timestamp": "2025-10-29T14:36:54.373Z"
+  },
+  {
+    "clienteId": "849219753_CJR4HUHNWOG",
+    "numero": "849219753",
+    "referenciaOriginal": "CJR4HUHNWOG",
+    "novaReferencia": "CJR4HUHNWOGD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-29T14:26:46.804Z",
+    "timestamp": "2025-10-29T15:36:54.372Z"
+  },
+  {
+    "clienteId": "855508847_CJR8HUIYFP4",
+    "numero": "855508847",
+    "referenciaOriginal": "CJR8HUIYFP4",
+    "novaReferencia": "CJR8HUIYFP4D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-29T14:27:03.657Z",
+    "timestamp": "2025-10-29T15:37:19.398Z"
+  },
+  {
+    "clienteId": "CJS2HUNADJK_844027676\n",
+    "numero": "CJS2HUNADJK",
+    "referenciaOriginal": "844027676\n",
+    "novaReferencia": "844027676\nD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-30T13:37:35.916Z",
+    "timestamp": "2025-10-29T15:37:35.916Z"
+  },
+  {
+    "clienteId": "CJS2HUNADJK_",
+    "numero": "CJS2HUNADJK",
+    "referenciaOriginal": "",
+    "novaReferencia": "D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-30T13:37:53.957Z",
+    "timestamp": "2025-10-29T15:37:53.957Z"
+  },
+  {
+    "clienteId": "844027676_CJS2HUWJ3RO",
+    "numero": "844027676",
+    "referenciaOriginal": "CJS2HUWJ3RO",
+    "novaReferencia": "CJS2HUWJ3ROD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-30T13:38:08.648Z",
+    "timestamp": "2025-10-29T15:38:08.648Z"
+  },
+  {
+    "clienteId": "848212586_CJG1HQ4SMVN.l",
+    "numero": "848212586",
+    "referenciaOriginal": "CJG1HQ4SMVN.l",
+    "novaReferencia": "CJG1HQ4SMVN.lD16",
+    "dia": 16,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-29T15:58:33.680Z",
+    "timestamp": "2025-10-29T16:44:55.028Z"
+  },
+  {
+    "clienteId": "857650963_CJS3HUXIWWL",
+    "numero": "857650963",
+    "referenciaOriginal": "CJS3HUXIWWL",
+    "novaReferencia": "CJS3HUXIWWLD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-30T14:45:10.717Z",
+    "timestamp": "2025-10-29T16:45:10.717Z"
+  },
+  {
+    "clienteId": "841985459_CJH2HQIMXD8",
+    "numero": "841985459",
+    "referenciaOriginal": "CJH2HQIMXD8",
+    "novaReferencia": "CJH2HQIMXD8D15",
+    "dia": 15,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-30T15:44:25.026Z",
+    "timestamp": "2025-10-29T17:44:25.026Z"
+  },
+  {
+    "clienteId": "848212586_CJJ7HR634QJ",
+    "numero": "848212586",
+    "referenciaOriginal": "CJJ7HR634QJ",
+    "novaReferencia": "CJJ7HR634QJD13",
+    "dia": 13,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-30T15:44:37.897Z",
+    "timestamp": "2025-10-29T17:44:37.897Z"
+  },
+  {
+    "clienteId": "846610914_CJP4HTT4HQW",
+    "numero": "846610914",
+    "referenciaOriginal": "CJP4HTT4HQW",
+    "novaReferencia": "CJP4HTT4HQWD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-29T16:59:02.587Z",
+    "timestamp": "2025-10-29T17:44:53.433Z"
+  },
+  {
+    "clienteId": "847189063_CJP4HTT4HQP",
+    "numero": "847189063",
+    "referenciaOriginal": "CJP4HTT4HQP",
+    "novaReferencia": "CJP4HTT4HQPD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-29T16:59:20.145Z",
+    "timestamp": "2025-10-29T17:45:07.806Z"
+  },
+  {
+    "clienteId": "855580411_CJS5HUYRMAP",
+    "numero": "855580411",
+    "referenciaOriginal": "CJS5HUYRMAP",
+    "novaReferencia": "CJS5HUYRMAPD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-30T16:44:25.026Z",
+    "timestamp": "2025-10-29T18:44:25.026Z"
+  },
+  {
+    "clienteId": "858856738_CJK0HRLV7O8",
+    "numero": "858856738",
+    "referenciaOriginal": "CJK0HRLV7O8",
+    "novaReferencia": "CJK0HRLV7O8D12",
+    "dia": 12,
+    "diasRestantes": 4,
+    "proximaRenovacao": "2025-10-30T19:44:25.027Z",
+    "timestamp": "2025-10-29T21:44:25.027Z"
+  },
+  {
+    "clienteId": "848987053_CJK7HRMKUBF",
+    "numero": "848987053",
+    "referenciaOriginal": "CJK7HRMKUBF",
+    "novaReferencia": "CJK7HRMKUBFD12",
+    "dia": 12,
+    "diasRestantes": 4,
+    "proximaRenovacao": "2025-10-30T20:44:25.028Z",
+    "timestamp": "2025-10-29T22:44:25.028Z"
+  },
+  {
+    "clienteId": "845289852_CJI4HR16B20",
+    "numero": "845289852",
+    "referenciaOriginal": "CJI4HR16B20",
+    "novaReferencia": "CJI4HR16B20D14",
+    "dia": 14,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-30T21:44:25.029Z",
+    "timestamp": "2025-10-29T23:44:25.029Z"
+  },
+  {
+    "clienteId": "846610914_CJP4HTT4HQK",
+    "numero": "846610914",
+    "referenciaOriginal": "CJP4HTT4HQK",
+    "novaReferencia": "CJP4HTT4HQKD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-30T23:44:25.029Z",
+    "timestamp": "2025-10-30T01:44:25.029Z"
+  },
+  {
+    "clienteId": "847189063_CJP4HTT4HK",
+    "numero": "847189063",
+    "referenciaOriginal": "CJP4HTT4HK",
+    "novaReferencia": "CJP4HTT4HKD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-30T23:44:41.436Z",
+    "timestamp": "2025-10-30T01:44:41.436Z"
+  },
+  {
+    "clienteId": "849011348_PP251024.1636.C0266",
+    "numero": "849011348",
+    "referenciaOriginal": "PP251024.1636.C0266",
+    "novaReferencia": "PP251024.1636.C0266D5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-31T00:44:25.031Z",
+    "timestamp": "2025-10-30T02:44:25.031Z"
+  },
+  {
+    "clienteId": "848554715_CLAGDUWJGA124",
+    "numero": "848554715",
+    "referenciaOriginal": "CLAGDUWJGA124",
+    "novaReferencia": "CLAGDUWJGA124D5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-31T00:44:37.677Z",
+    "timestamp": "2025-10-30T02:44:37.677Z"
+  },
+  {
+    "clienteId": "858856738_CJM5HSHWKX3",
+    "numero": "858856738",
+    "referenciaOriginal": "CJM5HSHWKX3",
+    "novaReferencia": "CJM5HSHWKX3D10",
+    "dia": 10,
+    "diasRestantes": 6,
+    "proximaRenovacao": "2025-10-31T02:44:25.031Z",
+    "timestamp": "2025-10-30T04:44:25.031Z"
+  },
+  {
+    "clienteId": "841079447_PP251028.0925.Q17963",
+    "numero": "841079447",
+    "referenciaOriginal": "PP251028.0925.Q17963",
+    "novaReferencia": "PP251028.0925.Q17963D4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-31T03:44:25.032Z",
+    "timestamp": "2025-10-30T05:44:25.032Z"
+  },
+  {
+    "clienteId": "852535767_CJN9HSWODHD",
+    "numero": "852535767",
+    "referenciaOriginal": "CJN9HSWODHD",
+    "novaReferencia": "CJN9HSWODHDD9",
+    "dia": 9,
+    "diasRestantes": 7,
+    "proximaRenovacao": "2025-10-31T05:44:25.032Z",
+    "timestamp": "2025-10-30T07:44:25.032Z"
+  },
+  {
+    "clienteId": "847392499_CJL7HS8L6KR",
+    "numero": "847392499",
+    "referenciaOriginal": "CJL7HS8L6KR",
+    "novaReferencia": "CJL7HS8L6KRD11",
+    "dia": 11,
+    "diasRestantes": 5,
+    "proximaRenovacao": "2025-10-31T07:44:25.034Z",
+    "timestamp": "2025-10-30T09:44:25.034Z"
+  },
+  {
+    "clienteId": "848985453_PP251029.1158.L60936",
+    "numero": "848985453",
+    "referenciaOriginal": "PP251029.1158.L60936",
+    "novaReferencia": "PP251029.1158.L60936D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-31T07:44:38.056Z",
+    "timestamp": "2025-10-30T09:44:38.056Z"
+  },
+  {
+    "clienteId": "847715828_CJR9HUGDLAR",
+    "numero": "847715828",
+    "referenciaOriginal": "CJR9HUGDLAR",
+    "novaReferencia": "CJR9HUGDLARD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-31T08:44:25.034Z",
+    "timestamp": "2025-10-30T10:44:25.034Z"
+  },
+  {
+    "clienteId": "843426292_CJS9HUTH9YX",
+    "numero": "843426292",
+    "referenciaOriginal": "CJS9HUTH9YX",
+    "novaReferencia": "CJS9HUTH9YXD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-30T10:37:49.391Z",
+    "timestamp": "2025-10-30T10:44:44.427Z"
+  },
+  {
+    "clienteId": "CJS2HUNADJK_844027676\n",
+    "numero": "CJS2HUNADJK",
+    "referenciaOriginal": "844027676\n",
+    "novaReferencia": "844027676\nD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-31T11:44:25.036Z",
+    "timestamp": "2025-10-30T13:44:25.036Z"
+  },
+  {
+    "clienteId": "CJS2HUNADJK_",
+    "numero": "CJS2HUNADJK",
+    "referenciaOriginal": "",
+    "novaReferencia": "D4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-31T11:44:40.844Z",
+    "timestamp": "2025-10-30T13:44:40.844Z"
+  },
+  {
+    "clienteId": "844027676_CJS2HUWJ3RO",
+    "numero": "844027676",
+    "referenciaOriginal": "CJS2HUWJ3RO",
+    "novaReferencia": "CJS2HUWJ3ROD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-31T11:44:55.696Z",
+    "timestamp": "2025-10-30T13:44:55.696Z"
+  },
+  {
+    "clienteId": "841985459_CJH2HQIMXD8",
+    "numero": "841985459",
+    "referenciaOriginal": "CJH2HQIMXD8",
+    "novaReferencia": "CJH2HQIMXD8D16",
+    "dia": 16,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-30T15:44:25.026Z",
+    "timestamp": "2025-10-30T15:44:25.035Z"
+  },
+  {
+    "clienteId": "857650963_CJS3HUXIWWL",
+    "numero": "857650963",
+    "referenciaOriginal": "CJS3HUXIWWL",
+    "novaReferencia": "CJS3HUXIWWLD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-30T14:45:10.717Z",
+    "timestamp": "2025-10-30T15:44:42.304Z"
+  },
+  {
+    "clienteId": "848212586_CJJ7HR634QJ",
+    "numero": "848212586",
+    "referenciaOriginal": "CJJ7HR634QJ",
+    "novaReferencia": "CJJ7HR634QJD14",
+    "dia": 14,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-10-31T14:44:25.037Z",
+    "timestamp": "2025-10-30T16:44:25.037Z"
+  },
+  {
+    "clienteId": "855580411_CJS5HUYRMAP",
+    "numero": "855580411",
+    "referenciaOriginal": "CJS5HUYRMAP",
+    "novaReferencia": "CJS5HUYRMAPD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-30T16:44:25.026Z",
+    "timestamp": "2025-10-30T16:44:41.092Z"
+  },
+  {
+    "clienteId": "857231470_CJT0HVBPJMA",
+    "numero": "857231470",
+    "referenciaOriginal": "CJT0HVBPJMA",
+    "novaReferencia": "CJT0HVBPJMAD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-31T14:44:56.411Z",
+    "timestamp": "2025-10-30T16:44:56.411Z"
+  },
+  {
+    "clienteId": "853861605_CJT9HVCABA3",
+    "numero": "853861605",
+    "referenciaOriginal": "CJT9HVCABA3",
+    "novaReferencia": "CJT9HVCABA3D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-31T15:44:25.037Z",
+    "timestamp": "2025-10-30T17:44:25.037Z"
+  },
+  {
+    "clienteId": "849571460_PP251029.2250.b82816",
+    "numero": "849571460",
+    "referenciaOriginal": "PP251029.2250.b82816",
+    "novaReferencia": "PP251029.2250.b82816D3",
+    "dia": 3,
+    "diasRestantes": 13,
+    "proximaRenovacao": "2025-10-31T17:25:31.143Z",
+    "timestamp": "2025-10-30T19:25:31.143Z"
+  },
+  {
+    "clienteId": "858856738_CJK0HRLV7O8",
+    "numero": "858856738",
+    "referenciaOriginal": "CJK0HRLV7O8",
+    "novaReferencia": "CJK0HRLV7O8D13",
+    "dia": 13,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-31T18:25:31.142Z",
+    "timestamp": "2025-10-30T20:25:31.142Z"
+  },
+  {
+    "clienteId": "848987053_CJK7HRMKUBF",
+    "numero": "848987053",
+    "referenciaOriginal": "CJK7HRMKUBF",
+    "novaReferencia": "CJK7HRMKUBFD13",
+    "dia": 13,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-10-31T19:25:31.143Z",
+    "timestamp": "2025-10-30T21:25:31.143Z"
+  },
+  {
+    "clienteId": "845289852_CJI4HR16B20",
+    "numero": "845289852",
+    "referenciaOriginal": "CJI4HR16B20",
+    "novaReferencia": "CJI4HR16B20D15",
+    "dia": 15,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-10-31T20:25:31.145Z",
+    "timestamp": "2025-10-30T22:25:31.145Z"
+  },
+  {
+    "clienteId": "846610914_CJP4HTT4HQK",
+    "numero": "846610914",
+    "referenciaOriginal": "CJP4HTT4HQK",
+    "novaReferencia": "CJP4HTT4HQKD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-30T23:44:25.029Z",
+    "timestamp": "2025-10-31T00:25:31.144Z"
+  },
+  {
+    "clienteId": "847189063_CJP4HTT4HK",
+    "numero": "847189063",
+    "referenciaOriginal": "CJP4HTT4HK",
+    "novaReferencia": "CJP4HTT4HKD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-30T23:44:41.436Z",
+    "timestamp": "2025-10-31T00:25:43.966Z"
+  },
+  {
+    "clienteId": "849011348_PP251024.1636.C0266",
+    "numero": "849011348",
+    "referenciaOriginal": "PP251024.1636.C0266",
+    "novaReferencia": "PP251024.1636.C0266D6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-31T00:44:25.031Z",
+    "timestamp": "2025-10-31T01:25:31.147Z"
+  },
+  {
+    "clienteId": "848554715_CLAGDUWJGA124",
+    "numero": "848554715",
+    "referenciaOriginal": "CLAGDUWJGA124",
+    "novaReferencia": "CLAGDUWJGA124D6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-31T00:44:37.677Z",
+    "timestamp": "2025-10-31T01:25:48.519Z"
+  },
+  {
+    "clienteId": "858856738_CJM5HSHWKX3",
+    "numero": "858856738",
+    "referenciaOriginal": "CJM5HSHWKX3",
+    "novaReferencia": "CJM5HSHWKX3D11",
+    "dia": 11,
+    "diasRestantes": 5,
+    "proximaRenovacao": "2025-11-01T01:25:31.148Z",
+    "timestamp": "2025-10-31T03:25:31.148Z"
+  },
+  {
+    "clienteId": "841079447_PP251028.0925.Q17963",
+    "numero": "841079447",
+    "referenciaOriginal": "PP251028.0925.Q17963",
+    "novaReferencia": "PP251028.0925.Q17963D5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-01T02:18:19.772Z",
+    "timestamp": "2025-10-31T04:18:19.772Z"
+  },
+  {
+    "clienteId": "846475510_CJU6HVEL1UC",
+    "numero": "846475510",
+    "referenciaOriginal": "CJU6HVEL1UC",
+    "novaReferencia": "CJU6HVEL1UCD3",
+    "dia": 3,
+    "diasRestantes": 13,
+    "proximaRenovacao": "2025-11-01T02:18:36.590Z",
+    "timestamp": "2025-10-31T04:18:36.590Z"
+  },
+  {
+    "clienteId": "852535767_CJN9HSWODHD",
+    "numero": "852535767",
+    "referenciaOriginal": "CJN9HSWODHD",
+    "novaReferencia": "CJN9HSWODHDD10",
+    "dia": 10,
+    "diasRestantes": 6,
+    "proximaRenovacao": "2025-11-01T04:17:49.771Z",
+    "timestamp": "2025-10-31T06:17:49.771Z"
+  },
+  {
+    "clienteId": "847132373_CJU7HVFZTN7",
+    "numero": "847132373",
+    "referenciaOriginal": "CJU7HVFZTN7",
+    "novaReferencia": "CJU7HVFZTN7D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-11-01T04:18:03.892Z",
+    "timestamp": "2025-10-31T06:18:03.892Z"
+  },
+  {
+    "clienteId": "847392499_CJL7HS8L6KR",
+    "numero": "847392499",
+    "referenciaOriginal": "CJL7HS8L6KR",
+    "novaReferencia": "CJL7HS8L6KRD12",
+    "dia": 12,
+    "diasRestantes": 4,
+    "proximaRenovacao": "2025-11-01T06:17:49.771Z",
+    "timestamp": "2025-10-31T08:17:49.771Z"
+  },
+  {
+    "clienteId": "848985453_PP251029.1158.L60936",
+    "numero": "848985453",
+    "referenciaOriginal": "PP251029.1158.L60936",
+    "novaReferencia": "PP251029.1158.L60936D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-31T07:44:38.056Z",
+    "timestamp": "2025-10-31T08:18:07.277Z"
+  },
+  {
+    "clienteId": "847715828_CJR9HUGDLAR",
+    "numero": "847715828",
+    "referenciaOriginal": "CJR9HUGDLAR",
+    "novaReferencia": "CJR9HUGDLARD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-31T08:44:25.034Z",
+    "timestamp": "2025-10-31T09:17:49.772Z"
+  },
+  {
+    "clienteId": "CJS2HUNADJK_844027676\n",
+    "numero": "CJS2HUNADJK",
+    "referenciaOriginal": "844027676\n",
+    "novaReferencia": "844027676\nD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-01T10:17:49.773Z",
+    "timestamp": "2025-10-31T12:17:49.773Z"
+  },
+  {
+    "clienteId": "CJS2HUNADJK_",
+    "numero": "CJS2HUNADJK",
+    "referenciaOriginal": "",
+    "novaReferencia": "D5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-01T10:18:08.667Z",
+    "timestamp": "2025-10-31T12:18:08.667Z"
+  },
+  {
+    "clienteId": "844027676_CJS2HUWJ3RO",
+    "numero": "844027676",
+    "referenciaOriginal": "CJS2HUWJ3RO",
+    "novaReferencia": "CJS2HUWJ3ROD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-01T10:18:24.270Z",
+    "timestamp": "2025-10-31T12:18:24.270Z"
+  },
+  {
+    "clienteId": "848212586_CJJ7HR634QJ",
+    "numero": "848212586",
+    "referenciaOriginal": "CJJ7HR634QJ",
+    "novaReferencia": "CJJ7HR634QJD15",
+    "dia": 15,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-01T13:17:49.774Z",
+    "timestamp": "2025-10-31T15:17:49.774Z"
+  },
+  {
+    "clienteId": "857231470_CJT0HVBPJMA",
+    "numero": "857231470",
+    "referenciaOriginal": "CJT0HVBPJMA",
+    "novaReferencia": "CJT0HVBPJMAD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-01T13:18:07.112Z",
+    "timestamp": "2025-10-31T15:18:07.112Z"
+  },
+  {
+    "clienteId": "853861605_CJT9HVCABA3",
+    "numero": "853861605",
+    "referenciaOriginal": "CJT9HVCABA3",
+    "novaReferencia": "CJT9HVCABA3D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-31T15:44:25.037Z",
+    "timestamp": "2025-10-31T16:17:49.774Z"
+  },
+  {
+    "clienteId": "848554715_CHAGEKEJGJA",
+    "numero": "848554715",
+    "referenciaOriginal": "CHAGEKEJGJA",
+    "novaReferencia": "CHAGEKEJGJAD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-11-01T15:17:49.773Z",
+    "timestamp": "2025-10-31T17:17:49.773Z"
+  },
+  {
+    "clienteId": "849571460_PP251029.2250.b82816",
+    "numero": "849571460",
+    "referenciaOriginal": "PP251029.2250.b82816",
+    "novaReferencia": "PP251029.2250.b82816D4",
+    "dia": 4,
+    "diasRestantes": 12,
+    "proximaRenovacao": "2025-11-01T15:44:48.068Z",
+    "timestamp": "2025-10-31T17:44:48.068Z"
+  },
+  {
+    "clienteId": "858856738_CJK0HRLV7O8",
+    "numero": "858856738",
+    "referenciaOriginal": "CJK0HRLV7O8",
+    "novaReferencia": "CJK0HRLV7O8D14",
+    "dia": 14,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-01T16:44:18.064Z",
+    "timestamp": "2025-10-31T18:44:18.064Z"
+  },
+  {
+    "clienteId": "844808025_PP251030.2100.r58745",
+    "numero": "844808025",
+    "referenciaOriginal": "PP251030.2100.r58745",
+    "novaReferencia": "PP251030.2100.r58745D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-01T16:44:38.038Z",
+    "timestamp": "2025-10-31T18:44:38.038Z"
+  },
+  {
+    "clienteId": "848987053_CJK7HRMKUBF",
+    "numero": "848987053",
+    "referenciaOriginal": "CJK7HRMKUBF",
+    "novaReferencia": "CJK7HRMKUBFD14",
+    "dia": 14,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-01T17:44:18.069Z",
+    "timestamp": "2025-10-31T19:44:18.069Z"
+  },
+  {
+    "clienteId": "845289852_CJI4HR16B20",
+    "numero": "845289852",
+    "referenciaOriginal": "CJI4HR16B20",
+    "novaReferencia": "CJI4HR16B20D16",
+    "dia": 16,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-10-31T20:25:31.145Z",
+    "timestamp": "2025-10-31T20:44:18.063Z"
+  },
+  {
+    "clienteId": "858856738_CJM5HSHWKX3",
+    "numero": "858856738",
+    "referenciaOriginal": "CJM5HSHWKX3",
+    "novaReferencia": "CJM5HSHWKX3D12",
+    "dia": 12,
+    "diasRestantes": 4,
+    "proximaRenovacao": "2025-11-02T00:44:18.067Z",
+    "timestamp": "2025-11-01T02:44:18.067Z"
+  },
+  {
+    "clienteId": "841079447_PP251028.0925.Q17963",
+    "numero": "841079447",
+    "referenciaOriginal": "PP251028.0925.Q17963",
+    "novaReferencia": "PP251028.0925.Q17963D6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-01T02:18:19.772Z",
+    "timestamp": "2025-11-01T02:44:36.592Z"
+  },
+  {
+    "clienteId": "846475510_CJU6HVEL1UC",
+    "numero": "846475510",
+    "referenciaOriginal": "CJU6HVEL1UC",
+    "novaReferencia": "CJU6HVEL1UCD4",
+    "dia": 4,
+    "diasRestantes": 12,
+    "proximaRenovacao": "2025-11-02T00:44:50.880Z",
+    "timestamp": "2025-11-01T02:44:50.880Z"
+  },
+  {
+    "clienteId": "852535767_CJN9HSWODHD",
+    "numero": "852535767",
+    "referenciaOriginal": "CJN9HSWODHD",
+    "novaReferencia": "CJN9HSWODHDD11",
+    "dia": 11,
+    "diasRestantes": 5,
+    "proximaRenovacao": "2025-11-02T02:44:18.068Z",
+    "timestamp": "2025-11-01T04:44:18.068Z"
+  },
+  {
+    "clienteId": "847132373_CJU7HVFZTN7",
+    "numero": "847132373",
+    "referenciaOriginal": "CJU7HVFZTN7",
+    "novaReferencia": "CJU7HVFZTN7D4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-02T02:44:34.682Z",
+    "timestamp": "2025-11-01T04:44:34.682Z"
+  },
+  {
+    "clienteId": "847392499_CJL7HS8L6KR",
+    "numero": "847392499",
+    "referenciaOriginal": "CJL7HS8L6KR",
+    "novaReferencia": "CJL7HS8L6KRD13",
+    "dia": 13,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-11-02T04:44:18.068Z",
+    "timestamp": "2025-11-01T06:44:18.068Z"
+  },
+  {
+    "clienteId": "845639620_CJAGEKBSJT",
+    "numero": "845639620",
+    "referenciaOriginal": "CJAGEKBSJT",
+    "novaReferencia": "CJAGEKBSJTD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-11-02T04:44:32.372Z",
+    "timestamp": "2025-11-01T06:44:32.372Z"
+  },
+  {
+    "clienteId": "CJS2HUNADJK_844027676\n",
+    "numero": "CJS2HUNADJK",
+    "referenciaOriginal": "844027676\n",
+    "novaReferencia": "844027676\nD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-01T10:17:49.773Z",
+    "timestamp": "2025-11-01T10:44:18.072Z"
+  },
+  {
+    "clienteId": "CJS2HUNADJK_",
+    "numero": "CJS2HUNADJK",
+    "referenciaOriginal": "",
+    "novaReferencia": "D6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-01T10:18:08.667Z",
+    "timestamp": "2025-11-01T10:44:30.431Z"
+  },
+  {
+    "clienteId": "844027676_CJS2HUWJ3RO",
+    "numero": "844027676",
+    "referenciaOriginal": "CJS2HUWJ3RO",
+    "novaReferencia": "CJS2HUWJ3ROD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-01T10:18:24.270Z",
+    "timestamp": "2025-11-01T10:44:43.906Z"
+  },
+  {
+    "clienteId": "848985453_CJV5HVYRTBB",
+    "numero": "848985453",
+    "referenciaOriginal": "CJV5HVYRTBB",
+    "novaReferencia": "CJV5HVYRTBBD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-11-02T08:44:58.756Z",
+    "timestamp": "2025-11-01T10:44:58.756Z"
+  },
+  {
+    "clienteId": "855508847_CJV1HVZAHPV",
+    "numero": "855508847",
+    "referenciaOriginal": "CJV1HVZAHPV",
+    "novaReferencia": "CJV1HVZAHPVD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-02T09:44:18.071Z",
+    "timestamp": "2025-11-01T11:44:18.071Z"
+  },
+  {
+    "clienteId": "848212586_CJJ7HR634QJ",
+    "numero": "848212586",
+    "referenciaOriginal": "CJJ7HR634QJ",
+    "novaReferencia": "CJJ7HR634QJD16",
+    "dia": 16,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-01T13:17:49.774Z",
+    "timestamp": "2025-11-01T13:44:18.074Z"
+  },
+  {
+    "clienteId": "857231470_CJT0HVBPJMA",
+    "numero": "857231470",
+    "referenciaOriginal": "CJT0HVBPJMA",
+    "novaReferencia": "CJT0HVBPJMAD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-02T11:44:35.209Z",
+    "timestamp": "2025-11-01T13:44:35.209Z"
+  },
+  {
+    "clienteId": "846036182_PP251031.1811.w49526",
+    "numero": "846036182",
+    "referenciaOriginal": "PP251031.1811.w49526",
+    "novaReferencia": "PP251031.1811.w49526D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-11-02T12:35:52.787Z",
+    "timestamp": "2025-11-01T14:35:52.787Z"
+  },
+  {
+    "clienteId": "848554715_CHAGEKEJGJA",
+    "numero": "848554715",
+    "referenciaOriginal": "CHAGEKEJGJA",
+    "novaReferencia": "CHAGEKEJGJAD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-02T13:35:22.784Z",
+    "timestamp": "2025-11-01T15:35:22.784Z"
+  },
+  {
+    "clienteId": "849571460_PP251029.2250.b82816",
+    "numero": "849571460",
+    "referenciaOriginal": "PP251029.2250.b82816",
+    "novaReferencia": "PP251029.2250.b82816D5",
+    "dia": 5,
+    "diasRestantes": 11,
+    "proximaRenovacao": "2025-11-02T14:35:22.785Z",
+    "timestamp": "2025-11-01T16:35:22.785Z"
+  },
+  {
+    "clienteId": "846980978_CJV5HW4MJ5L",
+    "numero": "846980978",
+    "referenciaOriginal": "CJV5HW4MJ5L",
+    "novaReferencia": "CJV5HW4MJ5LD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-11-02T14:35:35.740Z",
+    "timestamp": "2025-11-01T16:35:35.740Z"
+  },
+  {
+    "clienteId": "858856738_CJK0HRLV7O8",
+    "numero": "858856738",
+    "referenciaOriginal": "CJK0HRLV7O8",
+    "novaReferencia": "CJK0HRLV7O8D15",
+    "dia": 15,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-02T15:35:22.785Z",
+    "timestamp": "2025-11-01T17:35:22.785Z"
+  },
+  {
+    "clienteId": "844808025_PP251030.2100.r58745",
+    "numero": "844808025",
+    "referenciaOriginal": "PP251030.2100.r58745",
+    "novaReferencia": "PP251030.2100.r58745D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-01T16:44:38.038Z",
+    "timestamp": "2025-11-01T17:35:37.240Z"
+  },
+  {
+    "clienteId": "844100042_CJV6HW5LDT4",
+    "numero": "844100042",
+    "referenciaOriginal": "CJV6HW5LDT4",
+    "novaReferencia": "CJV6HW5LDT4D3",
+    "dia": 3,
+    "diasRestantes": 13,
+    "proximaRenovacao": "2025-11-02T15:35:48.391Z",
+    "timestamp": "2025-11-01T17:35:48.391Z"
+  },
+  {
+    "clienteId": "848987053_CJK7HRMKUBF",
+    "numero": "848987053",
+    "referenciaOriginal": "CJK7HRMKUBF",
+    "novaReferencia": "CJK7HRMKUBFD15",
+    "dia": 15,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-02T16:35:22.788Z",
+    "timestamp": "2025-11-01T18:35:22.788Z"
+  },
+  {
+    "clienteId": "857451196_CJV2HW733XW",
+    "numero": "857451196",
+    "referenciaOriginal": "CJV2HW733XW",
+    "novaReferencia": "CJV2HW733XWD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-02T19:35:22.787Z",
+    "timestamp": "2025-11-01T21:35:22.787Z"
+  },
+  {
+    "clienteId": "858856738_CJM5HSHWKX3",
+    "numero": "858856738",
+    "referenciaOriginal": "CJM5HSHWKX3",
+    "novaReferencia": "CJM5HSHWKX3D13",
+    "dia": 13,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-11-02T23:35:22.790Z",
+    "timestamp": "2025-11-02T01:35:22.790Z"
+  },
+  {
+    "clienteId": "846475510_CJU6HVEL1UC",
+    "numero": "846475510",
+    "referenciaOriginal": "CJU6HVEL1UC",
+    "novaReferencia": "CJU6HVEL1UCD5",
+    "dia": 5,
+    "diasRestantes": 11,
+    "proximaRenovacao": "2025-11-02T23:35:40.120Z",
+    "timestamp": "2025-11-02T01:35:40.120Z"
+  },
+  {
+    "clienteId": "852535767_CJN9HSWODHD",
+    "numero": "852535767",
+    "referenciaOriginal": "CJN9HSWODHD",
+    "novaReferencia": "CJN9HSWODHDD12",
+    "dia": 12,
+    "diasRestantes": 4,
+    "proximaRenovacao": "2025-11-03T01:35:22.792Z",
+    "timestamp": "2025-11-02T03:35:22.792Z"
+  },
+  {
+    "clienteId": "847132373_CJU7HVFZTN7",
+    "numero": "847132373",
+    "referenciaOriginal": "CJU7HVFZTN7",
+    "novaReferencia": "CJU7HVFZTN7D5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-03T01:35:38.617Z",
+    "timestamp": "2025-11-02T03:35:38.617Z"
+  },
+  {
+    "clienteId": "857482525_CJV0HW4ENL4",
+    "numero": "857482525",
+    "referenciaOriginal": "CJV0HW4ENL4",
+    "novaReferencia": "CJV0HW4ENL4D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-03T02:35:22.793Z",
+    "timestamp": "2025-11-02T04:35:22.793Z"
+  },
+  {
+    "clienteId": "846161268_CJV0HW4ENL5",
+    "numero": "846161268",
+    "referenciaOriginal": "CJV0HW4ENL5",
+    "novaReferencia": "CJV0HW4ENL5D3",
+    "dia": 3,
+    "diasRestantes": 28,
+    "proximaRenovacao": "2025-11-03T02:35:36.163Z",
+    "timestamp": "2025-11-02T04:35:36.163Z"
+  },
+  {
+    "clienteId": "847392499_CJL7HS8L6KR",
+    "numero": "847392499",
+    "referenciaOriginal": "CJL7HS8L6KR",
+    "novaReferencia": "CJL7HS8L6KRD14",
+    "dia": 14,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-03T03:35:22.794Z",
+    "timestamp": "2025-11-02T05:35:22.794Z"
+  },
+  {
+    "clienteId": "845639620_CJAGEKBSJT",
+    "numero": "845639620",
+    "referenciaOriginal": "CJAGEKBSJT",
+    "novaReferencia": "CJAGEKBSJTD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-03T03:35:34.713Z",
+    "timestamp": "2025-11-02T05:35:34.713Z"
+  },
+  {
+    "clienteId": "845387822_CK16HWB24R8",
+    "numero": "845387822",
+    "referenciaOriginal": "CK16HWB24R8",
+    "novaReferencia": "CK16HWB24R8D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-11-03T04:35:22.794Z",
+    "timestamp": "2025-11-02T06:35:22.794Z"
+  },
+  {
+    "clienteId": "875384097_CK11HWCWE9P",
+    "numero": "875384097",
+    "referenciaOriginal": "CK11HWCWE9P",
+    "novaReferencia": "CK11HWCWE9PD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-03T06:35:22.795Z",
+    "timestamp": "2025-11-02T08:35:22.795Z"
+  },
+  {
+    "clienteId": "846737631_CK10HW8VM0A",
+    "numero": "846737631",
+    "referenciaOriginal": "CK10HW8VM0A",
+    "novaReferencia": "CK10HW8VM0AD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-03T06:35:34.731Z",
+    "timestamp": "2025-11-02T08:35:34.731Z"
+  },
+  {
+    "clienteId": "848985453_CJV5HVYRTBB",
+    "numero": "848985453",
+    "referenciaOriginal": "CJV5HVYRTBB",
+    "novaReferencia": "CJV5HVYRTBBD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-03T06:52:06.112Z",
+    "timestamp": "2025-11-02T08:52:06.112Z"
+  },
+  {
+    "clienteId": "855508847_CJV1HVZAHPV",
+    "numero": "855508847",
+    "referenciaOriginal": "CJV1HVZAHPV",
+    "novaReferencia": "CJV1HVZAHPVD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-02T09:44:18.071Z",
+    "timestamp": "2025-11-02T09:51:36.109Z"
+  },
+  {
+    "clienteId": "857231470_CJT0HVBPJMA",
+    "numero": "857231470",
+    "referenciaOriginal": "CJT0HVBPJMA",
+    "novaReferencia": "CJT0HVBPJMAD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-02T11:44:35.209Z",
+    "timestamp": "2025-11-02T11:51:36.110Z"
+  },
+  {
+    "clienteId": "848554715_CHAGEKEJGJA",
+    "numero": "848554715",
+    "referenciaOriginal": "CHAGEKEJGJA",
+    "novaReferencia": "CHAGEKEJGJAD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-03T11:51:36.110Z",
+    "timestamp": "2025-11-02T13:51:36.110Z"
+  },
+  {
+    "clienteId": "846036182_PP251031.1811.w49526",
+    "numero": "846036182",
+    "referenciaOriginal": "PP251031.1811.w49526",
+    "novaReferencia": "PP251031.1811.w49526D4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-03T11:51:48.789Z",
+    "timestamp": "2025-11-02T13:51:48.789Z"
+  },
+  {
+    "clienteId": "849571460_PP251029.2250.b82816",
+    "numero": "849571460",
+    "referenciaOriginal": "PP251029.2250.b82816",
+    "novaReferencia": "PP251029.2250.b82816D6",
+    "dia": 6,
+    "diasRestantes": 10,
+    "proximaRenovacao": "2025-11-03T12:51:36.114Z",
+    "timestamp": "2025-11-02T14:51:36.114Z"
+  },
+  {
+    "clienteId": "846980978_CJV5HW4MJ5L",
+    "numero": "846980978",
+    "referenciaOriginal": "CJV5HW4MJ5L",
+    "novaReferencia": "CJV5HW4MJ5LD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-03T12:51:50.092Z",
+    "timestamp": "2025-11-02T14:51:50.092Z"
+  },
+  {
+    "clienteId": "858856738_CJK0HRLV7O8",
+    "numero": "858856738",
+    "referenciaOriginal": "CJK0HRLV7O8",
+    "novaReferencia": "CJK0HRLV7O8D16",
+    "dia": 16,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-02T15:35:22.785Z",
+    "timestamp": "2025-11-02T15:51:36.112Z"
+  },
+  {
+    "clienteId": "844100042_CJV6HW5LDT4",
+    "numero": "844100042",
+    "referenciaOriginal": "CJV6HW5LDT4",
+    "novaReferencia": "CJV6HW5LDT4D4",
+    "dia": 4,
+    "diasRestantes": 12,
+    "proximaRenovacao": "2025-11-03T13:51:51.075Z",
+    "timestamp": "2025-11-02T15:51:51.075Z"
+  },
+  {
+    "clienteId": "848987053_CJK7HRMKUBF",
+    "numero": "848987053",
+    "referenciaOriginal": "CJK7HRMKUBF",
+    "novaReferencia": "CJK7HRMKUBFD16",
+    "dia": 16,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-02T16:35:22.788Z",
+    "timestamp": "2025-11-02T16:51:36.111Z"
+  },
+  {
+    "clienteId": "857451196_CJV2HW733XW",
+    "numero": "857451196",
+    "referenciaOriginal": "CJV2HW733XW",
+    "novaReferencia": "CJV2HW733XWD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-02T19:35:22.787Z",
+    "timestamp": "2025-11-02T20:34:22.769Z"
+  },
+  {
+    "clienteId": "858856738_CJM5HSHWKX3",
+    "numero": "858856738",
+    "referenciaOriginal": "CJM5HSHWKX3",
+    "novaReferencia": "CJM5HSHWKX3D14",
+    "dia": 14,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-03T22:34:22.773Z",
+    "timestamp": "2025-11-03T00:34:22.773Z"
+  },
+  {
+    "clienteId": "846475510_CJU6HVEL1UC",
+    "numero": "846475510",
+    "referenciaOriginal": "CJU6HVEL1UC",
+    "novaReferencia": "CJU6HVEL1UCD6",
+    "dia": 6,
+    "diasRestantes": 10,
+    "proximaRenovacao": "2025-11-03T22:34:39.667Z",
+    "timestamp": "2025-11-03T00:34:39.667Z"
+  },
+  {
+    "clienteId": "852535767_CJN9HSWODHD",
+    "numero": "852535767",
+    "referenciaOriginal": "CJN9HSWODHD",
+    "novaReferencia": "CJN9HSWODHDD13",
+    "dia": 13,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-11-04T00:34:22.774Z",
+    "timestamp": "2025-11-03T02:34:22.774Z"
+  },
+  {
+    "clienteId": "847132373_CJU7HVFZTN7",
+    "numero": "847132373",
+    "referenciaOriginal": "CJU7HVFZTN7",
+    "novaReferencia": "CJU7HVFZTN7D6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-03T01:35:38.617Z",
+    "timestamp": "2025-11-03T02:34:43.363Z"
+  },
+  {
+    "clienteId": "857482525_CJV0HW4ENL4",
+    "numero": "857482525",
+    "referenciaOriginal": "CJV0HW4ENL4",
+    "novaReferencia": "CJV0HW4ENL4D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-03T02:35:22.793Z",
+    "timestamp": "2025-11-03T03:34:22.776Z"
+  },
+  {
+    "clienteId": "846161268_CJV0HW4ENL5",
+    "numero": "846161268",
+    "referenciaOriginal": "CJV0HW4ENL5",
+    "novaReferencia": "CJV0HW4ENL5D4",
+    "dia": 4,
+    "diasRestantes": 27,
+    "proximaRenovacao": "2025-11-04T01:34:39.286Z",
+    "timestamp": "2025-11-03T03:34:39.286Z"
+  },
+  {
+    "clienteId": "847392499_CJL7HS8L6KR",
+    "numero": "847392499",
+    "referenciaOriginal": "CJL7HS8L6KR",
+    "novaReferencia": "CJL7HS8L6KRD15",
+    "dia": 15,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-04T02:34:22.775Z",
+    "timestamp": "2025-11-03T04:34:22.775Z"
+  },
+  {
+    "clienteId": "845639620_CJAGEKBSJT",
+    "numero": "845639620",
+    "referenciaOriginal": "CJAGEKBSJT",
+    "novaReferencia": "CJAGEKBSJTD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-04T02:34:40.969Z",
+    "timestamp": "2025-11-03T04:34:40.969Z"
+  },
+  {
+    "clienteId": "845387822_CK16HWB24R8",
+    "numero": "845387822",
+    "referenciaOriginal": "CK16HWB24R8",
+    "novaReferencia": "CK16HWB24R8D4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-04T03:34:22.776Z",
+    "timestamp": "2025-11-03T05:34:22.776Z"
+  },
+  {
+    "clienteId": "846980978_CK25HWP76AX",
+    "numero": "846980978",
+    "referenciaOriginal": "CK25HWP76AX",
+    "novaReferencia": "CK25HWP76AXD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-11-04T03:34:46.639Z",
+    "timestamp": "2025-11-03T05:34:46.639Z"
+  },
+  {
+    "clienteId": "_CK21HWPGVYL",
+    "numero": "",
+    "referenciaOriginal": "CK21HWPGVYL",
+    "novaReferencia": "CK21HWPGVYLD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-04T03:35:06.377Z",
+    "timestamp": "2025-11-03T05:35:06.377Z"
+  },
+  {
+    "clienteId": "848985453_CJV5HVYRTBB",
+    "numero": "848985453",
+    "referenciaOriginal": "CJV5HVYRTBB",
+    "novaReferencia": "CJV5HVYRTBBD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-04T05:34:22.778Z",
+    "timestamp": "2025-11-03T07:34:22.778Z"
+  },
+  {
+    "clienteId": "875384097_CK11HWCWE9P",
+    "numero": "875384097",
+    "referenciaOriginal": "CK11HWCWE9P",
+    "novaReferencia": "CK11HWCWE9PD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-03T06:35:22.795Z",
+    "timestamp": "2025-11-03T07:34:37.094Z"
+  },
+  {
+    "clienteId": "846737631_CK10HW8VM0A",
+    "numero": "846737631",
+    "referenciaOriginal": "CK10HW8VM0A",
+    "novaReferencia": "CK10HW8VM0AD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-03T06:35:34.731Z",
+    "timestamp": "2025-11-03T07:34:56.780Z"
+  },
+  {
+    "clienteId": "848554715_CHAGEKEJGJA",
+    "numero": "848554715",
+    "referenciaOriginal": "CHAGEKEJGJA",
+    "novaReferencia": "CHAGEKEJGJAD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-03T11:51:36.110Z",
+    "timestamp": "2025-11-03T12:12:45.594Z"
+  },
+  {
+    "clienteId": "846036182_PP251031.1811.w49526",
+    "numero": "846036182",
+    "referenciaOriginal": "PP251031.1811.w49526",
+    "novaReferencia": "PP251031.1811.w49526D5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-04T10:13:04.591Z",
+    "timestamp": "2025-11-03T12:13:04.591Z"
+  },
+  {
+    "clienteId": "849571460_PP251029.2250.b82816",
+    "numero": "849571460",
+    "referenciaOriginal": "PP251029.2250.b82816",
+    "novaReferencia": "PP251029.2250.b82816D7",
+    "dia": 7,
+    "diasRestantes": 9,
+    "proximaRenovacao": "2025-11-04T11:12:15.594Z",
+    "timestamp": "2025-11-03T13:12:15.594Z"
+  },
+  {
+    "clienteId": "846980978_CJV5HW4MJ5L",
+    "numero": "846980978",
+    "referenciaOriginal": "CJV5HW4MJ5L",
+    "novaReferencia": "CJV5HW4MJ5LD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-04T11:12:33.828Z",
+    "timestamp": "2025-11-03T13:12:33.828Z"
+  },
+  {
+    "clienteId": "843426292_CK21HWUW7SP",
+    "numero": "843426292",
+    "referenciaOriginal": "CK21HWUW7SP",
+    "novaReferencia": "CK21HWUW7SPD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-11-04T11:13:01.093Z",
+    "timestamp": "2025-11-03T13:13:01.093Z"
+  },
+  {
+    "clienteId": "844100042_CJV6HW5LDT4",
+    "numero": "844100042",
+    "referenciaOriginal": "CJV6HW5LDT4",
+    "novaReferencia": "CJV6HW5LDT4D5",
+    "dia": 5,
+    "diasRestantes": 11,
+    "proximaRenovacao": "2025-11-04T12:12:15.596Z",
+    "timestamp": "2025-11-03T14:12:15.596Z"
+  },
+  {
+    "clienteId": "841352177_CK24HWXHQWM",
+    "numero": "841352177",
+    "referenciaOriginal": "CK24HWXHQWM",
+    "novaReferencia": "CK24HWXHQWMD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-04T14:12:15.596Z",
+    "timestamp": "2025-11-03T16:12:15.596Z"
+  },
+  {
+    "clienteId": "858856738_CJM5HSHWKX3",
+    "numero": "858856738",
+    "referenciaOriginal": "CJM5HSHWKX3",
+    "novaReferencia": "CJM5HSHWKX3D15",
+    "dia": 15,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-04T20:39:37.862Z",
+    "timestamp": "2025-11-03T22:39:37.862Z"
+  },
+  {
+    "clienteId": "846475510_CJU6HVEL1UC",
+    "numero": "846475510",
+    "referenciaOriginal": "CJU6HVEL1UC",
+    "novaReferencia": "CJU6HVEL1UCD7",
+    "dia": 7,
+    "diasRestantes": 9,
+    "proximaRenovacao": "2025-11-04T20:39:58.243Z",
+    "timestamp": "2025-11-03T22:39:58.243Z"
+  },
+  {
+    "clienteId": "852535767_CJN9HSWODHD",
+    "numero": "852535767",
+    "referenciaOriginal": "CJN9HSWODHD",
+    "novaReferencia": "CJN9HSWODHDD14",
+    "dia": 14,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-04T22:39:37.861Z",
+    "timestamp": "2025-11-04T00:39:37.861Z"
+  },
+  {
+    "clienteId": "846161268_CJV0HW4ENL5",
+    "numero": "846161268",
+    "referenciaOriginal": "CJV0HW4ENL5",
+    "novaReferencia": "CJV0HW4ENL5D5",
+    "dia": 5,
+    "diasRestantes": 26,
+    "proximaRenovacao": "2025-11-04T23:39:37.862Z",
+    "timestamp": "2025-11-04T01:39:37.862Z"
+  },
+  {
+    "clienteId": "847392499_CJL7HS8L6KR",
+    "numero": "847392499",
+    "referenciaOriginal": "CJL7HS8L6KR",
+    "novaReferencia": "CJL7HS8L6KRD16",
+    "dia": 16,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-04T02:34:22.775Z",
+    "timestamp": "2025-11-04T02:39:37.863Z"
+  },
+  {
+    "clienteId": "845639620_CJAGEKBSJT",
+    "numero": "845639620",
+    "referenciaOriginal": "CJAGEKBSJT",
+    "novaReferencia": "CJAGEKBSJTD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-04T02:34:40.969Z",
+    "timestamp": "2025-11-04T02:39:58.632Z"
+  },
+  {
+    "clienteId": "845387822_CK16HWB24R8",
+    "numero": "845387822",
+    "referenciaOriginal": "CK16HWB24R8",
+    "novaReferencia": "CK16HWB24R8D5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-05T01:39:37.863Z",
+    "timestamp": "2025-11-04T03:39:37.863Z"
+  },
+  {
+    "clienteId": "846980978_CK25HWP76AX",
+    "numero": "846980978",
+    "referenciaOriginal": "CK25HWP76AX",
+    "novaReferencia": "CK25HWP76AXD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-05T01:39:54.025Z",
+    "timestamp": "2025-11-04T03:39:54.025Z"
+  },
+  {
+    "clienteId": "_CK21HWPGVYL",
+    "numero": "",
+    "referenciaOriginal": "CK21HWPGVYL",
+    "novaReferencia": "CK21HWPGVYLD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-04T03:35:06.377Z",
+    "timestamp": "2025-11-04T03:40:14.993Z"
+  },
+  {
+    "clienteId": "848985453_CJV5HVYRTBB",
+    "numero": "848985453",
+    "referenciaOriginal": "CJV5HVYRTBB",
+    "novaReferencia": "CJV5HVYRTBBD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-04T05:34:22.778Z",
+    "timestamp": "2025-11-04T05:39:37.864Z"
+  },
+  {
+    "clienteId": "847392499_CK33HX2MZ95",
+    "numero": "847392499",
+    "referenciaOriginal": "CK33HX2MZ95",
+    "novaReferencia": "CK33HX2MZ95D3",
+    "dia": 3,
+    "diasRestantes": 13,
+    "proximaRenovacao": "2025-11-05T04:39:37.866Z",
+    "timestamp": "2025-11-04T06:39:37.866Z"
+  },
+  {
+    "clienteId": "840309744_CK32HX3UP3G",
+    "numero": "840309744",
+    "referenciaOriginal": "CK32HX3UP3G",
+    "novaReferencia": "CK32HX3UP3GD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-05T05:39:37.866Z",
+    "timestamp": "2025-11-04T07:39:37.866Z"
+  },
+  {
+    "clienteId": "846036182_PP251031.1811.w49526",
+    "numero": "846036182",
+    "referenciaOriginal": "PP251031.1811.w49526",
+    "novaReferencia": "PP251031.1811.w49526D6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-04T10:13:04.591Z",
+    "timestamp": "2025-11-04T10:39:37.867Z"
+  },
+  {
+    "clienteId": "849571460_PP251029.2250.b82816",
+    "numero": "849571460",
+    "referenciaOriginal": "PP251029.2250.b82816",
+    "novaReferencia": "PP251029.2250.b82816D8",
+    "dia": 8,
+    "diasRestantes": 8,
+    "proximaRenovacao": "2025-11-05T09:39:37.868Z",
+    "timestamp": "2025-11-04T11:39:37.868Z"
+  },
+  {
+    "clienteId": "846980978_CJV5HW4MJ5L",
+    "numero": "846980978",
+    "referenciaOriginal": "CJV5HW4MJ5L",
+    "novaReferencia": "CJV5HW4MJ5LD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-04T11:12:33.828Z",
+    "timestamp": "2025-11-04T11:39:55.992Z"
+  },
+  {
+    "clienteId": "843426292_CK21HWUW7SP",
+    "numero": "843426292",
+    "referenciaOriginal": "CK21HWUW7SP",
+    "novaReferencia": "CK21HWUW7SPD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-05T09:40:15.984Z",
+    "timestamp": "2025-11-04T11:40:15.984Z"
+  },
+  {
+    "clienteId": "844100042_CJV6HW5LDT4",
+    "numero": "844100042",
+    "referenciaOriginal": "CJV6HW5LDT4",
+    "novaReferencia": "CJV6HW5LDT4D6",
+    "dia": 6,
+    "diasRestantes": 10,
+    "proximaRenovacao": "2025-11-05T10:39:37.869Z",
+    "timestamp": "2025-11-04T12:39:37.869Z"
+  },
+  {
+    "clienteId": "841352177_CK24HWXHQWM",
+    "numero": "841352177",
+    "referenciaOriginal": "CK24HWXHQWM",
+    "novaReferencia": "CK24HWXHQWMD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-04T14:12:15.596Z",
+    "timestamp": "2025-11-04T14:39:37.871Z"
+  },
+  {
+    "clienteId": "846036182_CK33HXDAOXX",
+    "numero": "846036182",
+    "referenciaOriginal": "CK33HXDAOXX",
+    "novaReferencia": "CK33HXDAOXXD3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-11-05T15:27:02.188Z",
+    "timestamp": "2025-11-04T17:27:02.188Z"
+  },
+  {
+    "clienteId": "858856738_CJM5HSHWKX3",
+    "numero": "858856738",
+    "referenciaOriginal": "CJM5HSHWKX3",
+    "novaReferencia": "CJM5HSHWKX3D16",
+    "dia": 16,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-04T20:39:37.862Z",
+    "timestamp": "2025-11-04T21:27:44.292Z"
+  },
+  {
+    "clienteId": "846475510_CJU6HVEL1UC",
+    "numero": "846475510",
+    "referenciaOriginal": "CJU6HVEL1UC",
+    "novaReferencia": "CJU6HVEL1UCD8",
+    "dia": 8,
+    "diasRestantes": 8,
+    "proximaRenovacao": "2025-11-05T19:28:03.191Z",
+    "timestamp": "2025-11-04T21:28:03.191Z"
+  },
+  {
+    "clienteId": "852535767_CJN9HSWODHD",
+    "numero": "852535767",
+    "referenciaOriginal": "CJN9HSWODHD",
+    "novaReferencia": "CJN9HSWODHDD15",
+    "dia": 15,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-05T21:27:44.292Z",
+    "timestamp": "2025-11-04T23:27:44.292Z"
+  },
+  {
+    "clienteId": "846161268_CJV0HW4ENL5",
+    "numero": "846161268",
+    "referenciaOriginal": "CJV0HW4ENL5",
+    "novaReferencia": "CJV0HW4ENL5D6",
+    "dia": 6,
+    "diasRestantes": 25,
+    "proximaRenovacao": "2025-11-05T22:27:44.292Z",
+    "timestamp": "2025-11-05T00:27:44.292Z"
+  },
+  {
+    "clienteId": "845387822_CK16HWB24R8",
+    "numero": "845387822",
+    "referenciaOriginal": "CK16HWB24R8",
+    "novaReferencia": "CK16HWB24R8D6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-05T01:39:37.863Z",
+    "timestamp": "2025-11-05T02:27:44.293Z"
+  },
+  {
+    "clienteId": "846980978_CK25HWP76AX",
+    "numero": "846980978",
+    "referenciaOriginal": "CK25HWP76AX",
+    "novaReferencia": "CK25HWP76AXD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-06T00:28:01.423Z",
+    "timestamp": "2025-11-05T02:28:01.423Z"
+  },
+  {
+    "clienteId": "847392499_CK33HX2MZ95",
+    "numero": "847392499",
+    "referenciaOriginal": "CK33HX2MZ95",
+    "novaReferencia": "CK33HX2MZ95D4",
+    "dia": 4,
+    "diasRestantes": 12,
+    "proximaRenovacao": "2025-11-06T03:27:44.295Z",
+    "timestamp": "2025-11-05T05:27:44.295Z"
+  },
+  {
+    "clienteId": "840309744_CK32HX3UP3G",
+    "numero": "840309744",
+    "referenciaOriginal": "CK32HX3UP3G",
+    "novaReferencia": "CK32HX3UP3GD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-05T05:39:37.866Z",
+    "timestamp": "2025-11-05T06:27:44.300Z"
+  },
+  {
+    "clienteId": "849571460_PP251029.2250.b82816",
+    "numero": "849571460",
+    "referenciaOriginal": "PP251029.2250.b82816",
+    "novaReferencia": "PP251029.2250.b82816D9",
+    "dia": 9,
+    "diasRestantes": 7,
+    "proximaRenovacao": "2025-11-06T08:27:44.302Z",
+    "timestamp": "2025-11-05T10:27:44.302Z"
+  },
+  {
+    "clienteId": "843426292_CK21HWUW7SP",
+    "numero": "843426292",
+    "referenciaOriginal": "CK21HWUW7SP",
+    "novaReferencia": "CK21HWUW7SPD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-06T08:28:01.901Z",
+    "timestamp": "2025-11-05T10:28:01.901Z"
+  },
+  {
+    "clienteId": "844100042_CJV6HW5LDT4",
+    "numero": "844100042",
+    "referenciaOriginal": "CJV6HW5LDT4",
+    "novaReferencia": "CJV6HW5LDT4D7",
+    "dia": 7,
+    "diasRestantes": 9,
+    "proximaRenovacao": "2025-11-06T08:52:03.598Z",
+    "timestamp": "2025-11-05T10:52:03.598Z"
+  },
+  {
+    "clienteId": "846707539_CK40HXNQQC9",
+    "numero": "846707539",
+    "referenciaOriginal": "CK40HXNQQC9",
+    "novaReferencia": "CK40HXNQQC9D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-06T10:51:33.602Z",
+    "timestamp": "2025-11-05T12:51:33.602Z"
+  },
+  {
+    "clienteId": "846036182_CK33HXDAOXX",
+    "numero": "846036182",
+    "referenciaOriginal": "CK33HXDAOXX",
+    "novaReferencia": "CK33HXDAOXXD4",
+    "dia": 4,
+    "diasRestantes": 2,
+    "proximaRenovacao": "2025-11-06T13:36:36.655Z",
+    "timestamp": "2025-11-05T15:36:36.655Z"
+  },
+  {
+    "clienteId": "855508847_CK48HXQ0KWU",
+    "numero": "855508847",
+    "referenciaOriginal": "CK48HXQ0KWU",
+    "novaReferencia": "CK48HXQ0KWUD3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-06T14:36:36.655Z",
+    "timestamp": "2025-11-05T16:36:36.655Z"
+  },
+  {
+    "clienteId": "PP251104.2021.t52303_848982502",
+    "numero": "PP251104.2021.t52303",
+    "referenciaOriginal": "848982502",
+    "novaReferencia": "848982502D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-06T15:38:32.272Z",
+    "timestamp": "2025-11-05T17:38:32.272Z"
+  },
+  {
+    "clienteId": "848982502_PP251104.2021.t52303",
+    "numero": "848982502",
+    "referenciaOriginal": "PP251104.2021.t52303",
+    "novaReferencia": "PP251104.2021.t52303D3",
+    "dia": 3,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-06T15:38:48.268Z",
+    "timestamp": "2025-11-05T17:38:48.268Z"
+  },
+  {
+    "clienteId": "846475510_CJU6HVEL1UC",
+    "numero": "846475510",
+    "referenciaOriginal": "CJU6HVEL1UC",
+    "novaReferencia": "CJU6HVEL1UCD9",
+    "dia": 9,
+    "diasRestantes": 7,
+    "proximaRenovacao": "2025-11-06T17:38:32.272Z",
+    "timestamp": "2025-11-05T19:38:32.272Z"
+  },
+  {
+    "clienteId": "852535767_CJN9HSWODHD",
+    "numero": "852535767",
+    "referenciaOriginal": "CJN9HSWODHD",
+    "novaReferencia": "CJN9HSWODHDD16",
+    "dia": 16,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-05T21:27:44.292Z",
+    "timestamp": "2025-11-05T21:38:32.275Z"
+  },
+  {
+    "clienteId": "846161268_CJV0HW4ENL5",
+    "numero": "846161268",
+    "referenciaOriginal": "CJV0HW4ENL5",
+    "novaReferencia": "CJV0HW4ENL5D7",
+    "dia": 7,
+    "diasRestantes": 24,
+    "proximaRenovacao": "2025-11-06T20:38:32.276Z",
+    "timestamp": "2025-11-05T22:38:32.276Z"
+  },
+  {
+    "clienteId": "846980978_CK25HWP76AX",
+    "numero": "846980978",
+    "referenciaOriginal": "CK25HWP76AX",
+    "novaReferencia": "CK25HWP76AXD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-06T00:28:01.423Z",
+    "timestamp": "2025-11-06T00:38:32.278Z"
+  },
+  {
+    "clienteId": "847392499_CK33HX2MZ95",
+    "numero": "847392499",
+    "referenciaOriginal": "CK33HX2MZ95",
+    "novaReferencia": "CK33HX2MZ95D5",
+    "dia": 5,
+    "diasRestantes": 11,
+    "proximaRenovacao": "2025-11-07T01:38:32.280Z",
+    "timestamp": "2025-11-06T03:38:32.280Z"
+  },
+  {
+    "clienteId": "846423695_CK45HXJI2J7",
+    "numero": "846423695",
+    "referenciaOriginal": "CK45HXJI2J7",
+    "novaReferencia": "CK45HXJI2J7D3",
+    "dia": 3,
+    "diasRestantes": 3,
+    "proximaRenovacao": "2025-11-07T03:38:32.282Z",
+    "timestamp": "2025-11-06T05:38:32.282Z"
+  },
+  {
+    "clienteId": "849571460_PP251029.2250.b82816",
+    "numero": "849571460",
+    "referenciaOriginal": "PP251029.2250.b82816",
+    "novaReferencia": "PP251029.2250.b82816D10",
+    "dia": 10,
+    "diasRestantes": 6,
+    "proximaRenovacao": "2025-11-07T06:38:32.284Z",
+    "timestamp": "2025-11-06T08:38:32.284Z"
+  },
+  {
+    "clienteId": "843426292_CK21HWUW7SP",
+    "numero": "843426292",
+    "referenciaOriginal": "CK21HWUW7SP",
+    "novaReferencia": "CK21HWUW7SPD6",
+    "dia": 6,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-06T08:28:01.901Z",
+    "timestamp": "2025-11-06T08:38:50.315Z"
+  },
+  {
+    "clienteId": "844100042_CJV6HW5LDT4",
+    "numero": "844100042",
+    "referenciaOriginal": "CJV6HW5LDT4",
+    "novaReferencia": "CJV6HW5LDT4D8",
+    "dia": 8,
+    "diasRestantes": 8,
+    "proximaRenovacao": "2025-11-07T07:38:32.282Z",
+    "timestamp": "2025-11-06T09:38:32.282Z"
+  },
+  {
+    "clienteId": "846707539_CK40HXNQQC9",
+    "numero": "846707539",
+    "referenciaOriginal": "CK40HXNQQC9",
+    "novaReferencia": "CK40HXNQQC9D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-06T10:51:33.602Z",
+    "timestamp": "2025-11-06T10:51:58.595Z"
+  },
+  {
+    "clienteId": "846036182_CK33HXDAOXX",
+    "numero": "846036182",
+    "referenciaOriginal": "CK33HXDAOXX",
+    "novaReferencia": "CK33HXDAOXXD5",
+    "dia": 5,
+    "diasRestantes": 1,
+    "proximaRenovacao": "2025-11-07T12:28:49.043Z",
+    "timestamp": "2025-11-06T14:28:49.043Z"
+  },
+  {
+    "clienteId": "855508847_CK48HXQ0KWU",
+    "numero": "855508847",
+    "referenciaOriginal": "CK48HXQ0KWU",
+    "novaReferencia": "CK48HXQ0KWUD4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-06T14:36:36.655Z",
+    "timestamp": "2025-11-06T15:28:49.043Z"
+  },
+  {
+    "clienteId": "848982502_PP251104.2021.t52303",
+    "numero": "848982502",
+    "referenciaOriginal": "PP251104.2021.t52303",
+    "novaReferencia": "PP251104.2021.t52303D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-06T15:38:48.268Z",
+    "timestamp": "2025-11-06T16:29:49.058Z"
+  },
+  {
+    "clienteId": "PP251104.2021.t52303_848982502",
+    "numero": "PP251104.2021.t52303",
+    "referenciaOriginal": "848982502",
+    "novaReferencia": "848982502D4",
+    "dia": 4,
+    "diasRestantes": 0,
+    "proximaRenovacao": "2025-11-06T15:38:32.272Z",
+    "timestamp": "2025-11-06T17:27:50.688Z"
+  },
+  {
+    "clienteId": "846475510_CJU6HVEL1UC",
+    "numero": "846475510",
+    "referenciaOriginal": "CJU6HVEL1UC",
+    "novaReferencia": "CJU6HVEL1UCD10",
+    "dia": 10,
+    "diasRestantes": 6,
+    "proximaRenovacao": "2025-11-07T17:27:20.687Z",
+    "timestamp": "2025-11-06T19:27:20.687Z"
+  },
+  {
+    "clienteId": "846161268_CJV0HW4ENL5",
+    "numero": "846161268",
+    "referenciaOriginal": "CJV0HW4ENL5",
+    "novaReferencia": "CJV0HW4ENL5D8",
+    "dia": 8,
+    "diasRestantes": 23,
+    "proximaRenovacao": "2025-11-07T19:27:20.689Z",
+    "timestamp": "2025-11-06T21:27:20.689Z"
+  }
+]

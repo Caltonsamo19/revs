@@ -1,0 +1,4466 @@
+{
+  "120363022366545020@g.us": [
+    {
+      "numero": "113267548680269@lid",
+      "megas": 137728,
+      "compras": 139,
+      "megasTotal": 137728,
+      "posicao": 1
+    },
+    {
+      "numero": "170725386272876@lid",
+      "megas": 136706,
+      "compras": 157,
+      "megasTotal": 136706,
+      "posicao": 2
+    },
+    {
+      "numero": "14148209524759@lid",
+      "megas": 59138,
+      "compras": 48,
+      "megasTotal": 59138,
+      "posicao": 3
+    },
+    {
+      "numero": "191169246015741@lid",
+      "megas": 44288,
+      "compras": 19,
+      "megasTotal": 44288,
+      "posicao": 4
+    },
+    {
+      "numero": "56788124717235@lid",
+      "megas": 40960,
+      "compras": 20,
+      "megasTotal": 40960,
+      "posicao": 5
+    },
+    {
+      "numero": "22857815969845@lid",
+      "megas": 34816,
+      "compras": 35,
+      "megasTotal": 34816,
+      "posicao": 6
+    },
+    {
+      "numero": "22407398047975@lid",
+      "megas": 32768,
+      "compras": 32,
+      "megasTotal": 32768,
+      "posicao": 7
+    },
+    {
+      "numero": "128935153115156@lid",
+      "megas": 27904,
+      "compras": 17,
+      "megasTotal": 27904,
+      "posicao": 8
+    },
+    {
+      "numero": "190362077368409@lid",
+      "megas": 23808,
+      "compras": 37,
+      "megasTotal": 23808,
+      "posicao": 9
+    },
+    {
+      "numero": "120551846739969@lid",
+      "megas": 21760,
+      "compras": 18,
+      "megasTotal": 21760,
+      "posicao": 10
+    },
+    {
+      "numero": "103878213251281@lid",
+      "megas": 21248,
+      "compras": 10,
+      "megasTotal": 21248,
+      "posicao": 11
+    },
+    {
+      "numero": "161989724745962@lid",
+      "megas": 19456,
+      "compras": 14,
+      "megasTotal": 19456,
+      "posicao": 12
+    },
+    {
+      "numero": "126788072169587@lid",
+      "megas": 18944,
+      "compras": 28,
+      "megasTotal": 18944,
+      "posicao": 13
+    },
+    {
+      "numero": "74599773519914@lid",
+      "megas": 18432,
+      "compras": 18,
+      "megasTotal": 18432,
+      "posicao": 14
+    },
+    {
+      "numero": "131276111667256@lid",
+      "megas": 17920,
+      "compras": 27,
+      "megasTotal": 17920,
+      "posicao": 15
+    },
+    {
+      "numero": "24653498196196@lid",
+      "megas": 16384,
+      "compras": 18,
+      "megasTotal": 16384,
+      "posicao": 16
+    },
+    {
+      "numero": "152488653127834@lid",
+      "megas": 16384,
+      "compras": 16,
+      "megasTotal": 16384,
+      "posicao": 17
+    },
+    {
+      "numero": "181321271881938@lid",
+      "megas": 16384,
+      "compras": 15,
+      "megasTotal": 16384,
+      "posicao": 18
+    },
+    {
+      "numero": "255666837053504@lid",
+      "megas": 16384,
+      "compras": 12,
+      "megasTotal": 16384,
+      "posicao": 19
+    },
+    {
+      "numero": "166520831369303@lid",
+      "megas": 15360,
+      "compras": 26,
+      "megasTotal": 15360,
+      "posicao": 20
+    },
+    {
+      "numero": "156333269614808@lid",
+      "megas": 15104,
+      "compras": 16,
+      "megasTotal": 15104,
+      "posicao": 21
+    },
+    {
+      "numero": "109960423854124@lid",
+      "megas": 14848,
+      "compras": 19,
+      "megasTotal": 14848,
+      "posicao": 22
+    },
+    {
+      "numero": "57974156476492@lid",
+      "megas": 14848,
+      "compras": 23,
+      "megasTotal": 14848,
+      "posicao": 23
+    },
+    {
+      "numero": "107099673636993@lid",
+      "megas": 14848,
+      "compras": 26,
+      "megasTotal": 14848,
+      "posicao": 24
+    },
+    {
+      "numero": "152686758465767@lid",
+      "megas": 13312,
+      "compras": 15,
+      "megasTotal": 13312,
+      "posicao": 25
+    },
+    {
+      "numero": "63510352531528@lid",
+      "megas": 13056,
+      "compras": 15,
+      "megasTotal": 13056,
+      "posicao": 26
+    },
+    {
+      "numero": "243941643419892@lid",
+      "megas": 13056,
+      "compras": 14,
+      "megasTotal": 13056,
+      "posicao": 27
+    },
+    {
+      "numero": "100399591763977@lid",
+      "megas": 12288,
+      "compras": 8,
+      "megasTotal": 12288,
+      "posicao": 28
+    },
+    {
+      "numero": "73990089482249@lid",
+      "megas": 11776,
+      "compras": 11,
+      "megasTotal": 11776,
+      "posicao": 29
+    },
+    {
+      "numero": "268345882492998@lid",
+      "megas": 11264,
+      "compras": 21,
+      "megasTotal": 11264,
+      "posicao": 30
+    },
+    {
+      "numero": "209663660425305@lid",
+      "megas": 11264,
+      "compras": 11,
+      "megasTotal": 11264,
+      "posicao": 31
+    },
+    {
+      "numero": "117149980999828@lid",
+      "megas": 11008,
+      "compras": 13,
+      "megasTotal": 11008,
+      "posicao": 32
+    },
+    {
+      "numero": "167138971111490@lid",
+      "megas": 10752,
+      "compras": 11,
+      "megasTotal": 10752,
+      "posicao": 33
+    },
+    {
+      "numero": "268423191867518@lid",
+      "megas": 10752,
+      "compras": 11,
+      "megasTotal": 10752,
+      "posicao": 34
+    },
+    {
+      "numero": "142494633308304@lid",
+      "megas": 10752,
+      "compras": 15,
+      "megasTotal": 10752,
+      "posicao": 35
+    },
+    {
+      "numero": "40171298897943@lid",
+      "megas": 10240,
+      "compras": 20,
+      "megasTotal": 10240,
+      "posicao": 36
+    },
+    {
+      "numero": "68191766192159@lid",
+      "megas": 10240,
+      "compras": 19,
+      "megasTotal": 10240,
+      "posicao": 37
+    },
+    {
+      "numero": "276995426529507@lid",
+      "megas": 9216,
+      "compras": 9,
+      "megasTotal": 9216,
+      "posicao": 38
+    },
+    {
+      "numero": "37508452761821@lid",
+      "megas": 9216,
+      "compras": 9,
+      "megasTotal": 9216,
+      "posicao": 39
+    },
+    {
+      "numero": "101039743217903@lid",
+      "megas": 9216,
+      "compras": 14,
+      "megasTotal": 9216,
+      "posicao": 40
+    },
+    {
+      "numero": "200734138175589@lid",
+      "megas": 9216,
+      "compras": 8,
+      "megasTotal": 9216,
+      "posicao": 41
+    },
+    {
+      "numero": "7009873215602@lid",
+      "megas": 8960,
+      "compras": 13,
+      "megasTotal": 8960,
+      "posicao": 42
+    },
+    {
+      "numero": "93540663222313@lid",
+      "megas": 8704,
+      "compras": 17,
+      "megasTotal": 8704,
+      "posicao": 43
+    },
+    {
+      "numero": "113525112475865@lid",
+      "megas": 8704,
+      "compras": 12,
+      "megasTotal": 8704,
+      "posicao": 44
+    },
+    {
+      "numero": "5343576854759@lid",
+      "megas": 8704,
+      "compras": 15,
+      "megasTotal": 8704,
+      "posicao": 45
+    },
+    {
+      "numero": "167762093691037@lid",
+      "megas": 8704,
+      "compras": 4,
+      "megasTotal": 8704,
+      "posicao": 46
+    },
+    {
+      "numero": "255756913881199@lid",
+      "megas": 8704,
+      "compras": 9,
+      "megasTotal": 8704,
+      "posicao": 47
+    },
+    {
+      "numero": "46188313182347@lid",
+      "megas": 8192,
+      "compras": 8,
+      "megasTotal": 8192,
+      "posicao": 48
+    },
+    {
+      "numero": "39471370211499@lid",
+      "megas": 8192,
+      "compras": 6,
+      "megasTotal": 8192,
+      "posicao": 49
+    },
+    {
+      "numero": "46398984740884@lid",
+      "megas": 8192,
+      "compras": 5,
+      "megasTotal": 8192,
+      "posicao": 50
+    },
+    {
+      "numero": "57381199282315@lid",
+      "megas": 7168,
+      "compras": 6,
+      "megasTotal": 7168,
+      "posicao": 51
+    },
+    {
+      "numero": "110256340398296@lid",
+      "megas": 7168,
+      "compras": 7,
+      "megasTotal": 7168,
+      "posicao": 52
+    },
+    {
+      "numero": "76158947344404@lid",
+      "megas": 7168,
+      "compras": 3,
+      "megasTotal": 7168,
+      "posicao": 53
+    },
+    {
+      "numero": "37263572508817@lid",
+      "megas": 6912,
+      "compras": 14,
+      "megasTotal": 6912,
+      "posicao": 54
+    },
+    {
+      "numero": "84594296664068@lid",
+      "megas": 6912,
+      "compras": 4,
+      "megasTotal": 6912,
+      "posicao": 55
+    },
+    {
+      "numero": "62359301296150@lid",
+      "megas": 6656,
+      "compras": 13,
+      "megasTotal": 6656,
+      "posicao": 56
+    },
+    {
+      "numero": "62496757022753@lid",
+      "megas": 6400,
+      "compras": 7,
+      "megasTotal": 6400,
+      "posicao": 57
+    },
+    {
+      "numero": "62045818982457@lid",
+      "megas": 6400,
+      "compras": 9,
+      "megasTotal": 6400,
+      "posicao": 58
+    },
+    {
+      "numero": "131503812006023@lid",
+      "megas": 6400,
+      "compras": 9,
+      "megasTotal": 6400,
+      "posicao": 59
+    },
+    {
+      "numero": "216269102027004@lid",
+      "megas": 6144,
+      "compras": 11,
+      "megasTotal": 6144,
+      "posicao": 60
+    },
+    {
+      "numero": "131001435062442@lid",
+      "megas": 6144,
+      "compras": 8,
+      "megasTotal": 6144,
+      "posicao": 61
+    },
+    {
+      "numero": "160640853401827@lid",
+      "megas": 6144,
+      "compras": 6,
+      "megasTotal": 6144,
+      "posicao": 62
+    },
+    {
+      "numero": "123863149051935@lid",
+      "megas": 6144,
+      "compras": 7,
+      "megasTotal": 6144,
+      "posicao": 63
+    },
+    {
+      "numero": "83911078109229@lid",
+      "megas": 6144,
+      "compras": 6,
+      "megasTotal": 6144,
+      "posicao": 64
+    },
+    {
+      "numero": "235871265660935@lid",
+      "megas": 6144,
+      "compras": 5,
+      "megasTotal": 6144,
+      "posicao": 65
+    },
+    {
+      "numero": "153966675517442@lid",
+      "megas": 6144,
+      "compras": 7,
+      "megasTotal": 6144,
+      "posicao": 66
+    },
+    {
+      "numero": "267559752446176@lid",
+      "megas": 6144,
+      "compras": 9,
+      "megasTotal": 6144,
+      "posicao": 67
+    },
+    {
+      "numero": "165361106321456@lid",
+      "megas": 5888,
+      "compras": 11,
+      "megasTotal": 5888,
+      "posicao": 68
+    },
+    {
+      "numero": "218068575862992@lid",
+      "megas": 5632,
+      "compras": 6,
+      "megasTotal": 5632,
+      "posicao": 69
+    },
+    {
+      "numero": "38449235124317@lid",
+      "megas": 5632,
+      "compras": 11,
+      "megasTotal": 5632,
+      "posicao": 70
+    },
+    {
+      "numero": "130326856773845@lid",
+      "megas": 5120,
+      "compras": 6,
+      "megasTotal": 5120,
+      "posicao": 71
+    },
+    {
+      "numero": "5901855490155@lid",
+      "megas": 5120,
+      "compras": 11,
+      "megasTotal": 5120,
+      "posicao": 72
+    },
+    {
+      "numero": "278774096629948@lid",
+      "megas": 5120,
+      "compras": 5,
+      "megasTotal": 5120,
+      "posicao": 73
+    },
+    {
+      "numero": "25791865872517@lid",
+      "megas": 4608,
+      "compras": 4,
+      "megasTotal": 4608,
+      "posicao": 74
+    },
+    {
+      "numero": "187372746580209@lid",
+      "megas": 4608,
+      "compras": 8,
+      "megasTotal": 4608,
+      "posicao": 75
+    },
+    {
+      "numero": "248069325078670@lid",
+      "megas": 4608,
+      "compras": 5,
+      "megasTotal": 4608,
+      "posicao": 76
+    },
+    {
+      "numero": "179156625162372@lid",
+      "megas": 4352,
+      "compras": 7,
+      "megasTotal": 4352,
+      "posicao": 77
+    },
+    {
+      "numero": "199531513790626@lid",
+      "megas": 4096,
+      "compras": 3,
+      "megasTotal": 4096,
+      "posicao": 78
+    },
+    {
+      "numero": "29609538105347@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 79
+    },
+    {
+      "numero": "206081557053592@lid",
+      "megas": 4096,
+      "compras": 6,
+      "megasTotal": 4096,
+      "posicao": 80
+    },
+    {
+      "numero": "228196310102065@lid",
+      "megas": 4096,
+      "compras": 2,
+      "megasTotal": 4096,
+      "posicao": 81
+    },
+    {
+      "numero": "15986002514076@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 82
+    },
+    {
+      "numero": "15952196411553@lid",
+      "megas": 4096,
+      "compras": 2,
+      "megasTotal": 4096,
+      "posicao": 83
+    },
+    {
+      "numero": "34651846516868@lid",
+      "megas": 3584,
+      "compras": 7,
+      "megasTotal": 3584,
+      "posicao": 84
+    },
+    {
+      "numero": "115827231711440@lid",
+      "megas": 3584,
+      "compras": 7,
+      "megasTotal": 3584,
+      "posicao": 85
+    },
+    {
+      "numero": "100949498560520@lid",
+      "megas": 3584,
+      "compras": 4,
+      "megasTotal": 3584,
+      "posicao": 86
+    },
+    {
+      "numero": "12795328344291@lid",
+      "megas": 3584,
+      "compras": 3,
+      "megasTotal": 3584,
+      "posicao": 87
+    },
+    {
+      "numero": "29296659832914@lid",
+      "megas": 3584,
+      "compras": 5,
+      "megasTotal": 3584,
+      "posicao": 88
+    },
+    {
+      "numero": "35739127525608@lid",
+      "megas": 3584,
+      "compras": 4,
+      "megasTotal": 3584,
+      "posicao": 89
+    },
+    {
+      "numero": "129004258508941@lid",
+      "megas": 3328,
+      "compras": 3,
+      "megasTotal": 3328,
+      "posicao": 90
+    },
+    {
+      "numero": "221732568846349@lid",
+      "megas": 3328,
+      "compras": 4,
+      "megasTotal": 4352,
+      "posicao": 91
+    },
+    {
+      "numero": "36735274733819@lid",
+      "megas": 3328,
+      "compras": 7,
+      "megasTotal": 3328,
+      "posicao": 92
+    },
+    {
+      "numero": "114654571446298@lid",
+      "megas": 3072,
+      "compras": 6,
+      "megasTotal": 3072,
+      "posicao": 93
+    },
+    {
+      "numero": "267504018542809@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 94
+    },
+    {
+      "numero": "125246027907157@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 95
+    },
+    {
+      "numero": "42554720575648@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 96
+    },
+    {
+      "numero": "95189964214351@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 97
+    },
+    {
+      "numero": "6589117374464@lid",
+      "megas": 3072,
+      "compras": 4,
+      "megasTotal": 3072,
+      "posicao": 98
+    },
+    {
+      "numero": "189297042935901@lid",
+      "megas": 3072,
+      "compras": 6,
+      "megasTotal": 3072,
+      "posicao": 99
+    },
+    {
+      "numero": "74166233526526@lid",
+      "megas": 3072,
+      "compras": 5,
+      "megasTotal": 3072,
+      "posicao": 100
+    },
+    {
+      "numero": "105278993367256@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 101
+    },
+    {
+      "numero": "195700218425478@lid",
+      "megas": 2816,
+      "compras": 3,
+      "megasTotal": 2816,
+      "posicao": 102
+    },
+    {
+      "numero": "18473208025285@lid",
+      "megas": 2560,
+      "compras": 2,
+      "megasTotal": 2560,
+      "posicao": 103
+    },
+    {
+      "numero": "250264036597916@lid",
+      "megas": 2560,
+      "compras": 3,
+      "megasTotal": 2560,
+      "posicao": 104
+    },
+    {
+      "numero": "23863459065871@lid",
+      "megas": 2560,
+      "compras": 3,
+      "megasTotal": 2560,
+      "posicao": 105
+    },
+    {
+      "numero": "169363596378320@lid",
+      "megas": 2560,
+      "compras": 4,
+      "megasTotal": 2560,
+      "posicao": 106
+    },
+    {
+      "numero": "43495788171299@lid",
+      "megas": 2560,
+      "compras": 3,
+      "megasTotal": 2560,
+      "posicao": 107
+    },
+    {
+      "numero": "33836322820286@lid",
+      "megas": 2048,
+      "compras": 1,
+      "megasTotal": 2048,
+      "posicao": 108
+    },
+    {
+      "numero": "107645184802938@lid",
+      "megas": 2048,
+      "compras": 4,
+      "megasTotal": 2048,
+      "posicao": 109
+    },
+    {
+      "numero": "259287628677145@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 110
+    },
+    {
+      "numero": "221693964476589@lid",
+      "megas": 2048,
+      "compras": 4,
+      "megasTotal": 2048,
+      "posicao": 111
+    },
+    {
+      "numero": "135906287706166@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 112
+    },
+    {
+      "numero": "89764917158033@lid",
+      "megas": 2048,
+      "compras": 1,
+      "megasTotal": 2048,
+      "posicao": 113
+    },
+    {
+      "numero": "240377021874284@lid",
+      "megas": 2048,
+      "compras": 4,
+      "megasTotal": 2048,
+      "posicao": 114
+    },
+    {
+      "numero": "138470248952041@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 115
+    },
+    {
+      "numero": "207473243898012@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 116
+    },
+    {
+      "numero": "87402769035264@lid",
+      "megas": 1792,
+      "compras": 3,
+      "megasTotal": 1792,
+      "posicao": 117
+    },
+    {
+      "numero": "155611396309051@lid",
+      "megas": 1536,
+      "compras": 3,
+      "megasTotal": 1536,
+      "posicao": 118
+    },
+    {
+      "numero": "19155990397024@lid",
+      "megas": 1536,
+      "compras": 3,
+      "megasTotal": 1536,
+      "posicao": 119
+    },
+    {
+      "numero": "270738078609556@lid",
+      "megas": 1536,
+      "compras": 3,
+      "megasTotal": 1536,
+      "posicao": 120
+    },
+    {
+      "numero": "17330260189269@lid",
+      "megas": 1536,
+      "compras": 2,
+      "megasTotal": 1536,
+      "posicao": 121
+    },
+    {
+      "numero": "244109314912366@lid",
+      "megas": 1536,
+      "compras": 2,
+      "megasTotal": 1536,
+      "posicao": 122
+    },
+    {
+      "numero": "14015182971053@lid",
+      "megas": 1536,
+      "compras": 3,
+      "megasTotal": 1536,
+      "posicao": 123
+    },
+    {
+      "numero": "25770458124448@lid",
+      "megas": 1536,
+      "compras": 2,
+      "megasTotal": 1536,
+      "posicao": 124
+    },
+    {
+      "numero": "267430936989782@lid",
+      "megas": 1536,
+      "compras": 2,
+      "megasTotal": 1536,
+      "posicao": 125
+    },
+    {
+      "numero": "152239914139713@lid",
+      "megas": 1536,
+      "compras": 3,
+      "megasTotal": 1536,
+      "posicao": 126
+    },
+    {
+      "numero": "209457686540294@lid",
+      "megas": 1280,
+      "compras": 2,
+      "megasTotal": 1280,
+      "posicao": 127
+    },
+    {
+      "numero": "28798342979696@lid",
+      "megas": 1024,
+      "compras": 2,
+      "megasTotal": 1024,
+      "posicao": 128
+    },
+    {
+      "numero": "265485417496662@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 129
+    },
+    {
+      "numero": "1499631476911@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 130
+    },
+    {
+      "numero": "147743133691944@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 131
+    },
+    {
+      "numero": "43023291396220@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 132
+    },
+    {
+      "numero": "211871256866843@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 133
+    },
+    {
+      "numero": "96937479008282@lid",
+      "megas": 1024,
+      "compras": 2,
+      "megasTotal": 1024,
+      "posicao": 134
+    },
+    {
+      "numero": "145840580640787@lid",
+      "megas": 1024,
+      "compras": 2,
+      "megasTotal": 1024,
+      "posicao": 135
+    },
+    {
+      "numero": "215822744207541@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 136
+    },
+    {
+      "numero": "212017436737649@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 137
+    },
+    {
+      "numero": "158794118115445@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 138
+    },
+    {
+      "numero": "262191328559320@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 139
+    },
+    {
+      "numero": "277558721540159@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 140
+    },
+    {
+      "numero": "73500345770115@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 141
+    },
+    {
+      "numero": "270244358713431@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 142
+    },
+    {
+      "numero": "37426747691020@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 143
+    },
+    {
+      "numero": "243662437011638@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 144
+    },
+    {
+      "numero": "74720032596032@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 145
+    },
+    {
+      "numero": "27110185914572@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 146
+    },
+    {
+      "numero": "216368255357155@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 147
+    },
+    {
+      "numero": "57767628898317@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 148
+    },
+    {
+      "numero": "21384843514016@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 149
+    },
+    {
+      "numero": "42168626450558@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 150
+    },
+    {
+      "numero": "90697361309925@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 151
+    },
+    {
+      "numero": "17352003448889@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 152
+    },
+    {
+      "numero": "260966759559414@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 153
+    },
+    {
+      "numero": "238671685001388@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 154
+    },
+    {
+      "numero": "42357605068836@lid",
+      "megas": 256,
+      "compras": 1,
+      "megasTotal": 256,
+      "posicao": 155
+    },
+    {
+      "numero": "25242177151046@lid",
+      "megas": 256,
+      "compras": 1,
+      "megasTotal": 256,
+      "posicao": 156
+    },
+    {
+      "numero": "32577930973227@lid",
+      "megas": 256,
+      "compras": 1,
+      "megasTotal": 256,
+      "posicao": 157
+    }
+  ],
+  "258820749141-1441573529@g.us": [
+    {
+      "numero": "23450974470333@lid",
+      "megas": 40144,
+      "compras": 34,
+      "megasTotal": 46288,
+      "posicao": 1
+    },
+    {
+      "numero": "169492831273139@lid",
+      "megas": 18608,
+      "compras": 7,
+      "megasTotal": 18608,
+      "posicao": 2
+    },
+    {
+      "numero": "49134711087243@lid",
+      "megas": 18432,
+      "compras": 18,
+      "megasTotal": 18432,
+      "posicao": 3
+    },
+    {
+      "numero": "33187799543909@lid",
+      "megas": 16384,
+      "compras": 8,
+      "megasTotal": 16384,
+      "posicao": 4
+    },
+    {
+      "numero": "132246958780653@lid",
+      "megas": 14880,
+      "compras": 12,
+      "megasTotal": 14880,
+      "posicao": 5
+    },
+    {
+      "numero": "122441464569927@lid",
+      "megas": 14512,
+      "compras": 14,
+      "megasTotal": 14512,
+      "posicao": 6
+    },
+    {
+      "numero": "246986540363799@lid",
+      "megas": 14500,
+      "compras": 9,
+      "megasTotal": 14500,
+      "posicao": 7
+    },
+    {
+      "numero": "43868896669736@lid",
+      "megas": 13840,
+      "compras": 9,
+      "megasTotal": 13840,
+      "posicao": 8
+    },
+    {
+      "numero": "162646703743003@lid",
+      "megas": 12640,
+      "compras": 10,
+      "megasTotal": 12640,
+      "posicao": 9
+    },
+    {
+      "numero": "121659763753215@lid",
+      "megas": 11264,
+      "compras": 8,
+      "megasTotal": 11264,
+      "posicao": 10
+    },
+    {
+      "numero": "239607769768089@lid",
+      "megas": 11264,
+      "compras": 2,
+      "megasTotal": 11264,
+      "posicao": 11
+    },
+    {
+      "numero": "140038063038542@lid",
+      "megas": 10272,
+      "compras": 7,
+      "megasTotal": 10272,
+      "posicao": 12
+    },
+    {
+      "numero": "188901654327449@lid",
+      "megas": 9368,
+      "compras": 8,
+      "megasTotal": 9368,
+      "posicao": 13
+    },
+    {
+      "numero": "266610682155102@lid",
+      "megas": 9216,
+      "compras": 9,
+      "megasTotal": 9216,
+      "posicao": 14
+    },
+    {
+      "numero": "252441132019923@lid",
+      "megas": 9216,
+      "compras": 5,
+      "megasTotal": 9216,
+      "posicao": 15
+    },
+    {
+      "numero": "195876446322760@lid",
+      "megas": 7696,
+      "compras": 7,
+      "megasTotal": 7696,
+      "posicao": 16
+    },
+    {
+      "numero": "128905440710707@lid",
+      "megas": 7696,
+      "compras": 5,
+      "megasTotal": 7696,
+      "posicao": 17
+    },
+    {
+      "numero": "243284714729644@lid",
+      "megas": 7200,
+      "compras": 6,
+      "megasTotal": 7200,
+      "posicao": 18
+    },
+    {
+      "numero": "274706678702292@lid",
+      "megas": 6144,
+      "compras": 6,
+      "megasTotal": 6144,
+      "posicao": 19
+    },
+    {
+      "numero": "182192898625688@lid",
+      "megas": 5808,
+      "compras": 6,
+      "megasTotal": 5808,
+      "posicao": 20
+    },
+    {
+      "numero": "44333088665752@lid",
+      "megas": 5632,
+      "compras": 6,
+      "megasTotal": 5632,
+      "posicao": 21
+    },
+    {
+      "numero": "135386512793691@lid",
+      "megas": 5120,
+      "compras": 5,
+      "megasTotal": 5120,
+      "posicao": 22
+    },
+    {
+      "numero": "226920755138721@lid",
+      "megas": 5120,
+      "compras": 5,
+      "megasTotal": 5120,
+      "posicao": 23
+    },
+    {
+      "numero": "244504015704294@lid",
+      "megas": 5120,
+      "compras": 5,
+      "megasTotal": 5120,
+      "posicao": 24
+    },
+    {
+      "numero": "220830088867936@lid",
+      "megas": 5120,
+      "compras": 1,
+      "megasTotal": 5120,
+      "posicao": 25
+    },
+    {
+      "numero": "138410169770054@lid",
+      "megas": 4784,
+      "compras": 5,
+      "megasTotal": 4784,
+      "posicao": 26
+    },
+    {
+      "numero": "209049379430487@lid",
+      "megas": 4096,
+      "compras": 3,
+      "megasTotal": 4096,
+      "posicao": 27
+    },
+    {
+      "numero": "117687053238324@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 28
+    },
+    {
+      "numero": "134222375346351@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 29
+    },
+    {
+      "numero": "155869060837402@lid",
+      "megas": 3584,
+      "compras": 4,
+      "megasTotal": 3584,
+      "posicao": 30
+    },
+    {
+      "numero": "260940939456626@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 31
+    },
+    {
+      "numero": "101318882545718@lid",
+      "megas": 3072,
+      "compras": 2,
+      "megasTotal": 3072,
+      "posicao": 32
+    },
+    {
+      "numero": "254361116606505@lid",
+      "megas": 2224,
+      "compras": 2,
+      "megasTotal": 2224,
+      "posicao": 33
+    },
+    {
+      "numero": "61611893096509@lid",
+      "megas": 2224,
+      "compras": 2,
+      "megasTotal": 2224,
+      "posicao": 34
+    },
+    {
+      "numero": "117854540181733@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 35
+    },
+    {
+      "numero": "268504360067214@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 36
+    },
+    {
+      "numero": "270291536244976@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 37
+    },
+    {
+      "numero": "99145410973801@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 38
+    },
+    {
+      "numero": "193402998157331@lid",
+      "megas": 1200,
+      "compras": 1,
+      "megasTotal": 1200,
+      "posicao": 39
+    },
+    {
+      "numero": "214718484639893@lid",
+      "megas": 1200,
+      "compras": 1,
+      "megasTotal": 1200,
+      "posicao": 40
+    },
+    {
+      "numero": "81437529210992@lid",
+      "megas": 1200,
+      "compras": 1,
+      "megasTotal": 1200,
+      "posicao": 41
+    },
+    {
+      "numero": "52420629508182@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 42
+    },
+    {
+      "numero": "256375858925658@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 43
+    },
+    {
+      "numero": "218635947782267@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 44
+    },
+    {
+      "numero": "273680181518352@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 45
+    },
+    {
+      "numero": "43577275056372@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 46
+    },
+    {
+      "numero": "NeuroByte",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 47
+    },
+    {
+      "numero": "204968875290799@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 48
+    },
+    {
+      "numero": "49109025210551@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 49
+    }
+  ],
+  "120363402609218031@g.us": [
+    {
+      "numero": "29945149558840@lid",
+      "megas": 21504,
+      "compras": 15,
+      "megasTotal": 21504,
+      "posicao": 1
+    },
+    {
+      "numero": "154867930804473@lid",
+      "megas": 5324,
+      "compras": 1,
+      "megasTotal": 5324,
+      "posicao": 2
+    },
+    {
+      "numero": "58884504989911@lid",
+      "megas": 5324,
+      "compras": 1,
+      "megasTotal": 5324,
+      "posicao": 3
+    },
+    {
+      "numero": "166288685052005@lid",
+      "megas": 5120,
+      "compras": 2,
+      "megasTotal": 5120,
+      "posicao": 4
+    },
+    {
+      "numero": "150246948647071@lid",
+      "megas": 5120,
+      "compras": 1,
+      "megasTotal": 5120,
+      "posicao": 5
+    },
+    {
+      "numero": "135236037939338@lid",
+      "megas": 5120,
+      "compras": 1,
+      "megasTotal": 5120,
+      "posicao": 6
+    },
+    {
+      "numero": "237812540534916@lid",
+      "megas": 5120,
+      "compras": 1,
+      "megasTotal": 5120,
+      "posicao": 7
+    },
+    {
+      "numero": "33286265032883@lid",
+      "megas": 3524,
+      "compras": 3,
+      "megasTotal": 3524,
+      "posicao": 8
+    },
+    {
+      "numero": "103264083288091@lid",
+      "megas": 3072,
+      "compras": 2,
+      "megasTotal": 3072,
+      "posicao": 9
+    },
+    {
+      "numero": "35334746280183@lid",
+      "megas": 3072,
+      "compras": 2,
+      "megasTotal": 3072,
+      "posicao": 10
+    },
+    {
+      "numero": "69810952093831@lid",
+      "megas": 3072,
+      "compras": 1,
+      "megasTotal": 3072,
+      "posicao": 11
+    },
+    {
+      "numero": "137752905551989@lid",
+      "megas": 3072,
+      "compras": 1,
+      "megasTotal": 3072,
+      "posicao": 12
+    },
+    {
+      "numero": "248404164767953@lid",
+      "megas": 3072,
+      "compras": 1,
+      "megasTotal": 3072,
+      "posicao": 13
+    },
+    {
+      "numero": "23450974470333@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 46288,
+      "posicao": 14
+    },
+    {
+      "numero": "51191916544114@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 15
+    },
+    {
+      "numero": "173873496645666@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 16
+    },
+    {
+      "numero": "40450673086662@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 17
+    },
+    {
+      "numero": "152213808783513@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 18
+    },
+    {
+      "numero": "72086798266600@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 19
+    },
+    {
+      "numero": "125559677931559@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 20
+    },
+    {
+      "numero": "226843043082457@lid",
+      "megas": 2048,
+      "compras": 1,
+      "megasTotal": 2048,
+      "posicao": 21
+    },
+    {
+      "numero": "185138994479235@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 22
+    },
+    {
+      "numero": "60319091159100@lid",
+      "megas": 2048,
+      "compras": 1,
+      "megasTotal": 2048,
+      "posicao": 23
+    },
+    {
+      "numero": "124524523712760@lid",
+      "megas": 1250,
+      "compras": 1,
+      "megasTotal": 1250,
+      "posicao": 24
+    },
+    {
+      "numero": "232916193939639@lid",
+      "megas": 1250,
+      "compras": 1,
+      "megasTotal": 1250,
+      "posicao": 25
+    },
+    {
+      "numero": "158776703324403@lid",
+      "megas": 1250,
+      "compras": 1,
+      "megasTotal": 1250,
+      "posicao": 26
+    },
+    {
+      "numero": "224803420164283@lid",
+      "megas": 1250,
+      "compras": 1,
+      "megasTotal": 1250,
+      "posicao": 27
+    },
+    {
+      "numero": "126671604699292@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 28
+    },
+    {
+      "numero": "61264051068961@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 29
+    },
+    {
+      "numero": "111124326436906@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 30
+    },
+    {
+      "numero": "245603510546519@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 31
+    },
+    {
+      "numero": "143555121127469@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 32
+    },
+    {
+      "numero": "201803618636026@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 33
+    },
+    {
+      "numero": "88283153481932@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 34
+    },
+    {
+      "numero": "232564543492342@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 35
+    },
+    {
+      "numero": "258316714401912@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 36
+    },
+    {
+      "numero": "85491827351769@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 37
+    },
+    {
+      "numero": "256508382158948@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 38
+    },
+    {
+      "numero": "26371334090858@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 39
+    },
+    {
+      "numero": "227139915882691@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 40
+    },
+    {
+      "numero": "139101172940846@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 41
+    },
+    {
+      "numero": "214757139296383@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 42
+    },
+    {
+      "numero": "19555590123549@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 43
+    },
+    {
+      "numero": "280448580206708@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 44
+    },
+    {
+      "numero": "64703917228130@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 45
+    },
+    {
+      "numero": "257938874736708@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 46
+    },
+    {
+      "numero": "63754746220702@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 47
+    },
+    {
+      "numero": "65876845969496@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 48
+    },
+    {
+      "numero": "206566972256388@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 49
+    },
+    {
+      "numero": "219666622509106@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 50
+    },
+    {
+      "numero": "250585571971161@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 51
+    },
+    {
+      "numero": "224253127442626@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 52
+    },
+    {
+      "numero": "35743288266944@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 53
+    },
+    {
+      "numero": "235050826260538@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 54
+    },
+    {
+      "numero": "178228710908036@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 55
+    },
+    {
+      "numero": "264824026050805@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 56
+    },
+    {
+      "numero": "85835558953055@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 57
+    },
+    {
+      "numero": "31749019009279@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 58
+    },
+    {
+      "numero": "265042884882603@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 59
+    }
+  ],
+  "120363020570328377@g.us": [
+    {
+      "numero": "85307059867830@lid",
+      "megas": 494592,
+      "compras": 350,
+      "megasTotal": 494592,
+      "posicao": 1
+    },
+    {
+      "numero": "127582624317687@lid",
+      "megas": 81920,
+      "compras": 29,
+      "megasTotal": 81920,
+      "posicao": 2
+    },
+    {
+      "numero": "275256350621899@lid",
+      "megas": 80896,
+      "compras": 63,
+      "megasTotal": 80896,
+      "posicao": 3
+    },
+    {
+      "numero": "39896605561080@lid",
+      "megas": 77824,
+      "compras": 25,
+      "megasTotal": 77824,
+      "posicao": 4
+    },
+    {
+      "numero": "71842085752978@lid",
+      "megas": 75776,
+      "compras": 31,
+      "megasTotal": 75776,
+      "posicao": 5
+    },
+    {
+      "numero": "245208709120075@lid",
+      "megas": 66560,
+      "compras": 12,
+      "megasTotal": 66560,
+      "posicao": 6
+    },
+    {
+      "numero": "108882219258004@lid",
+      "megas": 58368,
+      "compras": 18,
+      "megasTotal": 58368,
+      "posicao": 7
+    },
+    {
+      "numero": "40373128790155@lid",
+      "megas": 57344,
+      "compras": 6,
+      "megasTotal": 57344,
+      "posicao": 8
+    },
+    {
+      "numero": "101820991037608@lid",
+      "megas": 55296,
+      "compras": 16,
+      "megasTotal": 55296,
+      "posicao": 9
+    },
+    {
+      "numero": "14998277460043@lid",
+      "megas": 51200,
+      "compras": 5,
+      "megasTotal": 51200,
+      "posicao": 10
+    },
+    {
+      "numero": "35751324590310@lid",
+      "megas": 48128,
+      "compras": 16,
+      "megasTotal": 48128,
+      "posicao": 11
+    },
+    {
+      "numero": "203280835719300@lid",
+      "megas": 44032,
+      "compras": 10,
+      "megasTotal": 44032,
+      "posicao": 12
+    },
+    {
+      "numero": "47193738244151@lid",
+      "megas": 41984,
+      "compras": 27,
+      "megasTotal": 41984,
+      "posicao": 13
+    },
+    {
+      "numero": "136807744286968@lid",
+      "megas": 40960,
+      "compras": 14,
+      "megasTotal": 40960,
+      "posicao": 14
+    },
+    {
+      "numero": "140553308102700@lid",
+      "megas": 36864,
+      "compras": 20,
+      "megasTotal": 36864,
+      "posicao": 15
+    },
+    {
+      "numero": "68264730349805@lid",
+      "megas": 36864,
+      "compras": 19,
+      "megasTotal": 36864,
+      "posicao": 16
+    },
+    {
+      "numero": "181896562651214@lid",
+      "megas": 35840,
+      "compras": 4,
+      "megasTotal": 35840,
+      "posicao": 17
+    },
+    {
+      "numero": "118889140727904@lid",
+      "megas": 34816,
+      "compras": 7,
+      "megasTotal": 34816,
+      "posicao": 18
+    },
+    {
+      "numero": "117046566252760@lid",
+      "megas": 33792,
+      "compras": 29,
+      "megasTotal": 33792,
+      "posicao": 19
+    },
+    {
+      "numero": "203233859469353@lid",
+      "megas": 31744,
+      "compras": 31,
+      "megasTotal": 31744,
+      "posicao": 20
+    },
+    {
+      "numero": "11682764054555@lid",
+      "megas": 30720,
+      "compras": 6,
+      "megasTotal": 30720,
+      "posicao": 21
+    },
+    {
+      "numero": "188656488825050@lid",
+      "megas": 30720,
+      "compras": 20,
+      "megasTotal": 30720,
+      "posicao": 22
+    },
+    {
+      "numero": "189373899362413@lid",
+      "megas": 30720,
+      "compras": 13,
+      "megasTotal": 30720,
+      "posicao": 23
+    },
+    {
+      "numero": "100382277681193@lid",
+      "megas": 30720,
+      "compras": 18,
+      "megasTotal": 30720,
+      "posicao": 24
+    },
+    {
+      "numero": "97036548481222@lid",
+      "megas": 28672,
+      "compras": 14,
+      "megasTotal": 28672,
+      "posicao": 25
+    },
+    {
+      "numero": "138830539657405@lid",
+      "megas": 28672,
+      "compras": 20,
+      "megasTotal": 28672,
+      "posicao": 26
+    },
+    {
+      "numero": "142778168250584@lid",
+      "megas": 28672,
+      "compras": 27,
+      "megasTotal": 28672,
+      "posicao": 27
+    },
+    {
+      "numero": "211290983284759@lid",
+      "megas": 27648,
+      "compras": 5,
+      "megasTotal": 27648,
+      "posicao": 28
+    },
+    {
+      "numero": "61177681993899@lid",
+      "megas": 26624,
+      "compras": 24,
+      "megasTotal": 26624,
+      "posicao": 29
+    },
+    {
+      "numero": "62895803117631@lid",
+      "megas": 26624,
+      "compras": 13,
+      "megasTotal": 26624,
+      "posicao": 30
+    },
+    {
+      "numero": "119821534503159@lid",
+      "megas": 23552,
+      "compras": 20,
+      "megasTotal": 23552,
+      "posicao": 31
+    },
+    {
+      "numero": "98698784714882@lid",
+      "megas": 23552,
+      "compras": 23,
+      "megasTotal": 23552,
+      "posicao": 32
+    },
+    {
+      "numero": "104629815799942@lid",
+      "megas": 22528,
+      "compras": 14,
+      "megasTotal": 22528,
+      "posicao": 33
+    },
+    {
+      "numero": "145131575488539@lid",
+      "megas": 21504,
+      "compras": 3,
+      "megasTotal": 21504,
+      "posicao": 34
+    },
+    {
+      "numero": "183476909256740@lid",
+      "megas": 21504,
+      "compras": 14,
+      "megasTotal": 21504,
+      "posicao": 35
+    },
+    {
+      "numero": "41562885111834@lid",
+      "megas": 21504,
+      "compras": 21,
+      "megasTotal": 21504,
+      "posicao": 36
+    },
+    {
+      "numero": "179547500744817@lid",
+      "megas": 21504,
+      "compras": 10,
+      "megasTotal": 21504,
+      "posicao": 37
+    },
+    {
+      "numero": "253665147371615@lid",
+      "megas": 20480,
+      "compras": 2,
+      "megasTotal": 20480,
+      "posicao": 38
+    },
+    {
+      "numero": "211446038286373@lid",
+      "megas": 20480,
+      "compras": 17,
+      "megasTotal": 20480,
+      "posicao": 39
+    },
+    {
+      "numero": "31782909001823@lid",
+      "megas": 20480,
+      "compras": 2,
+      "megasTotal": 20480,
+      "posicao": 40
+    },
+    {
+      "numero": "31864513425648@lid",
+      "megas": 20480,
+      "compras": 2,
+      "megasTotal": 20480,
+      "posicao": 41
+    },
+    {
+      "numero": "74010960351271@lid",
+      "megas": 19456,
+      "compras": 17,
+      "megasTotal": 19456,
+      "posicao": 42
+    },
+    {
+      "numero": "151556964016360@lid",
+      "megas": 19456,
+      "compras": 10,
+      "megasTotal": 19456,
+      "posicao": 43
+    },
+    {
+      "numero": "265704108486848@lid",
+      "megas": 19456,
+      "compras": 19,
+      "megasTotal": 19456,
+      "posicao": 44
+    },
+    {
+      "numero": "209633058799678@lid",
+      "megas": 19456,
+      "compras": 10,
+      "megasTotal": 19456,
+      "posicao": 45
+    },
+    {
+      "numero": "68547728425042@lid",
+      "megas": 19456,
+      "compras": 10,
+      "megasTotal": 19456,
+      "posicao": 46
+    },
+    {
+      "numero": "68333584019538@lid",
+      "megas": 19456,
+      "compras": 19,
+      "megasTotal": 19456,
+      "posicao": 47
+    },
+    {
+      "numero": "270205670445217@lid",
+      "megas": 19456,
+      "compras": 16,
+      "megasTotal": 19456,
+      "posicao": 48
+    },
+    {
+      "numero": "87463368331425@lid",
+      "megas": 19456,
+      "compras": 2,
+      "megasTotal": 19456,
+      "posicao": 49
+    },
+    {
+      "numero": "34935733756078@lid",
+      "megas": 19456,
+      "compras": 11,
+      "megasTotal": 19456,
+      "posicao": 50
+    },
+    {
+      "numero": "118030583509205@lid",
+      "megas": 18432,
+      "compras": 17,
+      "megasTotal": 18432,
+      "posicao": 51
+    },
+    {
+      "numero": "261847680868397@lid",
+      "megas": 18432,
+      "compras": 14,
+      "megasTotal": 18432,
+      "posicao": 52
+    },
+    {
+      "numero": "221650477965532@lid",
+      "megas": 18432,
+      "compras": 18,
+      "megasTotal": 18432,
+      "posicao": 53
+    },
+    {
+      "numero": "105351252811914@lid",
+      "megas": 17408,
+      "compras": 15,
+      "megasTotal": 17408,
+      "posicao": 54
+    },
+    {
+      "numero": "152737828364510@lid",
+      "megas": 17408,
+      "compras": 15,
+      "megasTotal": 17408,
+      "posicao": 55
+    },
+    {
+      "numero": "189700149100574@lid",
+      "megas": 17408,
+      "compras": 12,
+      "megasTotal": 17408,
+      "posicao": 56
+    },
+    {
+      "numero": "64815468937348@lid",
+      "megas": 17408,
+      "compras": 5,
+      "megasTotal": 17408,
+      "posicao": 57
+    },
+    {
+      "numero": "15939076677856@lid",
+      "megas": 17408,
+      "compras": 3,
+      "megasTotal": 17408,
+      "posicao": 58
+    },
+    {
+      "numero": "253489640939702@lid",
+      "megas": 16384,
+      "compras": 16,
+      "megasTotal": 16384,
+      "posicao": 59
+    },
+    {
+      "numero": "164119441322087@lid",
+      "megas": 16384,
+      "compras": 14,
+      "megasTotal": 16384,
+      "posicao": 60
+    },
+    {
+      "numero": "16596173070432@lid",
+      "megas": 16384,
+      "compras": 13,
+      "megasTotal": 16384,
+      "posicao": 61
+    },
+    {
+      "numero": "71425859829882@lid",
+      "megas": 16384,
+      "compras": 16,
+      "megasTotal": 16384,
+      "posicao": 62
+    },
+    {
+      "numero": "231224043897079@lid",
+      "megas": 16384,
+      "compras": 12,
+      "megasTotal": 16384,
+      "posicao": 63
+    },
+    {
+      "numero": "132628640485486@lid",
+      "megas": 16384,
+      "compras": 16,
+      "megasTotal": 16384,
+      "posicao": 64
+    },
+    {
+      "numero": "162380348715186@lid",
+      "megas": 15360,
+      "compras": 14,
+      "megasTotal": 15360,
+      "posicao": 65
+    },
+    {
+      "numero": "151608453263413@lid",
+      "megas": 15360,
+      "compras": 15,
+      "megasTotal": 15360,
+      "posicao": 66
+    },
+    {
+      "numero": "230635566321827@lid",
+      "megas": 15360,
+      "compras": 5,
+      "megasTotal": 15360,
+      "posicao": 67
+    },
+    {
+      "numero": "77790816776437@lid",
+      "megas": 15360,
+      "compras": 15,
+      "megasTotal": 15360,
+      "posicao": 68
+    },
+    {
+      "numero": "76991768342659@lid",
+      "megas": 15360,
+      "compras": 13,
+      "megasTotal": 15360,
+      "posicao": 69
+    },
+    {
+      "numero": "22321146413267@lid",
+      "megas": 15360,
+      "compras": 13,
+      "megasTotal": 15360,
+      "posicao": 70
+    },
+    {
+      "numero": "138341500641354@lid",
+      "megas": 15360,
+      "compras": 11,
+      "megasTotal": 15360,
+      "posicao": 71
+    },
+    {
+      "numero": "124344235778285@lid",
+      "megas": 15360,
+      "compras": 14,
+      "megasTotal": 15360,
+      "posicao": 72
+    },
+    {
+      "numero": "8964066562155@lid",
+      "megas": 14336,
+      "compras": 14,
+      "megasTotal": 14336,
+      "posicao": 73
+    },
+    {
+      "numero": "23193393856686@lid",
+      "megas": 14336,
+      "compras": 14,
+      "megasTotal": 14336,
+      "posicao": 74
+    },
+    {
+      "numero": "57540062752769@lid",
+      "megas": 14336,
+      "compras": 14,
+      "megasTotal": 14336,
+      "posicao": 75
+    },
+    {
+      "numero": "201280068813030@lid",
+      "megas": 14336,
+      "compras": 2,
+      "megasTotal": 14336,
+      "posicao": 76
+    },
+    {
+      "numero": "71009147306104@lid",
+      "megas": 14336,
+      "compras": 14,
+      "megasTotal": 14336,
+      "posicao": 77
+    },
+    {
+      "numero": "210436821667873@lid",
+      "megas": 14336,
+      "compras": 14,
+      "megasTotal": 14336,
+      "posicao": 78
+    },
+    {
+      "numero": "219382802333919@lid",
+      "megas": 14336,
+      "compras": 12,
+      "megasTotal": 14336,
+      "posicao": 79
+    },
+    {
+      "numero": "174285763125328@lid",
+      "megas": 14336,
+      "compras": 10,
+      "megasTotal": 14336,
+      "posicao": 80
+    },
+    {
+      "numero": "76815976652890@lid",
+      "megas": 14336,
+      "compras": 14,
+      "megasTotal": 14336,
+      "posicao": 81
+    },
+    {
+      "numero": "163337740492981@lid",
+      "megas": 14336,
+      "compras": 7,
+      "megasTotal": 14336,
+      "posicao": 82
+    },
+    {
+      "numero": "33092773363924@lid",
+      "megas": 14336,
+      "compras": 8,
+      "megasTotal": 14336,
+      "posicao": 83
+    },
+    {
+      "numero": "97723776786598@lid",
+      "megas": 14336,
+      "compras": 13,
+      "megasTotal": 14336,
+      "posicao": 84
+    },
+    {
+      "numero": "233770791772223@lid",
+      "megas": 14336,
+      "compras": 14,
+      "megasTotal": 14336,
+      "posicao": 85
+    },
+    {
+      "numero": "91418479579223@lid",
+      "megas": 13312,
+      "compras": 11,
+      "megasTotal": 13312,
+      "posicao": 86
+    },
+    {
+      "numero": "124425974333595@lid",
+      "megas": 13312,
+      "compras": 12,
+      "megasTotal": 13312,
+      "posicao": 87
+    },
+    {
+      "numero": "238031885881483@lid",
+      "megas": 13312,
+      "compras": 12,
+      "megasTotal": 13312,
+      "posicao": 88
+    },
+    {
+      "numero": "221195513389172@lid",
+      "megas": 13312,
+      "compras": 10,
+      "megasTotal": 13312,
+      "posicao": 89
+    },
+    {
+      "numero": "197899593982159@lid",
+      "megas": 13312,
+      "compras": 13,
+      "megasTotal": 13312,
+      "posicao": 90
+    },
+    {
+      "numero": "267245968175227@lid",
+      "megas": 13312,
+      "compras": 12,
+      "megasTotal": 13312,
+      "posicao": 91
+    },
+    {
+      "numero": "197809600995517@lid",
+      "megas": 13312,
+      "compras": 12,
+      "megasTotal": 13312,
+      "posicao": 92
+    },
+    {
+      "numero": "269015947730947@lid",
+      "megas": 12288,
+      "compras": 7,
+      "megasTotal": 12288,
+      "posicao": 93
+    },
+    {
+      "numero": "100510942163162@lid",
+      "megas": 12288,
+      "compras": 11,
+      "megasTotal": 12288,
+      "posicao": 94
+    },
+    {
+      "numero": "89451753648315@lid",
+      "megas": 12288,
+      "compras": 11,
+      "megasTotal": 12288,
+      "posicao": 95
+    },
+    {
+      "numero": "32508909461661@lid",
+      "megas": 12288,
+      "compras": 11,
+      "megasTotal": 12288,
+      "posicao": 96
+    },
+    {
+      "numero": "223029632229457@lid",
+      "megas": 12288,
+      "compras": 12,
+      "megasTotal": 12288,
+      "posicao": 97
+    },
+    {
+      "numero": "148172076761199@lid",
+      "megas": 12288,
+      "compras": 6,
+      "megasTotal": 12288,
+      "posicao": 98
+    },
+    {
+      "numero": "103551862845495@lid",
+      "megas": 12288,
+      "compras": 12,
+      "megasTotal": 12288,
+      "posicao": 99
+    },
+    {
+      "numero": "110888153551029@lid",
+      "megas": 11264,
+      "compras": 11,
+      "megasTotal": 11264,
+      "posicao": 100
+    },
+    {
+      "numero": "118030063423705@lid",
+      "megas": 11264,
+      "compras": 7,
+      "megasTotal": 11264,
+      "posicao": 101
+    },
+    {
+      "numero": "168259756277977@lid",
+      "megas": 11264,
+      "compras": 11,
+      "megasTotal": 11264,
+      "posicao": 102
+    },
+    {
+      "numero": "274204217897084@lid",
+      "megas": 11264,
+      "compras": 11,
+      "megasTotal": 11264,
+      "posicao": 103
+    },
+    {
+      "numero": "267335977963717@lid",
+      "megas": 11264,
+      "compras": 11,
+      "megasTotal": 11264,
+      "posicao": 104
+    },
+    {
+      "numero": "209568936235100@lid",
+      "megas": 11264,
+      "compras": 10,
+      "megasTotal": 11264,
+      "posicao": 105
+    },
+    {
+      "numero": "138255467057288@lid",
+      "megas": 11264,
+      "compras": 2,
+      "megasTotal": 11264,
+      "posicao": 106
+    },
+    {
+      "numero": "109032677351450@lid",
+      "megas": 11264,
+      "compras": 5,
+      "megasTotal": 11264,
+      "posicao": 107
+    },
+    {
+      "numero": "115088480538749@lid",
+      "megas": 11264,
+      "compras": 7,
+      "megasTotal": 11264,
+      "posicao": 108
+    },
+    {
+      "numero": "67332453961813@lid",
+      "megas": 10240,
+      "compras": 10,
+      "megasTotal": 10240,
+      "posicao": 109
+    },
+    {
+      "numero": "112760708940017@lid",
+      "megas": 10240,
+      "compras": 10,
+      "megasTotal": 10240,
+      "posicao": 110
+    },
+    {
+      "numero": "225163811532833@lid",
+      "megas": 10240,
+      "compras": 10,
+      "megasTotal": 10240,
+      "posicao": 111
+    },
+    {
+      "numero": "200502008635473@lid",
+      "megas": 10240,
+      "compras": 9,
+      "megasTotal": 10240,
+      "posicao": 112
+    },
+    {
+      "numero": "199652074877042@lid",
+      "megas": 10240,
+      "compras": 10,
+      "megasTotal": 10240,
+      "posicao": 113
+    },
+    {
+      "numero": "62891390668964@lid",
+      "megas": 10240,
+      "compras": 5,
+      "megasTotal": 10240,
+      "posicao": 114
+    },
+    {
+      "numero": "205278582673503@lid",
+      "megas": 10240,
+      "compras": 2,
+      "megasTotal": 10240,
+      "posicao": 115
+    },
+    {
+      "numero": "265008122454168@lid",
+      "megas": 10240,
+      "compras": 6,
+      "megasTotal": 10240,
+      "posicao": 116
+    },
+    {
+      "numero": "77571706327193@lid",
+      "megas": 10240,
+      "compras": 10,
+      "megasTotal": 10240,
+      "posicao": 117
+    },
+    {
+      "numero": "55980754772090@lid",
+      "megas": 10240,
+      "compras": 5,
+      "megasTotal": 10240,
+      "posicao": 118
+    },
+    {
+      "numero": "98797334036723@lid",
+      "megas": 10240,
+      "compras": 6,
+      "megasTotal": 10240,
+      "posicao": 119
+    },
+    {
+      "numero": "159936629723299@lid",
+      "megas": 10240,
+      "compras": 4,
+      "megasTotal": 10240,
+      "posicao": 120
+    },
+    {
+      "numero": "189992643096816@lid",
+      "megas": 10240,
+      "compras": 10,
+      "megasTotal": 10240,
+      "posicao": 121
+    },
+    {
+      "numero": "125718323265709@lid",
+      "megas": 10240,
+      "compras": 1,
+      "megasTotal": 10240,
+      "posicao": 122
+    },
+    {
+      "numero": "212433662664767@lid",
+      "megas": 10240,
+      "compras": 1,
+      "megasTotal": 10240,
+      "posicao": 123
+    },
+    {
+      "numero": "5351982264457@lid",
+      "megas": 9216,
+      "compras": 9,
+      "megasTotal": 9216,
+      "posicao": 124
+    },
+    {
+      "numero": "12988115337435@lid",
+      "megas": 9216,
+      "compras": 7,
+      "megasTotal": 9216,
+      "posicao": 125
+    },
+    {
+      "numero": "85336789094425@lid",
+      "megas": 9216,
+      "compras": 8,
+      "megasTotal": 9216,
+      "posicao": 126
+    },
+    {
+      "numero": "216488313094379@lid",
+      "megas": 9216,
+      "compras": 7,
+      "megasTotal": 9216,
+      "posicao": 127
+    },
+    {
+      "numero": "265506623852736@lid",
+      "megas": 9216,
+      "compras": 8,
+      "megasTotal": 9216,
+      "posicao": 128
+    },
+    {
+      "numero": "122437102469145@lid",
+      "megas": 9216,
+      "compras": 7,
+      "megasTotal": 9216,
+      "posicao": 129
+    },
+    {
+      "numero": "149318967275644@lid",
+      "megas": 9216,
+      "compras": 2,
+      "megasTotal": 9216,
+      "posicao": 130
+    },
+    {
+      "numero": "118975224631337@lid",
+      "megas": 8192,
+      "compras": 8,
+      "megasTotal": 8192,
+      "posicao": 131
+    },
+    {
+      "numero": "109066533744685@lid",
+      "megas": 8192,
+      "compras": 8,
+      "megasTotal": 8192,
+      "posicao": 132
+    },
+    {
+      "numero": "142167863472222@lid",
+      "megas": 8192,
+      "compras": 7,
+      "megasTotal": 8192,
+      "posicao": 133
+    },
+    {
+      "numero": "57110700273876@lid",
+      "megas": 8192,
+      "compras": 8,
+      "megasTotal": 8192,
+      "posicao": 134
+    },
+    {
+      "numero": "133036813320345@lid",
+      "megas": 8192,
+      "compras": 8,
+      "megasTotal": 8192,
+      "posicao": 135
+    },
+    {
+      "numero": "99115446862015@lid",
+      "megas": 8192,
+      "compras": 6,
+      "megasTotal": 8192,
+      "posicao": 136
+    },
+    {
+      "numero": "34398544080956@lid",
+      "megas": 8192,
+      "compras": 8,
+      "megasTotal": 8192,
+      "posicao": 137
+    },
+    {
+      "numero": "97959882555506@lid",
+      "megas": 8192,
+      "compras": 8,
+      "megasTotal": 8192,
+      "posicao": 138
+    },
+    {
+      "numero": "19868636168308@lid",
+      "megas": 8192,
+      "compras": 7,
+      "megasTotal": 8192,
+      "posicao": 139
+    },
+    {
+      "numero": "81638906192076@lid",
+      "megas": 8192,
+      "compras": 8,
+      "megasTotal": 8192,
+      "posicao": 140
+    },
+    {
+      "numero": "77442874089605@lid",
+      "megas": 8192,
+      "compras": 6,
+      "megasTotal": 8192,
+      "posicao": 141
+    },
+    {
+      "numero": "30872476627174@lid",
+      "megas": 8192,
+      "compras": 8,
+      "megasTotal": 8192,
+      "posicao": 142
+    },
+    {
+      "numero": "58970471399623@lid",
+      "megas": 7168,
+      "compras": 7,
+      "megasTotal": 7168,
+      "posicao": 143
+    },
+    {
+      "numero": "182747251347457@lid",
+      "megas": 7168,
+      "compras": 7,
+      "megasTotal": 7168,
+      "posicao": 144
+    },
+    {
+      "numero": "54404904402989@lid",
+      "megas": 7168,
+      "compras": 7,
+      "megasTotal": 7168,
+      "posicao": 145
+    },
+    {
+      "numero": "72344697593900@lid",
+      "megas": 7168,
+      "compras": 7,
+      "megasTotal": 7168,
+      "posicao": 146
+    },
+    {
+      "numero": "113490417160329@lid",
+      "megas": 7168,
+      "compras": 2,
+      "megasTotal": 7168,
+      "posicao": 147
+    },
+    {
+      "numero": "73070832287868@lid",
+      "megas": 7168,
+      "compras": 7,
+      "megasTotal": 7168,
+      "posicao": 148
+    },
+    {
+      "numero": "127522377343109@lid",
+      "megas": 7168,
+      "compras": 6,
+      "megasTotal": 7168,
+      "posicao": 149
+    },
+    {
+      "numero": "20921205141695@lid",
+      "megas": 7168,
+      "compras": 7,
+      "megasTotal": 7168,
+      "posicao": 150
+    },
+    {
+      "numero": "244985303662648@lid",
+      "megas": 7168,
+      "compras": 7,
+      "megasTotal": 7168,
+      "posicao": 151
+    },
+    {
+      "numero": "61509032001537@lid",
+      "megas": 7168,
+      "compras": 7,
+      "megasTotal": 7168,
+      "posicao": 152
+    },
+    {
+      "numero": "276033672638504@lid",
+      "megas": 7168,
+      "compras": 7,
+      "megasTotal": 7168,
+      "posicao": 153
+    },
+    {
+      "numero": "46287416234235@lid",
+      "megas": 7168,
+      "compras": 7,
+      "megasTotal": 7168,
+      "posicao": 154
+    },
+    {
+      "numero": "14277125611522@lid",
+      "megas": 7168,
+      "compras": 7,
+      "megasTotal": 7168,
+      "posicao": 155
+    },
+    {
+      "numero": "79899310170152@lid",
+      "megas": 7168,
+      "compras": 7,
+      "megasTotal": 7168,
+      "posicao": 156
+    },
+    {
+      "numero": "57944024576115@lid",
+      "megas": 6144,
+      "compras": 6,
+      "megasTotal": 6144,
+      "posicao": 157
+    },
+    {
+      "numero": "167095753031708@lid",
+      "megas": 6144,
+      "compras": 3,
+      "megasTotal": 6144,
+      "posicao": 158
+    },
+    {
+      "numero": "8916972892381@lid",
+      "megas": 6144,
+      "compras": 4,
+      "megasTotal": 6144,
+      "posicao": 159
+    },
+    {
+      "numero": "190611302952978@lid",
+      "megas": 6144,
+      "compras": 6,
+      "megasTotal": 6144,
+      "posicao": 160
+    },
+    {
+      "numero": "188407615598672@lid",
+      "megas": 6144,
+      "compras": 6,
+      "megasTotal": 6144,
+      "posicao": 161
+    },
+    {
+      "numero": "26070585716817@lid",
+      "megas": 6144,
+      "compras": 3,
+      "megasTotal": 6144,
+      "posicao": 162
+    },
+    {
+      "numero": "8873939353737@lid",
+      "megas": 6144,
+      "compras": 6,
+      "megasTotal": 6144,
+      "posicao": 163
+    },
+    {
+      "numero": "190250022396090@lid",
+      "megas": 6144,
+      "compras": 6,
+      "megasTotal": 6144,
+      "posicao": 164
+    },
+    {
+      "numero": "209358801616955@lid",
+      "megas": 6144,
+      "compras": 5,
+      "megasTotal": 6144,
+      "posicao": 165
+    },
+    {
+      "numero": "56423455166715@lid",
+      "megas": 6144,
+      "compras": 6,
+      "megasTotal": 6144,
+      "posicao": 166
+    },
+    {
+      "numero": "151801961652407@lid",
+      "megas": 6144,
+      "compras": 6,
+      "megasTotal": 6144,
+      "posicao": 167
+    },
+    {
+      "numero": "180745511383114@lid",
+      "megas": 6144,
+      "compras": 6,
+      "megasTotal": 6144,
+      "posicao": 168
+    },
+    {
+      "numero": "159944666046540@lid",
+      "megas": 6144,
+      "compras": 1,
+      "megasTotal": 6144,
+      "posicao": 169
+    },
+    {
+      "numero": "238138807075035@lid",
+      "megas": 6144,
+      "compras": 1,
+      "megasTotal": 6144,
+      "posicao": 170
+    },
+    {
+      "numero": "76060196659338@lid",
+      "megas": 5120,
+      "compras": 5,
+      "megasTotal": 5120,
+      "posicao": 171
+    },
+    {
+      "numero": "182729501106416@lid",
+      "megas": 5120,
+      "compras": 5,
+      "megasTotal": 5120,
+      "posicao": 172
+    },
+    {
+      "numero": "46927416680648@lid",
+      "megas": 5120,
+      "compras": 5,
+      "megasTotal": 5120,
+      "posicao": 173
+    },
+    {
+      "numero": "248309356699720@lid",
+      "megas": 5120,
+      "compras": 5,
+      "megasTotal": 5120,
+      "posicao": 174
+    },
+    {
+      "numero": "143916351394036@lid",
+      "megas": 5120,
+      "compras": 4,
+      "megasTotal": 5120,
+      "posicao": 175
+    },
+    {
+      "numero": "213885630038065@lid",
+      "megas": 5120,
+      "compras": 5,
+      "megasTotal": 5120,
+      "posicao": 176
+    },
+    {
+      "numero": "219357485482100@lid",
+      "megas": 5120,
+      "compras": 5,
+      "megasTotal": 5120,
+      "posicao": 177
+    },
+    {
+      "numero": "224107635417275@lid",
+      "megas": 5120,
+      "compras": 4,
+      "megasTotal": 5120,
+      "posicao": 178
+    },
+    {
+      "numero": "165841924534441@lid",
+      "megas": 5120,
+      "compras": 3,
+      "megasTotal": 5120,
+      "posicao": 179
+    },
+    {
+      "numero": "128437087895678@lid",
+      "megas": 5120,
+      "compras": 3,
+      "megasTotal": 5120,
+      "posicao": 180
+    },
+    {
+      "numero": "260980047110300@lid",
+      "megas": 5120,
+      "compras": 5,
+      "megasTotal": 5120,
+      "posicao": 181
+    },
+    {
+      "numero": "160632179536115@lid",
+      "megas": 5120,
+      "compras": 3,
+      "megasTotal": 5120,
+      "posicao": 182
+    },
+    {
+      "numero": "79835087020205@lid",
+      "megas": 5120,
+      "compras": 3,
+      "megasTotal": 5120,
+      "posicao": 183
+    },
+    {
+      "numero": "22768192065652@lid",
+      "megas": 5120,
+      "compras": 1,
+      "megasTotal": 5120,
+      "posicao": 184
+    },
+    {
+      "numero": "124803428151525@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 185
+    },
+    {
+      "numero": "5055629504606@lid",
+      "megas": 4096,
+      "compras": 2,
+      "megasTotal": 4096,
+      "posicao": 186
+    },
+    {
+      "numero": "197358579126526@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 187
+    },
+    {
+      "numero": "63871062679714@lid",
+      "megas": 4096,
+      "compras": 3,
+      "megasTotal": 4096,
+      "posicao": 188
+    },
+    {
+      "numero": "62226006286542@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 189
+    },
+    {
+      "numero": "199604494676190@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 190
+    },
+    {
+      "numero": "143748310810800@lid",
+      "megas": 4096,
+      "compras": 3,
+      "megasTotal": 4096,
+      "posicao": 191
+    },
+    {
+      "numero": "246888007741642@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 192
+    },
+    {
+      "numero": "176455023648768@lid",
+      "megas": 4096,
+      "compras": 2,
+      "megasTotal": 4096,
+      "posicao": 193
+    },
+    {
+      "numero": "147936423989275@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 194
+    },
+    {
+      "numero": "271472534810654@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 195
+    },
+    {
+      "numero": "116450002002043@lid",
+      "megas": 4096,
+      "compras": 2,
+      "megasTotal": 4096,
+      "posicao": 196
+    },
+    {
+      "numero": "31010234347691@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 197
+    },
+    {
+      "numero": "2165150093395@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 198
+    },
+    {
+      "numero": "278653787189307@lid",
+      "megas": 4096,
+      "compras": 3,
+      "megasTotal": 4096,
+      "posicao": 199
+    },
+    {
+      "numero": "179873297510488@lid",
+      "megas": 4096,
+      "compras": 2,
+      "megasTotal": 4096,
+      "posicao": 200
+    },
+    {
+      "numero": "125581052125373@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 201
+    },
+    {
+      "numero": "41872022102258@lid",
+      "megas": 3072,
+      "compras": 2,
+      "megasTotal": 3072,
+      "posicao": 202
+    },
+    {
+      "numero": "131546275139792@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 203
+    },
+    {
+      "numero": "86655679639634@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 204
+    },
+    {
+      "numero": "253674156773528@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 205
+    },
+    {
+      "numero": "20603025252400@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 206
+    },
+    {
+      "numero": "132345155854587@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 207
+    },
+    {
+      "numero": "256074691170483@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 208
+    },
+    {
+      "numero": "52807210143879@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 209
+    },
+    {
+      "numero": "96001545216045@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 210
+    },
+    {
+      "numero": "88502632972357@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 211
+    },
+    {
+      "numero": "106609745358904@lid",
+      "megas": 3072,
+      "compras": 2,
+      "megasTotal": 3072,
+      "posicao": 212
+    },
+    {
+      "numero": "249632760291413@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 213
+    },
+    {
+      "numero": "96791399780580@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 214
+    },
+    {
+      "numero": "14267965251661@lid",
+      "megas": 2048,
+      "compras": 1,
+      "megasTotal": 2048,
+      "posicao": 215
+    },
+    {
+      "numero": "23450974470333@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 46288,
+      "posicao": 216
+    },
+    {
+      "numero": "98513748779009@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 217
+    },
+    {
+      "numero": "162332919476410@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 218
+    },
+    {
+      "numero": "61156660129970@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 219
+    },
+    {
+      "numero": "257818749833375@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 220
+    },
+    {
+      "numero": "210500826755313@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 221
+    },
+    {
+      "numero": "171545691463765@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 222
+    },
+    {
+      "numero": "26869919391807@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 223
+    },
+    {
+      "numero": "219851389956286@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 224
+    },
+    {
+      "numero": "213666167279783@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 225
+    },
+    {
+      "numero": "133724528226498@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 226
+    },
+    {
+      "numero": "121792387661875@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 227
+    },
+    {
+      "numero": "263269147213877@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 228
+    },
+    {
+      "numero": "14942795202766@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 229
+    },
+    {
+      "numero": "260717953450053@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 230
+    },
+    {
+      "numero": "121217163989132@lid",
+      "megas": 2048,
+      "compras": 1,
+      "megasTotal": 2048,
+      "posicao": 231
+    },
+    {
+      "numero": "2190903087263@lid",
+      "megas": 2048,
+      "compras": 1,
+      "megasTotal": 2048,
+      "posicao": 232
+    },
+    {
+      "numero": "182493512769594@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 233
+    },
+    {
+      "numero": "152308516135128@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 234
+    },
+    {
+      "numero": "156633430802666@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 235
+    },
+    {
+      "numero": "31400707264571@lid",
+      "megas": 2048,
+      "compras": 1,
+      "megasTotal": 2048,
+      "posicao": 236
+    },
+    {
+      "numero": "121298852290671@lid",
+      "megas": 2048,
+      "compras": 1,
+      "megasTotal": 2048,
+      "posicao": 237
+    },
+    {
+      "numero": "42060665118824@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 238
+    },
+    {
+      "numero": "165635548012626@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 239
+    },
+    {
+      "numero": "173847726784629@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 240
+    },
+    {
+      "numero": "277580078927885@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 241
+    },
+    {
+      "numero": "127058655096988@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 242
+    },
+    {
+      "numero": "208447832363150@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 243
+    },
+    {
+      "numero": "66722769940561@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 244
+    },
+    {
+      "numero": "120009992974520@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 245
+    },
+    {
+      "numero": "3904544718969@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 246
+    },
+    {
+      "numero": "178632588828881@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 247
+    },
+    {
+      "numero": "237164403130564@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 248
+    },
+    {
+      "numero": "6721707720791@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 249
+    },
+    {
+      "numero": "235201032671486@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 250
+    },
+    {
+      "numero": "219293111328983@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 251
+    },
+    {
+      "numero": "94060236767485@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 252
+    },
+    {
+      "numero": "13452374442100@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 253
+    },
+    {
+      "numero": "204771709452481@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 254
+    },
+    {
+      "numero": "278421322129476@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 255
+    },
+    {
+      "numero": "209616617078873@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 256
+    },
+    {
+      "numero": "188356495466525@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 257
+    },
+    {
+      "numero": "216131864367175@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 258
+    },
+    {
+      "numero": "118700581625865@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 259
+    },
+    {
+      "numero": "55787716133113@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 260
+    },
+    {
+      "numero": "93935749885992@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 261
+    },
+    {
+      "numero": "101752691011810@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 262
+    },
+    {
+      "numero": "256860686921763@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 263
+    },
+    {
+      "numero": "5317790286055@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 264
+    },
+    {
+      "numero": "66190193995792@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 265
+    },
+    {
+      "numero": "137005665149043@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 266
+    },
+    {
+      "numero": "128265054371961@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 267
+    }
+  ],
+  "120363402302455817@g.us": [
+    {
+      "numero": "216054655656152@lid",
+      "megas": 111624,
+      "compras": 94,
+      "megasTotal": 111624,
+      "posicao": 1
+    },
+    {
+      "numero": "262423089029176@lid",
+      "megas": 73364,
+      "compras": 33,
+      "megasTotal": 73364,
+      "posicao": 2
+    },
+    {
+      "numero": "208456405516377@lid",
+      "megas": 54264,
+      "compras": 30,
+      "megasTotal": 54264,
+      "posicao": 3
+    },
+    {
+      "numero": "234488453972135@lid",
+      "megas": 42008,
+      "compras": 38,
+      "megasTotal": 42008,
+      "posicao": 4
+    },
+    {
+      "numero": "157973192151156@lid",
+      "megas": 27600,
+      "compras": 27,
+      "megasTotal": 27600,
+      "posicao": 5
+    },
+    {
+      "numero": "183081772257498@lid",
+      "megas": 27088,
+      "compras": 24,
+      "megasTotal": 27088,
+      "posicao": 6
+    },
+    {
+      "numero": "182889018847284@lid",
+      "megas": 24424,
+      "compras": 16,
+      "megasTotal": 24424,
+      "posicao": 7
+    },
+    {
+      "numero": "262242448740513@lid",
+      "megas": 24064,
+      "compras": 11,
+      "megasTotal": 24064,
+      "posicao": 8
+    },
+    {
+      "numero": "65026325008463@lid",
+      "megas": 23920,
+      "compras": 19,
+      "megasTotal": 23920,
+      "posicao": 9
+    },
+    {
+      "numero": "49573099749511@lid",
+      "megas": 23706,
+      "compras": 19,
+      "megasTotal": 23706,
+      "posicao": 10
+    },
+    {
+      "numero": "138036440485920@lid",
+      "megas": 21616,
+      "compras": 17,
+      "megasTotal": 21616,
+      "posicao": 11
+    },
+    {
+      "numero": "2560538714113@lid",
+      "megas": 20992,
+      "compras": 13,
+      "megasTotal": 20992,
+      "posicao": 12
+    },
+    {
+      "numero": "142197894729824@lid",
+      "megas": 20394,
+      "compras": 11,
+      "megasTotal": 20394,
+      "posicao": 13
+    },
+    {
+      "numero": "273890081296550@lid",
+      "megas": 20280,
+      "compras": 13,
+      "megasTotal": 20280,
+      "posicao": 14
+    },
+    {
+      "numero": "4072249765993@lid",
+      "megas": 19992,
+      "compras": 15,
+      "megasTotal": 19992,
+      "posicao": 15
+    },
+    {
+      "numero": "238792195706903@lid",
+      "megas": 19184,
+      "compras": 18,
+      "megasTotal": 19184,
+      "posicao": 16
+    },
+    {
+      "numero": "94794525204531@lid",
+      "megas": 18672,
+      "compras": 16,
+      "megasTotal": 18672,
+      "posicao": 17
+    },
+    {
+      "numero": "157818975957050@lid",
+      "megas": 17766,
+      "compras": 8,
+      "megasTotal": 17766,
+      "posicao": 18
+    },
+    {
+      "numero": "60155446169842@lid",
+      "megas": 17408,
+      "compras": 17,
+      "megasTotal": 17408,
+      "posicao": 19
+    },
+    {
+      "numero": "198719613972492@lid",
+      "megas": 16384,
+      "compras": 16,
+      "megasTotal": 16384,
+      "posicao": 20
+    },
+    {
+      "numero": "235394591367269@lid",
+      "megas": 14336,
+      "compras": 14,
+      "megasTotal": 14336,
+      "posicao": 21
+    },
+    {
+      "numero": "54602489704667@lid",
+      "megas": 13440,
+      "compras": 2,
+      "megasTotal": 13440,
+      "posicao": 22
+    },
+    {
+      "numero": "51114707816491@lid",
+      "megas": 13312,
+      "compras": 13,
+      "megasTotal": 13312,
+      "posicao": 23
+    },
+    {
+      "numero": "12477131665617@lid",
+      "megas": 13312,
+      "compras": 13,
+      "megasTotal": 13312,
+      "posicao": 24
+    },
+    {
+      "numero": "93355409166453@lid",
+      "megas": 12480,
+      "compras": 13,
+      "megasTotal": 12480,
+      "posicao": 25
+    },
+    {
+      "numero": "55718711418918@lid",
+      "megas": 12416,
+      "compras": 10,
+      "megasTotal": 12416,
+      "posicao": 26
+    },
+    {
+      "numero": "146900883886104@lid",
+      "megas": 12288,
+      "compras": 12,
+      "megasTotal": 12288,
+      "posicao": 27
+    },
+    {
+      "numero": "103814224957475@lid",
+      "megas": 12200,
+      "compras": 5,
+      "megasTotal": 12200,
+      "posicao": 28
+    },
+    {
+      "numero": "71223828545639@lid",
+      "megas": 11616,
+      "compras": 11,
+      "megasTotal": 11616,
+      "posicao": 29
+    },
+    {
+      "numero": "118034643570756@lid",
+      "megas": 11472,
+      "compras": 12,
+      "megasTotal": 11472,
+      "posicao": 30
+    },
+    {
+      "numero": "188600738181168@lid",
+      "megas": 10944,
+      "compras": 10,
+      "megasTotal": 10944,
+      "posicao": 31
+    },
+    {
+      "numero": "117979077460095@lid",
+      "megas": 10240,
+      "compras": 10,
+      "megasTotal": 10240,
+      "posicao": 32
+    },
+    {
+      "numero": "115083883598073@lid",
+      "megas": 10240,
+      "compras": 1,
+      "megasTotal": 10240,
+      "posicao": 33
+    },
+    {
+      "numero": "54245571203133@lid",
+      "megas": 10240,
+      "compras": 6,
+      "megasTotal": 10240,
+      "posicao": 34
+    },
+    {
+      "numero": "52575130919107@lid",
+      "megas": 10240,
+      "compras": 1,
+      "megasTotal": 10240,
+      "posicao": 35
+    },
+    {
+      "numero": "8916989689883@lid",
+      "megas": 9840,
+      "compras": 7,
+      "megasTotal": 9840,
+      "posicao": 36
+    },
+    {
+      "numero": "7602729656549@lid",
+      "megas": 9728,
+      "compras": 10,
+      "megasTotal": 9728,
+      "posicao": 37
+    },
+    {
+      "numero": "219134163959903@lid",
+      "megas": 9424,
+      "compras": 8,
+      "megasTotal": 9424,
+      "posicao": 38
+    },
+    {
+      "numero": "157994700513463@lid",
+      "megas": 9216,
+      "compras": 13,
+      "megasTotal": 9216,
+      "posicao": 39
+    },
+    {
+      "numero": "46300435321073@lid",
+      "megas": 8424,
+      "compras": 4,
+      "megasTotal": 8424,
+      "posicao": 40
+    },
+    {
+      "numero": "21179104522245@lid",
+      "megas": 8368,
+      "compras": 12,
+      "megasTotal": 8368,
+      "posicao": 41
+    },
+    {
+      "numero": "242545879724136@lid",
+      "megas": 8192,
+      "compras": 8,
+      "megasTotal": 8192,
+      "posicao": 42
+    },
+    {
+      "numero": "269411084685558@lid",
+      "megas": 8048,
+      "compras": 6,
+      "megasTotal": 8048,
+      "posicao": 43
+    },
+    {
+      "numero": "257131622219936@lid",
+      "megas": 8000,
+      "compras": 1,
+      "megasTotal": 8000,
+      "posicao": 44
+    },
+    {
+      "numero": "197667430908086@lid",
+      "megas": 7712,
+      "compras": 5,
+      "megasTotal": 7712,
+      "posicao": 45
+    },
+    {
+      "numero": "31955278151911@lid",
+      "megas": 7680,
+      "compras": 9,
+      "megasTotal": 7680,
+      "posicao": 46
+    },
+    {
+      "numero": "39350809165953@lid",
+      "megas": 7680,
+      "compras": 7,
+      "megasTotal": 7680,
+      "posicao": 47
+    },
+    {
+      "numero": "147935920713976@lid",
+      "megas": 7200,
+      "compras": 6,
+      "megasTotal": 7200,
+      "posicao": 48
+    },
+    {
+      "numero": "161723185131679@lid",
+      "megas": 7168,
+      "compras": 7,
+      "megasTotal": 7168,
+      "posicao": 49
+    },
+    {
+      "numero": "228037228535904@lid",
+      "megas": 7168,
+      "compras": 6,
+      "megasTotal": 7168,
+      "posicao": 50
+    },
+    {
+      "numero": "21539831464181@lid",
+      "megas": 6320,
+      "compras": 6,
+      "megasTotal": 6320,
+      "posicao": 51
+    },
+    {
+      "numero": "92084719607849@lid",
+      "megas": 6272,
+      "compras": 5,
+      "megasTotal": 6272,
+      "posicao": 52
+    },
+    {
+      "numero": "81128274833590@lid",
+      "megas": 6096,
+      "compras": 5,
+      "megasTotal": 6096,
+      "posicao": 53
+    },
+    {
+      "numero": "242807470076119@lid",
+      "megas": 6024,
+      "compras": 2,
+      "megasTotal": 6024,
+      "posicao": 54
+    },
+    {
+      "numero": "122011967864868@lid",
+      "megas": 6000,
+      "compras": 5,
+      "megasTotal": 6000,
+      "posicao": 55
+    },
+    {
+      "numero": "178477970026747@lid",
+      "megas": 5632,
+      "compras": 4,
+      "megasTotal": 5632,
+      "posicao": 56
+    },
+    {
+      "numero": "52905608511519@lid",
+      "megas": 5248,
+      "compras": 3,
+      "megasTotal": 5248,
+      "posicao": 57
+    },
+    {
+      "numero": "3655621152907@lid",
+      "megas": 5120,
+      "compras": 5,
+      "megasTotal": 5120,
+      "posicao": 58
+    },
+    {
+      "numero": "17386648395902@lid",
+      "megas": 5120,
+      "compras": 5,
+      "megasTotal": 5120,
+      "posicao": 59
+    },
+    {
+      "numero": "75067908210834@lid",
+      "megas": 5000,
+      "compras": 1,
+      "megasTotal": 5000,
+      "posicao": 60
+    },
+    {
+      "numero": "82596868436026@lid",
+      "megas": 4608,
+      "compras": 5,
+      "megasTotal": 4608,
+      "posicao": 61
+    },
+    {
+      "numero": "81853788717093@lid",
+      "megas": 4250,
+      "compras": 1,
+      "megasTotal": 4250,
+      "posicao": 62
+    },
+    {
+      "numero": "6988163489886@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 63
+    },
+    {
+      "numero": "185371560267782@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 64
+    },
+    {
+      "numero": "188120154808430@lid",
+      "megas": 4096,
+      "compras": 4,
+      "megasTotal": 4096,
+      "posicao": 65
+    },
+    {
+      "numero": "231439144640635@lid",
+      "megas": 3600,
+      "compras": 3,
+      "megasTotal": 3600,
+      "posicao": 66
+    },
+    {
+      "numero": "31319539077127@lid",
+      "megas": 3584,
+      "compras": 5,
+      "megasTotal": 3584,
+      "posicao": 67
+    },
+    {
+      "numero": "73568847134959@lid",
+      "megas": 3584,
+      "compras": 4,
+      "megasTotal": 3584,
+      "posicao": 68
+    },
+    {
+      "numero": "186685266608328@lid",
+      "megas": 3248,
+      "compras": 2,
+      "megasTotal": 3248,
+      "posicao": 69
+    },
+    {
+      "numero": "185848066740437@lid",
+      "megas": 3072,
+      "compras": 4,
+      "megasTotal": 3072,
+      "posicao": 70
+    },
+    {
+      "numero": "141892985585678@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 71
+    },
+    {
+      "numero": "111553571487980@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 72
+    },
+    {
+      "numero": "161461158576229@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 73
+    },
+    {
+      "numero": "236584666448039@lid",
+      "megas": 3072,
+      "compras": 3,
+      "megasTotal": 3072,
+      "posicao": 74
+    },
+    {
+      "numero": "38199925706911@lid",
+      "megas": 3024,
+      "compras": 2,
+      "megasTotal": 3024,
+      "posicao": 75
+    },
+    {
+      "numero": "169978095526097@lid",
+      "megas": 2560,
+      "compras": 2,
+      "megasTotal": 2560,
+      "posicao": 76
+    },
+    {
+      "numero": "200755814396067@lid",
+      "megas": 2048,
+      "compras": 1,
+      "megasTotal": 2048,
+      "posicao": 77
+    },
+    {
+      "numero": "4230878388341@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 78
+    },
+    {
+      "numero": "209929914863779@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 79
+    },
+    {
+      "numero": "192075601555679@lid",
+      "megas": 2048,
+      "compras": 1,
+      "megasTotal": 2048,
+      "posicao": 80
+    },
+    {
+      "numero": "32053995278426@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 2048,
+      "posicao": 81
+    },
+    {
+      "numero": "5085794951338@lid",
+      "megas": 2048,
+      "compras": 1,
+      "megasTotal": 2048,
+      "posicao": 82
+    },
+    {
+      "numero": "150307380178946@lid",
+      "megas": 1560,
+      "compras": 1,
+      "megasTotal": 1560,
+      "posicao": 83
+    },
+    {
+      "numero": "258856286162",
+      "megas": 1560,
+      "compras": 1,
+      "megasTotal": 1560,
+      "posicao": 84
+    },
+    {
+      "numero": "156032034680890@lid",
+      "megas": 1536,
+      "compras": 2,
+      "megasTotal": 1536,
+      "posicao": 85
+    },
+    {
+      "numero": "88665975955693@lid",
+      "megas": 1536,
+      "compras": 2,
+      "megasTotal": 1536,
+      "posicao": 86
+    },
+    {
+      "numero": "90563948900569@lid",
+      "megas": 1200,
+      "compras": 1,
+      "megasTotal": 1200,
+      "posicao": 87
+    },
+    {
+      "numero": "64631070568448@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 88
+    },
+    {
+      "numero": "164914463264862@lid",
+      "megas": 1024,
+      "compras": 2,
+      "megasTotal": 1024,
+      "posicao": 89
+    },
+    {
+      "numero": "109496449904748@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 90
+    },
+    {
+      "numero": "97337296842774@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 91
+    },
+    {
+      "numero": "18601956397163@lid",
+      "megas": 512,
+      "compras": 1,
+      "megasTotal": 512,
+      "posicao": 92
+    }
+  ],
+  "120363419388089635@g.us": [
+    {
+      "numero": "171992384860350@lid",
+      "megas": 6144,
+      "compras": 6,
+      "megasTotal": 6144,
+      "posicao": 1
+    },
+    {
+      "numero": "67611928871020@lid",
+      "megas": 5120,
+      "compras": 4,
+      "megasTotal": 5120,
+      "posicao": 2
+    },
+    {
+      "numero": "257702869598254@lid",
+      "megas": 3072,
+      "compras": 2,
+      "megasTotal": 3072,
+      "posicao": 3
+    },
+    {
+      "numero": "147308855451794@lid",
+      "megas": 3072,
+      "compras": 1,
+      "megasTotal": 3072,
+      "posicao": 4
+    },
+    {
+      "numero": "23450974470333@lid",
+      "megas": 2048,
+      "compras": 2,
+      "megasTotal": 46288,
+      "posicao": 5
+    },
+    {
+      "numero": "195378750189658@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 6
+    },
+    {
+      "numero": "189588832264323@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 7
+    },
+    {
+      "numero": "237151350448206@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 8
+    },
+    {
+      "numero": "142537566216328@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 9
+    },
+    {
+      "numero": "19701602234522@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 10
+    },
+    {
+      "numero": "118344065757435@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 11
+    },
+    {
+      "numero": "266859890929836@lid",
+      "megas": 1024,
+      "compras": 1,
+      "megasTotal": 1024,
+      "posicao": 12
+    }
+  ]
+}

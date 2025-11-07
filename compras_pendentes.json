@@ -1,0 +1,34 @@
+{
+  "CK65HYKYDXJ": {
+    "numero": "847889731",
+    "megas": 10240,
+    "timestamp": "2025-11-06T17:28:12.927Z",
+    "tentativas": 0,
+    "remetente": "122441464569927@lid",
+    "grupoId": "258820749141-1441573529@g.us"
+  },
+  "CK65HYKYDXJ01": {
+    "numero": "847889731",
+    "megas": 1024,
+    "timestamp": "2025-11-06T17:28:29.313Z",
+    "tentativas": 0,
+    "remetente": "122441464569927@lid",
+    "grupoId": "258820749141-1441573529@g.us"
+  },
+  "CK63HYLWYG9": {
+    "numero": "842644017",
+    "megas": 1024,
+    "timestamp": "2025-11-06T18:29:19.482Z",
+    "tentativas": 0,
+    "remetente": "221195513389172@lid",
+    "grupoId": "120363020570328377@g.us"
+  },
+  "CK61HYMG6F1": {
+    "numero": "842222420",
+    "megas": 1024,
+    "timestamp": "2025-11-06T19:06:01.644Z",
+    "tentativas": 0,
+    "remetente": "146900883886104@lid",
+    "grupoId": "120363402302455817@g.us"
+  }
+}

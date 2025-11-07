@@ -1,0 +1,5 @@
+2025/11/06-18:26:32.666 8f88a Creating DB /root/revs/.wwebjs_auth/session-bot_retalho/Default/Local Storage/leveldb since it was missing.
+2025/11/06-18:26:32.699 8f88a Reusing MANIFEST /root/revs/.wwebjs_auth/session-bot_retalho/Default/Local Storage/leveldb/MANIFEST-000001
+2025/11/06-20:20:12.893 90384 Level-0 table #5: started
+2025/11/06-20:20:12.898 90384 Level-0 table #5: 18335 bytes OK
+2025/11/06-20:20:12.902 90384 Delete type=0 #3
