@@ -2195,7 +2195,8 @@ const ADMINISTRADORES_GLOBAIS = [
     '85307059867830@lid',   // @lid do Isaac
     '258865627840@c.us',    // +258 86 562 7840 - Ercílio
     '170725386272876@lid',  // @lid do Ercílio
-    '258857013922@c.us',    // +258 85 701 3922
+    '258857013922@c.us',    // +258 85 701 3922 - Frederico
+    '29945149558840@lid',   // @lid do Frederico
     '258879833297@c.us',    // +258 87 983 3297 - Astro Tech
     '278438854287537@lid',  // @lid do Astro Tech
     '258844093189@c.us',    // +258 84 409 3189 - Leonel
@@ -2212,7 +2213,8 @@ let MAPEAMENTO_IDS = {
     '170725386272876@lid': '258865627840@c.us',  // Ercílio
     '251032533737504@lid': '258874100607@c.us', // Mr Durst
     '67611928871020@lid': '258844093189@c.us',   // Leonel
-    '278438854287537@lid': '258879833297@c.us'   // Astro Tech
+    '278438854287537@lid': '258879833297@c.us',  // Astro Tech
+    '29945149558840@lid': '258857013922@c.us'    // Frederico
 };
 
 // === SISTEMA AUTOMÁTICO DE MAPEAMENTO LID ===
