@@ -594,14 +594,33 @@ Se não conseguires extrair os dados:
           // Determinar tipo de pacote
           let tipo = 'diario';
           let isDiamante = false;
+          let isPacotePonto8 = false;
 
+          // Detectar pacote .8GB (12.8, 22.8, 32.8, etc.) - PRIORITÁRIO
+          if (temGB && quantidade % 1 !== 0) {
+            const parteDecimal = (quantidade % 1).toFixed(1);
+            if (parteDecimal === '0.8') {
+              tipo = 'pacote_ponto_8gb';
+              isPacotePonto8 = true;
+              isDiamante = false;
+            }
+          }
           // Detectar pacote DIAMANTE (pelos critérios definidos)
-          if (linha.includes('💎') ||
+          else if (linha.includes('💎') ||
               linhaLower.includes('diamante') ||
               (linhaLower.includes('chamadas') && linhaLower.includes('sms') && linhaLower.includes('ilimitad'))) {
             tipo = 'diamante';
             isDiamante = true;
-          } else if (linhaLower.includes('mensal') || linhaLower.includes('30 dias')) {
+          }
+          // Detectar pacote 2.8GB fixo (critério: 📦 emoji ou "2.8" ou "2.8GB")
+          else if (linha.includes('📦') ||
+                   linhaLower.includes('2.8gb') ||
+                   linhaLower.includes('2.8 gb') ||
+                   (linhaLower.includes('2.8') && (linhaLower.includes('gb') || linhaLower.includes('giga')))) {
+            tipo = 'pacote_2_8gb';
+            isDiamante = false;
+          }
+          else if (linhaLower.includes('mensal') || linhaLower.includes('30 dias')) {
             tipo = 'mensal';
           } else if (linhaLower.includes('semanal') || linhaLower.includes('7 dias')) {
             tipo = 'semanal';
@@ -617,6 +636,8 @@ Se não conseguires extrair os dados:
             descricao: descricao,
             tipo: tipo,
             isDiamante: isDiamante,
+            isPacotePonto8: isPacotePonto8,
+            gbTotal: temGB ? quantidade : null,
             original: linha.trim()
           });
         }
@@ -1007,7 +1028,22 @@ Se não conseguires extrair os dados:
       
       const valorNumerico = parseFloat(valorPago);
 
-      // === VERIFICAR SE É PACOTE DIAMANTE ANTES DE TUDO ===
+      // === VERIFICAR SE É PACOTE ESPECIAL ANTES DE TUDO ===
+
+      // 1. Verificar se é Pacote .8GB (12.8, 22.8, etc.) - PRIORITÁRIO
+      const pacotePonto8 = precos.find(p => p.preco === valorNumerico && p.isPacotePonto8 === true);
+      if (pacotePonto8) {
+        console.log(`   📦 PACOTE .8GB DETECTADO: ${pacotePonto8.descricao} (${valorNumerico}MT)`);
+        console.log(`   ✂️ Divisão especial: ${pacotePonto8.gbTotal - 2.8}GB comuns + 2.8GB especial`);
+        return {
+          deveDividir: false,
+          isPacotePonto8: true,
+          pacoteDiamante: pacotePonto8,
+          motivo: `Pacote .8GB: ${pacotePonto8.descricao}`
+        };
+      }
+
+      // 2. Verificar se é Pacote Diamante
       const pacoteDiamante = precos.find(p => p.preco === valorNumerico && p.isDiamante === true);
       if (pacoteDiamante) {
         console.log(`   💎 DIAMANTE DETECTADO: ${pacoteDiamante.descricao} (${valorNumerico}MT)`);
@@ -1020,7 +1056,20 @@ Se não conseguires extrair os dados:
         };
       }
 
-      // Verificar se o valor é exatamente um pacote (comum)
+      // 3. Verificar se é Pacote 2.8GB fixo ou outro especial
+      const pacoteEspecial = precos.find(p => p.preco === valorNumerico && p.tipo === 'pacote_2_8gb');
+      if (pacoteEspecial) {
+        console.log(`   📦 PACOTE ESPECIAL 2.8GB DETECTADO: ${pacoteEspecial.descricao} (${valorNumerico}MT)`);
+        console.log(`   🚫 Divisão automática BLOQUEADA para pacote 2.8GB`);
+        return {
+          deveDividir: false,
+          isDiamante: true, // Usar flag isDiamante para indicar pacote especial
+          pacoteDiamante: pacoteEspecial, // Reutilizar estrutura existente
+          motivo: `Pacote Especial 2.8GB: ${pacoteEspecial.descricao}`
+        };
+      }
+
+      // 4. Verificar se o valor é exatamente um pacote comum
       const pacoteExato = precos.find(p => p.preco === valorNumerico);
       if (pacoteExato) {
         console.log(`   ⚡ Valor exato para: ${pacoteExato.descricao}`);
@@ -1442,6 +1491,22 @@ Se não conseguires extrair os dados:
       // Processar imediatamente como pedido completo
       if (configGrupo && parseFloat(comprovante.valor) >= 32) {
         const analiseAutomatica = await this.analisarDivisaoAutomatica(comprovante.valor, configGrupo);
+
+        // === VERIFICAR SE É PACOTE .8GB ===
+        if (analiseAutomatica.isPacotePonto8 && analiseAutomatica.pacoteDiamante) {
+          console.log(`   📦 Retornando pacote .8GB detectado automaticamente`);
+          return {
+            sucesso: true,
+            tipo: 'comprovante_ponto8_detectado',
+            referencia: comprovante.referencia,
+            valor: comprovante.valor,
+            valorComprovante: comprovante.valor,
+            megas: analiseAutomatica.pacoteDiamante.quantidade,
+            numero: numeros[0],
+            pacoteDiamante: analiseAutomatica.pacoteDiamante,
+            mensagem: `📦 Pacote .8GB detectado: ${analiseAutomatica.pacoteDiamante.descricao}`
+          };
+        }
 
         // === VERIFICAR SE É PACOTE DIAMANTE ===
         if (analiseAutomatica.isDiamante && analiseAutomatica.pacoteDiamante) {

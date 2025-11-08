@@ -184,12 +184,33 @@ const GOOGLE_SHEETS_CONFIG = {
     retryDelay: 2000
 };
 
-// === CONFIGURAÇÃO GOOGLE SHEETS - PACOTES DIAMANTE ===
+// === CONFIGURAÇÃO GOOGLE SHEETS - PACOTES ESPECIAIS ===
 const GOOGLE_SHEETS_CONFIG_DIAMANTE = {
     scriptUrl: process.env.GOOGLE_SHEETS_SCRIPT_URL_DIAMANTE || 'https://script.google.com/macros/s/AKfycbw_wHnKiZROpl720GduLz-KvVw4pEtS8njzPvHCnqdWgYHFRIoXlUCxrNpqt7OnZsr8/exec',
     timeout: 30000,
     retryAttempts: 3,
     retryDelay: 2000
+};
+
+// === MAPEAMENTO DE CÓDIGOS DE PACOTES ESPECIAIS ===
+const CODIGOS_PACOTES_ESPECIAIS = {
+    1: {
+        nome: 'Pacote Diamante',
+        descricao: 'Chamadas + SMS ilimitados + GB',
+        gbBase: 11, // GB base do pacote diamante
+        identificador: 'diamante',
+        emoji: '💎'
+    },
+    2: {
+        nome: 'Pacote 2.8GB',
+        descricao: 'Pacote fixo de 2.8GB',
+        gbFixo: 2.8, // GB fixo (não divide)
+        identificador: 'pacote_2_8gb',
+        emoji: '📦'
+    }
+    // Adicionar mais códigos conforme necessário:
+    // 3: { nome: 'Pacote X', ... },
+    // 4: { nome: 'Pacote Y', ... },
 };
 
 // === CONFIGURAÇÃO DE PAGAMENTOS (MESMA PLANILHA DO BOT ATACADO) ===
@@ -247,6 +268,119 @@ const ia = new WhatsAppAI(process.env.OPENAI_API_KEY);
 let sistemaPacotes = null;
 let sistemaCompras = null;
 let sistemaBonus = null;
+
+// === LISTA DE BOTS PARA IGNORAR ===
+// Adicione aqui nomes de bots que devem ser ignorados
+const BOTS_IGNORADOS = [
+    'safe',
+    'bot safe',
+    'safebot',
+    'safe bot',
+    'safeguard',
+    'safeguard autodata',
+    'autodata',
+    'bot atacado',
+    'bot retalho',
+    'whatsapp bot',
+    // Adicione mais nomes aqui conforme necessário
+];
+
+// Função para verificar se é bot ignorado
+function ehBotIgnorado(contact) {
+    const nomePushname = (contact.pushname || '').toLowerCase();
+    const nomeContato = (contact.name || '').toLowerCase();
+
+    return BOTS_IGNORADOS.some(botNome =>
+        nomePushname.includes(botNome.toLowerCase()) ||
+        nomeContato.includes(botNome.toLowerCase())
+    );
+}
+
+// === SISTEMA ANTI-DUPLICATAS DE MENSAGENS ===
+// Cache de mensagens recentes para evitar processamento duplicado
+const cacheMensagensRecentes = new Map();
+const CACHE_MENSAGEM_TTL = 5 * 60 * 1000; // 5 minutos
+const MAX_CACHE_SIZE = 500; // Máximo de mensagens no cache
+
+// Função para gerar hash único da mensagem
+function gerarHashMensagem(remetente, conteudo) {
+    // Normalizar conteúdo (remover espaços extras, quebras de linha, etc)
+    const conteudoNormalizado = conteudo
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .replace(/[^\w\s@.-]/gi, '')
+        .trim();
+
+    return `${remetente}_${conteudoNormalizado}`;
+}
+
+// Função para verificar se mensagem é duplicada
+function ehMensagemDuplicada(remetente, conteudo) {
+    const hashMensagem = gerarHashMensagem(remetente, conteudo);
+    const agora = Date.now();
+
+    // Verificar se mensagem já foi processada recentemente
+    const registro = cacheMensagensRecentes.get(hashMensagem);
+
+    if (registro && (agora - registro.timestamp < CACHE_MENSAGEM_TTL)) {
+        const tempoDecorrido = Math.floor((agora - registro.timestamp) / 1000);
+        console.log(`⚠️ DUPLICATA DETECTADA: Mensagem de ${remetente} já processada há ${tempoDecorrido}s`);
+        return {
+            duplicada: true,
+            tempoDecorrido: tempoDecorrido,
+            primeiroEnvio: registro.timestamp
+        };
+    }
+
+    return { duplicada: false };
+}
+
+// Função para registrar mensagem processada
+function registrarMensagemProcessada(remetente, conteudo) {
+    const hashMensagem = gerarHashMensagem(remetente, conteudo);
+
+    // Adicionar ao cache
+    cacheMensagensRecentes.set(hashMensagem, {
+        timestamp: Date.now(),
+        remetente: remetente
+    });
+
+    // Limpar cache se estiver muito grande
+    if (cacheMensagensRecentes.size > MAX_CACHE_SIZE) {
+        limparCacheMensagensAntigas();
+    }
+}
+
+// Função para limpar mensagens antigas do cache
+function limparCacheMensagensAntigas() {
+    const agora = Date.now();
+    let removidos = 0;
+
+    for (const [hash, registro] of cacheMensagensRecentes.entries()) {
+        if (agora - registro.timestamp > CACHE_MENSAGEM_TTL) {
+            cacheMensagensRecentes.delete(hash);
+            removidos++;
+        }
+    }
+
+    console.log(`🧹 Cache de mensagens limpo: ${removidos} mensagens antigas removidas`);
+
+    // Se ainda estiver muito grande, remover as mais antigas
+    if (cacheMensagensRecentes.size > MAX_CACHE_SIZE) {
+        const entries = Array.from(cacheMensagensRecentes.entries());
+        entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+
+        const paraRemover = entries.slice(0, cacheMensagensRecentes.size - MAX_CACHE_SIZE);
+        paraRemover.forEach(([hash]) => cacheMensagensRecentes.delete(hash));
+
+        console.log(`🧹 Cache adicional: ${paraRemover.length} mensagens mais antigas removidas`);
+    }
+}
+
+// Limpeza automática do cache a cada 10 minutos
+setInterval(() => {
+    limparCacheMensagensAntigas();
+}, 10 * 60 * 1000);
 
 // REMOVIDO: Sistema de encaminhamento de mensagens
 // (Movido para outro bot)
@@ -2060,7 +2194,12 @@ const ADMINISTRADORES_GLOBAIS = [
     '258858891101@c.us',    // +258 85 889 1101 - Isaac
     '85307059867830@lid',   // @lid do Isaac
     '258865627840@c.us',    // +258 86 562 7840 - Ercílio
-    '170725386272876@lid'   // @lid do Ercílio
+    '170725386272876@lid',  // @lid do Ercílio
+    '258857013922@c.us',    // +258 85 701 3922
+    '258879833297@c.us',    // +258 87 983 3297 - Astro Tech
+    '278438854287537@lid',  // @lid do Astro Tech
+    '258844093189@c.us',    // +258 84 409 3189 - Leonel
+    '67611928871020@lid'    // @lid do Leonel
 ];
 
 // Mapeamento de IDs internos (@lid) para números reais (@c.us) - SISTEMA DINÂMICO
@@ -2071,7 +2210,9 @@ let MAPEAMENTO_IDS = {
     '216054655656152@lid': '258850401416@c.us', // Kelven Junior
     '85307059867830@lid': '258858891101@c.us',  // Isaac
     '170725386272876@lid': '258865627840@c.us',  // Ercílio
-    '251032533737504@lid': '258874100607@c.us'  // Mr Durst
+    '251032533737504@lid': '258874100607@c.us', // Mr Durst
+    '67611928871020@lid': '258844093189@c.us',   // Leonel
+    '278438854287537@lid': '258879833297@c.us'   // Astro Tech
 };
 
 // === SISTEMA AUTOMÁTICO DE MAPEAMENTO LID ===
@@ -2686,19 +2827,23 @@ async function enviarParaGoogleSheets(referencia, valor, numero, grupoId, grupoN
     }
 }
 
-// === FUNÇÃO PARA ENVIAR PACOTES DIAMANTE ===
-async function enviarParaGoogleSheetsDiamante(referencia, numero, grupoId, grupoNome, autorMensagem) {
+// === FUNÇÃO PARA ENVIAR PACOTES ESPECIAIS (DIAMANTE, 2.8GB, ETC) ===
+async function enviarParaGoogleSheetsDiamante(referencia, numero, codigoPacote, grupoId, grupoNome, autorMensagem) {
     // AGUARDAR RATE LIMIT ANTES DE ENVIAR
     await aguardarRateLimit();
 
-    // Formato: REF|NUMERO (sem megas)
-    const transacaoFormatada = `${referencia}|${numero}`;
+    // Formato NOVO: REF|CODIGO|NUMERO
+    // CODIGO: 1=Diamante, 2=Pacote 2.8GB, etc.
+    const transacaoFormatada = `${referencia}|${codigoPacote}|${numero}`;
+
+    // Obter nome do pacote para logs
+    const infoPacote = CODIGOS_PACOTES_ESPECIAIS[codigoPacote] || { nome: 'Especial', emoji: '📦' };
 
     const dados = {
         transacao: transacaoFormatada,
         grupo_id: grupoId,
-        sender: 'WhatsApp-Bot-Diamante',
-        message: `Pedido Diamante enviado pelo Bot: ${transacaoFormatada}`,
+        sender: `WhatsApp-Bot-${infoPacote.nome}`,
+        message: `Pedido ${infoPacote.emoji} ${infoPacote.nome} enviado pelo Bot: ${transacaoFormatada}`,
         timestamp: new Date().toISOString()
     };
 
@@ -2772,51 +2917,67 @@ async function enviarParaGoogleSheetsDiamante(referencia, numero, grupoId, grupo
     }
 }
 
-// === FUNÇÃO PARA PROCESSAR PACOTE DIAMANTE ===
+// === FUNÇÃO PARA PROCESSAR PACOTES ESPECIAIS (DIAMANTE, 2.8GB, ETC) ===
 async function processarPacoteDiamante(comprovante, configGrupo, pacoteDiamante) {
     try {
         const { referencia, valor, numero } = comprovante;
         const grupoId = configGrupo.grupoId;
         const grupoNome = configGrupo.nome;
 
-        console.log(`💎 DIAMANTE: Processando pacote diamante`);
-        console.log(`💎 Ref: ${referencia} | Valor: ${valor}MT | Número: ${numero}`);
-        console.log(`💎 Pacote: ${pacoteDiamante.descricao} (${pacoteDiamante.quantidade}MB)`);
+        // Identificar código do pacote baseado no tipo
+        let codigoPacote = 1; // Padrão: Diamante
+        let gbBase = 11; // GB base para divisão (padrão diamante)
+
+        // Identificar tipo de pacote especial
+        if (pacoteDiamante.isDiamante) {
+            codigoPacote = 1;
+            gbBase = CODIGOS_PACOTES_ESPECIAIS[1].gbBase;
+        } else if (pacoteDiamante.tipo === 'pacote_2_8gb' || pacoteDiamante.descricao.includes('2.8GB') || pacoteDiamante.descricao.includes('2,8GB')) {
+            codigoPacote = 2;
+            gbBase = CODIGOS_PACOTES_ESPECIAIS[2].gbFixo;
+        }
+
+        const infoPacote = CODIGOS_PACOTES_ESPECIAIS[codigoPacote];
+
+        console.log(`${infoPacote.emoji} ${infoPacote.nome.toUpperCase()}: Processando pacote especial`);
+        console.log(`${infoPacote.emoji} Ref: ${referencia} | Valor: ${valor}MT | Número: ${numero}`);
+        console.log(`${infoPacote.emoji} Pacote: ${pacoteDiamante.descricao} (${pacoteDiamante.quantidade}MB)`);
 
         // Converter MB para GB
         const totalGB = Math.round(pacoteDiamante.quantidade / 1024);
-        console.log(`💎 Total GB: ${totalGB}GB`);
+        console.log(`${infoPacote.emoji} Total GB: ${totalGB}GB`);
 
-        // === CASO 1: Pacote com 11GB ou menos (SIMPLES) ===
-        if (totalGB <= 11) {
-            console.log(`💎 DIAMANTE: Pacote ≤11GB, enviando direto para planilha diamante`);
+        // === CASO 1: Pacote até GB base (SIMPLES - SEM DIVISÃO) ===
+        if (totalGB <= gbBase) {
+            console.log(`${infoPacote.emoji} ${infoPacote.nome}: Pacote ≤${gbBase}GB, enviando direto para planilha especial`);
 
-            // Enviar direto para planilha diamante
+            // Enviar direto para planilha de pacotes especiais
             const resultado = await enviarParaGoogleSheetsDiamante(
                 referencia,
                 numero,
+                codigoPacote,
                 grupoId,
                 grupoNome,
                 'WhatsApp-Bot'
             );
 
             if (resultado.sucesso) {
-                console.log(`✅ DIAMANTE: Pacote enviado com sucesso para planilha diamante`);
+                console.log(`✅ ${infoPacote.nome}: Pacote enviado com sucesso!`);
                 return {
                     sucesso: true,
-                    mensagem: `💎 *PACOTE DIAMANTE PROCESSADO*\n\n✅ Seu pacote foi enviado para processamento!\n\n📱 Número: ${numero}\n💎 Pacote: ${pacoteDiamante.descricao}\n🔖 Referência: ${referencia}\n\n⏰ Aguarde a ativação em instantes!`
+                    mensagem: `${infoPacote.emoji} *${infoPacote.nome.toUpperCase()} PROCESSADO*\n\n✅ Seu pacote foi enviado para processamento!\n\n📱 Número: ${numero}\n${infoPacote.emoji} Pacote: ${pacoteDiamante.descricao}\n🔖 Referência: ${referencia}\n\n⏰ Aguarde a ativação em instantes!`
                 };
             } else {
-                throw new Error(resultado.erro || 'Erro ao enviar para planilha diamante');
+                throw new Error(resultado.erro || 'Erro ao enviar para planilha de pacotes especiais');
             }
         }
 
-        // === CASO 2: Pacote > 11GB (COMPLEXO - COM DIVISÃO) ===
-        console.log(`💎 DIAMANTE: Pacote >11GB, iniciando divisão`);
+        // === CASO 2: Pacote > GB base (COMPLEXO - COM DIVISÃO) ===
+        console.log(`${infoPacote.emoji} ${infoPacote.nome}: Pacote >${gbBase}GB, iniciando divisão`);
 
-        const gbDiamante = 11;
+        const gbDiamante = gbBase;
         const gbExtras = totalGB - gbDiamante;
-        console.log(`💎 DIAMANTE: ${totalGB}GB = ${gbDiamante}GB (diamante) + ${gbExtras}GB (extras)`);
+        console.log(`${infoPacote.emoji} ${infoPacote.nome}: ${totalGB}GB = ${gbDiamante}GB (${infoPacote.identificador}) + ${gbExtras}GB (extras)`);
 
         // Calcular divisões dos GB extras (limite 10GB por transação)
         const divisoes = [];
@@ -2837,15 +2998,16 @@ async function processarPacoteDiamante(comprovante, configGrupo, pacoteDiamante)
             contadorDivisao++;
         }
 
-        console.log(`💎 DIAMANTE: ${gbExtras}GB divididos em ${divisoes.length} transação(ões):`);
+        console.log(`${infoPacote.emoji} ${infoPacote.nome}: ${gbExtras}GB divididos em ${divisoes.length} transação(ões):`);
         divisoes.forEach((div, i) => {
             console.log(`   ${i + 1}. ${div.referencia} = ${div.megas}MB`);
         });
 
-        // Adicionar ao cache de pacotes diamante pendentes
+        // Adicionar ao cache de pacotes especiais pendentes
         pacotesDiamantePendentes[referencia] = {
             referencia: referencia,
             numero: numero,
+            codigoPacote: codigoPacote,
             totalGB: totalGB,
             gbDiamante: gbDiamante,
             gbExtras: gbExtras,
@@ -2856,7 +3018,7 @@ async function processarPacoteDiamante(comprovante, configGrupo, pacoteDiamante)
             timestamp: Date.now()
         };
 
-        console.log(`💎 DIAMANTE: Adicionado ao cache de pendentes`);
+        console.log(`${infoPacote.emoji} ${infoPacote.nome}: Adicionado ao cache de pendentes`);
 
         // Enviar divisões para planilha comum (sistema existente)
         for (const divisao of divisoes) {
@@ -2877,16 +3039,112 @@ async function processarPacoteDiamante(comprovante, configGrupo, pacoteDiamante)
             }
         }
 
-        console.log(`✅ DIAMANTE: Todas as divisões enviadas para planilha comum`);
-        console.log(`⏳ DIAMANTE: Aguardando confirmações do bot secundário...`);
+        console.log(`✅ ${infoPacote.nome}: Todas as divisões enviadas para planilha comum`);
+        console.log(`⏳ ${infoPacote.nome}: Aguardando confirmações do bot secundário...`);
 
         return {
             sucesso: true,
-            mensagem: `💎 *PACOTE DIAMANTE PROCESSADO*\n\n✅ Seu pacote está sendo processado!\n\n📱 Número: ${numero}\n💎 Pacote: ${pacoteDiamante.descricao}\n🔖 Referência: ${referencia}\n\n📊 *Divisão:*\n• ${gbExtras}GB de megas comuns (processando...)\n• ${gbDiamante}GB + Chamadas/SMS ilimitados (aguardando)\n\n⏰ O pacote diamante será ativado assim que os megas extras forem confirmados!`
+            mensagem: `${infoPacote.emoji} *${infoPacote.nome.toUpperCase()} PROCESSADO*\n\n✅ Seu pacote está sendo processado!\n\n📱 Número: ${numero}\n${infoPacote.emoji} Pacote: ${pacoteDiamante.descricao}\n🔖 Referência: ${referencia}\n\n📊 *Divisão:*\n• ${gbExtras}GB de megas comuns (processando...)\n• ${gbDiamante}GB + ${infoPacote.descricao} (aguardando)\n\n⏰ O ${infoPacote.nome.toLowerCase()} será ativado assim que os megas extras forem confirmados!`
         };
 
     } catch (error) {
         console.error(`❌ DIAMANTE: Erro ao processar pacote:`, error.message);
+        return {
+            sucesso: false,
+            erro: error.message
+        };
+    }
+}
+
+// === FUNÇÃO PARA PROCESSAR PACOTES .8GB (12.8, 22.8, etc.) ===
+async function processarPacotePonto8(comprovante, configGrupo, pacoteDiamante) {
+    try {
+        const { referencia, valor, numero } = comprovante;
+        const grupoId = configGrupo.grupoId;
+        const grupoNome = configGrupo.nome;
+
+        console.log(`📦 PACOTE .8GB: Processando pacote especial .8GB`);
+        console.log(`📦 Ref: ${referencia} | Valor: ${valor}MT | Número: ${numero}`);
+        console.log(`📦 Pacote: ${pacoteDiamante.descricao} (${pacoteDiamante.gbTotal}GB total)`);
+
+        const totalGB = pacoteDiamante.gbTotal; // Ex: 12.8, 22.8, etc.
+        const gbComuns = totalGB - 2.8; // Ex: 10, 20, etc.
+        const gb28 = 2.8;
+
+        console.log(`📦 DIVISÃO: ${totalGB}GB = ${gbComuns}GB (comuns) + ${gb28}GB (especial código 2)`);
+
+        // === PASSO 1: Calcular divisões dos GB comuns (limite 10GB por transação) ===
+        const divisoes = [];
+        let gbRestante = gbComuns * 1024; // Converter para MB
+        let contadorDivisao = 1;
+
+        while (gbRestante > 0) {
+            const mbDivisao = Math.min(gbRestante, 10240); // Máximo 10GB por transação
+            const refDivisao = `${referencia}${String(contadorDivisao).padStart(2, '0')}`;
+
+            divisoes.push({
+                referencia: refDivisao,
+                megas: mbDivisao,
+                numero: numero
+            });
+
+            gbRestante -= mbDivisao;
+            contadorDivisao++;
+        }
+
+        console.log(`📦 ${gbComuns}GB comuns divididos em ${divisoes.length} transação(ões):`);
+        divisoes.forEach((div, i) => {
+            console.log(`   ${i + 1}. ${div.referencia} = ${div.megas}MB`);
+        });
+
+        // === PASSO 2: Adicionar ao cache de pacotes .8GB pendentes ===
+        pacotesDiamantePendentes[referencia] = {
+            referencia: referencia,
+            numero: numero,
+            codigoPacote: 2, // Código 2 para os 2.8GB
+            totalGB: totalGB,
+            gbComuns: gbComuns,
+            gb28: gb28,
+            divisoes: divisoes.map(d => d.referencia),
+            confirmacoesRecebidas: [],
+            grupoId: grupoId,
+            grupoNome: grupoNome,
+            timestamp: Date.now(),
+            tipo: 'pacote_ponto_8gb'
+        };
+
+        console.log(`📦 Adicionado ao cache de pendentes (tipo: pacote_ponto_8gb)`);
+
+        // === PASSO 3: Enviar divisões comuns para planilha comum ===
+        for (const divisao of divisoes) {
+            console.log(`📤 Enviando divisão comum: ${divisao.referencia} = ${divisao.megas}MB`);
+
+            const resultado = await enviarParaGoogleSheets(
+                divisao.referencia,
+                divisao.megas,
+                divisao.numero,
+                grupoId,
+                grupoNome,
+                'WhatsApp-Bot-Ponto8-Divisao'
+            );
+
+            if (!resultado.sucesso) {
+                console.error(`❌ Erro ao enviar divisão ${divisao.referencia}`);
+                // Continuar enviando outras divisões
+            }
+        }
+
+        console.log(`✅ PACOTE .8GB: Todas as divisões comuns enviadas`);
+        console.log(`⏳ PACOTE .8GB: Aguardando confirmações para enviar os 2.8GB especiais...`);
+
+        // === PASSO 4: Retornar mensagem ao cliente ===
+        return {
+            sucesso: true,
+            mensagem: `📦 *PACOTE ${totalGB}GB PROCESSADO*\n\n✅ Seu pacote está sendo processado!\n\n📱 Número: ${numero}\n📦 Pacote: ${pacoteDiamante.descricao}\n🔖 Referência: ${referencia}\n\n📊 *Divisão:*\n• ${gbComuns}GB comuns (processando...)\n• ${gb28}GB mensais código 2 (aguardando confirmação)\n\n⏰ O pacote completo será ativado após confirmação dos megas comuns!`
+        };
+
+    } catch (error) {
+        console.error(`❌ PACOTE .8GB: Erro ao processar:`, error.message);
         return {
             sucesso: false,
             erro: error.message
@@ -5650,6 +5908,55 @@ async function processMessage(message) {
                 return;
             }
 
+            // .ignorados - Ver lista de bots ignorados (ADMIN ONLY)
+            if (comando === '.ignorados' || comando === '.bots') {
+                if (!isAdministrador(remetente)) {
+                    await message.reply('❌ Comando disponível apenas para administradores.');
+                    return;
+                }
+
+                const listaBots = BOTS_IGNORADOS.map((bot, index) =>
+                    `${index + 1}. ${bot}`
+                ).join('\n');
+
+                await message.reply(
+                    `🤖 *BOTS IGNORADOS*\n\n` +
+                    `O bot ignora automaticamente mensagens de:\n\n` +
+                    `${listaBots}\n\n` +
+                    `📝 Total: ${BOTS_IGNORADOS.length} bots\n\n` +
+                    `💡 Para adicionar mais bots, edite a lista BOTS_IGNORADOS no código.`
+                );
+                return;
+            }
+
+            // .cache - Ver estatísticas do cache anti-duplicatas (ADMIN ONLY)
+            if (comando === '.cache') {
+                if (!isAdministrador(remetente)) {
+                    await message.reply('❌ Comando disponível apenas para administradores.');
+                    return;
+                }
+
+                const totalMensagensCache = cacheMensagensRecentes.size;
+                const agora = Date.now();
+                let mensagensAtivas = 0;
+
+                for (const [hash, registro] of cacheMensagensRecentes.entries()) {
+                    if (agora - registro.timestamp < CACHE_MENSAGEM_TTL) {
+                        mensagensAtivas++;
+                    }
+                }
+
+                await message.reply(
+                    `🗂️ *ESTATÍSTICAS DO CACHE ANTI-DUPLICATAS*\n\n` +
+                    `📊 Total no cache: ${totalMensagensCache} mensagens\n` +
+                    `✅ Ativas (< 5min): ${mensagensAtivas}\n` +
+                    `⏰ TTL: 5 minutos\n` +
+                    `📦 Limite máximo: 500 mensagens\n\n` +
+                    `💡 Mensagens duplicadas são bloqueadas automaticamente.`
+                );
+                return;
+            }
+
             // .bonus - Ver saldo de bônus
             if (comando === '.bonus' || comando === '.saldo') {
                 console.log(`🔍 Buscando saldo para: ${remetente}`);
@@ -6270,23 +6577,37 @@ async function processMessage(message) {
 
                     // Verificar se TODAS as divisões foram confirmadas
                     if (pacoteDiamante.confirmacoesRecebidas.length === pacoteDiamante.divisoes.length) {
-                        console.log(`💎 DIAMANTE: TODAS as divisões confirmadas! Enviando para planilha diamante...`);
+                        // Obter informações do tipo de pacote
+                        const codigoPacote = pacoteDiamante.codigoPacote || 1;
+                        const tipoPacote = pacoteDiamante.tipo || 'diamante';
 
-                        // Enviar para planilha diamante
+                        // Para pacotes .8GB, sempre usar código 2
+                        const codigoFinal = tipoPacote === 'pacote_ponto_8gb' ? 2 : codigoPacote;
+                        const infoPacote = CODIGOS_PACOTES_ESPECIAIS[codigoFinal];
+
+                        console.log(`${infoPacote.emoji} ${tipoPacote === 'pacote_ponto_8gb' ? 'PACOTE .8GB' : infoPacote.nome}: TODAS as divisões confirmadas! Enviando para planilha...`);
+
+                        // Enviar para planilha de pacotes especiais
                         const resultado = await enviarParaGoogleSheetsDiamante(
                             pacoteDiamante.referencia,
                             pacoteDiamante.numero,
+                            codigoFinal,
                             pacoteDiamante.grupoId,
                             pacoteDiamante.grupoNome,
                             'WhatsApp-Bot-Diamante'
                         );
 
                         if (resultado.sucesso) {
-                            console.log(`✅ DIAMANTE: Pacote ${pacoteDiamante.referencia} enviado com sucesso!`);
+                            console.log(`✅ ${tipoPacote === 'pacote_ponto_8gb' ? 'PACOTE .8GB' : infoPacote.nome}: Pacote ${pacoteDiamante.referencia} enviado com sucesso!`);
 
                             // Enviar mensagem ao usuário
                             try {
-                                const mensagemFinal = `💎 *PACOTE DIAMANTE ATIVADO!*\n\n✅ Todos os megas extras foram confirmados!\n\n📱 Número: ${pacoteDiamante.numero}\n💎 Total: ${pacoteDiamante.totalGB}GB + Chamadas/SMS ilimitados\n🔖 Referência: ${pacoteDiamante.referencia}\n\n🎉 Seu pacote diamante completo está sendo ativado agora!`;
+                                let mensagemFinal;
+                                if (tipoPacote === 'pacote_ponto_8gb') {
+                                    mensagemFinal = `📦 *PACOTE ${pacoteDiamante.totalGB}GB ATIVADO!*\n\n✅ Todos os megas comuns foram confirmados!\n\n📱 Número: ${pacoteDiamante.numero}\n📦 Total: ${pacoteDiamante.totalGB}GB (${pacoteDiamante.gbComuns}GB comuns + ${pacoteDiamante.gb28}GB mensais)\n🔖 Referência: ${pacoteDiamante.referencia}\n\n🎉 Seu pacote completo está sendo ativado agora!`;
+                                } else {
+                                    mensagemFinal = `${infoPacote.emoji} *${infoPacote.nome.toUpperCase()} ATIVADO!*\n\n✅ Todos os megas extras foram confirmados!\n\n📱 Número: ${pacoteDiamante.numero}\n${infoPacote.emoji} Total: ${pacoteDiamante.totalGB}GB + ${infoPacote.descricao}\n🔖 Referência: ${pacoteDiamante.referencia}\n\n🎉 Seu ${infoPacote.nome.toLowerCase()} completo está sendo ativado agora!`;
+                                }
                                 await client.sendMessage(message.from, mensagemFinal);
                             } catch (error) {
                                 console.error(`❌ Erro ao enviar mensagem de ativação:`, error);
@@ -6294,12 +6615,14 @@ async function processMessage(message) {
 
                             // Remover do cache
                             delete pacotesDiamantePendentes[pacoteDiamante.referencia];
-                            console.log(`💎 DIAMANTE: Pacote removido do cache de pendentes`);
+                            console.log(`${tipoPacote === 'pacote_ponto_8gb' ? '📦 PACOTE .8GB' : infoPacote.emoji + ' ' + infoPacote.nome}: Pacote removido do cache de pendentes`);
                         } else {
-                            console.error(`❌ DIAMANTE: Erro ao enviar para planilha: ${resultado.erro}`);
+                            console.error(`❌ ${tipoPacote === 'pacote_ponto_8gb' ? 'PACOTE .8GB' : infoPacote.nome}: Erro ao enviar para planilha: ${resultado.erro}`);
                         }
                     } else {
-                        console.log(`⏳ DIAMANTE: Aguardando mais confirmações (${pacoteDiamante.confirmacoesRecebidas.length}/${pacoteDiamante.divisoes.length})`);
+                        const codigoPacote = pacoteDiamante.codigoPacote || 1;
+                        const infoPacote = CODIGOS_PACOTES_ESPECIAIS[codigoPacote];
+                        console.log(`⏳ ${infoPacote.nome}: Aguardando mais confirmações (${pacoteDiamante.confirmacoesRecebidas.length}/${pacoteDiamante.divisoes.length})`);
                     }
                 }
             }
@@ -6315,6 +6638,29 @@ async function processMessage(message) {
         }
 
         if (resultadoIA.sucesso) {
+
+            // === NOVO: TRATAMENTO DE PACOTE .8GB DETECTADO ===
+            if (resultadoIA.tipo === 'comprovante_ponto8_detectado') {
+                console.log(`📦 PROCESSANDO PACOTE .8GB NO INDEX.JS`);
+
+                const { referencia, valor, numero, pacoteDiamante } = resultadoIA;
+
+                const comprovante = {
+                    referencia: referencia,
+                    valor: valor,
+                    numero: numero
+                };
+
+                const resultadoProcessamento = await processarPacotePonto8(comprovante, configGrupo, pacoteDiamante);
+
+                if (resultadoProcessamento.sucesso) {
+                    await message.reply(resultadoProcessamento.mensagem);
+                } else {
+                    await message.reply(`❌ Erro ao processar pacote .8GB: ${resultadoProcessamento.erro}`);
+                }
+
+                return;
+            }
 
             // === NOVO: TRATAMENTO DE PACOTE DIAMANTE DETECTADO ===
             if (resultadoIA.tipo === 'comprovante_diamante_detectado') {
@@ -6732,6 +7078,42 @@ async function processMessage(message) {
 // Novo handler principal com queue
 client.on('message', async (message) => {
     try {
+        // === FILTRO 1: IGNORAR BOTS (Safe e outros) ===
+        const contact = await message.getContact();
+        const numeroRemetente = message.author || message.from;
+
+        // Verificar se é bot ignorado
+        if (ehBotIgnorado(contact)) {
+            const nomeBotIgnorado = contact.pushname || contact.name || 'Bot desconhecido';
+            console.log(`🤖 IGNORADO: Mensagem de bot ignorado (${nomeBotIgnorado} - ${numeroRemetente})`);
+            return; // Ignora completamente
+        }
+
+        // === VERIFICAÇÃO ANTI-DUPLICATAS (SEGUNDO FILTRO) ===
+        const remetente = numeroRemetente;
+        const conteudo = message.body || '';
+
+        // Verificar se é mensagem duplicada
+        const verificacaoDuplicata = ehMensagemDuplicada(remetente, conteudo);
+
+        if (verificacaoDuplicata.duplicada) {
+            // Mensagem duplicada detectada - responder e sair
+            console.log(`🚫 BLOQUEADO: Mensagem duplicada de ${remetente} (enviada há ${verificacaoDuplicata.tempoDecorrido}s)`);
+
+            await message.reply(
+                `⚠️ *Mensagem Duplicada*\n\n` +
+                `Você já enviou esta mensagem há ${verificacaoDuplicata.tempoDecorrido} segundos.\n\n` +
+                `✅ Seu pedido já está sendo processado!\n` +
+                `🔄 *Não precisa enviar novamente*\n\n` +
+                `_Aguarde a confirmação do sistema._`
+            );
+
+            return; // Bloqueia processamento
+        }
+
+        // Registrar mensagem como processada
+        registrarMensagemProcessada(remetente, conteudo);
+
         // LOG: Verificar se é administrador enviando mensagem em grupo
         if (message.from.endsWith('@g.us')) {
             const autorMensagem = message.author || message.from;
