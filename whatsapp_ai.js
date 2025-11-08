@@ -297,11 +297,11 @@ Procura por:
 INSTRUÇÕES IMPORTANTES:
 - A REFERÊNCIA pode estar QUEBRADA em múltiplas linhas. Ex: "PP250901.1250.B" + "64186" = "PP250901.1250.B64186"
 - RECONSTRÓI referências que estão separadas por quebras de linha
-- Procura por "ID da transacao", "Confirmado", "Transferiste"
+- Procura por "ID da transacao", "Confirmado", "Transferiste", "Recebeste"
 - Junta códigos que aparecem próximos e parecem ser parte da mesma referência
 - O valor pode estar em formato "100.00MT", "100MT", "100,00MT"
-- ATENÇÃO: Procura pelo valor após "Transferiste" - NÃO o saldo da conta!
-- Exemplo: "Transferiste 17.00MT" = valor é 17.00, não o saldo mencionado depois
+- ATENÇÃO: Procura pelo valor após "Transferiste" ou "Recebeste" - NÃO o saldo da conta!
+- Exemplo: "Transferiste 17.00MT" ou "Recebeste 51.00MT" = valor é 17.00 ou 51.00, não o saldo mencionado depois
 
 EXEMPLOS DE RECONSTRUÇÃO:
 - Se vês "PP250901.1250.B" e depois "64186", a referência é "PP250901.1250.B64186"
@@ -1735,7 +1735,7 @@ Procura por:
 2. Valor transferido (em MT - Meticais)
 
 ATENÇÃO: 
-- Procura por palavras como "Confirmado", "ID da transacao", "Transferiste"
+- Procura por palavras como "Confirmado", "ID da transacao", "Transferiste", "Recebeste"
 - O valor pode estar em formato "100.00MT", "100MT", "100,00MT"
 - A referência é geralmente um código alfanumérico
 
