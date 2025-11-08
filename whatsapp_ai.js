@@ -2074,9 +2074,10 @@ Se não conseguires ler a imagem ou extrair os dados:
     }
     
     const temConfirmado = /^confirmado/i.test(mensagemLimpa);
-    const temID = /^id\s/i.test(mensagemLimpa);
-    
-    if (!temConfirmado && !temID) {
+    const temID = /^id\s|^id\sda\stransacao/i.test(mensagemLimpa);
+    const temRecebeste = /recebeste\s+\d+\.?\d*\s*mt/i.test(mensagemLimpa);
+
+    if (!temConfirmado && !temID && !temRecebeste) {
       return null;
     }
 
@@ -2087,8 +2088,12 @@ Analisa esta mensagem de comprovante de pagamento M-Pesa ou E-Mola de Moçambiqu
 
 Extrai a referência da transação e o valor transferido.
 Procura especialmente por padrões como:
-- "Confirmado [REFERENCIA]" 
+- "Confirmado [REFERENCIA]"
+- "ID da transacao: [REFERENCIA]"
 - "Transferiste [VALOR]MT"
+- "Recebeste [VALOR]MT"
+
+IMPORTANTE: O valor é o que foi transferido ou recebido, NÃO o saldo da conta!
 
 Responde APENAS no formato JSON:
 {
