@@ -40,15 +40,34 @@ class SistemaBonus {
                 // PROTEÇÃO: Arquivo vazio
                 if (!dados || dados.trim().length === 0) {
                     console.log(`⚠️ Arquivo de bônus está VAZIO! Tentando restaurar backup...`);
-                    await this.restaurarBackup(this.ARQUIVO_BONUS, 'bonus');
-                    // Tentar ler novamente após restaurar
-                    const dadosBackup = await fs.readFile(this.ARQUIVO_BONUS, 'utf8');
-                    if (dadosBackup && dadosBackup.trim().length > 0) {
-                        this.bonusSaldos = JSON.parse(dadosBackup);
-                        console.log(`✅ Backup restaurado: ${Object.keys(this.bonusSaldos).length} saldos`);
-                    } else {
-                        console.log(`⚠️ Nenhum backup disponível - iniciando vazio`);
+                    try {
+                        await this.restaurarBackup(this.ARQUIVO_BONUS, 'bonus');
+                        // Tentar ler novamente após restaurar
+                        const dadosBackup = await fs.readFile(this.ARQUIVO_BONUS, 'utf8');
+                        if (dadosBackup && dadosBackup.trim().length > 0) {
+                            this.bonusSaldos = JSON.parse(dadosBackup);
+                            console.log(`✅ Backup restaurado com sucesso: ${Object.keys(this.bonusSaldos).length} saldos`);
+
+                            // Mostrar exemplos do backup restaurado
+                            const exemplos = Object.entries(this.bonusSaldos).slice(0, 3);
+                            if (exemplos.length > 0) {
+                                console.log(`💰 Saldos restaurados:`);
+                                exemplos.forEach(([cliente, dados]) => {
+                                    console.log(`   - ${cliente}: ${dados.saldo}MB`);
+                                });
+                            }
+                        } else {
+                            console.log(`⚠️ Backup também está vazio - criando arquivo inicial`);
+                            this.bonusSaldos = {};
+                            await fs.writeFile(this.ARQUIVO_BONUS, JSON.stringify({}, null, 2));
+                            console.log(`✅ Arquivo inicial criado`);
+                        }
+                    } catch (backupError) {
+                        console.log(`⚠️ Falha ao restaurar backup: ${backupError.message}`);
+                        console.log(`⚠️ Criando arquivo inicial vazio`);
                         this.bonusSaldos = {};
+                        await fs.writeFile(this.ARQUIVO_BONUS, JSON.stringify({}, null, 2));
+                        console.log(`✅ Arquivo inicial criado`);
                     }
                 } else {
                     this.bonusSaldos = JSON.parse(dados);
@@ -72,8 +91,11 @@ class SistemaBonus {
                     this.bonusSaldos = JSON.parse(dadosBackup);
                     console.log(`✅ Backup restaurado: ${Object.keys(this.bonusSaldos).length} saldos`);
                 } catch (backupError) {
-                    console.log(`⚠️ Nenhum backup disponível - iniciando vazio`);
+                    console.log(`⚠️ Nenhum backup disponível - criando arquivo inicial`);
                     this.bonusSaldos = {};
+                    // Criar arquivo inicial
+                    await fs.writeFile(this.ARQUIVO_BONUS, JSON.stringify({}, null, 2));
+                    console.log(`✅ Arquivo inicial criado`);
                 }
             }
 
@@ -167,6 +189,9 @@ class SistemaBonus {
 
             if (erros === 0) {
                 console.log(`✅ BONUS: Todos os dados salvos com sucesso!`);
+
+                // VERIFICAÇÃO PÓS-SALVAMENTO: Confirmar que arquivo não está vazio
+                await this.verificarIntegridadeArquivos();
             } else {
                 console.error(`⚠️ BONUS: ${erros} arquivo(s) falharam ao salvar`);
             }
@@ -218,6 +243,24 @@ class SistemaBonus {
         } catch (error) {
             console.log(`⚠️ Nenhum backup de ${tipo} disponível`);
             throw error;
+        }
+    }
+
+    // === VERIFICAR INTEGRIDADE DOS ARQUIVOS ===
+    async verificarIntegridadeArquivos() {
+        try {
+            // Verificar arquivo de bônus
+            const dados = await fs.readFile(this.ARQUIVO_BONUS, 'utf8');
+            if (!dados || dados.trim().length === 0) {
+                console.error(`❌ CRÍTICO: Arquivo de bônus ficou VAZIO após salvar!`);
+                console.error(`❌ Tentando restaurar do backup...`);
+                await this.restaurarBackup(this.ARQUIVO_BONUS, 'bonus');
+            } else {
+                const numSaldos = Object.keys(this.bonusSaldos).length;
+                console.log(`✅ Integridade confirmada: ${dados.length} caracteres, ${numSaldos} saldos`);
+            }
+        } catch (error) {
+            console.error(`⚠️ Erro ao verificar integridade:`, error.message);
         }
     }
 
