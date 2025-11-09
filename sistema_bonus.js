@@ -28,15 +28,28 @@ class SistemaBonus {
     // === CARREGAR DADOS PERSISTIDOS ===
     async carregarDados() {
         console.log('💰 Carregando dados de bônus...');
+        console.log(`💰 Diretório: ${__dirname}`);
+        console.log(`💰 Arquivo de bônus: ${this.ARQUIVO_BONUS}`);
 
         try {
             // Carregar saldos de bônus
             try {
                 const dados = await fs.readFile(this.ARQUIVO_BONUS, 'utf8');
+                console.log(`💰 Arquivo lido com sucesso (${dados.length} caracteres)`);
                 this.bonusSaldos = JSON.parse(dados);
                 console.log(`💰 ${Object.keys(this.bonusSaldos).length} saldos de bônus carregados`);
+
+                // Mostrar alguns saldos como exemplo
+                const exemplos = Object.entries(this.bonusSaldos).slice(0, 3);
+                if (exemplos.length > 0) {
+                    console.log(`💰 Exemplos carregados:`);
+                    exemplos.forEach(([cliente, dados]) => {
+                        console.log(`   - ${cliente}: ${dados.saldo}MB`);
+                    });
+                }
             } catch (error) {
-                console.log(`💰 Nenhum saldo de bônus encontrado - iniciando limpo`);
+                console.log(`💰 Erro ao carregar saldos: ${error.message}`);
+                console.log(`💰 Iniciando com saldos vazios`);
                 this.bonusSaldos = {};
             }
 
@@ -82,6 +95,14 @@ class SistemaBonus {
         try {
             console.log(`💾 BONUS: Salvando dados...`);
 
+            // Log de estatísticas antes de salvar
+            const numSaldos = Object.keys(this.bonusSaldos).length;
+            const numSaques = Object.keys(this.pedidosSaque).length;
+            const numCodigos = Object.keys(this.codigosReferencia).length;
+            const numReferencias = Object.keys(this.referenciasClientes).length;
+
+            console.log(`💾 ${numSaldos} saldos, ${numSaques} saques, ${numCodigos} códigos, ${numReferencias} referências`);
+
             // Salvar todos os arquivos em paralelo (mais rápido)
             const resultados = await Promise.allSettled([
                 fs.writeFile(this.ARQUIVO_BONUS, JSON.stringify(this.bonusSaldos, null, 2)),
@@ -92,12 +113,14 @@ class SistemaBonus {
 
             // Verificar erros
             const nomeArquivos = ['BONUS', 'SAQUES', 'CODIGOS', 'REFERENCIAS'];
+            const caminhos = [this.ARQUIVO_BONUS, this.ARQUIVO_SAQUES, this.ARQUIVO_CODIGOS, this.ARQUIVO_REFERENCIAS];
             let erros = 0;
             resultados.forEach((resultado, index) => {
                 if (resultado.status === 'fulfilled') {
-                    console.log(`   ✅ ${nomeArquivos[index]} salvo`);
+                    console.log(`   ✅ ${nomeArquivos[index]} salvo em ${caminhos[index]}`);
                 } else {
                     console.error(`   ❌ ${nomeArquivos[index]} FALHOU:`, resultado.reason);
+                    console.error(`   📁 Caminho: ${caminhos[index]}`);
                     erros++;
                 }
             });

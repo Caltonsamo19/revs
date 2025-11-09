@@ -174,6 +174,9 @@ const SistemaRelatorios = require('./sistema_relatorios');
 // === IMPORTAR SISTEMA DE BÔNUS ===
 const SistemaBonus = require('./sistema_bonus');
 
+// === IMPORTAR SISTEMA DE CONFIGURAÇÃO DE GRUPOS ===
+const SistemaConfigGrupos = require('./sistema_config_grupos');
+
 // === CONFIGURAÇÃO GOOGLE SHEETS - BOT RETALHO (SCRIPT PRÓPRIO) ===
 const GOOGLE_SHEETS_CONFIG = {
     scriptUrl: process.env.GOOGLE_SHEETS_SCRIPT_URL_RETALHO || 'https://script.google.com/macros/s/AKfycbyMilUC5bYKGXV95LR4MmyaRHzMf6WCmXeuztpN0tDpQ9_2qkgCxMipSVqYK_Q6twZG/exec',
@@ -268,6 +271,7 @@ const ia = new WhatsAppAI(process.env.OPENAI_API_KEY);
 let sistemaPacotes = null;
 let sistemaCompras = null;
 let sistemaBonus = null;
+let sistemaConfigGrupos = null;
 
 // === LISTA DE BOTS PARA IGNORAR ===
 // Adicione aqui nomes de bots que devem ser ignorados
@@ -296,14 +300,32 @@ function ehBotIgnorado(contact) {
     );
 }
 
-// === SISTEMA ANTI-DUPLICATAS DE MENSAGENS ===
-// Cache de mensagens recentes para evitar processamento duplicado
-const cacheMensagensRecentes = new Map();
-const CACHE_MENSAGEM_TTL = 5 * 60 * 1000; // 5 minutos
-const MAX_CACHE_SIZE = 500; // Máximo de mensagens no cache
+// === SISTEMA ANTI-DUPLICATAS DE COMPROVANTES ===
+// Cache de COMPROVANTES recentes para evitar processamento duplicado
+const cacheComprovantesRecentes = new Map();
+const CACHE_COMPROVANTE_TTL = 5 * 60 * 1000; // 5 minutos
+const MAX_CACHE_SIZE = 500; // Máximo de comprovantes no cache
 
-// Função para gerar hash único da mensagem
-function gerarHashMensagem(remetente, conteudo) {
+// Função para identificar se mensagem é um comprovante M-Pesa/E-Mola
+function ehComprovante(conteudo) {
+    if (!conteudo || typeof conteudo !== 'string') return false;
+
+    const conteudoLower = conteudo.toLowerCase();
+
+    // Padrões REAIS de comprovantes M-Pesa e E-Mola
+    const iniciaComConfirmado = /^confirmado/i.test(conteudo);
+    const contemIdTransacao = /id\s*da\s*transac[aã]o/i.test(conteudo);
+    const contemTransferiste = /transferiste.*mt/i.test(conteudo);
+
+    // É comprovante se:
+    // 1. Inicia com "Confirmado" OU
+    // 2. Contém "ID da transação" OU
+    // 3. Contém "Transferiste X.XXMT"
+    return iniciaComConfirmado || contemIdTransacao || contemTransferiste;
+}
+
+// Função para gerar hash único do comprovante
+function gerarHashComprovante(remetente, conteudo) {
     // Normalizar conteúdo (remover espaços extras, quebras de linha, etc)
     const conteudoNormalizado = conteudo
         .toLowerCase()
@@ -314,17 +336,23 @@ function gerarHashMensagem(remetente, conteudo) {
     return `${remetente}_${conteudoNormalizado}`;
 }
 
-// Função para verificar se mensagem é duplicada
-function ehMensagemDuplicada(remetente, conteudo) {
-    const hashMensagem = gerarHashMensagem(remetente, conteudo);
+// Função para verificar se COMPROVANTE é duplicado
+function ehComprovanteDuplicado(remetente, conteudo) {
+    // PRIMEIRO: Verificar se é um comprovante
+    if (!ehComprovante(conteudo)) {
+        // NÃO é comprovante, não controlar duplicatas
+        return { duplicada: false, naoEhComprovante: true };
+    }
+
+    const hashComprovante = gerarHashComprovante(remetente, conteudo);
     const agora = Date.now();
 
-    // Verificar se mensagem já foi processada recentemente
-    const registro = cacheMensagensRecentes.get(hashMensagem);
+    // Verificar se comprovante já foi processado recentemente
+    const registro = cacheComprovantesRecentes.get(hashComprovante);
 
-    if (registro && (agora - registro.timestamp < CACHE_MENSAGEM_TTL)) {
+    if (registro && (agora - registro.timestamp < CACHE_COMPROVANTE_TTL)) {
         const tempoDecorrido = Math.floor((agora - registro.timestamp) / 1000);
-        console.log(`⚠️ DUPLICATA DETECTADA: Mensagem de ${remetente} já processada há ${tempoDecorrido}s`);
+        console.log(`⚠️ COMPROVANTE DUPLICADO: De ${remetente} já processado há ${tempoDecorrido}s`);
         return {
             duplicada: true,
             tempoDecorrido: tempoDecorrido,
@@ -335,51 +363,58 @@ function ehMensagemDuplicada(remetente, conteudo) {
     return { duplicada: false };
 }
 
-// Função para registrar mensagem processada
-function registrarMensagemProcessada(remetente, conteudo) {
-    const hashMensagem = gerarHashMensagem(remetente, conteudo);
+// Função para registrar comprovante processado
+function registrarComprovanteProcessado(remetente, conteudo) {
+    // Só registrar se for comprovante
+    if (!ehComprovante(conteudo)) {
+        return; // Não cachear mensagens normais
+    }
+
+    const hashComprovante = gerarHashComprovante(remetente, conteudo);
 
     // Adicionar ao cache
-    cacheMensagensRecentes.set(hashMensagem, {
+    cacheComprovantesRecentes.set(hashComprovante, {
         timestamp: Date.now(),
         remetente: remetente
     });
 
     // Limpar cache se estiver muito grande
-    if (cacheMensagensRecentes.size > MAX_CACHE_SIZE) {
-        limparCacheMensagensAntigas();
+    if (cacheComprovantesRecentes.size > MAX_CACHE_SIZE) {
+        limparCacheComprovantesAntigos();
     }
 }
 
-// Função para limpar mensagens antigas do cache
-function limparCacheMensagensAntigas() {
+// Função para limpar comprovantes antigos do cache
+function limparCacheComprovantesAntigos() {
     const agora = Date.now();
     let removidos = 0;
 
-    for (const [hash, registro] of cacheMensagensRecentes.entries()) {
-        if (agora - registro.timestamp > CACHE_MENSAGEM_TTL) {
-            cacheMensagensRecentes.delete(hash);
+    for (const [hash, registro] of cacheComprovantesRecentes.entries()) {
+        if (agora - registro.timestamp > CACHE_COMPROVANTE_TTL) {
+            cacheComprovantesRecentes.delete(hash);
             removidos++;
         }
     }
 
-    console.log(`🧹 Cache de mensagens limpo: ${removidos} mensagens antigas removidas`);
+    if (removidos > 0) {
+        console.log(`🧹 Cache de comprovantes limpo: ${removidos} comprovantes antigos removidos`);
+    }
 
     // Se ainda estiver muito grande, remover as mais antigas
-    if (cacheMensagensRecentes.size > MAX_CACHE_SIZE) {
-        const entries = Array.from(cacheMensagensRecentes.entries());
+    if (cacheComprovantesRecentes.size > MAX_CACHE_SIZE) {
+        const entries = Array.from(cacheComprovantesRecentes.entries());
         entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
 
-        const paraRemover = entries.slice(0, cacheMensagensRecentes.size - MAX_CACHE_SIZE);
-        paraRemover.forEach(([hash]) => cacheMensagensRecentes.delete(hash));
+        const paraRemover = entries.slice(0, cacheComprovantesRecentes.size - MAX_CACHE_SIZE);
+        paraRemover.forEach(([hash]) => cacheComprovantesRecentes.delete(hash));
 
-        console.log(`🧹 Cache adicional: ${paraRemover.length} mensagens mais antigas removidas`);
+        console.log(`🧹 Cache adicional: ${paraRemover.length} comprovantes mais antigos removidos`);
     }
 }
 
 // Limpeza automática do cache a cada 10 minutos
 setInterval(() => {
-    limparCacheMensagensAntigas();
+    limparCacheComprovantesAntigos();
 }, 10 * 60 * 1000);
 
 // REMOVIDO: Sistema de encaminhamento de mensagens
@@ -3506,6 +3541,21 @@ function isGrupoMonitorado(chatId) {
 }
 
 function getConfiguracaoGrupo(chatId) {
+    // Verificar se existe configuração customizada
+    if (sistemaConfigGrupos) {
+        const configCustomizada = sistemaConfigGrupos.obterConfig(chatId);
+        if (configCustomizada && configCustomizada.tabela) {
+            // Usar config customizada, mas manter nome do padrão se existir
+            const configPadrao = CONFIGURACAO_GRUPOS[chatId];
+            return {
+                nome: configPadrao?.nome || configCustomizada.nome || 'Grupo',
+                tabela: configCustomizada.tabela,
+                pagamento: configCustomizada.pagamento || configPadrao?.pagamento || ''
+            };
+        }
+    }
+
+    // Usar configuração padrão do código
     return CONFIGURACAO_GRUPOS[chatId] || null;
 }
 
@@ -3877,6 +3927,11 @@ client.on('ready', async () => {
     sistemaBonus = new SistemaBonus();
     await sistemaBonus.carregarDados();
     console.log('💰 Sistema de Bônus ATIVADO');
+
+    // === INICIALIZAR SISTEMA DE CONFIGURAÇÃO DE GRUPOS ===
+    sistemaConfigGrupos = new SistemaConfigGrupos();
+    await sistemaConfigGrupos.carregarConfiguracoes();
+    console.log('⚙️ Sistema de Configuração de Grupos ATIVADO');
 
     // Carregar dados de referência (legado - será migrado)
     await carregarDadosReferencia();
@@ -5422,6 +5477,362 @@ async function processMessage(message) {
                 return;
             }
 
+            // === COMANDO PARA ADICIONAR NOVO GRUPO AO SISTEMA ===
+            if (comando === '.configurar') {
+                const grupoId = message.from;
+                const chat = await message.getChat();
+                const grupoNome = chat.name || 'Grupo';
+                const autorId = message.author || message.from;
+
+                // VERIFICAR SE É ADMINISTRADOR GLOBAL
+                const ehAdminGlobal = ADMINISTRADORES_GLOBAIS.includes(autorId);
+
+                if (!ehAdminGlobal) {
+                    await message.reply(
+                        `🔒 *ACESSO NEGADO*\n\n` +
+                        `⚠️ Apenas **administradores globais** podem adicionar grupos ao sistema.\n\n` +
+                        `📞 Solicite a um administrador do sistema.`
+                    );
+                    console.log(`🚫 ${autorId} tentou usar .configurar sem permissão global`);
+                    return;
+                }
+
+                // VERIFICAR SE GRUPO JÁ ESTÁ CONFIGURADO
+                const grupoJaConfigurado = CONFIGURACAO_GRUPOS.hasOwnProperty(grupoId);
+
+                if (grupoJaConfigurado) {
+                    await message.reply(
+                        `ℹ️ *GRUPO JÁ CONFIGURADO*\n\n` +
+                        `✅ Este grupo já está cadastrado no sistema.\n\n` +
+                        `📊 **Nome:** ${grupoNome}\n` +
+                        `🆔 **ID:** \`${grupoId}\`\n\n` +
+                        `💡 **Para alterar configurações:**\n` +
+                        `• \`.config-tabela\` - Alterar tabela de preços\n` +
+                        `• \`.config-pagamento\` - Alterar formas de pagamento\n` +
+                        `• \`.ver-config\` - Ver configuração atual`
+                    );
+                    return;
+                }
+
+                try {
+                    // ADICIONAR GRUPO AO SISTEMA
+                    CONFIGURACAO_GRUPOS[grupoId] = {
+                        nome: grupoNome,
+                        tabela: `📋 *TABELA DE PREÇOS*\n\n⚠️ Configure a tabela usando o comando \`.config-tabela\``,
+                        pagamento: `💳 *FORMAS DE PAGAMENTO*\n\n⚠️ Configure o pagamento usando o comando \`.config-pagamento\``
+                    };
+
+                    // Salvar também no sistema de configuração
+                    await sistemaConfigGrupos.atualizarTabela(
+                        grupoId,
+                        `📋 *TABELA DE PREÇOS*\n\n⚠️ Configure a tabela usando o comando \`.config-tabela\``,
+                        autorId,
+                        grupoNome
+                    );
+
+                    await message.reply(
+                        `✅ *GRUPO ADICIONADO AO SISTEMA!*\n\n` +
+                        `🎉 O grupo foi cadastrado com sucesso!\n\n` +
+                        `📊 **Grupo:** ${grupoNome}\n` +
+                        `🆔 **ID:** \`${grupoId}\`\n` +
+                        `👤 **Adicionado por:** Admin Global\n` +
+                        `⏰ **Data:** ${new Date().toLocaleString('pt-BR')}\n\n` +
+                        `📝 **PRÓXIMOS PASSOS:**\n\n` +
+                        `1️⃣ Configure a tabela de preços:\n` +
+                        `   \`.config-tabela\`\n` +
+                        `   \`[Cole sua tabela aqui]\`\n\n` +
+                        `2️⃣ Configure as formas de pagamento:\n` +
+                        `   \`.config-pagamento\`\n` +
+                        `   \`[Cole informações de pagamento]\`\n\n` +
+                        `3️⃣ Verifique a configuração:\n` +
+                        `   \`.ver-config\`\n\n` +
+                        `💡 **Dica:** Prepare suas tabelas em um arquivo de texto antes de colar!`
+                    );
+
+                    console.log(`✅ NOVO GRUPO ADICIONADO: ${grupoNome} (${grupoId}) por admin global ${autorId}`);
+
+                } catch (error) {
+                    await message.reply(`❌ *Erro ao adicionar grupo:* ${error.message}`);
+                    console.error('❌ Erro ao adicionar grupo:', error);
+                }
+
+                return;
+            }
+
+            // === COMANDO PARA CONFIGURAR TABELA DE PREÇOS ===
+            if (message.body.startsWith('.config-tabela ')) {
+                const grupoId = message.from;
+                const chat = await message.getChat();
+                const grupoNome = chat.name || 'Grupo';
+                const autorId = message.author || message.from;
+
+                // VERIFICAR SE É ADMINISTRADOR GLOBAL
+                const ehAdminGlobal = ADMINISTRADORES_GLOBAIS.includes(autorId);
+
+                if (!ehAdminGlobal) {
+                    await message.reply(
+                        `🔒 *ACESSO NEGADO*\n\n` +
+                        `⚠️ Apenas **administradores globais** podem alterar configurações.\n\n` +
+                        `📞 Solicite a um administrador do sistema.`
+                    );
+                    console.log(`🚫 ${autorId} tentou usar .config-tabela sem permissão global`);
+                    return;
+                }
+
+                // VERIFICAR SE GRUPO ESTÁ CONFIGURADO
+                const grupoConfigurado = CONFIGURACAO_GRUPOS.hasOwnProperty(grupoId);
+
+                if (!grupoConfigurado) {
+                    await message.reply(
+                        `❌ *GRUPO NÃO CONFIGURADO*\n\n` +
+                        `⚠️ Este grupo ainda não está cadastrado no sistema.\n\n` +
+                        `📝 **ID do grupo:** \`${grupoId}\`\n` +
+                        `📊 **Nome:** ${grupoNome}\n\n` +
+                        `💡 **Para adicionar:** Entre em contato com o desenvolvedor para adicionar este grupo ao código.`
+                    );
+                    console.log(`⚠️ Tentativa de configurar grupo não cadastrado: ${grupoNome} (${grupoId})`);
+                    return;
+                }
+
+                // Extrair tabela (tudo após ".config-tabela ")
+                const novaTabela = message.body.substring(15).trim();
+
+                console.log(`📝 Admin global ${autorId} solicitou atualização de tabela para grupo ${grupoNome}`);
+                console.log(`📏 Tamanho da tabela: ${novaTabela.length} caracteres`);
+
+                try {
+                    await message.reply('⏳ *Atualizando tabela...*');
+
+                    // Atualizar tabela (passar nome do grupo também)
+                    const resultado = await sistemaConfigGrupos.atualizarTabela(
+                        grupoId,
+                        novaTabela,
+                        autorId,
+                        grupoNome
+                    );
+
+                    if (resultado.sucesso) {
+                        // Recarregar configuração mesclada
+                        const configMesclada = sistemaConfigGrupos.mesclarComConfigPadrao(CONFIGURACAO_GRUPOS);
+                        Object.assign(CONFIGURACAO_GRUPOS, configMesclada);
+
+                        await message.reply(
+                            `✅ *TABELA ATUALIZADA COM SUCESSO!*\n\n` +
+                            `📊 **Grupo:** ${grupoNome}\n` +
+                            `📦 **Pacotes encontrados:** ${resultado.precosCont}\n` +
+                            `⏰ **Atualizado em:** ${new Date().toLocaleString('pt-BR')}\n\n` +
+                            `💡 **Para visualizar:** Digite "tabela"\n` +
+                            `🔄 **Para restaurar:** Use \`.restaurar-tabela\``
+                        );
+
+                        console.log(`✅ Tabela do grupo ${grupoNome} atualizada por admin global ${autorId}`);
+                    } else {
+                        await message.reply(
+                            `❌ *ERRO AO ATUALIZAR TABELA*\n\n` +
+                            `⚠️ ${resultado.erro}\n\n` +
+                            `💡 **Formato correto:**\n` +
+                            `\`.config-tabela\n` +
+                            `TABELA DE MEGAS\n` +
+                            `1GB = 17MT\n` +
+                            `2GB = 34MT\`\n\n` +
+                            `📝 **Dica:** Copie a tabela formatada e cole após o comando`
+                        );
+                    }
+                } catch (error) {
+                    await message.reply(`❌ *Erro inesperado:* ${error.message}`);
+                    console.error('❌ Erro ao configurar tabela:', error);
+                }
+
+                return;
+            }
+
+            // === COMANDO PARA CONFIGURAR FORMAS DE PAGAMENTO ===
+            if (message.body.startsWith('.config-pagamento ')) {
+                const grupoId = message.from;
+                const chat = await message.getChat();
+                const grupoNome = chat.name || 'Grupo';
+                const autorId = message.author || message.from;
+
+                // VERIFICAR SE É ADMINISTRADOR GLOBAL
+                const ehAdminGlobal = ADMINISTRADORES_GLOBAIS.includes(autorId);
+
+                if (!ehAdminGlobal) {
+                    await message.reply(
+                        `🔒 *ACESSO NEGADO*\n\n` +
+                        `⚠️ Apenas **administradores globais** podem alterar configurações.\n\n` +
+                        `📞 Solicite a um administrador do sistema.`
+                    );
+                    console.log(`🚫 ${autorId} tentou usar .config-pagamento sem permissão global`);
+                    return;
+                }
+
+                // VERIFICAR SE GRUPO ESTÁ CONFIGURADO
+                const grupoConfigurado = CONFIGURACAO_GRUPOS.hasOwnProperty(grupoId);
+
+                if (!grupoConfigurado) {
+                    await message.reply(
+                        `❌ *GRUPO NÃO CONFIGURADO*\n\n` +
+                        `⚠️ Este grupo ainda não está cadastrado no sistema.\n\n` +
+                        `📝 Configure primeiro com \`.config-tabela\``
+                    );
+                    return;
+                }
+
+                const novoPagamento = message.body.substring(19).trim();
+
+                try {
+                    await message.reply('⏳ *Atualizando formas de pagamento...*');
+
+                    const resultado = await sistemaConfigGrupos.atualizarPagamento(
+                        grupoId,
+                        novoPagamento,
+                        autorId
+                    );
+
+                    if (resultado.sucesso) {
+                        // Recarregar configuração
+                        const configMesclada = sistemaConfigGrupos.mesclarComConfigPadrao(CONFIGURACAO_GRUPOS);
+                        Object.assign(CONFIGURACAO_GRUPOS, configMesclada);
+
+                        await message.reply(
+                            `✅ *FORMAS DE PAGAMENTO ATUALIZADAS!*\n\n` +
+                            `📊 **Grupo:** ${grupoNome}\n` +
+                            `⏰ **Atualizado em:** ${new Date().toLocaleString('pt-BR')}`
+                        );
+
+                        console.log(`✅ Pagamento do grupo ${grupoNome} atualizado por admin global ${autorId}`);
+                    } else {
+                        await message.reply(`❌ *ERRO:* ${resultado.erro}`);
+                    }
+                } catch (error) {
+                    await message.reply(`❌ *Erro inesperado:* ${error.message}`);
+                    console.error('❌ Erro ao configurar pagamento:', error);
+                }
+
+                return;
+            }
+
+            // === COMANDO PARA VISUALIZAR CONFIGURAÇÃO ATUAL ===
+            if (comando === '.ver-config') {
+                const grupoId = message.from;
+                const chat = await message.getChat();
+                const grupoNome = chat.name || 'Grupo';
+
+                const config = sistemaConfigGrupos.obterConfig(grupoId);
+                const configPadrao = CONFIGURACAO_GRUPOS[grupoId];
+
+                let resposta = `⚙️ *CONFIGURAÇÃO DO GRUPO*\n\n`;
+                resposta += `📊 **Nome:** ${grupoNome}\n`;
+                resposta += `🆔 **ID:** \`${grupoId}\`\n\n`;
+
+                if (config) {
+                    const pacotesNaTabela = sistemaConfigGrupos.contarPrecos(config.tabela);
+                    const tabelaConfigurada = pacotesNaTabela > 0;
+                    const pagamentoConfigurado = config.pagamento && !config.pagamento.includes('Configure');
+
+                    // Status baseado na configuração
+                    if (tabelaConfigurada && pagamentoConfigurado) {
+                        resposta += `✅ **Status:** Completamente configurado\n`;
+                    } else {
+                        resposta += `⚠️ **Status:** Configuração incompleta\n`;
+                        if (!tabelaConfigurada) {
+                            resposta += `   ❌ Tabela de preços pendente\n`;
+                        }
+                        if (!pagamentoConfigurado) {
+                            resposta += `   ❌ Formas de pagamento pendentes\n`;
+                        }
+                    }
+
+                    resposta += `⏰ **Última atualização:** ${new Date(config.ultimaAtualizacao).toLocaleString('pt-BR')}\n`;
+                    resposta += `👤 **Atualizado por:** ${config.atualizadoPor}\n`;
+                    resposta += `📦 **Pacotes na tabela:** ${pacotesNaTabela}\n`;
+
+                    const historico = sistemaConfigGrupos.obterHistorico(grupoId);
+                    if (historico.sucesso) {
+                        resposta += `📜 **Histórico:** ${historico.versoes} versões salvas\n`;
+                    }
+
+                    // Mostrar o que falta fazer
+                    if (!tabelaConfigurada || !pagamentoConfigurado) {
+                        resposta += `\n📝 **PENDENTE:**\n`;
+                        if (!tabelaConfigurada) {
+                            resposta += `1️⃣ Configure a tabela: \`.config-tabela\`\n`;
+                        }
+                        if (!pagamentoConfigurado) {
+                            resposta += `2️⃣ Configure o pagamento: \`.config-pagamento\`\n`;
+                        }
+                    }
+
+                } else if (configPadrao) {
+                    const pacotesNaTabela = sistemaConfigGrupos.contarPrecos(configPadrao.tabela);
+                    resposta += `📋 **Status:** Usando configuração padrão do código\n`;
+                    resposta += `📦 **Pacotes na tabela:** ${pacotesNaTabela}`;
+                } else {
+                    resposta += `❌ **Status:** Não configurado\n\n`;
+                    resposta += `💡 **Para adicionar este grupo:**\n`;
+                    resposta += `Use o comando \`.configurar\` (apenas admin global)`;
+                }
+
+                if (configPadrao || config) {
+                    resposta += `\n\n💡 **Comandos disponíveis:**\n`;
+                    resposta += `• \`.config-tabela\` - Alterar tabela\n`;
+                    resposta += `• \`.config-pagamento\` - Alterar pagamento\n`;
+                    resposta += `• \`.restaurar-tabela\` - Restaurar versão anterior`;
+                }
+
+                await message.reply(resposta);
+                return;
+            }
+
+            // === COMANDO PARA RESTAURAR VERSÃO ANTERIOR ===
+            if (comando === '.restaurar-tabela') {
+                const grupoId = message.from;
+                const chat = await message.getChat();
+                const grupoNome = chat.name || 'Grupo';
+                const autorId = message.author || message.from;
+
+                // VERIFICAR SE É ADMINISTRADOR GLOBAL
+                const ehAdminGlobal = ADMINISTRADORES_GLOBAIS.includes(autorId);
+
+                if (!ehAdminGlobal) {
+                    await message.reply(
+                        `🔒 *ACESSO NEGADO*\n\n` +
+                        `⚠️ Apenas **administradores globais** podem restaurar configurações.\n\n` +
+                        `📞 Solicite a um administrador do sistema.`
+                    );
+                    console.log(`🚫 ${autorId} tentou usar .restaurar-tabela sem permissão global`);
+                    return;
+                }
+
+                try {
+                    await message.reply('⏳ *Restaurando versão anterior...*');
+
+                    const resultado = await sistemaConfigGrupos.restaurarVersaoAnterior(grupoId, autorId);
+
+                    if (resultado.sucesso) {
+                        // Recarregar configuração
+                        const configMesclada = sistemaConfigGrupos.mesclarComConfigPadrao(CONFIGURACAO_GRUPOS);
+                        Object.assign(CONFIGURACAO_GRUPOS, configMesclada);
+
+                        await message.reply(
+                            `✅ *VERSÃO ANTERIOR RESTAURADA!*\n\n` +
+                            `📊 **Grupo:** ${grupoNome}\n` +
+                            `⏰ **Restaurado em:** ${new Date().toLocaleString('pt-BR')}\n\n` +
+                            `💡 Digite "tabela" para visualizar`
+                        );
+
+                        console.log(`✅ Tabela do grupo ${grupoNome} restaurada por admin global ${autorId}`);
+                    } else {
+                        await message.reply(`❌ *ERRO:* ${resultado.erro}`);
+                    }
+                } catch (error) {
+                    await message.reply(`❌ *Erro inesperado:* ${error.message}`);
+                    console.error('❌ Erro ao restaurar tabela:', error);
+                }
+
+                return;
+            }
+
             if (comando === '.test_grupo') {
                 const grupoAtual = message.from;
                 const configGrupo = getConfiguracaoGrupo(grupoAtual);
@@ -5931,30 +6342,31 @@ async function processMessage(message) {
                 return;
             }
 
-            // .cache - Ver estatísticas do cache anti-duplicatas (ADMIN ONLY)
+            // .cache - Ver estatísticas do cache anti-duplicatas de comprovantes (ADMIN ONLY)
             if (comando === '.cache') {
                 if (!isAdministrador(remetente)) {
                     await message.reply('❌ Comando disponível apenas para administradores.');
                     return;
                 }
 
-                const totalMensagensCache = cacheMensagensRecentes.size;
+                const totalComprovantesCache = cacheComprovantesRecentes.size;
                 const agora = Date.now();
-                let mensagensAtivas = 0;
+                let comprovantesAtivos = 0;
 
-                for (const [hash, registro] of cacheMensagensRecentes.entries()) {
-                    if (agora - registro.timestamp < CACHE_MENSAGEM_TTL) {
-                        mensagensAtivas++;
+                for (const [hash, registro] of cacheComprovantesRecentes.entries()) {
+                    if (agora - registro.timestamp < CACHE_COMPROVANTE_TTL) {
+                        comprovantesAtivos++;
                     }
                 }
 
                 await message.reply(
-                    `🗂️ *ESTATÍSTICAS DO CACHE ANTI-DUPLICATAS*\n\n` +
-                    `📊 Total no cache: ${totalMensagensCache} mensagens\n` +
-                    `✅ Ativas (< 5min): ${mensagensAtivas}\n` +
+                    `🗂️ *CACHE ANTI-DUPLICATAS DE COMPROVANTES*\n\n` +
+                    `📊 Total no cache: ${totalComprovantesCache} comprovantes\n` +
+                    `✅ Ativos (< 5min): ${comprovantesAtivos}\n` +
                     `⏰ TTL: 5 minutos\n` +
-                    `📦 Limite máximo: 500 mensagens\n\n` +
-                    `💡 Mensagens duplicadas são bloqueadas automaticamente.`
+                    `📦 Limite máximo: 500 comprovantes\n\n` +
+                    `💡 Apenas COMPROVANTES duplicados são bloqueados.\n` +
+                    `📝 Outras mensagens (comandos, números) não são controladas.`
                 );
                 return;
             }
@@ -7091,20 +7503,20 @@ client.on('message', async (message) => {
             return; // Ignora completamente
         }
 
-        // === VERIFICAÇÃO ANTI-DUPLICATAS (SEGUNDO FILTRO) ===
+        // === VERIFICAÇÃO ANTI-DUPLICATAS DE COMPROVANTES (SEGUNDO FILTRO) ===
         const remetente = numeroRemetente;
         const conteudo = message.body || '';
 
-        // Verificar se é mensagem duplicada
-        const verificacaoDuplicata = ehMensagemDuplicada(remetente, conteudo);
+        // Verificar se é COMPROVANTE duplicado (apenas comprovantes são controlados)
+        const verificacaoDuplicata = ehComprovanteDuplicado(remetente, conteudo);
 
         if (verificacaoDuplicata.duplicada) {
-            // Mensagem duplicada detectada - responder e sair
-            console.log(`🚫 BLOQUEADO: Mensagem duplicada de ${remetente} (enviada há ${verificacaoDuplicata.tempoDecorrido}s)`);
+            // Comprovante duplicado detectado - responder e sair
+            console.log(`🚫 BLOQUEADO: Comprovante duplicado de ${remetente} (enviado há ${verificacaoDuplicata.tempoDecorrido}s)`);
 
             await message.reply(
-                `⚠️ *Mensagem Duplicada*\n\n` +
-                `Você já enviou esta mensagem há ${verificacaoDuplicata.tempoDecorrido} segundos.\n\n` +
+                `⚠️ *Comprovante Duplicado*\n\n` +
+                `Você já enviou este comprovante há ${verificacaoDuplicata.tempoDecorrido} segundos.\n\n` +
                 `✅ Seu pedido já está sendo processado!\n` +
                 `🔄 *Não precisa enviar novamente*\n\n` +
                 `_Aguarde a confirmação do sistema._`
@@ -7113,8 +7525,8 @@ client.on('message', async (message) => {
             return; // Bloqueia processamento
         }
 
-        // Registrar mensagem como processada
-        registrarMensagemProcessada(remetente, conteudo);
+        // Registrar comprovante como processado (se for comprovante)
+        registrarComprovanteProcessado(remetente, conteudo);
 
         // LOG: Verificar se é administrador enviando mensagem em grupo
         if (message.from.endsWith('@g.us')) {
