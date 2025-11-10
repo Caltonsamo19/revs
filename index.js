@@ -2828,6 +2828,79 @@ Chamadas + SMS ilimitadas + 100GB = 2250MT
 💵 E-Mola: 878184842 (Leonel Amâncio Nhantumbo)  
 
 📤 Envie o comprovativo em (screenshot) da transferência + o número  84 que deverá receber os GB's.`
+    },
+'120363401912741383@g.us': {
+        nome: 'ShopNet',
+        tabela: `🅿/Consumidores🔥🥳🥳
+Nós oferecemos a solução para suas necessidades de dados a preços acessíveis.
+
+🔥🎉 PACOTE DIÁRIO 👌 🔥🎉
+🌐 500MB = 10MT 💸
+🌐 1024MB = 17MT 💸
+🌐 1150MB = 20MT 💸
+🌐 1500MB = 27MT 💸
+🌐 2048MB = 34MT 💸
+🌐 3072MB = 51MT 💸
+🌐 4096MB = 68MT 💸
+🌐 5120MB = 85MT 💸
+🌐 7168MB = 120MT 💸
+🌐 11264MB = 190MT 💸
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+🌐 2000MB = 44MT 💵💽
+🌐 3000MB = 66MT 💵💽
+🌐 4000MB = 88MT 💵💽
+🌐 5000MB = 109MT 💵💽
+🌐 6000MB = 133MT 💵💽
+🌐 7000MB = 149MT 💵💽
+🌐 10000MB = 219MT 💵💽
+🔄 Bônus: +100MB ao atualizar dentro de 3 dias
+
+📅 PACOTES SEMANAIS BÁSICOS (5 Dias – Renováveis)
+🌐 1700MB = 45MT 💵💽
+🌐 2900MB = 80MT 💵💽
+🌐 3400MB = 110MT 💵💽
+🌐 5500MB = 150MT 💵💽
+🌐 7800MB = 200MT 💵💽
+🌐 11400MB = 300MT 💵💽
+🔄 Bônus: +100MB ao atualizar dentro de 5 dias
+
+📅 PACOTES SEMANAIS PREMIUM (15 Dias – Renováveis)
+🌐 3000MB = 100MT 💵💽
+🌐 5000MB = 149MT 💵💽
+🌐 8000MB = 201MT 💵💽
+🌐 10000MB = 231MT 💵💽
+🌐 20000MB = 352MT 💵💽
+🔄 Bônus: +100MB ao atualizar dentro de 15 dias
+
+🔥📞 PACOTE MENSAL 📞🔥
+🌐 3072MB = 100MT 💸
+🌐 5120MB = 165MT 💸
+🌐 7168MB = 195MT 💸
+🌐 10240MB = 260MT 💸
+🌐 11264MB = 290MT 💸
+🌐 20480MB = 480MT 💸
+🌐 40960MB = 1050MT 💸
+
+💳 FORMAS DE PAGAMENTO: ⤵
+📲 E-MOLA: 872685743 💶💰
+👤 Almeida Vasco
+
+📲 M-PESA: 851923280 💷💰
+👤 Almeida
+
+📩 Envie o seu comprovante no grupo, juntamente com o número que receberá os dados.
+✅
+`,
+
+        pagamento: `💳 FORMAS DE PAGAMENTO:⤵  
+- 📲 *𝗘-𝗠𝗢𝗟𝗔: *872685743💶💰  
+- Almeida Vasco 
+- 📲 *𝗠-𝗣𝗘𝗦𝗔: 851923280💷💰  
+- ↪📞📱 Almeida  
+
+📩 Envie o seu comprovante no grupo, juntamente com o número que receberá os dados.
+`
     }
 };
 
@@ -3388,6 +3461,59 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
             }
         }
 
+        // === DETECTAR E ATIVAR PACOTES AUTOMÁTICOS (3, 5, 15 DIAS) ===
+        if (sistemaPacotes && CONFIGURACAO_GRUPOS[grupoId]) {
+            try {
+                const tabelaGrupo = CONFIGURACAO_GRUPOS[grupoId].tabela;
+
+                // Extrair pacotes renováveis da tabela para fazer lookup
+                const pacotesRenovaveis = sistemaPacotes.extrairPacotesRenovaveis(tabelaGrupo);
+
+                // Procurar o valor em MT correspondente aos MB
+                let valorMTEncontrado = null;
+                let tipoPacoteDetectado = null;
+
+                for (const [tipoDias, listaPacotes] of Object.entries(pacotesRenovaveis)) {
+                    for (const pacote of listaPacotes) {
+                        // Comparar com tolerância de 1%
+                        if (Math.abs(pacote.mb - valor) <= (valor * 0.01)) {
+                            valorMTEncontrado = pacote.valor;
+                            tipoPacoteDetectado = tipoDias;
+                            break;
+                        }
+                    }
+                    if (tipoPacoteDetectado) break;
+                }
+
+                if (tipoPacoteDetectado && valorMTEncontrado) {
+                    console.log(`🎯 PACOTES: Detectado pacote de ${tipoPacoteDetectado} dias - Ativando automaticamente!`);
+                    console.log(`   📋 Referência: ${referencia}`);
+                    console.log(`   📱 Número: ${numero}`);
+                    console.log(`   💰 Valor: ${valorMTEncontrado}MT`);
+                    console.log(`   📊 Megas: ${valor}MB`);
+
+                    // Ativar pacote automático
+                    const resultadoPacote = await sistemaPacotes.processarComprovante(
+                        referencia,
+                        numero,
+                        grupoId,
+                        tipoPacoteDetectado,
+                        new Date() // Horário de ativação = agora
+                    );
+
+                    if (resultadoPacote.sucesso) {
+                        console.log(`✅ PACOTES: Pacote automático ativado com sucesso!`);
+                        console.log(`   📅 Primeira renovação: ${new Date(resultadoPacote.cliente.proximaRenovacao).toLocaleString('pt-BR')}`);
+                    } else {
+                        console.error(`❌ PACOTES: Erro ao ativar pacote automático: ${resultadoPacote.erro}`);
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Erro ao detectar/ativar pacote automático:', error);
+                // Não falhar o envio por causa disso
+            }
+        }
+
         return {
             sucesso: true,
             referencia: referencia,
@@ -3797,8 +3923,21 @@ async function aplicarModeracao(message, motivoDeteccao) {
 
             // Enviar aviso ao grupo antes/depois da remoção
             try {
+                // VALIDAÇÃO CRÍTICA: Verificar se é um ID válido de usuário
+                const ehIDValido = authorId &&
+                                  typeof authorId === 'string' &&
+                                  (authorId.includes('@c.us') || authorId.includes('@lid')) &&
+                                  !authorId.startsWith('SAQUE_BONUS_') &&
+                                  !authorId.startsWith('SAQ');
+
                 const aviso = `🚫 @${mentionId} foi removido(a) do grupo por enviar link.`;
-                await client.sendMessage(chatId, aviso, { mentions: [authorId] });
+
+                if (ehIDValido) {
+                    await client.sendMessage(chatId, aviso, { mentions: [authorId] });
+                } else {
+                    console.warn(`⚠️ ID inválido para menção de remoção: ${authorId}`);
+                    await client.sendMessage(chatId, aviso);
+                }
             } catch (errAviso) {
                 // Se o envio do aviso falhar, não interromper a remoção
                 console.log('⚠️ Não foi possível enviar aviso de remoção:', errAviso.message);
@@ -3808,8 +3947,21 @@ async function aplicarModeracao(message, motivoDeteccao) {
 
             if (!removido) {
                 try {
+                    // VALIDAÇÃO CRÍTICA: Verificar se é um ID válido de usuário
+                    const ehIDValido = authorId &&
+                                      typeof authorId === 'string' &&
+                                      (authorId.includes('@c.us') || authorId.includes('@lid')) &&
+                                      !authorId.startsWith('SAQUE_BONUS_') &&
+                                      !authorId.startsWith('SAQ');
+
                     const avisoErro = `⚠️ Não foi possível remover @${mentionId}. Verifique se o bot tem permissões de administrador.`;
-                    await client.sendMessage(chatId, avisoErro, { mentions: [authorId] });
+
+                    if (ehIDValido) {
+                        await client.sendMessage(chatId, avisoErro, { mentions: [authorId] });
+                    } else {
+                        console.warn(`⚠️ ID inválido para menção de erro: ${authorId}`);
+                        await client.sendMessage(chatId, avisoErro);
+                    }
                 } catch (err2) {
                     console.log('⚠️ Falha ao notificar sobre remoção mal-sucedida:', err2.message);
                 }
@@ -4905,8 +5057,18 @@ async function processMessage(message) {
                         
                         mensagem += `🆕 *Total sem compras: ${semCompra.length}*\n\n`;
                         mensagem += `💡 *Dica:* Considere campanhas de incentivo para estes usuários!`;
-                        
-                        await client.sendMessage(message.from, mensagem, { mentions: mentions });
+
+                        // VALIDAÇÃO CRÍTICA: Filtrar IDs inválidos do array mentions
+                        const mentionsValidos = mentions.filter(id => {
+                            return id &&
+                                   typeof id === 'string' &&
+                                   (id.includes('@c.us') || id.includes('@lid')) &&
+                                   !id.startsWith('SAQUE_BONUS_') &&
+                                   !id.startsWith('SAQ');
+                        });
+
+                        console.log(`📊 Sem compra: ${mentions.length} mentions, ${mentionsValidos.length} válidos`);
+                        await client.sendMessage(message.from, mensagem, { mentions: mentionsValidos });
                         return;
                     } catch (error) {
                         console.error('❌ Erro ao obter sem compra:', error);
@@ -5270,6 +5432,19 @@ async function processMessage(message) {
                             `${novoSaldo >= 1024 ? '🚀 *Já podes sacar!* Use: *.sacar*' : '💡 *Continua a acumular para sacar!*'}`;
 
                         try {
+                            // VALIDAÇÃO CRÍTICA: Verificar se é um ID válido de usuário
+                            const ehIDValido = idParaSalvar &&
+                                              typeof idParaSalvar === 'string' &&
+                                              (idParaSalvar.includes('@c.us') || idParaSalvar.includes('@lid')) &&
+                                              !idParaSalvar.startsWith('SAQUE_BONUS_') &&
+                                              !idParaSalvar.startsWith('SAQ');
+
+                            if (!ehIDValido) {
+                                console.warn(`⚠️ ID inválido para menção: ${idParaSalvar}`);
+                                // Usar fallback sem menção
+                                throw new Error('ID inválido para menção');
+                            }
+
                             // SEGUIR PADRÃO DO RANKING (linha 3635-3657)
                             const mentionId = String(idParaSalvar).replace('@c.us', '').replace('@lid', '');
 
@@ -7105,6 +7280,20 @@ async function processMessage(message) {
                         try {
                             // Normalizar ID para formato @c.us igual às boas-vindas
                             const participantId = resultadoConfirmacao.contactId; // IGUAL ÀS BOAS-VINDAS
+
+                            // VALIDAÇÃO CRÍTICA: Verificar se é um ID válido de usuário
+                            const ehIDValido = participantId &&
+                                              typeof participantId === 'string' &&
+                                              (participantId.includes('@c.us') || participantId.includes('@lid')) &&
+                                              !participantId.startsWith('SAQUE_BONUS_') &&
+                                              !participantId.startsWith('SAQ');
+
+                            if (!ehIDValido) {
+                                console.warn(`⚠️ ID inválido para menção: ${participantId}`);
+                                // Usar fallback sem menção
+                                throw new Error('ID inválido para menção');
+                            }
+
                             // Usar exato formato das boas-vindas
                             const mensagemFinal = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${participantId.replace('@c.us', '').replace('@lid', '')}`);
 
