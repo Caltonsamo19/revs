@@ -1521,6 +1521,80 @@ function gerarCodigoReferencia(remetente) {
 async function processarBonusCompra(remetenteCompra, valorCompra, grupoId = null) {
     console.log(`🎁 Verificando bônus para compra`);
 
+    // CORRIGIDO: Usar sistemaBonus se disponível (método robusto e persistente)
+    if (sistemaBonus) {
+        console.log(`✅ Usando SistemaBonus para processar bônus`);
+        const resultado = await sistemaBonus.processarBonusCompra(remetenteCompra, valorCompra);
+
+        if (!resultado) {
+            console.log(`   ❌ Cliente não tem referência ou já atingiu limite de compras`);
+            return false;
+        }
+
+        // Enviar notificação de bônus
+        try {
+            const nomeComprador = await obterNomeContato(remetenteCompra);
+            const convidadorId = resultado.convidadorId;
+            const bonusMB = resultado.bonusMB;
+            const comprasRealizadas = resultado.comprasRealizadas;
+
+            // Buscar saldo atualizado
+            const saldoObj = sistemaBonus.buscarSaldo(convidadorId);
+            const novoSaldo = saldoObj ? saldoObj.saldo : bonusMB;
+            const novoSaldoFormatado = novoSaldo >= 1024 ? `${(novoSaldo/1024).toFixed(2)}GB` : `${novoSaldo}MB`;
+
+            // Buscar referência para saber se é automática ou manual
+            const formatos = [
+                remetenteCompra,
+                remetenteCompra.replace('@c.us', '@lid'),
+                remetenteCompra.replace('@lid', '@c.us')
+            ];
+            let referencia = null;
+            for (const formato of formatos) {
+                if (sistemaBonus.referenciasClientes[formato]) {
+                    referencia = sistemaBonus.referenciasClientes[formato];
+                    break;
+                }
+            }
+
+            const isAutomatico = referencia?.automatico;
+            const tipoReferencia = isAutomatico ? 'adicionou ao grupo' : `usou seu código ${referencia?.codigo || ''}`;
+
+            // CORRIGIDO: Remover @lid e @c.us das menções
+            const convidadorLimpo = convidadorId.replace('@c.us', '').replace('@lid', '');
+            const remetenteCompraLimpo = remetenteCompra.replace('@c.us', '').replace('@lid', '');
+
+            // CORRIGIDO: Usar grupoId ou convidadorId como destino da mensagem
+            const destinoMensagem = grupoId || convidadorId;
+
+            await client.sendMessage(destinoMensagem,
+                `🎉 *BÔNUS DE REFERÊNCIA CREDITADO!*\n\n` +
+                `💎 @${convidadorLimpo}, recebeste *${bonusMB}MB* de bônus!\n\n` +
+                `👤 *Referenciado:* @${remetenteCompraLimpo}\n` +
+                `📢 *Motivo:* @${remetenteCompraLimpo} que você ${tipoReferencia} fez uma compra!\n` +
+                `🛒 *Compra:* ${comprasRealizadas}ª de 5\n` +
+                `💰 *Novo saldo:* ${novoSaldoFormatado}\n\n` +
+                `${novoSaldo >= 1024 ? '🚀 *Já podes sacar!* Use: *.sacar*' : '⏳ *Continua a convidar amigos para ganhar mais bônus!*'}`, {
+                mentions: [convidadorId, remetenteCompra]
+            });
+
+            console.log(`   ✅ Bônus creditado via SistemaBonus: ${bonusMB}MB (${comprasRealizadas}/5)`);
+        } catch (error) {
+            console.error('❌ Erro ao enviar notificação de bônus:', error);
+        }
+
+        return {
+            convidador: resultado.convidadorId,
+            bonusGanho: resultado.bonusMB,
+            compraAtual: resultado.comprasRealizadas,
+            totalCompras: 5,
+            novoSaldo: sistemaBonus.buscarSaldo(resultado.convidadorId)?.saldo || 0
+        };
+    }
+
+    // === FALLBACK: Sistema antigo (caso sistemaBonus não esteja disponível) ===
+    console.log(`⚠️ SistemaBonus não disponível, usando sistema antigo`);
+
     // Verificar se cliente tem referência
     const referencia = referenciasClientes[remetenteCompra];
     if (!referencia) {
@@ -3097,11 +3171,19 @@ async function processarPacoteDiamante(comprovante, configGrupo, pacoteDiamante)
 async function processarPacotePonto8(comprovante, configGrupo, pacoteDiamante) {
     try {
         const { referencia, valor, numero } = comprovante;
+
+        // Verificação de segurança para configGrupo
+        if (!configGrupo) {
+            console.error(`❌ PACOTE .8GB: configGrupo está undefined!`);
+            throw new Error('Configuração do grupo não encontrada');
+        }
+
         const grupoId = configGrupo.grupoId;
-        const grupoNome = configGrupo.nome;
+        const grupoNome = configGrupo.nome || 'Desconhecido';
 
         console.log(`📦 PACOTE .8GB: Processando pacote especial .8GB`);
         console.log(`📦 Ref: ${referencia} | Valor: ${valor}MT | Número: ${numero}`);
+        console.log(`📦 Grupo ID: ${grupoId} | Nome: ${grupoNome}`);
         console.log(`📦 Pacote: ${pacoteDiamante.descricao} (${pacoteDiamante.gbTotal}GB total)`);
 
         const totalGB = pacoteDiamante.gbTotal; // Ex: 12.8, 22.8, etc.
@@ -3548,6 +3630,7 @@ function getConfiguracaoGrupo(chatId) {
             // Usar config customizada, mas manter nome do padrão se existir
             const configPadrao = CONFIGURACAO_GRUPOS[chatId];
             return {
+                grupoId: chatId, // ADICIONAR grupoId ao retorno
                 nome: configPadrao?.nome || configCustomizada.nome || 'Grupo',
                 tabela: configCustomizada.tabela,
                 pagamento: configCustomizada.pagamento || configPadrao?.pagamento || ''
@@ -3556,7 +3639,16 @@ function getConfiguracaoGrupo(chatId) {
     }
 
     // Usar configuração padrão do código
-    return CONFIGURACAO_GRUPOS[chatId] || null;
+    const configPadrao = CONFIGURACAO_GRUPOS[chatId];
+    if (configPadrao) {
+        // Adicionar grupoId ao objeto retornado
+        return {
+            grupoId: chatId,
+            ...configPadrao
+        };
+    }
+
+    return null;
 }
 
 // Função para resolver ID interno (@lid) para número real (@c.us)
@@ -3935,6 +4027,37 @@ client.on('ready', async () => {
 
     // Carregar dados de referência (legado - será migrado)
     await carregarDadosReferencia();
+
+    // CORRIGIDO: Sincronizar dados legados com SistemaBonus
+    console.log('🔄 Sincronizando dados legados com SistemaBonus...');
+
+    // Sincronizar códigos de referência
+    if (Object.keys(codigosReferencia).length > 0) {
+        sistemaBonus.codigosReferencia = { ...codigosReferencia };
+        console.log(`   ✅ ${Object.keys(codigosReferencia).length} códigos sincronizados`);
+    }
+
+    // Sincronizar referências de clientes
+    if (Object.keys(referenciasClientes).length > 0) {
+        sistemaBonus.referenciasClientes = { ...referenciasClientes };
+        console.log(`   ✅ ${Object.keys(referenciasClientes).length} referências sincronizadas`);
+    }
+
+    // Sincronizar saldos de bônus (mesclar dados)
+    if (Object.keys(bonusSaldos).length > 0) {
+        for (const [clienteId, saldoLegado] of Object.entries(bonusSaldos)) {
+            const saldoNovo = sistemaBonus.buscarSaldo(clienteId);
+            if (!saldoNovo || saldoNovo.saldo === 0) {
+                // Se não existe no novo sistema ou está zerado, usar dados legados
+                sistemaBonus.bonusSaldos[clienteId] = { ...saldoLegado };
+            }
+        }
+        console.log(`   ✅ ${Object.keys(bonusSaldos).length} saldos mesclados`);
+    }
+
+    // Salvar dados sincronizados
+    await sistemaBonus.salvarDados();
+    console.log('✅ Sincronização concluída e salva!');
     
     await carregarHistorico();
     
@@ -6190,15 +6313,25 @@ async function processMessage(message) {
             if (!codigo) {
                 console.log(`📝 Criando NOVO código para: ${remetente}`);
                 codigo = gerarCodigoReferencia(remetente);
-                codigosReferencia[codigo] = {
+                const dadosCodigo = {
                     dono: remetente,
                     nome: message._data.notifyName || 'N/A',
                     criado: new Date().toISOString(),
                     ativo: true
                 };
 
-                // CORRIGIDO: Salvar IMEDIATAMENTE (não agendar) para garantir persistência
-                console.log(`💾 Salvando código ${codigo} IMEDIATAMENTE...`);
+                // Salvar no sistema legado
+                codigosReferencia[codigo] = dadosCodigo;
+
+                // CORRIGIDO: Sincronizar com SistemaBonus
+                if (sistemaBonus) {
+                    sistemaBonus.codigosReferencia[codigo] = { ...dadosCodigo };
+                    await sistemaBonus.salvarDados();
+                    console.log(`✅ Código ${codigo} salvo no SistemaBonus`);
+                }
+
+                // Salvar sistema legado
+                console.log(`💾 Salvando código ${codigo} no sistema legado...`);
                 await salvarDadosReferencia();
                 console.log(`✅ Código ${codigo} salvo com sucesso!`);
             }
@@ -6267,12 +6400,15 @@ async function processMessage(message) {
                 }
                 
                 // Registrar referência
-                referenciasClientes[remetente] = {
+                const dadosReferencia = {
                     convidadoPor: codigosReferencia[codigo].dono,
                     codigo: codigo,
                     dataRegistro: new Date().toISOString(),
                     comprasRealizadas: 0
                 };
+
+                // Salvar no sistema legado
+                referenciasClientes[remetente] = dadosReferencia;
 
                 const convidadorId = codigosReferencia[codigo].dono;
                 const nomeConvidador = codigosReferencia[codigo].nome;
@@ -6293,8 +6429,50 @@ async function processMessage(message) {
                 }
                 bonusSaldos[convidadorId].totalReferencias++;
 
+                // CORRIGIDO: Sincronizar com SistemaBonus
+                if (sistemaBonus) {
+                    console.log(`🔄 Sincronizando referência com SistemaBonus...`);
+
+                    // Atualizar referência em todos os formatos (compatibilidade)
+                    const formatos = [
+                        remetente,
+                        remetente.replace('@c.us', '@lid'),
+                        remetente.replace('@lid', '@c.us')
+                    ];
+
+                    formatos.forEach(formato => {
+                        sistemaBonus.referenciasClientes[formato] = { ...dadosReferencia };
+                    });
+
+                    // Atualizar código
+                    sistemaBonus.codigosReferencia[codigo] = { ...codigosReferencia[codigo] };
+
+                    // Inicializar saldo no sistemaBonus
+                    const formatosConvidador = [
+                        convidadorId,
+                        convidadorId.replace('@c.us', '@lid'),
+                        convidadorId.replace('@lid', '@c.us')
+                    ];
+
+                    formatosConvidador.forEach(formato => {
+                        if (!sistemaBonus.bonusSaldos[formato]) {
+                            sistemaBonus.bonusSaldos[formato] = {
+                                saldo: 0,
+                                detalhesReferencias: {},
+                                historicoSaques: [],
+                                totalReferencias: 0
+                            };
+                        }
+                        sistemaBonus.bonusSaldos[formato].totalReferencias++;
+                    });
+
+                    // Salvar no SistemaBonus
+                    await sistemaBonus.salvarDados();
+                    console.log(`✅ Referência sincronizada com SistemaBonus`);
+                }
+
                 // CORRIGIDO: Salvar IMEDIATAMENTE para garantir persistência
-                console.log(`💾 Salvando uso do código ${codigo} IMEDIATAMENTE...`);
+                console.log(`💾 Salvando uso do código ${codigo} no sistema legado...`);
                 await salvarDadosReferencia();
 
                 // Salvar arquivo de membros se foi atualizado
@@ -6493,22 +6671,7 @@ async function processMessage(message) {
                     return;
                 }
 
-                // Verificar limite diário de saques
-                const hoje = new Date().toDateString();
-                const saquesHoje = Object.values(pedidosSaque).filter(s =>
-                    s.cliente === remetente &&
-                    new Date(s.dataSolicitacao).toDateString() === hoje
-                );
-
-                if (saquesHoje.length >= 3) {
-                    await message.reply(
-                        `❌ *LIMITE DIÁRIO ATINGIDO*\n\n` +
-                        `🚫 Limite: 3 saques por dia\n` +
-                        `📊 Já solicitados hoje: ${saquesHoje.length}\n\n` +
-                        `⏰ Tente novamente amanhã!`
-                    );
-                    return;
-                }
+                // Limite diário de saques REMOVIDO - Agora sem limite!
 
                 // === GERAR REFERÊNCIA ÚNICA PARA SAQUE ===
                 const agora = new Date();
@@ -7058,6 +7221,9 @@ async function processMessage(message) {
                 console.log(`📦 PROCESSANDO PACOTE .8GB NO INDEX.JS`);
 
                 const { referencia, valor, numero, pacoteDiamante } = resultadoIA;
+
+                // Verificar configGrupo antes de passar
+                console.log(`🔍 configGrupo disponível:`, configGrupo ? `✅ Sim (ID: ${configGrupo.grupoId})` : '❌ Não');
 
                 const comprovante = {
                     referencia: referencia,
