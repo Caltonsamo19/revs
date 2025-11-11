@@ -2784,31 +2784,60 @@ Chamadas + SMS ilimitadas + 100GB = 2250MT
     },
 '120363419388089635@g.us': {
         nome: 'NET VODACOM 18MT',
-        tabela: `TABELA DE MEGAS ⚙🥶
+        tabela: `🤖❤INTERNET VODACOM- a melhor preço do mercado 🎉
 
-🚀 MEGAS DIÁRIOS 🕔
-1024MB  =  18MT  
-2048MB  =  36MT  
-3072MB  =  54MT  
-4096MB  =  72MT  
-5120MB  =  90MT  
-6144MB  =  108MT  
-7168MB  =  126MT  
-8192MB  =  144MT  
-9216MB  =  162MT  
-10240MB =  180MT  
+📆 PACOTES DIÁRIOS
 
-🌐🚀 PACOTE MENSAL (APENAS MEGAS)
-5.5GB  =  175MT  
-10.5GB =  290MT  
-16.1GB =  425MT  
-21.5GB =  555MT  
-25.5GB =  720MT  
-37.5GB =  835MT  
-54GB   =  995MT 🤩  
-64GB   =  1245MT  
-74GB   =  1445MT  
-100GB  =  1795MT 🚀  
+1024MB = 18MT 💵💽
+1100MB = 20MT 💵💽
+1300MB =24MT 💵💽
+2048MB = 36MT 💵💽
+2200MB = 40MT 💵💽
+3072MB = 54MT 💵💽
+4096MB = 72MT 💵💽
+5120MB = 90MT 💵💽
+6144MB = 108MT 💵💽
+7168MB = 126MT 💵💽
+8192MB = 144MT 💵💽
+9144MB = 162MT 💵💽
+10240MB = 180MT 💵💽
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+2000MB = 44MT 💵💽
+3000MB = 66MT 💵💽
+4000MB = 88MT 💵💽
+5000MB = 109MT 💵💽
+6000MB = 133MT 💵💽
+7000MB = 149MT 💵💽
+10000MB = 219MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
+
+📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
+1700MB = 45MT 💵💽
+2900MB = 80MT 💵💽
+3400MB = 110MT 💵💽
+5500MB = 150MT 💵💽
+7800MB = 200MT 💵💽
+11400MB = 300MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
+
+📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
+3000MB = 100MT 💵💽
+5000MB = 149MT 💵💽
+8000MB = 201MT 💵💽
+10000MB = 231MT 💵💽
+20000MB = 352MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
+
+📅 PACOTE MENSAL (APENAS MEGAS)
+5.8GB  =  175MT  
+10.8GB =  290MT  
+15.8GB =  425MT  
+21.8GB =  555MT  
+25.8GB =  720MT  
+37.8GB =  835MT  
+54.8GB   =  995MT 
+64.8GB   =  1245MT
 
 💎 DIAMANTE MENSAL TUDO TOP ILIMITADO
 11GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  460MT  
@@ -2819,6 +2848,10 @@ Chamadas + SMS ilimitadas + 100GB = 2250MT
 51.1GB + Chamadas e SMS ilimitadas + 10min int + 30MB ROAM  =  1245MT  
 64.1GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  1445MT  
 100GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  2145MT
+
+
+📍 NB: Válido apenas para Vodacom  
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!
 `,
 
         pagamento: `💳 Formas de Pagamento:  
