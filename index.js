@@ -2309,7 +2309,9 @@ const ADMINISTRADORES_GLOBAIS = [
     '258879833297@c.us',    // +258 87 983 3297 - Astro Tech
     '278438854287537@lid',  // @lid do Astro Tech
     '258844093189@c.us',    // +258 84 409 3189 - Leonel
-    '67611928871020@lid'    // @lid do Leonel
+    '67611928871020@lid',   // @lid do Leonel
+    '258871784594@c.us',    // +258 87 178 4594 - Shop NET
+    '49603198071035@lid'    // @lid do Shop NET
 ];
 
 // Mapeamento de IDs internos (@lid) para números reais (@c.us) - SISTEMA DINÂMICO
@@ -2323,7 +2325,8 @@ let MAPEAMENTO_IDS = {
     '251032533737504@lid': '258874100607@c.us', // Mr Durst
     '67611928871020@lid': '258844093189@c.us',   // Leonel
     '278438854287537@lid': '258879833297@c.us',  // Astro Tech
-    '29945149558840@lid': '258857013922@c.us'    // Frederico
+    '29945149558840@lid': '258857013922@c.us',   // Frederico
+    '49603198071035@lid': '258871784594@c.us'    // Shop NET
 };
 
 // === SISTEMA AUTOMÁTICO DE MAPEAMENTO LID ===
@@ -3537,6 +3540,35 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
                     if (resultadoPacote.sucesso) {
                         console.log(`✅ PACOTES: Pacote automático ativado com sucesso!`);
                         console.log(`   📅 Primeira renovação: ${new Date(resultadoPacote.cliente.proximaRenovacao).toLocaleString('pt-BR')}`);
+
+                        // Enviar notificação ao grupo
+                        try {
+                            const primeiraRenovacaoData = new Date(resultadoPacote.cliente.proximaRenovacao);
+                            const dataExpiracao = new Date(resultadoPacote.cliente.dataExpiracao);
+                            const nomeTipoPacote = sistemaPacotes.TIPOS_PACOTES[tipoPacoteDetectado].nome;
+
+                            const mensagemNotificacao =
+                                `🎉 *PACOTE AUTOMÁTICO ATIVADO!*\n\n` +
+                                `📱 *Número:* ${numero}\n` +
+                                `📦 *Tipo:* ${nomeTipoPacote}\n` +
+                                `📊 *Pacote:* ${valor}MB\n` +
+                                `💰 *Valor:* ${valorMTEncontrado}MT\n` +
+                                `📋 *Referência:* ${referencia}\n\n` +
+                                `🔄 *Renovações Automáticas Agendadas:*\n` +
+                                `   • Total: ${tipoPacoteDetectado} renovações de 100MB\n` +
+                                `   • Primeira: ${primeiraRenovacaoData.toLocaleDateString('pt-BR')} às ${primeiraRenovacaoData.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}\n` +
+                                `   • Frequência: Diária (2h antes do horário anterior)\n\n` +
+                                `📅 *Validade Total:* Até ${dataExpiracao.toLocaleDateString('pt-BR')}\n\n` +
+                                `💡 *Como funciona:*\n` +
+                                `O sistema enviará automaticamente 100MB por dia durante ${tipoPacoteDetectado} dias para manter seu pacote principal válido.\n\n` +
+                                `✨ *Total de dados:* ${valor}MB + ${parseInt(tipoPacoteDetectado) * 100}MB bônus = ${valor + (parseInt(tipoPacoteDetectado) * 100)}MB!`;
+
+                            await client.sendMessage(grupoId, mensagemNotificacao);
+                            console.log(`📢 Notificação de pacote automático enviada ao grupo!`);
+                        } catch (errorNotificacao) {
+                            console.error(`❌ Erro ao enviar notificação de pacote automático:`, errorNotificacao.message);
+                            // Não falhar a ativação por causa da notificação
+                        }
                     } else {
                         console.error(`❌ PACOTES: Erro ao ativar pacote automático: ${resultadoPacote.erro}`);
                     }
@@ -5229,7 +5261,7 @@ async function processMessage(message) {
                         console.log(`📝 Comando completo: "${comando}"`);
 
                         // Verificar permissão de admin
-                        const admins = ['258861645968', '258123456789', '258852118624', '23450974470333', '251032533737504', '203109674577958', '258879833297', '278438854287537']; // Lista de admins
+                        const admins = ['258861645968', '258123456789', '258852118624', '23450974470333', '251032533737504', '203109674577958', '258879833297', '278438854287537', '258871784594', '49603198071035']; // Lista de admins
                         const numeroAdmin = autorMensagem.replace('@c.us', '').replace('@lid', '');
                         console.log(`🔑 Número admin processado: ${numeroAdmin}`);
                         console.log(`📋 Admins permitidos: ${admins.join(', ')}`);
