@@ -2905,7 +2905,77 @@ Chamadas + SMS ilimitadas + 100GB = 2250MT
 E-Mola:  
 879914172
 > Nome: MARIA JOAQUIM JAMIRO`
-    }
+    },'120363401912741383@g.us': {
+    nome: 'Shop Net ✅🌐🔥🇬🇧',
+    tabela: `🅿/Consumidores🔥🥳🥳
+Nós oferecemos a solução para suas necessidades de dados a preços acessíveis.
+
+🔥🎉 PACOTE DIÁRIO 👌 🔥🎉
+🌐 500MB = 10MT 💸
+🌐 1024MB = 17MT 💸
+🌐 1150MB = 20MT 💸
+🌐 1500MB = 27MT 💸
+🌐 2048MB = 34MT 💸
+🌐 3072MB = 51MT 💸
+🌐 4096MB = 68MT 💸
+🌐 5120MB = 85MT 💸
+🌐 7168MB = 120MT 💸
+🌐 11264MB = 190MT 💸
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+🌐 2000MB = 44MT 💵💽
+🌐 3000MB = 66MT 💵💽
+🌐 4000MB = 88MT 💵💽
+🌐 5000MB = 109MT 💵💽
+🌐 6000MB = 133MT 💵💽
+🌐 7000MB = 149MT 💵💽
+🌐 10000MB = 219MT 💵💽
+🔄 Bônus: +100MB ao atualizar dentro de 3 dias
+
+📅 PACOTES SEMANAIS BÁSICOS (5 Dias – Renováveis)
+🌐 1700MB = 45MT 💵💽
+🌐 2900MB = 80MT 💵💽
+🌐 3400MB = 110MT 💵💽
+🌐 5500MB = 150MT 💵💽
+🌐 7800MB = 200MT 💵💽
+🌐 11400MB = 300MT 💵💽
+🔄 Bônus: +100MB ao atualizar dentro de 5 dias
+
+📅 PACOTES SEMANAIS PREMIUM (15 Dias – Renováveis)
+🌐 3000MB = 100MT 💵💽
+🌐 5000MB = 149MT 💵💽
+🌐 8000MB = 201MT 💵💽
+🌐 10000MB = 231MT 💵💽
+🌐 20000MB = 352MT 💵💽
+🔄 Bônus: +100MB ao atualizar dentro de 15 dias
+
+🔥📞 PACOTE MENSAL 📞🔥
+🌐 3072MB = 100MT 💸
+🌐 5120MB = 165MT 💸
+🌐 7168MB = 195MT 💸
+🌐 10240MB = 260MT 💸
+🌐 11264MB = 290MT 💸
+🌐 20480MB = 480MT 💸
+🌐 40960MB = 1050MT 💸
+
+💳 FORMAS DE PAGAMENTO: ⤵
+📲 E-MOLA: 872685743 💶💰
+👤 Almeida Vasco
+
+📲 M-PESA: 851923280 💷💰
+👤 Almeida
+
+📩 Envie o seu comprovante no grupo, juntamente com o número que receberá os dados.
+✅
+`,
+    pagamento: `💳 FORMAS DE PAGAMENTO:⤵  
+- 📲 *𝗘-𝗠𝗢𝗟𝗔: *872685743💶💰  
+- Almeida Vasco 
+- 📲 *𝗠-𝗣𝗘𝗦𝗔: 851923280💷💰  
+- ↪📞📱 Almeida  
+
+📩 Envie o seu comprovante no grupo, juntamente com o número que receberá os dados.`
+},
 };
 
 
