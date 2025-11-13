@@ -94,7 +94,7 @@ setInterval(verificarSinalRestart, 10000);
 
 // === AXIOS SIMPLIFICADO (SEGUINDO PADRÃO BOT1) ===
 const axiosInstance = axios.create({
-    timeout: 15000, // 15 segundos - OTIMIZADO para respostas rápidas
+    timeout: 60000, // 60 segundos - tolerância a conexões lentas
     maxRedirects: 3,
     headers: {
         'User-Agent': 'WhatsApp-Bot/1.0'
@@ -523,8 +523,8 @@ const MAX_RETRY_ATTEMPTS = 10; // 10 tentativas em 5 minutos (1 a cada 30s)
 
 // === CONTROLE DE RATE LIMITING ===
 let ultimaRequisicao = 0;
-const DELAY_ENTRE_REQUISICOES = 500; // 500ms entre cada requisição (OTIMIZADO para velocidade)
-const MAX_REQUISICOES_POR_MINUTO = 40; // 40 req/min (OTIMIZADO para envios rápidos)
+const DELAY_ENTRE_REQUISICOES = 2000; // 2 segundos entre cada verificação (reduzido)
+const MAX_REQUISICOES_POR_MINUTO = 20; // Aumentado para 20 req/min
 let requisicoesUltimoMinuto = [];
 let erros429Consecutivos = 0;
 const MAX_ERROS_429 = 3; // Após 3 erros 429, pausar temporariamente
@@ -2433,428 +2433,630 @@ const MODERACAO_CONFIG = {
 
 // Configuração para cada grupo
 const CONFIGURACAO_GRUPOS = {
-    '258840161370-1471468657@g.us': {
-        nome: 'Venda Automática 24/7',
-        tabela: `📢🔥 TABELA ATUALIZADA – OUTUBRO 2025 🔥📢
-Internet e Chamadas Ilimitadas – Vodacom
-Pacotes Diários | Semanais | Mensais
+    '258820749141-1441573529@g.us': {
+        nome: 'Data Store - Vodacom',
+        tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - OUTUBRO 2025 🚨🔥✅
 
-OFERTA ESPECIAL – 24 HORAS ⏱
-600MB - 10MT
-800MB - 15MT
-1024MB - 17MT
-1200MB - 20MT
-2048MB - 34MT
+📆 PACOTES DIÁRIOS
+512MB = 10MT 💵💽
+1024MB = 17MT 💵💽
+1200MB = 20MT 💵💽
+2048MB = 34MT 💵💽
+2200MB = 40MT 💵💽
+3072MB = 51MT 💵💽
+4096MB = 68MT 💵💽
+5120MB = 85MT 💵💽
+6144MB = 102MT 💵💽
+7168MB = 119MT 💵💽
+8192MB = 136MT 💵💽
+9144MB = 153MT 💵💽
+10240MB = 170MT 💵💽
 
-PACOTES DIÁRIOS (24H ⏱)
-2400MB - 40MT
-3072MB - 51MT
-4096MB - 68MT
-5120MB - 85MT
-6144MB - 102MT
-7168MB - 119MT
-8192MB - 136MT
-9144MB - 153MT
-10240MB - 170MT
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+2000MB = 44MT 💵💽
+3000MB = 66MT 💵💽
+4000MB = 88MT 💵💽
+5000MB = 109MT 💵💽
+6000MB = 133MT 💵💽
+7000MB = 149MT 💵💽
+10000MB = 219MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
 
-PACOTES PREMIUM (3 DIAS 🗓 – RENOVÁVEIS)
-2000MB - 44MT
-3000MB - 66MT
-4000MB - 88MT
-5000MB - 109MT
-6000MB - 133MT
-7000MB - 149MT
-10000MB - 219MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 3 dias
+📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
+1700MB = 45MT 💵💽
+2900MB = 80MT 💵💽
+3400MB = 110MT 💵💽
+5500MB = 150MT 💵💽
+7800MB = 200MT 💵💽
+11400MB = 300MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
 
-SEMANAIS BÁSICOS (5 DIAS 🗓 – RENOVÁVEIS)
-1700MB - 45MT
-2900MB - 80MT
-3400MB - 110MT
-5500MB - 150MT
-7800MB - 200MT
-11400MB - 300MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 5 dias
+📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
+3000MB = 100MT 💵💽
+5000MB = 149MT 💵💽
+8000MB = 201MT 💵💽
+10000MB = 231MT 💵💽
+20000MB = 352MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
 
-SEMANAIS PREMIUM (15 DIAS 🗓 – RENOVÁVEIS)
-3000MB - 100MT
-5000MB - 149MT
-8000MB - 201MT
-10000MB - 231MT
-20000MB - 352MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 15 dias
+📅 PACOTES MENSAIS
+12.8GB = 270MT 💵💽
+22.8GB = 435MT 💵💽
+32.8GB = 605MT 💵💽
+52.8GB = 945MT 💵💽
+60.2GB = 1249MT 💵💽
+80.2GB = 1449MT 💵💽
+100.2GB = 1700MT 💵💽
 
-PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
-2.8GB - 100MT
-5.8GB - 175MT
-8.8GB - 200MT
-10.8GB - 249MT
-12.8GB - 300MT
-15.8GB - 349MT
-18.8GB - 400MT
-20.8GB - 449MT
-25.8GB - 549MT
-32.8GB - 649MT
-51.2GB - 1049MT
-60.2GB - 1249MT
-80.2GB - 1449MT
-100.2GB - 1700MT
-Observação: Pacotes mensais não compatíveis com Txuna
+💎 PACOTES DIAMANTE MENSAIS
+Chamadas + SMS ilimitadas + 11GB = 460MT 💵
+Chamadas + SMS ilimitadas + 24GB = 820MT 💵
+Chamadas + SMS ilimitadas + 50GB = 1550MT 💵
+Chamadas + SMS ilimitadas + 100GB = 2250MT 💵
 
-CHAMADAS ILIMITADAS — VODACOM 📞 ♾
-
-11GB - 449MT - Ilimitadas ✨
-14.5GB - 500MT - Ilimitadas
-26.5GB - 700MT - Ilimitadas
-37.5GB - 1000MT - Ilimitadas
-53.5GB - 1500MT - Ilimitadas
-102.5GB - 2150MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
-
-CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
-
-9GB - 469MT - Ilimitadas ✨
-23GB - 950MT - Ilimitadas
-38GB - 1450MT - Ilimitadas
-46GB - 1700MT - Ilimitadas
-53GB - 1900MT - Ilimitadas
-68GB - 2400MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
-
-🔹 CONEXÃO SEM LIMITES 🔹
-Internet rápida, chamadas e SMS ilimitadas.
-Pacotes exclusivos Vodacom e Movitel.
-Sempre conectado, sempre no controle!
+📍 NB: Válido apenas para Vodacom  
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!
 `,
 
-        pagamento: `💸 FORMAS DE PAGAMENTO
+        pagamento: `FORMAS DE PAGAMENTO ATUALIZADAS
+ 
+1- M-PESA 
+NÚMERO: 848715208
+NOME:  NATACHA ALICE
 
-🟠 E-Mola – Glória | 📲 860186270  
-🔴 M-Pesa – Leonor | 📲 857451196  
+NÚMERO: 871112049
+NOME: NATACHA ALICE`
+    },
+    '120363402609218031@g.us': {
+        nome: 'NET PROMOÇÃO 17MT V12',
+        tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - NOVEMBRO 2025 🚨🔥✅
 
-⚠ ATENÇÃO  
-▪ Após o pagamento, envie a confirmação ✉ ** e o seu número para receber o seu pacote 📲  
-▪ Envie ** o valor exato da tabela 💰  
+📆 PACOTES DIÁRIOS
+1024MB = 17MT 💵💽
+1200MB = 20MT 💵💽
+2048MB = 34MT 💵💽
+2200MB = 40MT 💵💽
+3072MB = 51MT 💵💽
+4096MB = 68MT 💵💽
+5120MB = 85MT 💵💽
+6144MB = 102MT 💵💽
+7168MB = 119MT 💵💽
+8192MB = 136MT 💵💽
+9144MB = 153MT 💵💽
+10240MB = 170MT 💵💽
 
-NB: Válido apenas para Vodacom  
-🚀 Garanta seus Megabytes agora!
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+2000MB = 44MT 💵💽
+3000MB = 66MT 💵💽
+4000MB = 88MT 💵💽
+5000MB = 109MT 💵💽
+6000MB = 133MT 💵💽
+7000MB = 149MT 💵💽
+10000MB = 219MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
+
+📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
+1700MB = 45MT 💵💽
+2900MB = 80MT 💵💽
+3400MB = 110MT 💵💽
+5500MB = 150MT 💵💽
+7800MB = 200MT 💵💽
+11400MB = 300MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
+
+📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
+3000MB = 100MT 💵💽
+5000MB = 149MT 💵💽
+8000MB = 201MT 💵💽
+10000MB = 231MT 💵💽
+20000MB = 352MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
+
+📅 PACOTES MENSAIS
+12.8GB = 270MT 💵💽
+22.8GB = 435MT 💵💽
+32.8GB = 605MT 💵💽
+52.8GB = 945MT 💵💽
+60.2GB = 1249MT 💵💽
+80.2GB = 1449MT 💵💽
+100.2GB = 1700MT 💵💽
+
+💎 PACOTES DIAMANTE MENSAIS
+Chamadas + SMS ilimitadas + 11GB = 460MT 💵
+Chamadas + SMS ilimitadas + 24GB = 820MT 💵
+Chamadas + SMS ilimitadas + 50GB = 1550MT 💵
+Chamadas + SMS ilimitadas + 100GB = 2250MT 💵
+
+📍 NB: Válido apenas para Vodacom  
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!
+
+`,
+
+        pagamento: `🤖 Formas de Pagamento
+
+🟧E-mola:870718396__[FREDERICO FELICIANO SIMANGO]
+
+🟥M-Pesa:857013922__[SHAT TERCIANA]
+
+
+Em seguida mande a mensagem de comprovativo
+Aqui no grupo`
+    },
+    '120363020570328377@g.us': {
+        nome: ' NET VODACOM ACESSÍVEL',
+        tabela: `🚨📱 INTERNET VODACOM COM OS MELHORES PREÇOS!
+Mega Promoção da NET DA VODACOM ACESSÍVEL — Conecte-se já! 🚀
+
+📅 PACOTES DIÁRIOS (24h de validade)
+
+✅ 1GB - 17MT
+✅ 2GB - 34MT
+✅ 3GB - 51MT
+✅ 4GB - 68MT
+✅ 5GB - 85MT
+✅ 6GB - 102MT
+✅ 7GB - 119MT
+✅ 8GB - 136MT
+✅ 9GB - 153MT
+✅ 10GB - 170MT
+
+
+
+🚨QUANDO PRECISAREM PACOTE MENSAL, ENTRA EM CONTACTO ATRAVÉS DO LINK ABAIXO 👇👇🚨
+
+https://wa.me/258858891101?text=%20Quero%20pacote%20mensal!%20
+
+
+QUANDO PRECISAREM DO  ILIMITADO, EMTREM EM CONTACTO COM O LINK 
+https://wa.me/258858891101?text=%20Quero%20pacote%20ilimitado!%20
+
+
+FORMAS DE PAGAMENTO💰💶
+
+📌 M-PESA:  858891101
+   Nome:  ISAC DA LURDES
+
+📌 E-MOLA: 866291101
+    Nome:   ISAC LURDES 
+
+🚀 O futuro é agora! Vamos? 🔥🛒
+
+
+`,
+
+        pagamento: `FORMAS DE PAGAMENTO💰💶
+
+📌 M-PESA:  858891101
+   Nome:  ISAC DA LURDES
+
+📌 E-MOLA: 866291101
+    Nome:  ISAC LURDES 
+
+📮 Após a transferência enviei o comprovante em forma do cópia junto com seu número.
+ 
+> 1. 🚨Não mande comprovativo em formato de imagem 📸🚨
+
+> 2.  🚨 Não mande valor que não têm na tabela🚨
+
+🚀 O futuro é agora! Vamos? 🔥🛒
 `
     },
-'258876291014-1634575097@g.us': {
-        nome: '🪐V2 Megabytes NetConnect 🌍',
-        tabela: `📢🔥 TABELA ATUALIZADA – OUTUBRO 2025 🔥📢
-Internet e Chamadas Ilimitadas – Vodacom
-Pacotes Diários | Semanais | Mensais
+    '120363022366545020@g.us': {
+        nome: 'MNGmegas Elite Net',
+        tabela: `🚨MB DA VODACOM 📶🌐
 
-OFERTA ESPECIAL – 24 HORAS ⏱
-600MB - 10MT
-800MB - 15MT
-1024MB - 17MT
-1200MB - 20MT
-2048MB - 34MT
+🔥 Imperdível! Nosso pacote diário e semanal, txuna! Não leva💸
+⚡ Aproveite já, pode acabar a qualquer momento! 🚀
 
-PACOTES DIÁRIOS (24H ⏱)
-2400MB - 40MT
-3072MB - 51MT
-4096MB - 68MT
-5120MB - 85MT
-6144MB - 102MT
-7168MB - 119MT
-8192MB - 136MT
-9144MB - 153MT
-10240MB - 170MT
+⏰PACOTE DIÁRIO🛒📦
+🌐256MB = 7MT
+🌐512MB = 10MT
+🌐1024MB = 17MT
+🌐1280MB = 25MT
+🌐2048MB = 34MT
+🌐3072MB = 51MT
+🌐4096MB = 68MT
+🌐5120MB = 85MT
+🌐6144MB = 102MT
+🌐7168MB = 119MT
+🌐8192MB = 136MT
+🌐9216MB = 153MT
+🌐10240MB = 170MT
 
-PACOTES PREMIUM (3 DIAS 🗓 – RENOVÁVEIS)
-2000MB - 44MT
-3000MB - 66MT
-4000MB - 88MT
-5000MB - 109MT
-6000MB - 133MT
-7000MB - 149MT
-10000MB - 219MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 3 dias
+ 📅PACOTE SEMANAL BÁSICO 🛒📦
+⚠ Vai receber 100MB por dia durante 6 dias, totalizando +0.6GB. ⚠
 
-SEMANAIS BÁSICOS (5 DIAS 🗓 – RENOVÁVEIS)
-1700MB - 45MT
-2900MB - 80MT
-3400MB - 110MT
-5500MB - 150MT
-7800MB - 200MT
-11400MB - 300MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 5 dias
+📡3.0GB = 89MT 
+📡5.0GB = 133MT
+📡6.0GB = 158MT 
+📡7.0GB = 175MT 
+📡10.0GB = 265MT
 
-SEMANAIS PREMIUM (15 DIAS 🗓 – RENOVÁVEIS)
-3000MB - 100MT
-5000MB - 149MT
-8000MB - 201MT
-10000MB - 231MT
-20000MB - 352MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 15 dias
+🗓PACOTE SEMANAL PREMIUM (15 Dias – Renováveis) 🛒📦
+⚠ Vai receber 100MB por dia durante 14 dias, totalizando +1.4GB. ⚠
 
-PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
-2.8GB - 100MT
-5.8GB - 175MT
-8.8GB - 200MT
-10.8GB - 249MT
-12.8GB - 300MT
-15.8GB - 349MT
-18.8GB - 400MT
-20.8GB - 449MT
-25.8GB - 549MT
-32.8GB - 649MT
-51.2GB - 1049MT
-60.2GB - 1249MT
-80.2GB - 1449MT
-100.2GB - 1700MT
-Observação: Pacotes mensais não compatíveis com Txuna
+📡4096MB = 143MT 
+📡4608MB = 156MT 
+📡5120MB = 186MT 
+📡8192MB = 238MT 
+📡9150MB = 259MT
+📡10240MB = 278MT 
 
-CHAMADAS ILIMITADAS — VODACOM 📞 ♾
+> PARA VER TABELA DO PACOTE MENSAL DIGITE: Mensal
 
-11GB - 449MT - Ilimitadas ✨
-14.5GB - 500MT - Ilimitadas
-26.5GB - 700MT - Ilimitadas
-37.5GB - 1000MT - Ilimitadas
-53.5GB - 1500MT - Ilimitadas
-102.5GB - 2150MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
+> PARA VER TABELA DO PACOTE  ILIMITADO DIGITE: Ilimitado
 
-CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
 
-9GB - 469MT - Ilimitadas ✨
-23GB - 950MT - Ilimitadas
-38GB - 1450MT - Ilimitadas
-46GB - 1700MT - Ilimitadas
-53GB - 1900MT - Ilimitadas
-68GB - 2400MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
+💳FORMA DE PAGAMENTO:
 
-🔹 CONEXÃO SEM LIMITES 🔹
-Internet rápida, chamadas e SMS ilimitadas.
-Pacotes exclusivos Vodacom e Movitel.
-Sempre conectado, sempre no controle!
-`,
+M-Pesa: 853529033 📱
+- Ercílio UANELA 
+e-Mola: 865627840 📱
+- Alexandre UANELA 
 
-        pagamento: `💸 FORMAS DE PAGAMENTO
+✨ Mais Rápido, Mais Barato, Mais Confiável! ✨`,
 
-🟠 E-Mola – Glória | 📲 860186270  
-🔴 M-Pesa – Leonor | 📲 857451196  
+        pagamento: `formas de pagamento💰💶
 
-⚠ ATENÇÃO  
-▪ Após o pagamento, envie a confirmação ✉ ** e o seu número para receber o seu pacote 📲  
-▪ Envie ** o valor exato da tabela 💰  
+📌 m-pesa: 853529033 
+   nome: ercílio uanela 
 
-NB: Válido apenas para Vodacom  
-🚀 Garanta seus Megabytes agora!
+📌 e-mola: 865627840 
+    nome: alexandre uanela  
+
+📮 após a transferência enviei o comprovante em forma do cópia junto com seu número.
+ 
+> 1. 🚨não mande comprovativo em formato de imagem 📸🚨
+
+> 2.  🚨 não mande valor que não têm na tabela🚨
+
+🚀 o futuro é agora! vamos? 🔥🛒
 `
     },
-'120363419414311700@g.us': {
-        nome: '🪐Megabytes PROMO',
-        tabela: `📢🔥 TABELA ATUALIZADA – OUTUBRO 2025 🔥📢
-Internet e Chamadas Ilimitadas – Vodacom
-Pacotes Diários | Semanais | Mensais
+    '120363402302455817@g.us': {
+        nome: 'KA-NET',
+        tabela: `🆕🛜TABELA ATUALIZADA VODACOM - 2025🔄
 
-OFERTA ESPECIAL – 24 HORAS ⏱
-600MB - 10MT
-800MB - 15MT
-1024MB - 17MT
-1200MB - 20MT
-2048MB - 34MT
+📆 PACOTES DIÁRIOS
+512MB = 10MT
+1024MB = 16MT
+1200MB = 20MT
+1560MB = 25MT
+2048MB = 32MT
+3200MB = 54MT 
+4250MB = 68MT 
+5350MB = 90MT 
+10240MB = 160MT
 
-PACOTES DIÁRIOS (24H ⏱)
-2400MB - 40MT
-3072MB - 51MT
-4096MB - 68MT
-5120MB - 85MT
-6144MB - 102MT
-7168MB - 119MT
-8192MB - 136MT
-9144MB - 153MT
-10240MB - 170MT
+📆 PACOTE DIÁRIO PREMIUM (3 Dias)
+2000MB = 40MT
+3000MB = 66MT 
+4000MB = 72MT 
+5000MB = 85MT
+6000MB = 110MT 
+7000MB = 125MT 
+10000MB = 185MT 
+🔄Bônus: 100MB extra ao atualizar dentro de 3 dias
 
-PACOTES PREMIUM (3 DIAS 🗓 – RENOVÁVEIS)
-2000MB - 44MT
-3000MB - 66MT
-4000MB - 88MT
-5000MB - 109MT
-6000MB - 133MT
-7000MB - 149MT
-10000MB - 219MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 3 dias
+📆 PACOTE SEMANAL (5 dias)
+5000MB = 95MT
+8000MB = 140MT
+10000MB = 190MT
+15000MB = 290MT
+🔄Bônus: 100MB extra ao atualizar dentro de 5 dias
 
-SEMANAIS BÁSICOS (5 DIAS 🗓 – RENOVÁVEIS)
-1700MB - 45MT
-2900MB - 80MT
-3400MB - 110MT
-5500MB - 150MT
-7800MB - 200MT
-11400MB - 300MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 5 dias
+📆 SEMANAIS PREMIUM (15 Dias - Renováveis)
+3000MB = 100MT
+5000MB = 145MT
+8000MB = 205MT
+10000MB = 240MT
+20000MB = 360MT
+🔄Bônus: 100MB extra ao atualizar dentro de 15 dias
 
-SEMANAIS PREMIUM (15 DIAS 🗓 – RENOVÁVEIS)
-3000MB - 100MT
-5000MB - 149MT
-8000MB - 201MT
-10000MB - 231MT
-20000MB - 352MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 15 dias
+Mensal (Válido Por 30 Dias)
+5GB = 150MT
+10GB = 260MT
+35GB = 710MT
+50GB = 1030MT
+100GB = 2040MT
 
-PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
-2.8GB - 100MT
-5.8GB - 175MT
-8.8GB - 200MT
-10.8GB - 249MT
-12.8GB - 300MT
-15.8GB - 349MT
-18.8GB - 400MT
-20.8GB - 449MT
-25.8GB - 549MT
-32.8GB - 649MT
-51.2GB - 1049MT
-60.2GB - 1249MT
-80.2GB - 1449MT
-100.2GB - 1700MT
-Observação: Pacotes mensais não compatíveis com Txuna
+📅 PACOTES DIAMANTE MENSAIS 💎
+Chamadas + SMS ilimitadas + 11GB = 450MT 
+Chamadas + SMS ilimitadas + 24GB = 820MT 
+Chamadas + SMS ilimitadas + 50GB = 1550MT 
+Chamadas + SMS ilimitadas + 100GB = 2250MT
 
-CHAMADAS ILIMITADAS — VODACOM 📞 ♾
-
-11GB - 449MT - Ilimitadas ✨
-14.5GB - 500MT - Ilimitadas
-26.5GB - 700MT - Ilimitadas
-37.5GB - 1000MT - Ilimitadas
-53.5GB - 1500MT - Ilimitadas
-102.5GB - 2150MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
-
-CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
-
-9GB - 469MT - Ilimitadas ✨
-23GB - 950MT - Ilimitadas
-38GB - 1450MT - Ilimitadas
-46GB - 1700MT - Ilimitadas
-53GB - 1900MT - Ilimitadas
-68GB - 2400MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
-
-🔹 CONEXÃO SEM LIMITES 🔹
-Internet rápida, chamadas e SMS ilimitadas.
-Pacotes exclusivos Vodacom e Movitel.
-Sempre conectado, sempre no controle!
+❗NB: Internet só para vodacom
+❗Para o pacote mensal e Diamante, não pode ter TXUNA crédito.
 `,
-
-        pagamento: `💸 FORMAS DE PAGAMENTO
-
-🟠 E-Mola – Glória | 📲 860186270  
-🔴 M-Pesa – Leonor | 📲 857451196  
-
-⚠ ATENÇÃO  
-▪ Após o pagamento, envie a confirmação ✉ ** e o seu número para receber o seu pacote 📲  
-▪ Envie ** o valor exato da tabela 💰  
-
-NB: Válido apenas para Vodacom  
-🚀 Garanta seus Megabytes agora!
+        pagamento: `- 📲 𝗘-𝗠𝗢𝗟𝗔: 864882152💶💰
+- Catia Anabela Nharrava 
+- 📲 𝗠-𝗣𝗘𝗦𝗔: 856268811💷💰 
+- ↪📞Kelven Junior Anabela Nharrava
 `
     },
-'120363420106859235@g.us': {
-        nome: 'MozStreaming MB’s v3*',
-        tabela: `📢🔥 TABELA ATUALIZADA – OUTUBRO 2025 🔥📢
-Internet e Chamadas Ilimitadas – Vodacom
-Pacotes Diários | Semanais | Mensais
+'120363043964227338@g.us': {
+        nome: 'ASTRO BOOSTING I',
+        tabela: `📢 SUPER PROMOÇÃO DE INTERNET - VODACOM  
 
-OFERTA ESPECIAL – 24 HORAS ⏱
-600MB - 10MT
-800MB - 15MT
-1024MB - 17MT
-1200MB - 20MT
-2048MB - 34MT
+📋 TABELA DE MEGAS DIÁRIOS
+1GB  =  18MT  
+2GB  =  36MT  
+3GB  =  54MT  
+4GB  =  72MT  
+5GB  =  90MT  
+6GB  =  108MT  
+7GB  =  126MT  
+8GB  =  144MT  
+9GB  =  162MT  
+10GB =  180MT  (Para Patrões 🤩)  
 
-PACOTES DIÁRIOS (24H ⏱)
-2400MB - 40MT
-3072MB - 51MT
-4096MB - 68MT
-5120MB - 85MT
-6144MB - 102MT
-7168MB - 119MT
-8192MB - 136MT
-9144MB - 153MT
-10240MB - 170MT
+📅 MEGAS SEMANAIS
+4.36GB =  110MT  
+6.50GB =  180MT  
+9.76GB =  250MT  
 
-PACOTES PREMIUM (3 DIAS 🗓 – RENOVÁVEIS)
-2000MB - 44MT
-3000MB - 66MT
-4000MB - 88MT
-5000MB - 109MT
-6000MB - 133MT
-7000MB - 149MT
-10000MB - 219MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 3 dias
+📅 MEGAS MENSAIS
+3GB  =  160MT  
+6GB  =  200MT  
+10GB =  300MT  
 
-SEMANAIS BÁSICOS (5 DIAS 🗓 – RENOVÁVEIS)
-1700MB - 45MT
-2900MB - 80MT
-3400MB - 110MT
-5500MB - 150MT
-7800MB - 200MT
-11400MB - 300MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 5 dias
-
-SEMANAIS PREMIUM (15 DIAS 🗓 – RENOVÁVEIS)
-3000MB - 100MT
-5000MB - 149MT
-8000MB - 201MT
-10000MB - 231MT
-20000MB - 352MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 15 dias
-
-PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
-2.8GB - 100MT
-5.8GB - 175MT
-8.8GB - 200MT
-10.8GB - 249MT
-12.8GB - 300MT
-15.8GB - 349MT
-18.8GB - 400MT
-20.8GB - 449MT
-25.8GB - 549MT
-32.8GB - 649MT
-51.2GB - 1049MT
-60.2GB - 1249MT
-80.2GB - 1449MT
-100.2GB - 1700MT
-Observação: Pacotes mensais não compatíveis com Txuna
-
-CHAMADAS ILIMITADAS — VODACOM 📞 ♾
-
-11GB - 449MT - Ilimitadas ✨
-14.5GB - 500MT - Ilimitadas
-26.5GB - 700MT - Ilimitadas
-37.5GB - 1000MT - Ilimitadas
-53.5GB - 1500MT - Ilimitadas
-102.5GB - 2150MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
-
-CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
-
-9GB - 469MT - Ilimitadas ✨
-23GB - 950MT - Ilimitadas
-38GB - 1450MT - Ilimitadas
-46GB - 1700MT - Ilimitadas
-53GB - 1900MT - Ilimitadas
-68GB - 2400MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
-
-🔹 CONEXÃO SEM LIMITES 🔹
-Internet rápida, chamadas e SMS ilimitadas.
-Pacotes exclusivos Vodacom e Movitel.
-Sempre conectado, sempre no controle!
+= PACOTES DIAMANTE
+11GB + Chamadas e SMS Ilimitadas + 10min Internacionais + 30MB Roaming  =  450MT
 `,
 
-        pagamento: `FORMAS DE PAGAMENTO
-📱 M-Pesa: 844345161 (Elton Matusse)
-📱 E-Mola: 864524363 (Aleocha Matusse)
-
-📩 Envie o comprovativo, após o pagamento e o número que receberá os dados!
+        pagamento: `╭━━━┛ 💸  𝗙𝗢𝗥𝗠𝗔𝗦 𝗗𝗘 𝗣𝗔𝗚𝗔𝗠𝗘𝗡𝗧𝗢:  
+┃  
+┃ 🪙 𝗘-𝗠𝗼𝗹𝗮:  
+┃    879833297  
+┃     👤 𝗧𝗶𝘁𝘂𝗹𝗮𝗿: 𝗖𝗵𝗲𝗹𝘁𝗼𝗻  
+┃  
+┃ 🪙 𝗠-𝗣𝗲𝘀𝗮:  
+┃   856629444  
+┃     👤 𝗧𝗶𝘁𝘂𝗹𝗮𝗿: 𝗖𝗵𝗲𝗹𝘁𝗼𝗻
+┃   
+┃  
+┃ ⚠ 𝗜𝗠𝗣𝗢𝗥𝗧𝗔𝗡𝗧𝗘:  
+┃     ▪ 𝗣𝗮𝗿𝗮 𝗮𝗾𝘂𝗶𝘀𝗶𝗰̧𝗮̃𝗼, 𝗲𝗻𝘃𝗶𝗲:  
+┃         𝟭⃣ 𝗢 𝘃𝗮𝗹𝗼𝗿  
+┃         𝟮⃣ 𝗢 𝗰𝗼𝗺𝗽𝗿𝗼𝘃𝗮𝘁𝗶𝘃𝗼  
+┃         𝟯⃣ 𝗢 𝗻𝘂́𝗺𝗲𝗿𝗼 𝗾𝘂𝗲 𝘃𝗮𝗶 𝗿𝗲𝗰𝗲𝗯𝗲𝗿 𝗼𝘀 𝗺𝗲𝗴𝗮𝘀  
+┃  
+╰━━━━━━━━━━━━━━━━━━━━━  
+        🚀 𝗢 𝗳𝘂𝘁𝘂𝗿𝗼 𝗲́ 𝗮𝗴𝗼𝗿𝗮. 𝗩𝗮𝗺𝗼𝘀?
 `
-    }
+    },
+'120363419388089635@g.us': {
+        nome: 'NET VODACOM 18MT',
+        tabela: `🤖❤INTERNET VODACOM- a melhor preço do mercado 🎉
+
+📆 PACOTES DIÁRIOS
+
+1024MB = 18MT 💵💽
+1100MB = 20MT 💵💽
+1300MB =24MT 💵💽
+2048MB = 36MT 💵💽
+2200MB = 40MT 💵💽
+3072MB = 54MT 💵💽
+4096MB = 72MT 💵💽
+5120MB = 90MT 💵💽
+6144MB = 108MT 💵💽
+7168MB = 126MT 💵💽
+8192MB = 144MT 💵💽
+9144MB = 162MT 💵💽
+10240MB = 180MT 💵💽
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+2000MB = 44MT 💵💽
+3000MB = 66MT 💵💽
+4000MB = 88MT 💵💽
+5000MB = 109MT 💵💽
+6000MB = 133MT 💵💽
+7000MB = 149MT 💵💽
+10000MB = 219MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
+
+📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
+1700MB = 45MT 💵💽
+2900MB = 80MT 💵💽
+3400MB = 110MT 💵💽
+5500MB = 150MT 💵💽
+7800MB = 200MT 💵💽
+11400MB = 300MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
+
+📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
+3000MB = 100MT 💵💽
+5000MB = 149MT 💵💽
+8000MB = 201MT 💵💽
+10000MB = 231MT 💵💽
+20000MB = 352MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
+
+📅 PACOTE MENSAL (APENAS MEGAS)
+5.8GB  =  175MT  
+10.8GB =  290MT  
+15.8GB =  425MT  
+21.8GB =  555MT  
+25.8GB =  720MT  
+37.8GB =  835MT  
+54.8GB   =  995MT 
+64.8GB   =  1245MT
+
+💎 DIAMANTE MENSAL TUDO TOP ILIMITADO
+11GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  460MT  
+14.5GB + Chamadas e SMS ilimitadas para todas redes  =  540MT  
+20GB + Chamadas e SMS ilimitadas + 10min int + 30MB ROAM  =  640MT  
+31.1GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  820MT  
+41.1GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  995MT  
+51.1GB + Chamadas e SMS ilimitadas + 10min int + 30MB ROAM  =  1245MT  
+64.1GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  1445MT  
+100GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  2145MT
+
+
+📍 NB: Válido apenas para Vodacom  
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!
+`,
+
+        pagamento: `💳 Formas de Pagamento:  
+
+💵 M-Pesa: 844093189 (Leonel Amâncio Nhantumbo)  
+
+💵 E-Mola: 878184842 (Leonel Amâncio Nhantumbo)  
+
+📤 Envie o comprovativo em (screenshot) da transferência + o número  84 que deverá receber os GB's.`
+    },
+'258843851507-1502735322@g.us': {
+        nome: 'DKNET',
+        tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - OUTUBRO 2025 🚨🔥✅
+
+📆 PACOTES DIÁRIOS
+512MB = 10MT 💵💽
+800MB = 15MT 💵💽
+1024MB = 18MT 💵💽
+1100MB = 20MT 💵💽
+1300MB = 25MT 💵💽
+1600MB = 30MT 💵💽
+2048MB = 36MT 💵💽
+2200MB = 40MT 💵💽
+2800MB = 50MT 💵💽
+3072MB = 54MT 💵💽
+4096MB = 72MT 💵💽
+5120MB = 90MT 💵💽
+6144MB = 108MT 💵💽
+7168MB = 126MT 💵💽
+8192MB = 144MT 💵💽
+9144MB = 162MT 💵💽
+10240MB = 180MT 💵💽
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+2000MB = 44MT 💵💽
+3000MB = 66MT 💵💽
+4000MB = 88MT 💵💽
+5000MB = 109MT 💵💽
+6000MB = 133MT 💵💽
+7000MB = 149MT 💵💽
+10000MB = 219MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
+
+📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
+1700MB = 45MT 💵💽
+2900MB = 80MT 💵💽
+3400MB = 110MT 💵💽
+5500MB = 150MT 💵💽
+7800MB = 200MT 💵💽
+11400MB = 300MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
+
+📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
+3000MB = 100MT 💵💽
+5000MB = 149MT 💵💽
+8000MB = 201MT 💵💽
+10000MB = 231MT 💵💽
+20000MB = 352MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
+
+📅 PACOTES MENSAIS
+12.8GB = 315MT 💵💽
+22.8GB = 550MT 💵💽
+32.8GB = 725MT 💵💽
+52.8GB = 945MT 💵💽
+60.2GB = 1249MT 💵💽
+80.2GB = 1449MT 💵💽
+100.2GB = 1700MT 💵💽
+
+💎 PACOTES DIAMANTE MENSAIS
+Chamadas + SMS ilimitadas + 11GB = 450MT 💵
+Chamadas + SMS ilimitadas + 24GB = 820MT 💵
+Chamadas + SMS ilimitadas + 50GB = 1550MT 💵
+Chamadas + SMS ilimitadas + 100GB = 2250MT 💵
+
+📍 NB: Válido apenas para Vodacom  
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!
+`,
+
+        pagamento: `M-Pesa:  
+845060515  
+> Nome: WALTER
+
+E-Mola:  
+879914172
+> Nome: MARIA JOAQUIM JAMIRO`
+    },
+'120363401912741383@g.us': {
+    nome: 'Shop Net ✅🌐🔥🇬🇧',
+    tabela: `🅿/Consumidores🔥🥳🥳
+Nós oferecemos a solução para suas necessidades de dados a preços acessíveis.
+
+🔥🎉 PACOTE DIÁRIO 👌 🔥🎉
+🌐 500MB = 10MT 💸
+🌐 1024MB = 17MT 💸
+🌐 1150MB = 20MT 💸
+🌐 1500MB = 27MT 💸
+🌐 2048MB = 34MT 💸
+🌐 3300MB = 40MT 💸
+🌐 3072MB = 51MT 💸
+🌐 3900MB = 60MT 💸
+🌐 4096MB = 68MT 💸
+🌐 5120MB = 85MT 💸
+🌐 7168MB = 120MT 💸
+🌐 10240MB = 170MT 💸
+🌐 11264MB = 190MT 💸
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+🌐 2000MB = 44MT 💵💽
+🌐 3000MB = 66MT 💵💽
+🌐 4000MB = 88MT 💵💽
+🌐 5000MB = 109MT 💵💽
+🌐 6000MB = 133MT 💵💽
+🌐 7000MB = 149MT 💵💽
+🌐 10000MB = 219MT 💵💽
+🔄 Bônus: +100MB ao atualizar dentro de 3 dias
+
+📅 PACOTES SEMANAIS BÁSICOS (5 Dias – Renováveis)
+🌐 1700MB = 45MT 💵💽
+🌐 2900MB = 80MT 💵💽
+🌐 3400MB = 110MT 💵💽
+🌐 5500MB = 150MT 💵💽
+🌐 7800MB = 200MT 💵💽
+🌐 11400MB = 300MT 💵💽
+🔄 Bônus: +100MB ao atualizar dentro de 5 dias
+
+📅 PACOTES SEMANAIS PREMIUM (15 Dias – Renováveis)
+🌐 3000MB = 100MT 💵💽
+🌐 5000MB = 149MT 💵💽
+🌐 8000MB = 201MT 💵💽
+🌐 10000MB = 231MT 💵💽
+🌐 20000MB = 352MT 💵💽
+🔄 Bônus: +100MB ao atualizar dentro de 15 dias
+
+🔥📞 PACOTE MENSAL 📞🔥
+🌐 3072MB = 100MT 💸
+🌐 5120MB = 165MT 💸
+🌐 7168MB = 195MT 💸
+🌐 10240MB = 260MT 💸
+🌐 11264MB = 290MT 💸
+🌐 20480MB = 480MT 💸
+🌐 40960MB = 1050MT 💸
+
+💳 FORMAS DE PAGAMENTO: ⤵
+📲 E-MOLA: 872685743 💶💰
+👤 Almeida Vasco
+
+📲 M-PESA: 851923280 💷💰
+👤 Almeida
+
+📩 Envie o seu comprovante no grupo, juntamente com o número que receberá os dados.
+✅
+`,
+    pagamento: `💳 FORMAS DE PAGAMENTO:⤵  
+- 📲 *𝗘-𝗠𝗢𝗟𝗔: *872685743💶💰  
+- Almeida Vasco 
+- 📲 *𝗠-𝗣𝗘𝗦𝗔: 851923280💷💰  
+- ↪📞📱 Almeida  
+
+📩 Envie o seu comprovante no grupo, juntamente com o número que receberá os dados.`
+},
 };
 
 
