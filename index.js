@@ -94,7 +94,7 @@ setInterval(verificarSinalRestart, 10000);
 
 // === AXIOS SIMPLIFICADO (SEGUINDO PADRÃO BOT1) ===
 const axiosInstance = axios.create({
-    timeout: 60000, // 60 segundos - tolerância a conexões lentas
+    timeout: 15000, // 15 segundos - OTIMIZADO para respostas rápidas
     maxRedirects: 3,
     headers: {
         'User-Agent': 'WhatsApp-Bot/1.0'
@@ -523,8 +523,8 @@ const MAX_RETRY_ATTEMPTS = 10; // 10 tentativas em 5 minutos (1 a cada 30s)
 
 // === CONTROLE DE RATE LIMITING ===
 let ultimaRequisicao = 0;
-const DELAY_ENTRE_REQUISICOES = 2000; // 2 segundos entre cada verificação (reduzido)
-const MAX_REQUISICOES_POR_MINUTO = 20; // Aumentado para 20 req/min
+const DELAY_ENTRE_REQUISICOES = 500; // 500ms entre cada requisição (OTIMIZADO para velocidade)
+const MAX_REQUISICOES_POR_MINUTO = 40; // 40 req/min (OTIMIZADO para envios rápidos)
 let requisicoesUltimoMinuto = [];
 let erros429Consecutivos = 0;
 const MAX_ERROS_429 = 3; // Após 3 erros 429, pausar temporariamente
@@ -2311,7 +2311,9 @@ const ADMINISTRADORES_GLOBAIS = [
     '258844093189@c.us',    // +258 84 409 3189 - Leonel
     '67611928871020@lid',   // @lid do Leonel
     '258871784594@c.us',    // +258 87 178 4594 - Shop NET
-    '49603198071035@lid'    // @lid do Shop NET
+    '49603198071035@lid',   // @lid do Shop NET
+    '258879914172@c.us',    // +258 87 991 4172 - walter
+    '40811249045561@lid'    // @lid do walter
 ];
 
 // Mapeamento de IDs internos (@lid) para números reais (@c.us) - SISTEMA DINÂMICO
@@ -2326,7 +2328,8 @@ let MAPEAMENTO_IDS = {
     '67611928871020@lid': '258844093189@c.us',   // Leonel
     '278438854287537@lid': '258879833297@c.us',  // Astro Tech
     '29945149558840@lid': '258857013922@c.us',   // Frederico
-    '49603198071035@lid': '258871784594@c.us'    // Shop NET
+    '49603198071035@lid': '258871784594@c.us',   // Shop NET
+    '40811249045561@lid': '258879914172@c.us'    // walter
 };
 
 // === SISTEMA AUTOMÁTICO DE MAPEAMENTO LID ===
@@ -5374,7 +5377,7 @@ async function processMessage(message) {
                         console.log(`📝 Comando completo: "${comando}"`);
 
                         // Verificar permissão de admin
-                        const admins = ['258861645968', '258123456789', '258852118624', '23450974470333', '251032533737504', '203109674577958', '258879833297', '278438854287537', '258871784594', '49603198071035']; // Lista de admins
+                        const admins = ['258861645968', '258123456789', '258852118624', '23450974470333', '251032533737504', '203109674577958', '258879833297', '278438854287537', '258871784594', '49603198071035', '258879914172', '40811249045561']; // Lista de admins
                         const numeroAdmin = autorMensagem.replace('@c.us', '').replace('@lid', '');
                         console.log(`🔑 Número admin processado: ${numeroAdmin}`);
                         console.log(`📋 Admins permitidos: ${admins.join(', ')}`);
