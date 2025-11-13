@@ -7447,12 +7447,12 @@ async function processMessage(message) {
                 console.log(`🛒 CONFIRMAÇÃO BOT: Detectada transação concluída - Ref: ${referenciaConfirmada} | Número: ${numeroConfirmado}`);
                 console.log(`🔍 CONFIRMAÇÃO BOT: Tipo detectado: ${/emola|e-mola/i.test(message.body) ? 'EMOLA' : /mpesa|m-pesa/i.test(message.body) ? 'MPESA' : 'DESCONHECIDO'}`);
                 
-                // Processar confirmação
+                // Processar confirmação no sistema de compras
                 const resultadoConfirmacao = await sistemaCompras.processarConfirmacao(referenciaConfirmada, numeroConfirmado);
-                
+
                 if (resultadoConfirmacao) {
                     console.log(`✅ COMPRAS: Confirmação processada - ${resultadoConfirmacao.numero} | ${resultadoConfirmacao.megas}MB`);
-                    
+
                     // Enviar mensagem de parabenização com menção clicável (igual às boas-vindas)
                     if (resultadoConfirmacao.mensagem && resultadoConfirmacao.contactId) {
                         try {
@@ -7487,9 +7487,84 @@ async function processMessage(message) {
                             await message.reply(mensagemFallback);
                         }
                     }
-                } else {
-                    console.log(`⚠️ COMPRAS: Confirmação ${referenciaConfirmada} não encontrada ou já processada`);
+                    return; // Confirmação processada com sucesso, sair
                 }
+
+                // === SE NÃO ENCONTROU NO SISTEMA DE COMPRAS, VERIFICAR NO CACHE DE DIAMANTES ===
+                console.log(`🔍 COMPRAS: Não encontrado em compras normais, verificando cache de pacotes especiais...`);
+
+                // Verificar se é divisão de pacote diamante/.8GB
+                const pacoteDiamante = Object.values(pacotesDiamantePendentes).find(
+                    p => p.divisoes && p.divisoes.includes(referenciaConfirmada)
+                );
+
+                if (pacoteDiamante) {
+                    console.log(`💎 PACOTE ESPECIAL: Confirmação de divisão detectada!`);
+                    console.log(`💎 Ref Divisão: ${referenciaConfirmada} | Pacote Original: ${pacoteDiamante.referencia}`);
+                    console.log(`💎 Tipo: ${pacoteDiamante.tipo || 'diamante'}`);
+
+                    // Adicionar à lista de confirmações recebidas (evitar duplicatas)
+                    if (!pacoteDiamante.confirmacoesRecebidas.includes(referenciaConfirmada)) {
+                        pacoteDiamante.confirmacoesRecebidas.push(referenciaConfirmada);
+                        console.log(`💎 PACOTE ESPECIAL: Confirmação adicionada (${pacoteDiamante.confirmacoesRecebidas.length}/${pacoteDiamante.divisoes.length})`);
+                    }
+
+                    // Verificar se TODAS as divisões foram confirmadas
+                    if (pacoteDiamante.confirmacoesRecebidas.length === pacoteDiamante.divisoes.length) {
+                        // Obter informações do tipo de pacote
+                        const codigoPacote = pacoteDiamante.codigoPacote || 1;
+                        const tipoPacote = pacoteDiamante.tipo || 'diamante';
+
+                        // Para pacotes .8GB, sempre usar código 2
+                        const codigoFinal = tipoPacote === 'pacote_ponto_8gb' ? 2 : codigoPacote;
+                        const infoPacote = CODIGOS_PACOTES_ESPECIAIS[codigoFinal];
+
+                        console.log(`${infoPacote.emoji} ${tipoPacote === 'pacote_ponto_8gb' ? 'PACOTE .8GB' : infoPacote.nome}: TODAS as divisões confirmadas! Enviando para planilha...`);
+
+                        // Enviar para planilha de pacotes especiais
+                        const resultado = await enviarParaGoogleSheetsDiamante(
+                            pacoteDiamante.referencia,
+                            pacoteDiamante.numero,
+                            codigoFinal,
+                            pacoteDiamante.grupoId,
+                            pacoteDiamante.grupoNome,
+                            'WhatsApp-Bot-Diamante'
+                        );
+
+                        if (resultado.sucesso) {
+                            console.log(`✅ ${tipoPacote === 'pacote_ponto_8gb' ? 'PACOTE .8GB' : infoPacote.nome}: Pacote ${pacoteDiamante.referencia} enviado com sucesso!`);
+
+                            // Enviar mensagem ao usuário
+                            try {
+                                let mensagemFinal;
+                                if (tipoPacote === 'pacote_ponto_8gb') {
+                                    mensagemFinal = `📦 *PACOTE ${pacoteDiamante.totalGB}GB ATIVADO!*\n\n✅ Todos os megas comuns foram confirmados!\n\n📱 Número: ${pacoteDiamante.numero}\n📦 Total: ${pacoteDiamante.totalGB}GB (${pacoteDiamante.gbComuns}GB comuns + ${pacoteDiamante.gb28}GB mensais)\n🔖 Referência: ${pacoteDiamante.referencia}\n\n🎉 Seu pacote completo está sendo ativado agora!`;
+                                } else {
+                                    mensagemFinal = `${infoPacote.emoji} *${infoPacote.nome.toUpperCase()} ATIVADO!*\n\n✅ Todos os megas extras foram confirmados!\n\n📱 Número: ${pacoteDiamante.numero}\n${infoPacote.emoji} Total: ${pacoteDiamante.totalGB}GB + ${infoPacote.descricao}\n🔖 Referência: ${pacoteDiamante.referencia}\n\n🎉 Seu ${infoPacote.nome.toLowerCase()} completo está sendo ativado agora!`;
+                                }
+                                await client.sendMessage(message.from, mensagemFinal);
+                            } catch (error) {
+                                console.error(`❌ Erro ao enviar mensagem de ativação:`, error);
+                            }
+
+                            // Remover do cache
+                            delete pacotesDiamantePendentes[pacoteDiamante.referencia];
+                            console.log(`${tipoPacote === 'pacote_ponto_8gb' ? '📦 PACOTE .8GB' : infoPacote.emoji + ' ' + infoPacote.nome}: Pacote removido do cache de pendentes`);
+                        } else {
+                            console.error(`❌ ${tipoPacote === 'pacote_ponto_8gb' ? 'PACOTE .8GB' : infoPacote.nome}: Erro ao enviar para planilha: ${resultado.erro}`);
+                        }
+                    } else {
+                        const codigoPacote = pacoteDiamante.codigoPacote || 1;
+                        const tipoPacote = pacoteDiamante.tipo || 'diamante';
+                        const codigoFinal = tipoPacote === 'pacote_ponto_8gb' ? 2 : codigoPacote;
+                        const infoPacote = CODIGOS_PACOTES_ESPECIAIS[codigoFinal];
+                        console.log(`⏳ ${tipoPacote === 'pacote_ponto_8gb' ? 'PACOTE .8GB' : infoPacote.nome}: Aguardando mais confirmações (${pacoteDiamante.confirmacoesRecebidas.length}/${pacoteDiamante.divisoes.length})`);
+                    }
+                    return; // Processado como pacote especial, sair
+                }
+
+                // Se não encontrou em nenhum dos dois sistemas
+                console.log(`⚠️ CONFIRMAÇÃO: ${referenciaConfirmada} não encontrada em compras nem em pacotes especiais`);
                 return;
             }
         }
