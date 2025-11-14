@@ -1454,6 +1454,7 @@ Se não conseguires extrair os dados:
     }
 
     // MELHORAR DETECÇÃO: Verificar se é uma mensagem que contém apenas números
+    const mensagemLimpa = mensagem.trim();
     const apenasNumeroRegex = /^8[0-9]{8}$/; // Exatamente um número de 9 dígitos
     const multiplosNumerosRegex = /^(8[0-9]{8}[\s,]*)+$/; // Múltiplos números separados por espaço ou vírgula
 

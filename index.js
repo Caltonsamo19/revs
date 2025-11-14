@@ -112,7 +112,8 @@ async function axiosComRetry(config, maxTentativas = 3) {
             const ehUltimaTentativa = tentativa === maxTentativas;
 
             if (ehTimeout && !ehUltimaTentativa) {
-                const delayMs = Math.min(1000 * Math.pow(2, tentativa - 1), 10000); // Max 10s
+                // Aumentado delay progressivo: 3s, 5s, 7s (para dar tempo do cache do Google Sheets)
+                const delayMs = Math.min(3000 + (2000 * (tentativa - 1)), 10000); // 3s, 5s, 7s
                 console.log(`⏳ Timeout na tentativa ${tentativa}/${maxTentativas}, aguardando ${delayMs}ms antes de tentar novamente...`);
                 await new Promise(resolve => setTimeout(resolve, delayMs));
                 continue;
@@ -517,13 +518,13 @@ let pacotesDiamantePendentes = {};
 let pagamentosPendentes = {}; // {id: {dados do pedido}}
 let timerRetryPagamentos = null;
 const ARQUIVO_PAGAMENTOS_PENDENTES = './pagamentos_pendentes.json';
-const RETRY_INTERVAL = 30000; // 30 segundos - verificação rápida
+const RETRY_INTERVAL = 25000; // 25 segundos - verificação otimizada (planilha mantém apenas 48h de dados)
 const RETRY_TIMEOUT = 5 * 60 * 1000; // 5 minutos - tempo máximo de tentativas
-const MAX_RETRY_ATTEMPTS = 10; // 10 tentativas em 5 minutos (1 a cada 30s)
+const MAX_RETRY_ATTEMPTS = 12; // 12 tentativas em 5 minutos (1 a cada 25s)
 
 // === CONTROLE DE RATE LIMITING ===
 let ultimaRequisicao = 0;
-const DELAY_ENTRE_REQUISICOES = 2000; // 2 segundos entre cada verificação (reduzido)
+const DELAY_ENTRE_REQUISICOES = 3000; // 3 segundos entre cada verificação (otimizado para planilha pequena com 48h de dados)
 const MAX_REQUISICOES_POR_MINUTO = 20; // Aumentado para 20 req/min
 let requisicoesUltimoMinuto = [];
 let erros429Consecutivos = 0;
