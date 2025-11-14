@@ -2135,8 +2135,8 @@ async function verificarPagamentosPendentes() {
             const tempoDecorrido = Math.floor((agora - pendencia.timestamp) / 1000 / 60);
             console.log(`⏰ RETRY: Pagamento ${pendencia.referencia} expirou após ${tempoDecorrido}min sem confirmação`);
 
-            // NOTIFICAR USUÁRIO SOBRE FALHA
-            await notificarPagamentoExpirado(pendencia);
+            // NOTIFICAR USUÁRIO SOBRE FALHA - DESABILITADO
+            // await notificarPagamentoExpirado(pendencia);
             await removerPagamentoPendente(pendencia.id);
             continue;
         }
@@ -2145,8 +2145,8 @@ async function verificarPagamentosPendentes() {
         if (pendencia.tentativas >= MAX_RETRY_ATTEMPTS) {
             console.log(`❌ RETRY: Pagamento ${pendencia.referencia} atingiu limite de ${MAX_RETRY_ATTEMPTS} tentativas`);
 
-            // NOTIFICAR USUÁRIO SOBRE FALHA
-            await notificarPagamentoExpirado(pendencia);
+            // NOTIFICAR USUÁRIO SOBRE FALHA - DESABILITADO
+            // await notificarPagamentoExpirado(pendencia);
             await removerPagamentoPendente(pendencia.id);
             continue;
         }
@@ -3006,6 +3006,7 @@ Nós oferecemos a solução para suas necessidades de dados a preços acessívei
 🌐 7168MB = 120MT 💸
 🌐 10240MB = 170MT 💸
 🌐 11264MB = 190MT 💸
+🌐 20480MB = 340MT 💸
 
 📅 PACOTES PREMIUM (3 Dias – Renováveis)
 🌐 2000MB = 44MT 💵💽
@@ -3795,6 +3796,9 @@ function obterRenovacoesPendentesTasker() {
 
 // === COMANDOS CUSTOMIZADOS - FUNÇÕES ===
 
+let gatilhosAutomaticos = {}; // { chatId: { gatilho: { resposta, criadoPor, criadoEm } } }
+const ARQUIVO_GATILHOS = './gatilhos_automaticos.json';
+
 async function carregarComandosCustomizados() {
     try {
         const data = await fs.readFile(ARQUIVO_COMANDOS, 'utf8');
@@ -3803,6 +3807,17 @@ async function carregarComandosCustomizados() {
     } catch (error) {
         comandosCustomizados = {};
         console.log('📝 Arquivo de comandos não existe, criando estrutura vazia');
+    }
+}
+
+async function carregarGatilhosAutomaticos() {
+    try {
+        const data = await fs.readFile(ARQUIVO_GATILHOS, 'utf8');
+        gatilhosAutomaticos = JSON.parse(data);
+        console.log(`🎯 Gatilhos automáticos carregados: ${Object.keys(gatilhosAutomaticos).length} grupos`);
+    } catch (error) {
+        gatilhosAutomaticos = {};
+        console.log('🎯 Arquivo de gatilhos não existe, criando estrutura vazia');
     }
 }
 
@@ -3815,14 +3830,39 @@ async function salvarComandosCustomizados() {
     }
 }
 
+async function salvarGatilhosAutomaticos() {
+    try {
+        await fs.writeFile(ARQUIVO_GATILHOS, JSON.stringify(gatilhosAutomaticos));
+        console.log('✅ Gatilhos automáticos salvos');
+    } catch (error) {
+        console.error('❌ Erro ao salvar gatilhos:', error);
+    }
+}
+
 function parsearComandoCustomizado(texto) {
-    // Regex para capturar: .addcomando Nome_do_comando(resposta)
-    const regex = /^\.addcomando\s+(\w+)\s*\((.+)\)$/s;
+    // Regex para capturar: .addcomando Nome do comando(resposta)
+    // Aceita múltiplas palavras e caracteres especiais (ç, á, õ, etc)
+    const regex = /^\.addcomando\s+(.+?)\s*\((.+)\)$/s;
     const match = texto.match(regex);
-    
+
     if (match) {
         return {
-            nome: match[1].toLowerCase(),
+            nome: match[1].trim().toLowerCase(),
+            resposta: match[2].trim()
+        };
+    }
+    return null;
+}
+
+function parsearGatilhoAutomatico(texto) {
+    // Regex para capturar: .addgatilho Texto inicial(resposta)
+    // Aceita múltiplas palavras e caracteres especiais
+    const regex = /^\.addgatilho\s+(.+?)\s*\((.+)\)$/s;
+    const match = texto.match(regex);
+
+    if (match) {
+        return {
+            gatilho: match[1].trim().toLowerCase(),
             resposta: match[2].trim()
         };
     }
@@ -3844,17 +3884,47 @@ async function adicionarComandoCustomizado(chatId, nomeComando, resposta, autorI
     console.log(`✅ Comando '${nomeComando}' adicionado ao grupo ${chatId}`);
 }
 
+async function adicionarGatilhoAutomatico(chatId, gatilho, resposta, autorId) {
+    if (!gatilhosAutomaticos[chatId]) {
+        gatilhosAutomaticos[chatId] = {};
+    }
+
+    gatilhosAutomaticos[chatId][gatilho] = {
+        resposta: resposta,
+        criadoPor: autorId,
+        criadoEm: new Date().toISOString()
+    };
+
+    await salvarGatilhosAutomaticos();
+    console.log(`✅ Gatilho '${gatilho}' adicionado ao grupo ${chatId}`);
+}
+
 async function removerComandoCustomizado(chatId, nomeComando) {
     if (comandosCustomizados[chatId] && comandosCustomizados[chatId][nomeComando]) {
         delete comandosCustomizados[chatId][nomeComando];
-        
+
         // Se não há mais comandos no grupo, remove a entrada do grupo
         if (Object.keys(comandosCustomizados[chatId]).length === 0) {
             delete comandosCustomizados[chatId];
         }
-        
+
         await salvarComandosCustomizados();
         console.log(`🗑️ Comando '${nomeComando}' removido do grupo ${chatId}`);
+        return true;
+    }
+    return false;
+}
+
+async function removerGatilhoAutomatico(chatId, gatilho) {
+    if (gatilhosAutomaticos[chatId] && gatilhosAutomaticos[chatId][gatilho]) {
+        delete gatilhosAutomaticos[chatId][gatilho];
+
+        if (Object.keys(gatilhosAutomaticos[chatId]).length === 0) {
+            delete gatilhosAutomaticos[chatId];
+        }
+
+        await salvarGatilhosAutomaticos();
+        console.log(`🗑️ Gatilho '${gatilho}' removido do grupo ${chatId}`);
         return true;
     }
     return false;
@@ -3864,6 +3934,21 @@ function executarComandoCustomizado(chatId, comando) {
     if (comandosCustomizados[chatId] && comandosCustomizados[chatId][comando]) {
         return comandosCustomizados[chatId][comando].resposta;
     }
+    return null;
+}
+
+function verificarGatilhoAutomatico(chatId, mensagem) {
+    if (!gatilhosAutomaticos[chatId]) return null;
+
+    const mensagemLower = mensagem.toLowerCase().trim();
+
+    // Verifica cada gatilho do grupo
+    for (const gatilho in gatilhosAutomaticos[chatId]) {
+        if (mensagemLower.startsWith(gatilho)) {
+            return gatilhosAutomaticos[chatId][gatilho].resposta;
+        }
+    }
+
     return null;
 }
 
@@ -4407,7 +4492,7 @@ client.on('ready', async () => {
         console.log(`   📋 ${config.nome} (${grupoId})`);
     });
     
-    console.log('\n🔧 Comandos admin: .ia .stats .sheets .test_sheets .test_grupo .grupos_status .grupos .grupo_atual .addcomando .comandos .delcomando .test_vision .ranking .inativos .detetives .semcompra .resetranking .bonus .testreferencia .config-relatorio .list-relatorios .remove-relatorio .test-relatorio');
+    console.log('\n🔧 Comandos admin: .ia .stats .sheets .test_sheets .test_grupo .grupos_status .grupos .grupo_atual .addcomando .comandos .delcomando .addgatilho .gatilhos .delgatilho .test_vision .ranking .inativos .detetives .semcompra .resetranking .bonus .testreferencia .config-relatorio .list-relatorios .remove-relatorio .test-relatorio');
 
     // Monitoramento de novos membros DESATIVADO
     console.log('⏸️ Monitoramento automático de novos membros DESATIVADO');
@@ -4521,7 +4606,8 @@ async function processMessage(message) {
         const isAdmin = isAdministrador(autorMensagem);
 
         // DEBUG DETALHADO DA MENSAGEM
-        if (message.body.startsWith('.addcomando') || message.body.startsWith('.comandos') || message.body.startsWith('.delcomando')) {
+        if (message.body.startsWith('.addcomando') || message.body.startsWith('.comandos') || message.body.startsWith('.delcomando') ||
+            message.body.startsWith('.addgatilho') || message.body.startsWith('.gatilhos') || message.body.startsWith('.delgatilho')) {
             smartLog(LOG_LEVEL.DEBUG, `🔍 DEBUG MENSAGEM ADMIN:`);
             console.log(`   📱 message.from: ${message.from}`);
             console.log(`   👤 message.author: ${message.author}`);
@@ -5383,14 +5469,11 @@ async function processMessage(message) {
                         console.log(`🔍 Autor: ${autorMensagem}`);
                         console.log(`📝 Comando completo: "${comando}"`);
 
-                        // Verificar permissão de admin
-                        const admins = ['258861645968', '258123456789', '258852118624', '23450974470333', '251032533737504', '203109674577958', '258879833297', '278438854287537', '258871784594', '49603198071035', '258879914172', '40811249045561', '258844345161', '144478891450544']; // Lista de admins
-                        const numeroAdmin = autorMensagem.replace('@c.us', '').replace('@lid', '');
-                        console.log(`🔑 Número admin processado: ${numeroAdmin}`);
-                        console.log(`📋 Admins permitidos: ${admins.join(', ')}`);
+                        // Verificar permissão de admin usando a lista global
+                        console.log(`🔑 Verificando permissão de admin para: ${autorMensagem}`);
 
-                        if (!admins.includes(numeroAdmin)) {
-                            console.log(`❌ Admin NÃO autorizado`);
+                        if (!isAdministrador(autorMensagem)) {
+                            console.log(`❌ Admin NÃO autorizado: ${autorMensagem}`);
                             return; // Falha silenciosa para segurança
                         }
 
@@ -5732,7 +5815,7 @@ async function processMessage(message) {
                 const comandoParsado = parsearComandoCustomizado(message.body);
                 
                 if (!comandoParsado) {
-                    await message.reply(`❌ *Sintaxe incorreta!*\n\n✅ *Sintaxe correta:*\n\`.addcomando NomeComando(Sua resposta aqui)\`\n\n📝 *Exemplo:*\n\`.addcomando horario(Funcionamos de 8h às 18h)\`\n\n⚠️ *Importante:*\n• Nome sem espaços\n• Resposta entre parênteses\n• Pode usar quebras de linha`);
+                    await message.reply(`❌ *Sintaxe incorreta!*\n\n✅ *Sintaxe correta:*\n\`.addcomando Nome do Comando(Sua resposta aqui)\`\n\n📝 *Exemplos:*\n\`.addcomando horário(Funcionamos de 8h às 18h)\`\n\`.addcomando promoção mb(Promoção especial hoje!)\`\n\`.addcomando como comprar(Envie o valor que deseja)\`\n\n⚠️ *Importante:*\n• Aceita múltiplas palavras\n• Aceita caracteres especiais (ç, á, õ, etc)\n• Resposta entre parênteses\n• Pode usar quebras de linha`);
                     return;
                 }
                 
@@ -5759,7 +5842,7 @@ async function processMessage(message) {
                 const comandosGrupo = comandosCustomizados[grupoId];
                 
                 if (!comandosGrupo || Object.keys(comandosGrupo).length === 0) {
-                    await message.reply('📋 *Nenhum comando customizado criado ainda*\n\n💡 **Para criar:** `.addcomando nome(resposta)`');
+                    await message.reply('📋 *Nenhum comando customizado criado ainda*\n\n💡 **Para criar:** `.addcomando nome do comando(resposta)`');
                     return;
                 }
                 
@@ -5783,15 +5866,15 @@ async function processMessage(message) {
             // === COMANDO PARA REMOVER COMANDOS CUSTOMIZADOS ===
             if (message.body.startsWith('.delcomando ')) {
                 const nomeComando = message.body.replace('.delcomando ', '').trim().toLowerCase();
-                
+
                 if (!nomeComando) {
                     await message.reply(`❌ *Nome do comando é obrigatório!*\n\n✅ *Sintaxe:* \`.delcomando nomecomando\`\n\n📝 *Para ver comandos:* \`.comandos\``);
                     return;
                 }
-                
+
                 try {
                     const removido = await removerComandoCustomizado(message.from, nomeComando);
-                    
+
                     if (removido) {
                         await message.reply(`✅ *Comando removido!*\n\n🗑️ **Comando:** \`${nomeComando}\`\n\n📝 **Para ver restantes:** \`.comandos\``);
                         console.log(`✅ Admin ${message.author || message.from} removeu comando '${nomeComando}' do grupo ${message.from}`);
@@ -5801,6 +5884,84 @@ async function processMessage(message) {
                 } catch (error) {
                     await message.reply(`❌ **Erro ao remover comando**\n\nTente novamente ou contacte o desenvolvedor.`);
                     console.error('❌ Erro ao remover comando customizado:', error);
+                }
+                return;
+            }
+
+            // === COMANDO PARA ADICIONAR GATILHOS AUTOMÁTICOS ===
+            if (message.body.startsWith('.addgatilho ')) {
+                const gatilhoParsado = parsearGatilhoAutomatico(message.body);
+
+                if (!gatilhoParsado) {
+                    await message.reply(`❌ *Sintaxe incorreta!*\n\n✅ *Sintaxe correta:*\n\`.addgatilho Início da mensagem(Resposta automática)\`\n\n📝 *Exemplos:*\n\`.addgatilho posso(Sim, como posso ajudar?)\`\n\`.addgatilho oi(Olá! Bem-vindo ao nosso grupo!)\`\n\`.addgatilho bom dia(Bom dia! Como posso te ajudar hoje?)\`\n\n⚠️ *Importante:*\n• Responde quando a mensagem COMEÇA com o texto\n• Aceita múltiplas palavras e caracteres especiais\n• Não diferencia maiúsculas/minúsculas`);
+                    return;
+                }
+
+                try {
+                    await adicionarGatilhoAutomatico(
+                        message.from,
+                        gatilhoParsado.gatilho,
+                        gatilhoParsado.resposta,
+                        message.author || message.from
+                    );
+
+                    await message.reply(`✅ *Gatilho criado com sucesso!*\n\n🎯 **Gatilho:** \`${gatilhoParsado.gatilho}\`\n📝 **Resposta:** ${gatilhoParsado.resposta.substring(0, 100)}${gatilhoParsado.resposta.length > 100 ? '...' : ''}\n\n💡 **Funcionamento:** Quando uma mensagem começar com "${gatilhoParsado.gatilho}", responderá automaticamente`);
+                    console.log(`✅ Admin ${message.author || message.from} criou gatilho '${gatilhoParsado.gatilho}' no grupo ${message.from}`);
+                } catch (error) {
+                    await message.reply(`❌ **Erro ao criar gatilho**\n\nTente novamente ou contacte o desenvolvedor.`);
+                    console.error('❌ Erro ao adicionar gatilho automático:', error);
+                }
+                return;
+            }
+
+            // === COMANDO PARA LISTAR GATILHOS AUTOMÁTICOS ===
+            if (comando === '.gatilhos') {
+                const grupoId = message.from;
+                const gatilhosGrupo = gatilhosAutomaticos[grupoId];
+
+                if (!gatilhosGrupo || Object.keys(gatilhosGrupo).length === 0) {
+                    await message.reply('🎯 *Nenhum gatilho automático criado ainda*\n\n💡 **Para criar:** `.addgatilho texto inicial(resposta)`');
+                    return;
+                }
+
+                let listaGatilhos = '🎯 *GATILHOS AUTOMÁTICOS*\n━━━━━━━━\n\n';
+
+                Object.keys(gatilhosGrupo).forEach(gatilho => {
+                    const g = gatilhosGrupo[gatilho];
+                    const preview = g.resposta.length > 50 ?
+                        g.resposta.substring(0, 50) + '...' :
+                        g.resposta;
+
+                    listaGatilhos += `🔔 **"${gatilho}"**\n📝 ${preview}\n\n`;
+                });
+
+                listaGatilhos += `📊 **Total:** ${Object.keys(gatilhosGrupo).length} gatilho(s)`;
+
+                await message.reply(listaGatilhos);
+                return;
+            }
+
+            // === COMANDO PARA REMOVER GATILHOS AUTOMÁTICOS ===
+            if (message.body.startsWith('.delgatilho ')) {
+                const nomeGatilho = message.body.replace('.delgatilho ', '').trim().toLowerCase();
+
+                if (!nomeGatilho) {
+                    await message.reply(`❌ *Texto do gatilho é obrigatório!*\n\n✅ *Sintaxe:* \`.delgatilho texto inicial\`\n\n📝 *Para ver gatilhos:* \`.gatilhos\``);
+                    return;
+                }
+
+                try {
+                    const removido = await removerGatilhoAutomatico(message.from, nomeGatilho);
+
+                    if (removido) {
+                        await message.reply(`✅ *Gatilho removido!*\n\n🗑️ **Gatilho:** \`${nomeGatilho}\`\n\n📝 **Para ver restantes:** \`.gatilhos\``);
+                        console.log(`✅ Admin ${message.author || message.from} removeu gatilho '${nomeGatilho}' do grupo ${message.from}`);
+                    } else {
+                        await message.reply(`❌ *Gatilho não encontrado!*\n\n🔍 **Gatilho:** \`${nomeGatilho}\`\n📝 **Ver gatilhos:** \`.gatilhos\``);
+                    }
+                } catch (error) {
+                    await message.reply(`❌ **Erro ao remover gatilho**\n\nTente novamente ou contacte o desenvolvedor.`);
+                    console.error('❌ Erro ao remover gatilho automático:', error);
                 }
                 return;
             }
@@ -7358,6 +7519,9 @@ async function processMessage(message) {
                 message.body.startsWith('.addcomando ') ||
                 message.body.startsWith('.delcomando ') ||
                 message.body.startsWith('.comandos') ||
+                message.body.startsWith('.addgatilho ') ||
+                message.body.startsWith('.delgatilho ') ||
+                message.body.startsWith('.gatilhos') ||
                 message.body.startsWith('.ia') ||
                 message.body.startsWith('.stats') ||
                 message.body.startsWith('.sheets') ||
@@ -7434,10 +7598,19 @@ async function processMessage(message) {
         // === VERIFICAR COMANDOS CUSTOMIZADOS ===
         const textoMensagem = message.body.trim().toLowerCase();
         const respostaComando = executarComandoCustomizado(message.from, textoMensagem);
-        
+
         if (respostaComando) {
             await message.reply(respostaComando);
             console.log(`🎯 Comando customizado '${textoMensagem}' executado no grupo ${message.from}`);
+            return;
+        }
+
+        // === VERIFICAR GATILHOS AUTOMÁTICOS ===
+        const respostaGatilho = verificarGatilhoAutomatico(message.from, message.body);
+
+        if (respostaGatilho) {
+            await message.reply(respostaGatilho);
+            console.log(`🔔 Gatilho automático acionado no grupo ${message.from}`);
             return;
         }
 
@@ -8130,7 +8303,8 @@ process.on('uncaughtException', (error) => {
 (async function inicializar() {
     console.log('🚀 Iniciando bot...');
     await carregarComandosCustomizados();
-    console.log('🔧 Comandos carregados, inicializando cliente WhatsApp...');
+    await carregarGatilhosAutomaticos();
+    console.log('🔧 Comandos e gatilhos carregados, inicializando cliente WhatsApp...');
     
     try {
         client.initialize();

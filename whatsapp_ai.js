@@ -968,20 +968,20 @@ Se não conseguires extrair os dados:
   // === SEPARAR COMPROVANTE E NÚMEROS (CORRIGIDO) ===
   separarComprovanteENumeros(mensagem, ehLegenda = false) {
     // console.log(`   🔍 Separando comprovante e números ${ehLegenda ? '(LEGENDA)' : '(TEXTO)'}...`);
-    
+
     if (!mensagem || typeof mensagem !== 'string') {
       console.log(`   ❌ Mensagem inválida para separação`);
       return { textoComprovante: '', numeros: [] };
     }
-    
+
     // Usar função específica para legendas
-    const numeros = ehLegenda ? 
-      this.extrairNumerosDeLegenda(mensagem) : 
+    const numeros = ehLegenda ?
+      this.extrairNumerosDeLegenda(mensagem) :
       this.extrairTodosNumeros(mensagem);
-    
+
     // Criar texto do comprovante removendo números e contexto
     let textoComprovante = mensagem;
-    
+
     for (const numero of numeros) {
       // Remover o número e possível contexto ao redor
       const padroes = [
@@ -996,18 +996,18 @@ Se não conseguires extrair os dados:
         new RegExp(`\\s*${numero}\\s*`, 'gi'), // Número no final
         new RegExp(`\\s+${numero}\\s*`, 'gi') // Número com espaços
       ];
-      
+
       for (const padrao of padroes) {
         textoComprovante = textoComprovante.replace(padrao, ' ');
       }
     }
-    
+
     // Limpar espaços extras
     textoComprovante = textoComprovante.replace(/\s+/g, ' ').trim();
-    
+
     console.log(`   📄 Texto do comprovante processado`);
     console.log(`   📱 Números extraídos: ${numeros.length}`);
-    
+
     return {
       textoComprovante: textoComprovante,
       numeros: numeros
@@ -1397,39 +1397,39 @@ Se não conseguires extrair os dados:
       const pedidosEspecificos = this.analisarPedidosEspecificos(mensagem, configGrupo);
       if (pedidosEspecificos) {
         console.log(`   🎯 PEDIDOS ESPECÍFICOS DETECTADOS!`);
-        
+
         // Verificar se há comprovante na mensagem ou no histórico
         const { textoComprovante } = this.separarComprovanteENumeros(mensagem);
         let comprovante = null;
-        
+
         if (textoComprovante && textoComprovante.length > 10) {
           comprovante = await this.analisarComprovante(textoComprovante);
         }
-        
+
         // Se não encontrou comprovante na mensagem, buscar no histórico
         if (!comprovante) {
           comprovante = await this.buscarComprovanteRecenteNoHistorico(remetente, timestamp);
         }
-        
+
         if (comprovante) {
           const valorPago = parseFloat(comprovante.valor);
           const valorCalculado = pedidosEspecificos.valorTotal;
-          
+
           console.log(`   💰 Valor pago: ${valorPago}MT`);
           console.log(`   🧮 Valor calculado: ${valorCalculado}MT`);
-          
+
           // Verificar se valores batem (tolerância de ±5MT)
           if (Math.abs(valorPago - valorCalculado) <= 5) {
             console.log(`   ✅ VALORES COMPATÍVEIS! Processando pedidos específicos...`);
-            
-            const resultados = pedidosEspecificos.pedidos.map(pedido => 
+
+            const resultados = pedidosEspecificos.pedidos.map(pedido =>
               `${comprovante.referencia}|${pedido.preco}|${pedido.numero}`
             );
-            
+
             console.log(`   ✅ PEDIDOS ESPECÍFICOS PROCESSADOS: ${resultados.join(' + ')}`);
-            
-            return { 
-              sucesso: true, 
+
+            return {
+              sucesso: true,
               dadosCompletos: resultados.join('\n'),
               tipo: 'pedidos_especificos_processados',
               numeros: pedidosEspecificos.numeros,
@@ -1439,7 +1439,7 @@ Se não conseguires extrair os dados:
             };
           } else {
             console.log(`   ❌ VALORES INCOMPATÍVEIS! Diferença: ${Math.abs(valorPago - valorCalculado)}MT`);
-            
+
             return {
               sucesso: false,
               tipo: 'valores_incompativeis',
@@ -1452,22 +1452,21 @@ Se não conseguires extrair os dados:
         }
       }
     }
-    
+
     // MELHORAR DETECÇÃO: Verificar se é uma mensagem que contém apenas números
-    const mensagemLimpa = mensagem.trim();
     const apenasNumeroRegex = /^8[0-9]{8}$/; // Exatamente um número de 9 dígitos
     const multiplosNumerosRegex = /^(8[0-9]{8}[\s,]*)+$/; // Múltiplos números separados por espaço ou vírgula
-    
+
     console.log(`   🔍 Verificando se é apenas número(s)...`);
     // console.log(`   📝 Mensagem limpa: "${mensagemLimpa}"`);
-    
+
     if (apenasNumeroRegex.test(mensagemLimpa) || multiplosNumerosRegex.test(mensagemLimpa)) {
       console.log(`   📱 DETECTADO: Mensagem contém apenas número(s)!`);
-      
+
       // Extrair números da mensagem
       const numerosDetectados = mensagemLimpa.match(/8[0-9]{8}/g) || [];
       console.log(`   📱 Números detectados: ${numerosDetectados.length}`);
-      
+
       if (numerosDetectados.length > 0) {
         return await this.processarNumeros(numerosDetectados, remetente, timestamp, mensagem, configGrupo);
       }
@@ -2165,41 +2164,44 @@ Se não conseguires extrair, responde:
     for (let msg of mensagensRecentes.reverse()) {
       if (msg.tipo === 'texto') {
         console.log(`   🔍 Verificando mensagem: "${msg.mensagem.substring(0, 50)}..."`);
-        
+
         const comprovante = await this.analisarComprovante(msg.mensagem);
         if (comprovante) {
           const valorTotal = parseFloat(comprovante.valor);
           const tempoDecorrido = Math.floor((timestamp - msg.timestamp) / 60000);
-          
+
           console.log(`   ✅ Comprovante encontrado: ${comprovante.referencia} - ${comprovante.valor}MT (${tempoDecorrido} min atrás)`);
-          
+
           if (numeros.length === 1) {
             // Calcular megas baseado no valor e tabela do grupo
             const megas = configGrupo ? this.calcularMegasPorValor(comprovante.valor, configGrupo.tabela) : comprovante.valor;
+
             const resultado = `${comprovante.referencia}|${megas}|${numeros[0]}`;
             console.log(`   ✅ ENCONTRADO NO HISTÓRICO: ${resultado} (${comprovante.valor}MT → ${megas}MB)`);
-            return { 
-              sucesso: true, 
+            return {
+              sucesso: true,
               dadosCompletos: resultado,
               tipo: 'numero_processado',
               numero: numeros[0],
               tempoDecorrido: tempoDecorrido,
               valorPago: comprovante.valor,
+              valorComprovante: comprovante.valor, // === CORREÇÃO: Adicionar valorComprovante ===
               megas: megas
             };
           } else {
             const valorPorNumero = (valorTotal / numeros.length).toFixed(2);
-            const resultados = numeros.map(numero => 
+            const resultados = numeros.map(numero =>
               `${comprovante.referencia}|${valorPorNumero}|${numero}`
             );
-            
+
             console.log(`   ✅ ENCONTRADO NO HISTÓRICO (MÚLTIPLO): ${resultados.join(' + ')}`);
-            return { 
-              sucesso: true, 
+            return {
+              sucesso: true,
               dadosCompletos: resultados.join('\n'),
               tipo: 'numeros_multiplos_processados',
               numeros: numeros,
               valorCada: valorPorNumero,
+              valorComprovante: comprovante.valor, // === CORREÇÃO: Adicionar valorComprovante ===
               tempoDecorrido: tempoDecorrido
             };
           }
