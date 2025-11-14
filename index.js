@@ -2157,7 +2157,11 @@ async function verificarPagamentosPendentes() {
 
         const pagamentoConfirmado = await verificarPagamentoIndividual(pendencia.referencia, pendencia.valorComprovante);
 
-        if (pagamentoConfirmado) {
+        // Verificar se pagamento já foi processado anteriormente
+        if (pagamentoConfirmado === 'JA_PROCESSADO') {
+            console.log(`⚠️ RETRY: Pagamento ${pendencia.referencia} já foi processado - removendo da fila silenciosamente`);
+            await removerPagamentoPendente(pendencia.id);
+        } else if (pagamentoConfirmado) {
             console.log(`✅ RETRY: Pagamento ${pendencia.referencia} confirmado! Processando...`);
             await processarPagamentoConfirmado(pendencia);
             await removerPagamentoPendente(pendencia.id);
