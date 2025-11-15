@@ -687,19 +687,26 @@ Se não conseguires extrair os dados:
 
   // === FUNÇÃO AUXILIAR PARA NORMALIZAR NÚMEROS ===
   normalizarNumero(numeroString) {
-    // Remove espaços, hífens, pontos e + do número
-    let numeroLimpo = numeroString.replace(/[\s\-\.+]/g, '');
+    if (!numeroString) return null;
 
-    // Remove código de país 258 se presente (em qualquer posição no início)
-    // Suporta formatos como: 258852118624, 258 852 118 624, +258852118624
-    numeroLimpo = numeroLimpo.replace(/^258/, '');
+    // Remove espaços, hífens, pontos, parênteses e + do número
+    let numeroLimpo = numeroString.toString().replace(/[\s\-\.+\(\)]/g, '');
+
+    // Remove código de país 00 se presente
+    numeroLimpo = numeroLimpo.replace(/^00/, '');
+
+    // Remove código de país 258 se presente no início (pode aparecer múltiplas vezes)
+    // Loop para remover 258 repetidos: 258258852118624 -> 852118624
+    while (numeroLimpo.startsWith('258') && numeroLimpo.length > 9) {
+      numeroLimpo = numeroLimpo.substring(3);
+    }
 
     // Retorna apenas se for um número válido de 9 dígitos começando com 8
     if (/^8[0-9]{8}$/.test(numeroLimpo)) {
       return numeroLimpo;
     }
 
-    // Se não conseguiu normalizar, tentar extrair apenas os 9 últimos dígitos se começar com 8
+    // Se não conseguiu normalizar, tentar extrair os primeiros 9 dígitos começando com 8
     const match = numeroLimpo.match(/8[0-9]{8}/);
     if (match) {
       return match[0];
@@ -725,17 +732,23 @@ Se não conseguires extrair os dados:
 
     // console.log(`   📝 LEGENDA: Limpa "${legendaLimpa}"`);
 
-    // NOVOS PADRÕES DE DETECÇÃO:
-    // 1. Números com espaços: 85 211 8624 ou 848 715 208
-    // 2. Números com +258: +258852118624 ou +258 85 211 8624
-    // 3. Números com 258: 25852118624 ou 258 85 211 8624
+    // PADRÕES DE DETECÇÃO MELHORADOS:
+    // 1. Números com espaços variados: 85 211 8624, 8 5 2 1 1 8 6 2 4, 85 211 86 24
+    // 2. Números com +258: +258852118624, +258 852 118 624, +258 85 211 8624
+    // 3. Números com 258: 258852118624, 258 852 118 624, 258 85 211 8624
     // 4. Números normais: 852118624
+    // 5. Números com parênteses: (258)852118624, (258) 85 211 8624
     const padroes = [
-      /(?:\+?\s*258\s*)?8\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]/g,  // 258 8 5 2 1 1 8 6 2 4 ou 8 5 2 1 1 8 6 2 4
-      /\+?\s*258\s*8[0-9]\s*[0-9]{3}\s*[0-9]{4}/g,           // +258 85 211 8624 (com espaços variados)
-      /(?<!\d)\+?258\s*8[0-9]{8}(?!\d)/g,                    // +258852118624 ou 258852118624 (junto)
-      /\b8[0-9]\s*[0-9]{3}\s*[0-9]{4}\b/g,                   // 85 211 8624 (com espaços variados)
-      /\b8[0-9]{8}\b/g                                        // 852118624 (padrão normal)
+      // Com +258 ou 00258 junto: +258852118624, 00258852118624
+      /(?:\+|00)\s*258\s*8[0-9]{8}\b/g,
+      // Com 258 e espaços: 258 85 211 8624, (258) 85 211 8624
+      /(?:\(?\s*258\s*\)?)?\s*8\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9](?!\d)/g,
+      // Com 258 junto: 258852118624
+      /\b258\s*8[0-9]{8}\b/g,
+      // Números com espaços variados: 85 211 86 24, 8 52 118 624
+      /\b8\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9](?!\d)/g,
+      // Números normais: 852118624
+      /\b8[0-9]{8}\b/g
     ];
 
     const numerosEncontrados = [];
@@ -860,17 +873,23 @@ Se não conseguires extrair os dados:
       return [];
     }
 
-    // NOVOS PADRÕES DE DETECÇÃO (mesmos da legenda):
-    // 1. Números com espaços: 85 211 8624 ou 848 715 208
-    // 2. Números com +258: +258852118624 ou +258 85 211 8624
-    // 3. Números com 258: 25852118624 ou 258 85 211 8624
+    // PADRÕES DE DETECÇÃO MELHORADOS (mesmos da legenda):
+    // 1. Números com espaços variados: 85 211 8624, 8 5 2 1 1 8 6 2 4, 85 211 86 24
+    // 2. Números com +258: +258852118624, +258 852 118 624, +258 85 211 8624
+    // 3. Números com 258: 258852118624, 258 852 118 624, 258 85 211 8624
     // 4. Números normais: 852118624
+    // 5. Números com parênteses: (258)852118624, (258) 85 211 8624
     const padroes = [
-      /(?:\+?\s*258\s*)?8\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]/g,  // 258 8 5 2 1 1 8 6 2 4 ou 8 5 2 1 1 8 6 2 4
-      /\+?\s*258\s*8[0-9]\s*[0-9]{3}\s*[0-9]{4}/g,           // +258 85 211 8624 (com espaços variados)
-      /(?<!\d)\+?258\s*8[0-9]{8}(?!\d)/g,                    // +258852118624 ou 258852118624 (junto)
-      /\b8[0-9]\s*[0-9]{3}\s*[0-9]{4}\b/g,                   // 85 211 8624 (com espaços variados)
-      /\b8[0-9]{8}\b/g                                        // 852118624 (padrão normal)
+      // Com +258 ou 00258 junto: +258852118624, 00258852118624
+      /(?:\+|00)\s*258\s*8[0-9]{8}\b/g,
+      // Com 258 e espaços: 258 85 211 8624, (258) 85 211 8624
+      /(?:\(?\s*258\s*\)?)?\s*8\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9](?!\d)/g,
+      // Com 258 junto: 258852118624
+      /\b258\s*8[0-9]{8}\b/g,
+      // Números com espaços variados: 85 211 86 24, 8 52 118 624
+      /\b8\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9](?!\d)/g,
+      // Números normais: 852118624
+      /\b8[0-9]{8}\b/g
     ];
 
     const numerosEncontrados = [];
@@ -1201,14 +1220,17 @@ Se não conseguires extrair os dados:
       return null;
     }
     
-    // Padrões melhorados para pedidos específicos (com suporte a números espaçados)
+    // Padrões melhorados para pedidos específicos (suporte a números com variações)
+    // Aceita: 258852118624, +258852118624, 258 85 211 8624, +258 852 118 624, 85 211 86 24, etc.
+    const numeroPattern = '(?:(?:\\+|00)?\\s*(?:\\(?\\s*258\\s*\\)?)?\\s*)?8\\s*[0-9]\\s*[0-9]?\\s*[0-9]?\\s*[0-9]?\\s*[0-9]?\\s*[0-9]?\\s*[0-9]?\\s*[0-9]?\\s*[0-9]?\\s*[0-9]?';
+
     const padroesPedidos = [
-      // Formato: quantidade + unidade + número (com ou sem espaços no número, incluindo 258)
-      /(\d+(?:\.\d+)?)\s*(gb|g|giga|gigas?|mb|m|mega|megas?)\s+(?:\+?\s*258\s*)?(?:8\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]|8[0-9]\s*[0-9]{3}\s*[0-9]{4}|8[0-9]{8})/gi,
-      // Formato: número + quantidade + unidade (com ou sem espaços no número, incluindo 258)
-      /(?:\+?\s*258\s*)?(?:8\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]|8[0-9]\s*[0-9]{3}\s*[0-9]{4}|8[0-9]{8})\s+(\d+(?:\.\d+)?)\s*(gb|g|giga|gigas?|mb|m|mega|megas?)/gi,
-      // Formato com "para": 2gb para 852413946 ou 85 211 8624 ou 258 8 5 2...
-      /(\d+(?:\.\d+)?)\s*(gb|g|giga|gigas?|mb|m|mega|megas?)\s+(?:para\s+)?(?:\+?\s*258\s*)?(?:8\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]|8[0-9]\s*[0-9]{3}\s*[0-9]{4}|8[0-9]{8})/gi
+      // Formato: quantidade + unidade + número
+      new RegExp(`(\\d+(?:\\.\\d+)?)\\s*(gb|g|giga|gigas?|mb|m|mega|megas?)\\s+${numeroPattern}`, 'gi'),
+      // Formato: número + quantidade + unidade
+      new RegExp(`${numeroPattern}\\s+(\\d+(?:\\.\\d+)?)\\s*(gb|g|giga|gigas?|mb|m|mega|megas?)`, 'gi'),
+      // Formato com "para": 2gb para 852413946 ou 85 211 8624
+      new RegExp(`(\\d+(?:\\.\\d+)?)\\s*(gb|g|giga|gigas?|mb|m|mega|megas?)\\s+(?:para\\s+)?${numeroPattern}`, 'gi')
     ];
     
     const pedidos = [];
@@ -1218,17 +1240,23 @@ Se não conseguires extrair os dados:
       while ((match = padrao.exec(mensagem)) !== null) {
         let quantidade, unidade, numeroRaw;
 
-        // Detectar formato: quantidade + unidade + número
-        if (match[1] && /\d/.test(match[1]) && match[2] && match[3]) {
+        // O match[0] contém a string completa
+        const matchCompleto = match[0];
+
+        // Detectar se começa com número ou quantidade
+        // Formato: quantidade + unidade + número (ex: 2gb 852118624)
+        if (match[1] && match[2] && /^\d+(\.\d+)?/.test(matchCompleto)) {
           quantidade = parseFloat(match[1]);
           unidade = match[2].toLowerCase();
-          numeroRaw = match[3];
+          // Extrair número da string completa
+          numeroRaw = matchCompleto.replace(new RegExp(`^${match[1]}\\s*${match[2]}\\s+(?:para\\s+)?`, 'i'), '').trim();
         }
-        // Detectar formato: número + quantidade + unidade
-        else if (match[1] && match[2] && /\d/.test(match[2]) && match[3]) {
-          numeroRaw = match[1];
-          quantidade = parseFloat(match[2]);
-          unidade = match[3].toLowerCase();
+        // Formato: número + quantidade + unidade (ex: 852118624 2gb)
+        else if (match[1] && match[2] && /^[+0-9\s\(\)]+/.test(matchCompleto)) {
+          quantidade = parseFloat(match[1]);
+          unidade = match[2].toLowerCase();
+          // Extrair número da string completa
+          numeroRaw = matchCompleto.replace(new RegExp(`\\s+${match[1]}\\s*${match[2]}$`, 'i'), '').trim();
         }
 
         // Normalizar o número (remover espaços, +258, etc)
