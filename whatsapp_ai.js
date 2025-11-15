@@ -767,27 +767,27 @@ Se não conseguires extrair os dados:
 
     console.log(`   📱 LEGENDA: Números brutos encontrados: ${numerosEncontrados.join(', ')}`);
 
-    // Normalizar todos os números encontrados
-    const numerosNormalizados = new Set();
+    // Normalizar todos os números encontrados e manter referência ao original
+    const numerosNormalizados = new Map(); // numero normalizado -> numero original
     for (const numeroRaw of numerosEncontrados) {
       const numeroNormalizado = this.normalizarNumero(numeroRaw);
-      if (numeroNormalizado) {
-        numerosNormalizados.add(numeroNormalizado);
+      if (numeroNormalizado && !numerosNormalizados.has(numeroNormalizado)) {
+        numerosNormalizados.set(numeroNormalizado, numeroRaw);
       }
     }
 
     const numerosValidos = [];
 
-    for (const numero of numerosNormalizados) {
+    for (const [numero, numeroOriginal] of numerosNormalizados) {
       // Procurar o número original na legenda para análise de contexto
-      const posicao = legendaLimpa.indexOf(numero);
+      const posicao = legendaLimpa.indexOf(numeroOriginal);
       const comprimentoLegenda = legendaLimpa.length;
-      
+
       // Análise de número removida para privacidade
-      
+
       // Contexto antes e depois do número
-      const contextoBefore = legendaLimpa.substring(Math.max(0, posicao - 30), posicao).toLowerCase();
-      const contextoAfter = legendaLimpa.substring(posicao + numero.length, posicao + numero.length + 30).toLowerCase();
+      const contextoBefore = posicao >= 0 ? legendaLimpa.substring(Math.max(0, posicao - 30), posicao).toLowerCase() : '';
+      const contextoAfter = posicao >= 0 ? legendaLimpa.substring(posicao + numeroOriginal.length, posicao + numeroOriginal.length + 30).toLowerCase() : '';
       const contextoCompleto = (contextoBefore + contextoAfter).toLowerCase();
       
       console.log(`   📖 LEGENDA: Contexto antes: "${contextoBefore}"`);
@@ -832,9 +832,9 @@ Se não conseguires extrair os dados:
       );
       
       // NOVA LÓGICA: Verificar se está no final da legenda (mais provável ser destino)
-      const percentualPosicao = (posicao / comprimentoLegenda) * 100;
+      const percentualPosicao = posicao >= 0 ? (posicao / comprimentoLegenda) * 100 : 0;
       const estaNofinal = percentualPosicao > 70; // Últimos 30% da legenda
-      
+
       console.log(`   📊 LEGENDA: Está no final (>70%): ${estaNofinal} (${percentualPosicao.toFixed(1)}%)`);
       console.log(`   📊 LEGENDA: É número de pagamento: ${eNumeroPagamento}`);
       console.log(`   📊 LEGENDA: É número de destino: ${eNumeroDestino}`);
@@ -908,26 +908,27 @@ Se não conseguires extrair os dados:
 
     console.log(`   📱 TEXTO: Números brutos encontrados: ${numerosEncontrados.join(', ')}`);
 
-    // Normalizar todos os números encontrados
-    const numerosNormalizados = new Set();
+    // Normalizar todos os números encontrados e manter referência ao original
+    const numerosNormalizados = new Map(); // numero normalizado -> numero original
     for (const numeroRaw of numerosEncontrados) {
       const numeroNormalizado = this.normalizarNumero(numeroRaw);
-      if (numeroNormalizado) {
-        numerosNormalizados.add(numeroNormalizado);
+      if (numeroNormalizado && !numerosNormalizados.has(numeroNormalizado)) {
+        numerosNormalizados.set(numeroNormalizado, numeroRaw);
       }
     }
 
     const numerosValidos = [];
 
-    for (const numero of numerosNormalizados) {
-      const posicao = mensagem.indexOf(numero);
+    for (const [numero, numeroOriginal] of numerosNormalizados) {
+      // Buscar pela string original, não normalizada
+      const posicao = mensagem.indexOf(numeroOriginal);
       const tamanhoMensagem = mensagem.length;
-      const percentualPosicao = (posicao / tamanhoMensagem) * 100;
+      const percentualPosicao = posicao >= 0 ? (posicao / tamanhoMensagem) * 100 : 0;
       
       // console.log(`   🔍 TEXTO: Analisando ${numero} na posição ${posicao}/${tamanhoMensagem} (${percentualPosicao.toFixed(1)}%)`);
-      
-      const contextoBefore = mensagem.substring(Math.max(0, posicao - 50), posicao).toLowerCase();
-      const contextoAfter = mensagem.substring(posicao + numero.length, posicao + numero.length + 50).toLowerCase();
+
+      const contextoBefore = posicao >= 0 ? mensagem.substring(Math.max(0, posicao - 50), posicao).toLowerCase() : '';
+      const contextoAfter = posicao >= 0 ? mensagem.substring(posicao + numeroOriginal.length, posicao + numeroOriginal.length + 50).toLowerCase() : '';
       
       // PALAVRAS QUE INDICAM NÚMERO DE PAGAMENTO (IGNORAR)
       const indicadoresPagamento = [
@@ -951,21 +952,29 @@ Se não conseguires extrair os dados:
         return contextoCompleto.includes(indicador);
       });
       
-      // LÓGICA ESPECIAL: Número isolado no final da mensagem
+      // LÓGICA ESPECIAL: Número isolado ou no final da mensagem
       const estaNofinalAbsoluto = posicao > tamanhoMensagem * 0.8;
       const contextoAposFinal = contextoAfter.trim();
       const estaIsoladoNoFinal = estaNofinalAbsoluto && (contextoAposFinal === '' || contextoAposFinal.length < 10);
-      
+
+      // Verificar se a mensagem é APENAS o número (mensagem muito curta, só número)
+      const mensagemLimpa = mensagem.replace(/[\s\-\.+\(\)]/g, '');
+      const eMensagemApenasNumero = mensagemLimpa.length <= 15 && !eNumeroPagamento;
+
       // console.log(`   📊 TEXTO: No final absoluto (>80%): ${estaNofinalAbsoluto}`);
       // console.log(`   📊 TEXTO: Isolado no final: ${estaIsoladoNoFinal}`);
       // console.log(`   📊 TEXTO: É pagamento: ${eNumeroPagamento}`);
       // console.log(`   📊 TEXTO: É destino: ${eNumeroDestino}`);
-      
+      // console.log(`   📊 TEXTO: Mensagem só número: ${eMensagemApenasNumero}`);
+
       if (eNumeroDestino) {
         numerosValidos.push(numero);
         console.log(`   ✅ TEXTO: Número aceito (destino)`);
       } else if (eNumeroPagamento) {
         // console.log(`   ❌ TEXTO: REJEITADO por ser pagamento: ${numero}`);
+      } else if (eMensagemApenasNumero) {
+        numerosValidos.push(numero);
+        console.log(`   ✅ TEXTO: Número aceito (mensagem só número)`);
       } else if (estaIsoladoNoFinal) {
         numerosValidos.push(numero);
         console.log(`   ✅ TEXTO: Número aceito (isolado)`);

@@ -2990,7 +2990,7 @@ E-Mola:
     },
 '120363401912741383@g.us': {
     nome: 'Shop Net ✅🌐🔥🇬🇧',
-    tabela: `🅿/Consumidores🔥🥳🥳
+    tabela: `🅿️/Consumidores🔥🥳🥳
 Nós oferecemos a solução para suas necessidades de dados a preços acessíveis.
 
 🔥🎉 PACOTE DIÁRIO 👌 🔥🎉
@@ -3037,24 +3037,23 @@ Nós oferecemos a solução para suas necessidades de dados a preços acessívei
 🔄 Bônus: +100MB ao atualizar dentro de 15 dias
 
 🔥📞 PACOTE MENSAL 📞🔥
-🌐 3072MB = 100MT 💸
+🌐 3072MB = 115MT 💸
 🌐 5120MB = 165MT 💸
 🌐 7168MB = 195MT 💸
 🌐 10240MB = 260MT 💸
 🌐 11264MB = 290MT 💸
 🌐 20480MB = 480MT 💸
-🌐 40960MB = 1050MT 💸
+🌐 40960MB = 900MT 💸
 
-💳 FORMAS DE PAGAMENTO: ⤵
+💳 FORMAS DE PAGAMENTO: ⤵️
 📲 E-MOLA: 872685743 💶💰
 👤 Almeida Vasco
 
 📲 M-PESA: 851923280 💷💰
 👤 Almeida
 
-📩 Envie o seu comprovante no grupo, juntamente com o número que receberá os dados.
-✅
-`,
+📩 Envie o seu comprovante no grupo, juntamente com o número que receberá os dados.
+✅`,
     pagamento: `💳 FORMAS DE PAGAMENTO:⤵  
 - 📲 *𝗘-𝗠𝗢𝗟𝗔: *872685743💶💰  
 - Almeida Vasco 
