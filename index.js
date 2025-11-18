@@ -5115,7 +5115,7 @@ async function processMessage(message) {
                         const partes = message.body.trim().split(' ');
 
                         if (partes.length < 4) {
-                            await message.reply(`❌ *USO INCORRETO*\n\n✅ **Formato correto:**\n*.pacote DIAS REF NUMERO*\n\n📝 **Exemplos:**\n• *.pacote 3 ABC123 845123456*\n• *.pacote 30 XYZ789 847654321*\n\n📦 **Tipos disponíveis:**\n• 3 - Pacote de 3 dias (300MB)\n• 5 - Pacote de 5 dias (500MB)\n• 15 - Pacote de 15 dias (1.5GB)\n• 30 - Pacote de 30 dias (3GB)`);
+                            await message.reply(`❌ *USO INCORRETO*\n\n✅ **Formato correto:**\n*.pacote DIAS REF NUMERO [MEGAS] [VALORMT]*\n\n📝 **Exemplos:**\n• *.pacote 5 ABC123 845123456* (usa tabela do grupo)\n• *.pacote 5 ABC123 845123456 1700 45* (especificar valores)\n\n📦 **Tipos disponíveis:**\n• 3 - Pacote de 3 dias\n• 5 - Pacote de 5 dias\n• 15 - Pacote de 15 dias\n• 30 - Pacote de 30 dias\n\n⚠️ **IMPORTANTE:** Use este comando APENAS quando você já enviou o pacote principal manualmente. O sistema só agendará as renovações diárias de 100MB.`);
                             return;
                         }
 
@@ -5150,7 +5150,7 @@ async function processMessage(message) {
                             return;
                         }
 
-                        const resultado = await sistemaPacotes.processarComprovante(referencia, numero, grupoId, diasPacote, megasIniciais, valorMTInicial);
+                        const resultado = await sistemaPacotes.processarComprovante(referencia, numero, grupoId, diasPacote, megasIniciais, valorMTInicial, true); // true = modo manual
 
                         if (resultado.sucesso) {
                             await message.reply(resultado.mensagem);

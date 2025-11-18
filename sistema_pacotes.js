@@ -91,9 +91,9 @@ class SistemaPacotes {
     }
     
     // === CRIAR PACOTE (SEM VERIFICAÇÃO DE PAGAMENTO) ===
-    async processarComprovante(referencia, numero, grupoId, tipoPacote, megasIniciais, valorMTInicial) {
+    async processarComprovante(referencia, numero, grupoId, tipoPacote, megasIniciais, valorMTInicial, modoManual = false) {
         try {
-            console.log(`📦 Processando pacote: ${referencia}`);
+            console.log(`📦 Processando pacote: ${referencia} (Modo: ${modoManual ? 'MANUAL' : 'AUTOMÁTICO'})`);
             console.log(`   📊 Pacote inicial: ${megasIniciais}MB por ${valorMTInicial}MT`);
 
             // 1. Verificar se a referência já foi usada (evitar duplicatas)
@@ -114,15 +114,19 @@ class SistemaPacotes {
             const diasPacote = this.TIPOS_PACOTES[tipoPacote].dias;
             const dataExpiracao = new Date(agora.getTime() + (diasPacote * 24 * 60 * 60 * 1000));
 
-            // 4. Criar primeiro PEDIDO e PAGAMENTO usando PACOTE ORIGINAL (não D1!)
-            // IMPORTANTE: Usa os megas e valor REAIS do pacote comprado
-            console.log(`📦 Criando pacote inicial: ${referencia} (${megasIniciais}MB - ${valorMTInicial}MT)`);
+            // 4. MODO AUTOMÁTICO: Criar primeiro PEDIDO e PAGAMENTO
+            // MODO MANUAL: Pular criação (admin já enviou manualmente)
+            if (!modoManual) {
+                console.log(`📦 Criando pacote inicial: ${referencia} (${megasIniciais}MB - ${valorMTInicial}MT)`);
 
-            // Criar PEDIDO na planilha de pedidos (PACOTE ORIGINAL)
-            await this.criarPedidoPacote(referencia, megasIniciais, numero, grupoId, agora);
+                // Criar PEDIDO na planilha de pedidos (PACOTE ORIGINAL)
+                await this.criarPedidoPacote(referencia, megasIniciais, numero, grupoId, agora);
 
-            // Criar PAGAMENTO na planilha de pagamentos (PACOTE ORIGINAL)
-            await this.criarPagamentoPacote(referencia, valorMTInicial, numero, grupoId, agora);
+                // Criar PAGAMENTO na planilha de pagamentos (PACOTE ORIGINAL)
+                await this.criarPagamentoPacote(referencia, valorMTInicial, numero, grupoId, agora);
+            } else {
+                console.log(`📦 Modo MANUAL: Pulando criação do pedido inicial (admin já enviou)`);
+            }
             
             // 5. Registrar cliente no sistema
             const clienteId = `${numero}_${referencia}`;
@@ -149,6 +153,10 @@ class SistemaPacotes {
 
             console.log(`✅ Cliente ativado com ${this.TIPOS_PACOTES[tipoPacote].nome}`);
 
+            const statusPacoteInicial = modoManual
+                ? `📦 **Pacote inicial:** ${megasIniciais}MB (${valorMTInicial}MT) - ENVIADO MANUALMENTE`
+                : `📦 **Pacote inicial:** ${megasIniciais}MB (${valorMTInicial}MT) - ENVIADO AUTOMATICAMENTE`;
+
             return {
                 sucesso: true,
                 cliente: this.clientesAtivos[clienteId],
@@ -156,7 +164,7 @@ class SistemaPacotes {
                          `📱 **Número:** ${numero}\n` +
                          `📋 **Referência:** ${referencia}\n` +
                          `📅 **Duração:** ${diasPacote} dias\n` +
-                         `📦 **Pacote inicial:** ${megasIniciais}MB (${valorMTInicial}MT) - JÁ ENVIADO\n` +
+                         `${statusPacoteInicial}\n` +
                          `🔄 **Renovações automáticas:** ${diasPacote}x de 100MB (diárias, 2h antes do horário anterior)\n` +
                          `📅 **Expira em:** ${dataExpiracao.toLocaleDateString('pt-BR')}\n\n` +
                          `💡 *Verifique a validade com: .validade ${numero}*`
