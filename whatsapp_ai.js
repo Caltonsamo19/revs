@@ -1842,12 +1842,23 @@ Se não conseguires ler a imagem ou extrair os dados:
         return await this.processarNumerosComDivisaoAutomatica(numeros, remetente, comprovante);
       }
       
-      // === VERIFICAR SE É PACOTE DIAMANTE ANTES DE CALCULAR MEGAS ===
+      // === VERIFICAR SE É PACOTE ESPECIAL ANTES DE CALCULAR MEGAS ===
       if (configGrupo && numeros.length === 1) {
         const precos = this.extrairPrecosTabela(configGrupo.tabela);
         const valorNumerico = parseFloat(comprovante.valor);
-        const pacoteDiamante = precos.find(p => p.preco === valorNumerico && p.isDiamante === true);
 
+        // Verificar se é pacote .8GB
+        const pacotePonto8 = precos.find(p => p.preco === valorNumerico && p.isPacotePonto8 === true);
+        if (pacotePonto8) {
+          console.log(`   📦 PACOTE .8GB DETECTADO (comprovante em aberto): ${pacotePonto8.descricao} (${comprovante.valor}MT)`);
+          console.log(`   🔄 Processando como divisão automática pré-configurada`);
+
+          // Processar como divisão automática (usar o fluxo que já existe)
+          return await this.processarNumerosComDivisaoAutomatica(numeros, remetente, comprovante);
+        }
+
+        // Verificar se é pacote diamante
+        const pacoteDiamante = precos.find(p => p.preco === valorNumerico && p.isDiamante === true);
         if (pacoteDiamante) {
           console.log(`   💎 DIAMANTE DETECTADO (comprovante em aberto): ${pacoteDiamante.descricao} (${comprovante.valor}MT)`);
 
