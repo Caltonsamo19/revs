@@ -2796,33 +2796,49 @@ Chamadas + SMS ilimitadas + 100GB = 2250MT
     },
 '120363043964227338@g.us': {
         nome: 'ASTRO BOOSTING I',
-        tabela: `📢 SUPER PROMOÇÃO DE INTERNET - VODACOM  
+        tabela: `📢 GRUPO ABERTO 24H 🕜…
 
-📋 TABELA DE MEGAS DIÁRIOS
-1GB  =  18MT  
-2GB  =  36MT  
-3GB  =  54MT  
-4GB  =  72MT  
-5GB  =  90MT  
-6GB  =  108MT  
-7GB  =  126MT  
-8GB  =  144MT  
-9GB  =  162MT  
-10GB =  180MT  (Para Patrões 🤩)  
+PACOTES DIÁRIOS (24H ⏱)
+1024MB - 18MT
+2048MB - 36MT
+3072MB - 54MT
+4096MB - 72MT
+5130MB - 90MT
+6144MB - 108MT
+7168MB - 126MT
+8192MB - 144MT
+9144MB - 162MT
+10240MB - 180MT
 
-📅 MEGAS SEMANAIS
-4.36GB =  110MT  
-6.50GB =  180MT  
-9.76GB =  250MT  
+PACOTES PREMIUM (3 DIAS 🗓 – RENOVÁVEIS)
+2000MB - 44MT
+3000MB - 66MT
+4000MB - 88MT
+5000MB - 109MT
+6000MB - 133MT
+7000MB - 149MT
+10000MB - 219MT
 
-📅 MEGAS MENSAIS
-3GB  =  160MT  
-6GB  =  200MT  
-10GB =  300MT  
+Bónus 🔄: Receba 100MB extras para atualizar os megas dentro de 3 dias
 
-= PACOTES DIAMANTE
-11GB + Chamadas e SMS Ilimitadas + 10min Internacionais + 30MB Roaming  =  450MT
-`,
+SEMANAIS BÁSICOS (5 DIAS 🗓 – RENOVÁVEIS)
+1700MB - 45MT
+2900MB - 80MT
+3400MB - 110MT
+5500MB - 150MT
+7800MB - 200MT
+11400MB - 300MT
+
+Bónus 🔄: Receba 100MB extras para atualizar os megas dentro de 5 dias
+
+SEMANAIS PREMIUM (15 DIAS 🗓 – RENOVÁVEIS)
+3000MB - 100MT
+5000MB - 149MT
+8000MB - 201MT
+10000MB - 231MT
+20000MB - 352MT
+
+Bónus 🔄: Receba 100MB extras para atualizar os megas dentro de 15 dias`,
 
         pagamento: `╭━━━┛ 💸  𝗙𝗢𝗥𝗠𝗔𝗦 𝗗𝗘 𝗣𝗔𝗚𝗔𝗠𝗘𝗡𝗧𝗢:  
 ┃  
@@ -3076,7 +3092,7 @@ Nós oferecemos a solução para suas necessidades de dados a preços acessívei
 
 📩 Envie o seu comprovante no grupo, juntamente com o número que receberá os dados.`
 },
-    '120363041024889744@g.us': {
+'120363041024889744@g.us': {
         nome: 'NET PROMOÇÃO 17MT V12',
         tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - NOVEMBRO 2025 🚨🔥✅
 
@@ -3151,7 +3167,7 @@ Chamadas + SMS ilimitadas + 100GB = 2250MT 💵
 Em seguida mande a mensagem de comprovativo
 Aqui no grupo`
     },
-    '120363131493688789@g.us': {
+'120363131493688789@g.us': {
         nome: 'NET PROMOÇÃO 17MT V12',
         tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - NOVEMBRO 2025 🚨🔥✅
 
@@ -3226,7 +3242,7 @@ Chamadas + SMS ilimitadas + 100GB = 2250MT 💵
 Em seguida mande a mensagem de comprovativo
 Aqui no grupo`
     },
-    '120363403399939386@g.us': {
+'120363403399939386@g.us': {
         nome: 'Megas Auto 24/7',
         tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - NOVEMBRO 2025 🚨🔥✅
 
