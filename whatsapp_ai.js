@@ -1851,10 +1851,45 @@ Se não conseguires ler a imagem ou extrair os dados:
         const pacotePonto8 = precos.find(p => p.preco === valorNumerico && p.isPacotePonto8 === true);
         if (pacotePonto8) {
           console.log(`   📦 PACOTE .8GB DETECTADO (comprovante em aberto): ${pacotePonto8.descricao} (${comprovante.valor}MT)`);
-          console.log(`   🔄 Processando como divisão automática pré-configurada`);
+          console.log(`   ✂️ Criando divisão: ${pacotePonto8.gbTotal - 2.8}GB comum + 2.8GB especial`);
 
-          // Processar como divisão automática (usar o fluxo que já existe)
-          return await this.processarNumerosComDivisaoAutomatica(numeros, remetente, comprovante);
+          delete this.comprovantesEmAberto[remetente];
+
+          // Criar divisão manual: 10GB comum + 2.8GB especial
+          const gbComum = pacotePonto8.gbTotal - 2.8; // Ex: 12.8 - 2.8 = 10GB
+          const megasComum = gbComum * 1024; // Ex: 10 * 1024 = 10240MB
+          const megas28 = 2.8 * 1024; // 2867.2MB
+
+          // Calcular preços (proporcionais ou da tabela)
+          const preco10GB = precos.find(p => p.quantidade === 10240)?.preco || 170; // 10GB
+          const preco28GB = valorNumerico - preco10GB; // Restante para 2.8GB
+
+          const bloco1 = `${comprovante.referencia}|${megasComum}|${numeros[0]}`;
+          const bloco2 = `${comprovante.referencia}01|${megas28}|${numeros[0]}`;
+
+          console.log(`   ✅ Divisão .8GB criada: ${bloco1} + ${bloco2}`);
+
+          return {
+            sucesso: true,
+            dadosCompletos: `${bloco1}\n${bloco2}`,
+            tipo: 'divisao_blocos',
+            numeros: numeros,
+            totalBlocos: 2,
+            megasPorNumero: pacotePonto8.quantidade,
+            valorTotal: valorNumerico,
+            valorComprovante: comprovante.valor,
+            divisao: {
+              sucesso: true,
+              pedidos: [
+                { referencia: comprovante.referencia, megas: megasComum, numero: numeros[0], valor: preco10GB },
+                { referencia: `${comprovante.referencia}01`, megas: megas28, numero: numeros[0], valor: preco28GB }
+              ],
+              totalBlocos: 2,
+              megasPorNumero: pacotePonto8.quantidade,
+              valorTotal: valorNumerico
+            },
+            origem: 'pacote_ponto8_comprovante_em_aberto'
+          };
         }
 
         // Verificar se é pacote diamante
