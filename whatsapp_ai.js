@@ -1841,6 +1841,31 @@ Se não conseguires ler a imagem ou extrair os dados:
         return await this.processarNumerosComDivisaoAutomatica(numeros, remetente, comprovante);
       }
       
+      // === VERIFICAR SE É PACOTE DIAMANTE ANTES DE CALCULAR MEGAS ===
+      if (configGrupo && numeros.length === 1) {
+        const precos = this.extrairPrecosTabela(configGrupo.tabela);
+        const pacoteDiamante = precos.find(p => p.preco === comprovante.valor && p.isDiamante === true);
+
+        if (pacoteDiamante) {
+          console.log(`   💎 DIAMANTE DETECTADO (comprovante em aberto): ${pacoteDiamante.descricao} (${comprovante.valor}MT)`);
+
+          delete this.comprovantesEmAberto[remetente];
+
+          // Retornar indicação de pacote diamante para o index.js processar
+          return {
+            sucesso: true,
+            tipo: 'comprovante_diamante_detectado',
+            referencia: comprovante.referencia,
+            valor: comprovante.valor,
+            valorComprovante: comprovante.valor,
+            megas: pacoteDiamante.quantidade, // MB do pacote
+            numero: numeros[0], // Primeiro número
+            pacoteDiamante: pacoteDiamante,
+            mensagem: `💎 Pacote Diamante detectado: ${pacoteDiamante.descricao}`
+          };
+        }
+      }
+
       // Calcular megas totais baseado no valor e tabela do grupo
       const megasTotais = configGrupo ? this.calcularMegasPorValor(comprovante.valor, configGrupo.tabela) : comprovante.valor;
       const LIMITE_BLOCO = 10240; // 10GB
