@@ -5115,40 +5115,19 @@ async function processMessage(message) {
                         const partes = message.body.trim().split(' ');
 
                         if (partes.length < 4) {
-                            await message.reply(`❌ *USO INCORRETO*\n\n✅ **Formato correto:**\n*.pacote DIAS REF NUMERO [MEGAS] [VALORMT]*\n\n📝 **Exemplos:**\n• *.pacote 5 ABC123 845123456* (usa tabela do grupo)\n• *.pacote 5 ABC123 845123456 1700 45* (especificar valores)\n\n📦 **Tipos disponíveis:**\n• 3 - Pacote de 3 dias\n• 5 - Pacote de 5 dias\n• 15 - Pacote de 15 dias\n• 30 - Pacote de 30 dias\n\n⚠️ **IMPORTANTE:** Use este comando APENAS quando você já enviou o pacote principal manualmente. O sistema só agendará as renovações diárias de 100MB.`);
+                            await message.reply(`❌ *USO INCORRETO*\n\n✅ **Formato correto:**\n*.pacote DIAS REF NUMERO*\n\n📝 **Exemplos:**\n• *.pacote 3 ABC123 845123456*\n• *.pacote 5 XYZ789 847654321*\n• *.pacote 15 DEF456 841234567*\n\n📦 **Dias disponíveis:** 3, 5, 15, 30\n\n⚠️ **IMPORTANTE:**\nEste comando serve APENAS para agendar renovações automáticas.\nVocê deve ter enviado o pacote principal MANUALMENTE antes de usar este comando.\n\n🔄 O sistema agendará renovações diárias de 100MB durante o período especificado.`);
                             return;
                         }
 
-                        const [, diasPacote, referencia, numero, megasParam, valorMTParam] = partes;
+                        const [, diasPacote, referencia, numero] = partes;
                         const grupoId = message.from;
 
                         console.log(`📦 COMANDO PACOTE: Dias=${diasPacote}, Ref=${referencia}, Numero=${numero}`);
 
-                        // Se megas e valorMT não foram fornecidos, usar valores padrão baseados nos dias
-                        let megasIniciais = megasParam ? parseInt(megasParam) : null;
-                        let valorMTInicial = valorMTParam ? parseFloat(valorMTParam) : null;
-
-                        // Se não fornecidos, tentar buscar da tabela do grupo
-                        if (!megasIniciais || !valorMTInicial) {
-                            const configGrupo = CONFIGURACAO_GRUPOS[grupoId];
-                            if (configGrupo) {
-                                const pacotesRenovaveis = sistemaPacotes.extrairPacotesRenovaveis(configGrupo.tabela);
-                                const pacotesDoDia = pacotesRenovaveis[diasPacote];
-
-                                if (pacotesDoDia && pacotesDoDia.length > 0) {
-                                    // Usar o primeiro pacote encontrado como padrão
-                                    megasIniciais = pacotesDoDia[0].mb;
-                                    valorMTInicial = pacotesDoDia[0].valor;
-                                    console.log(`📦 Usando valores da tabela: ${megasIniciais}MB - ${valorMTInicial}MT`);
-                                }
-                            }
-                        }
-
-                        // Se ainda não definidos, usar valores genéricos
-                        if (!megasIniciais || !valorMTInicial) {
-                            await message.reply(`❌ *ERRO*\n\nNão foi possível determinar os valores do pacote.\n\n✅ **Use:**\n*.pacote DIAS REF NUMERO MEGAS VALORMT*\n\n📝 **Exemplo:**\n*.pacote 3 ABC123 845123456 2000 44*`);
-                            return;
-                        }
+                        // Modo manual: não precisa de megas/valor inicial (apenas agenda renovações)
+                        // Usar valores simbólicos (não serão enviados, apenas para registro)
+                        const megasIniciais = 0; // Não usado em modo manual
+                        const valorMTInicial = 0; // Não usado em modo manual
 
                         const resultado = await sistemaPacotes.processarComprovante(referencia, numero, grupoId, diasPacote, megasIniciais, valorMTInicial, true); // true = modo manual
 

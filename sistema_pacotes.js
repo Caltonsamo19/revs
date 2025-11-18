@@ -153,21 +153,34 @@ class SistemaPacotes {
 
             console.log(`✅ Cliente ativado com ${this.TIPOS_PACOTES[tipoPacote].nome}`);
 
-            const statusPacoteInicial = modoManual
-                ? `📦 **Pacote inicial:** ${megasIniciais}MB (${valorMTInicial}MT) - ENVIADO MANUALMENTE`
-                : `📦 **Pacote inicial:** ${megasIniciais}MB (${valorMTInicial}MT) - ENVIADO AUTOMATICAMENTE`;
+            let mensagem;
+
+            if (modoManual) {
+                // Modo manual: apenas confirma agendamento de renovações
+                mensagem = `🎯 **RENOVAÇÕES AGENDADAS!**\n\n` +
+                          `📱 **Número:** ${numero}\n` +
+                          `📋 **Referência:** ${referencia}\n` +
+                          `📅 **Período:** ${diasPacote} dias\n` +
+                          `🔄 **Renovações automáticas:** ${diasPacote}x de 100MB (diárias, 2h antes do horário anterior)\n` +
+                          `📅 **Expira em:** ${dataExpiracao.toLocaleDateString('pt-BR')}\n\n` +
+                          `⚠️ **Lembrete:** Você deve ter enviado o pacote principal manualmente!\n\n` +
+                          `💡 *Verifique a validade com: .validade ${numero}*`;
+            } else {
+                // Modo automático: confirma envio do pacote + renovações
+                mensagem = `🎯 **PACOTE ${this.TIPOS_PACOTES[tipoPacote].nome} ATIVADO!**\n\n` +
+                          `📱 **Número:** ${numero}\n` +
+                          `📋 **Referência:** ${referencia}\n` +
+                          `📅 **Duração:** ${diasPacote} dias\n` +
+                          `📦 **Pacote inicial:** ${megasIniciais}MB (${valorMTInicial}MT) - ENVIADO AUTOMATICAMENTE\n` +
+                          `🔄 **Renovações automáticas:** ${diasPacote}x de 100MB (diárias, 2h antes do horário anterior)\n` +
+                          `📅 **Expira em:** ${dataExpiracao.toLocaleDateString('pt-BR')}\n\n` +
+                          `💡 *Verifique a validade com: .validade ${numero}*`;
+            }
 
             return {
                 sucesso: true,
                 cliente: this.clientesAtivos[clienteId],
-                mensagem: `🎯 **PACOTE ${this.TIPOS_PACOTES[tipoPacote].nome} ATIVADO!**\n\n` +
-                         `📱 **Número:** ${numero}\n` +
-                         `📋 **Referência:** ${referencia}\n` +
-                         `📅 **Duração:** ${diasPacote} dias\n` +
-                         `${statusPacoteInicial}\n` +
-                         `🔄 **Renovações automáticas:** ${diasPacote}x de 100MB (diárias, 2h antes do horário anterior)\n` +
-                         `📅 **Expira em:** ${dataExpiracao.toLocaleDateString('pt-BR')}\n\n` +
-                         `💡 *Verifique a validade com: .validade ${numero}*`
+                mensagem: mensagem
             };
             
         } catch (error) {
