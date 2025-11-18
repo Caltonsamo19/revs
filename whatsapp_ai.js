@@ -1880,6 +1880,7 @@ Se não conseguires ler a imagem ou extrair os dados:
           totalBlocos: divisao.totalBlocos,
           megasPorNumero: divisao.megasPorNumero,
           valorTotal: divisao.valorTotal,
+          valorComprovante: comprovante.valor,
           divisao: divisao,
           origem: 'comprovante_em_aberto_com_divisao'
         };
