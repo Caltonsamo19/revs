@@ -25,7 +25,13 @@ class SistemaPacotes {
         // Arquivo para persistir dados dos clientes ativos
         this.ARQUIVO_CLIENTES = path.join(__dirname, 'dados_pacotes_clientes.json');
         this.ARQUIVO_HISTORICO = path.join(__dirname, 'historico_renovacoes.json');
-        
+
+        // Arquivos de backup
+        this.PASTA_BACKUP = path.join(__dirname, 'backup_pacotes');
+        this.ARQUIVO_BACKUP_CLIENTES = path.join(this.PASTA_BACKUP, 'dados_pacotes_clientes_backup.json');
+        this.ARQUIVO_BACKUP_HISTORICO = path.join(this.PASTA_BACKUP, 'historico_renovacoes_backup.json');
+        this.ARQUIVO_BACKUP_ROTATIVO = path.join(this.PASTA_BACKUP, 'dados_pacotes_backup_');
+
         // Controle de clientes ativos
         this.clientesAtivos = {};
         this.historicoRenovacoes = [];
@@ -38,7 +44,10 @@ class SistemaPacotes {
         console.log(`   📋 Pedidos (Retalho): ${this.PLANILHAS.PEDIDOS}`);
         console.log(`   💰 Pagamentos (Universal): ${this.PLANILHAS.PAGAMENTOS}`);
         console.log(`   ⏱️ Verificação: ${this.intervalVerificacao/60000} min`);
-        
+
+        // Garantir que a pasta de backup existe
+        this.garantirPastaBackup();
+
         // Carregar dados persistidos
         this.carregarDados();
         
@@ -49,14 +58,32 @@ class SistemaPacotes {
     // === CARREGAR DADOS PERSISTIDOS ===
     async carregarDados() {
         try {
-            // Carregar clientes ativos
+            // Carregar clientes ativos com backup automático
             try {
                 const dadosClientes = await fs.readFile(this.ARQUIVO_CLIENTES, 'utf8');
-                this.clientesAtivos = JSON.parse(dadosClientes);
-                console.log(`📦 ${Object.keys(this.clientesAtivos).length} clientes ativos carregados`);
+                const dadosParsados = JSON.parse(dadosClientes);
+
+                // Validar se os dados carregados são válidos
+                if (dadosParsados && typeof dadosParsados === 'object') {
+                    this.clientesAtivos = dadosParsados;
+                    console.log(`📦 ${Object.keys(this.clientesAtivos).length} clientes ativos carregados`);
+
+                    // Criar backup automático após carregamento bem-sucedido
+                    await this.criarBackupPacotes();
+                } else {
+                    throw new Error('Dados inválidos no arquivo de clientes');
+                }
             } catch (error) {
-                console.log(`📦 Nenhum arquivo de clientes encontrado - iniciando limpo`);
-                this.clientesAtivos = {};
+                console.log(`⚠️ Erro ao carregar clientes: ${error.message}`);
+
+                // Tentar restaurar do backup
+                const backupRestaurado = await this.restaurarBackupPacotes();
+                if (backupRestaurado) {
+                    console.log('✅ Clientes restaurados do backup!');
+                } else {
+                    console.log(`📦 Nenhum arquivo de clientes encontrado - iniciando limpo`);
+                    this.clientesAtivos = {};
+                }
             }
             
             // Carregar histórico
@@ -74,27 +101,115 @@ class SistemaPacotes {
         }
     }
     
-    // === SALVAR DADOS ===
+    // === SALVAR DADOS COM BACKUP AUTOMÁTICO ===
     async salvarDados() {
         try {
+            const qtdClientes = Object.keys(this.clientesAtivos).length;
+            console.log(`💾 PACOTES: Salvando dados (${qtdClientes} clientes)...`);
+
+            // Criar backup antes de salvar (apenas se houver dados)
+            if (qtdClientes > 0) {
+                await this.criarBackupPacotes();
+            }
+
             // Salvar clientes ativos
             await fs.writeFile(this.ARQUIVO_CLIENTES, JSON.stringify(this.clientesAtivos, null, 2));
-            
+
             // Salvar histórico (manter apenas últimos 1000 registros)
             const historicoLimitado = this.historicoRenovacoes.slice(-1000);
             await fs.writeFile(this.ARQUIVO_HISTORICO, JSON.stringify(historicoLimitado, null, 2));
-            
-            console.log(`💾 PACOTES: Dados salvos - ${Object.keys(this.clientesAtivos).length} clientes ativos`);
+
+            console.log(`✅ PACOTES: Dados salvos - ${qtdClientes} clientes ativos`);
         } catch (error) {
             console.error(`❌ PACOTES: Erro ao salvar dados:`, error);
         }
     }
     
-    // === CRIAR PACOTE (SEM VERIFICAÇÃO DE PAGAMENTO) ===
-    async processarComprovante(referencia, numero, grupoId, tipoPacote, megasIniciais, valorMTInicial, modoManual = false) {
+    // === EXTRAIR PACOTES RENOVÁVEIS DA TABELA (PARSING DINÂMICO) ===
+    extrairPacotesRenovaveis(tabelaTexto) {
+        const pacotesExtraidos = {
+            '3': [],
+            '5': [],
+            '15': []
+        };
+
         try {
-            console.log(`📦 Processando pacote: ${referencia} (Modo: ${modoManual ? 'MANUAL' : 'AUTOMÁTICO'})`);
-            console.log(`   📊 Pacote inicial: ${megasIniciais}MB por ${valorMTInicial}MT`);
+            // Regex para encontrar seções de pacotes renováveis
+            const padroes = [
+                { tipo: '3', regex: /3\s*Dias[^\n]*(?:Renováveis)?[^\n]*\n([\s\S]*?)(?=\n\n|📅|💎|📍|$)/i },
+                { tipo: '5', regex: /5\s*Dias[^\n]*(?:Renováveis)?[^\n]*\n([\s\S]*?)(?=\n\n|📅|💎|📍|$)/i },
+                { tipo: '15', regex: /15\s*Dias[^\n]*(?:Renováveis)?[^\n]*\n([\s\S]*?)(?=\n\n|📅|💎|📍|$)/i }
+            ];
+
+            for (const { tipo, regex } of padroes) {
+                const match = tabelaTexto.match(regex);
+                if (match && match[1]) {
+                    const secao = match[1];
+
+                    // Extrair pares MB = MT
+                    // Suporta formatos: "2000MB = 44MT", "2.0GB = 44MT", "2000 MB = 44 MT"
+                    const regexPacotes = /(\d+(?:\.\d+)?)\s*(?:MB|GB)\s*=\s*(\d+(?:\.\d+)?)\s*MT/gi;
+                    let matchPacote;
+
+                    while ((matchPacote = regexPacotes.exec(secao)) !== null) {
+                        let mb = parseFloat(matchPacote[1]);
+                        const valor = parseFloat(matchPacote[2]);
+
+                        // Se for GB, converter para MB
+                        if (matchPacote[0].toUpperCase().includes('GB')) {
+                            mb = mb * 1024;
+                        }
+
+                        pacotesExtraidos[tipo].push({ mb: Math.round(mb), valor });
+                    }
+                }
+            }
+
+            console.log(`📋 PACOTES: Extraídos da tabela:`, {
+                '3 dias': pacotesExtraidos['3'].length,
+                '5 dias': pacotesExtraidos['5'].length,
+                '15 dias': pacotesExtraidos['15'].length
+            });
+
+        } catch (error) {
+            console.error(`❌ PACOTES: Erro ao extrair pacotes da tabela:`, error.message);
+        }
+
+        return pacotesExtraidos;
+    }
+
+    // === DETECTAR TIPO DE PACOTE AUTOMATICAMENTE ===
+    detectarTipoPacote(mb, valor, tabelaTexto) {
+        try {
+            const pacotesDisponiveis = this.extrairPacotesRenovaveis(tabelaTexto);
+
+            // Procurar combinação exata de MB + Valor
+            for (const [tipoDias, listaPacotes] of Object.entries(pacotesDisponiveis)) {
+                for (const pacote of listaPacotes) {
+                    // Comparar com tolerância de 1% para valores (arredondamentos)
+                    const mbMatch = Math.abs(pacote.mb - mb) <= (mb * 0.01);
+                    const valorMatch = Math.abs(pacote.valor - valor) <= (valor * 0.01);
+
+                    if (mbMatch && valorMatch) {
+                        console.log(`✅ PACOTES: Detectado pacote de ${tipoDias} dias (${mb}MB + ${valor}MT)`);
+                        return tipoDias;
+                    }
+                }
+            }
+
+            console.log(`ℹ️ PACOTES: Pacote ${mb}MB + ${valor}MT não é renovável`);
+            return null;
+
+        } catch (error) {
+            console.error(`❌ PACOTES: Erro ao detectar tipo de pacote:`, error.message);
+            return null;
+        }
+    }
+
+    // === CRIAR PACOTE (SEM VERIFICAÇÃO DE PAGAMENTO) ===
+    async processarComprovante(referencia, numero, grupoId, tipoPacote, horarioAtivacao = null) {
+        try {
+            console.log(`📦 Processando pacote: ${referencia}`);
 
             // 1. Verificar se a referência já foi usada (evitar duplicatas)
             const referenciaExiste = await this.verificarReferenciaExistente(referencia);
@@ -111,24 +226,17 @@ class SistemaPacotes {
 
             // 3. Calcular datas
             const agora = new Date();
+            const horaAtivacao = horarioAtivacao ? new Date(horarioAtivacao) : agora;
             const diasPacote = this.TIPOS_PACOTES[tipoPacote].dias;
-            const dataExpiracao = new Date(agora.getTime() + (diasPacote * 24 * 60 * 60 * 1000));
+            const dataExpiracao = new Date(horaAtivacao.getTime() + (diasPacote * 24 * 60 * 60 * 1000));
 
-            // 4. MODO AUTOMÁTICO: Criar primeiro PEDIDO e PAGAMENTO
-            // MODO MANUAL: Pular criação (admin já enviou manualmente)
-            if (!modoManual) {
-                console.log(`📦 Criando pacote inicial: ${referencia} (${megasIniciais}MB - ${valorMTInicial}MT)`);
+            // 4. NOVA LÓGICA: NÃO criar D1 imediatamente, apenas agendar
+            // Calcular primeira renovação: DIA SEGUINTE, 2h ANTES da hora de ativação
+            const primeiraRenovacao = new Date(horaAtivacao);
+            primeiraRenovacao.setDate(primeiraRenovacao.getDate() + 1); // +1 dia
+            primeiraRenovacao.setHours(primeiraRenovacao.getHours() - 2); // -2 horas
 
-                // Criar PEDIDO na planilha de pedidos (PACOTE ORIGINAL)
-                await this.criarPedidoPacote(referencia, megasIniciais, numero, grupoId, agora);
-
-                // Criar PAGAMENTO na planilha de pagamentos (PACOTE ORIGINAL)
-                await this.criarPagamentoPacote(referencia, valorMTInicial, numero, grupoId, agora);
-            } else {
-                console.log(`📦 Modo MANUAL: Pulando criação do pedido inicial (admin já enviou)`);
-            }
-            
-            // 5. Registrar cliente no sistema
+            // 5. Registrar cliente no sistema (SEM criar D1 agora)
             const clienteId = `${numero}_${referencia}`;
             this.clientesAtivos[clienteId] = {
                 numero: numero,
@@ -136,53 +244,36 @@ class SistemaPacotes {
                 grupoId: grupoId,
                 tipoPacote: tipoPacote,
                 diasTotal: diasPacote,
-                diasRestantes: diasPacote, // CORRIGIDO: Começa com dias totais (renovações ainda não iniciaram)
-                megasIniciais: megasIniciais,
-                valorMTInicial: valorMTInicial,
+                diasRestantes: diasPacote, // AGORA é diasPacote (não -1)
                 dataInicio: agora.toISOString(),
                 dataExpiracao: dataExpiracao.toISOString(),
-                horaEnvioOriginal: agora.toISOString(),
-                proximaRenovacao: this.calcularProximaRenovacao(agora),
+                horaEnvioOriginal: horaAtivacao.toISOString(),
+                proximaRenovacao: primeiraRenovacao.toISOString(),
                 renovacoes: 0,
                 status: 'ativo',
-                ultimaRenovacao: agora.toISOString()
+                ultimaRenovacao: null // Ainda não teve renovação
             };
 
             // 6. Salvar dados
             await this.salvarDados();
 
             console.log(`✅ Cliente ativado com ${this.TIPOS_PACOTES[tipoPacote].nome}`);
-
-            let mensagem;
-
-            if (modoManual) {
-                // Modo manual: apenas confirma agendamento de renovações
-                mensagem = `🎯 **RENOVAÇÕES AGENDADAS!**\n\n` +
-                          `📱 **Número:** ${numero}\n` +
-                          `📋 **Referência:** ${referencia}\n` +
-                          `📅 **Período:** ${diasPacote} dias\n` +
-                          `🔄 **Renovações automáticas:** ${diasPacote}x de 100MB (diárias, 2h antes do horário anterior)\n` +
-                          `📅 **Expira em:** ${dataExpiracao.toLocaleDateString('pt-BR')}\n\n` +
-                          `⚠️ **Lembrete:** Você deve ter enviado o pacote principal manualmente!\n\n` +
-                          `💡 *Verifique a validade com: .validade ${numero}*`;
-            } else {
-                // Modo automático: confirma envio do pacote + renovações
-                mensagem = `🎯 **PACOTE ${this.TIPOS_PACOTES[tipoPacote].nome} ATIVADO!**\n\n` +
-                          `📱 **Número:** ${numero}\n` +
-                          `📋 **Referência:** ${referencia}\n` +
-                          `📅 **Duração:** ${diasPacote} dias\n` +
-                          `📦 **Pacote inicial:** ${megasIniciais}MB (${valorMTInicial}MT) - ENVIADO AUTOMATICAMENTE\n` +
-                          `🔄 **Renovações automáticas:** ${diasPacote}x de 100MB (diárias, 2h antes do horário anterior)\n` +
-                          `📅 **Expira em:** ${dataExpiracao.toLocaleDateString('pt-BR')}\n\n` +
-                          `💡 *Verifique a validade com: .validade ${numero}*`;
-            }
+            console.log(`📅 Primeira renovação agendada para: ${primeiraRenovacao.toLocaleString('pt-BR')}`);
 
             return {
                 sucesso: true,
                 cliente: this.clientesAtivos[clienteId],
-                mensagem: mensagem
+                mensagem: `🎯 **PACOTE ${this.TIPOS_PACOTES[tipoPacote].nome} ATIVADO!**\n\n` +
+                         `📱 **Número:** ${numero}\n` +
+                         `📋 **Referência:** ${referencia}\n` +
+                         `📅 **Duração:** ${diasPacote} dias\n` +
+                         `⚡ **Pacote principal já foi ativado**\n` +
+                         `🔄 **Renovações automáticas:** ${diasPacote}x (100MB cada)\n` +
+                         `📅 **Primeira renovação:** ${primeiraRenovacao.toLocaleDateString('pt-BR')} às ${primeiraRenovacao.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})} (2h antes)\n` +
+                         `📅 **Expira em:** ${dataExpiracao.toLocaleDateString('pt-BR')}\n\n` +
+                         `💡 *O cliente pode verificar a validade com: .validade ${numero}*`
             };
-            
+
         } catch (error) {
             console.error(`❌ PACOTES: Erro ao processar comprovante:`, error);
             return { sucesso: false, erro: error.message };
@@ -297,9 +388,9 @@ class SistemaPacotes {
             }
 
             if (!isSuccess) {
-                // Se for erro de duplicata (qualquer status), apenas loga e continua
-                if (response.data && response.data.duplicado) {
-                    console.log(`⚠️ PACOTES: Pedido ${novaReferencia} já existe (Status: ${response.data.status_existente}) - pulando criação`);
+                // Se for erro de duplicata com status PROCESSADO, apenas loga e continua
+                if (response.data && response.data.duplicado && response.data.status_existente === 'PROCESSADO') {
+                    console.log(`⚠️ PACOTES: Pedido ${novaReferencia} já existe com status PROCESSADO - pulando criação`);
                     return; // Retorna sem erro para não quebrar o fluxo
                 }
                 throw new Error(`Erro ao salvar pedido pacote: ${JSON.stringify(response.data)}`);
@@ -666,86 +757,147 @@ class SistemaPacotes {
         };
     }
 
-    // === EXTRAIR PACOTES RENOVÁVEIS DA TABELA ===
-    extrairPacotesRenovaveis(tabelaTexto) {
+    // === SISTEMA DE BACKUP AUTOMÁTICO ===
+
+    // Garantir que pasta de backup existe
+    async garantirPastaBackup() {
         try {
-            const pacotesRenovaveis = {
-                '3': [],
-                '5': [],
-                '15': []
+            await fs.mkdir(this.PASTA_BACKUP, { recursive: true });
+            console.log('📁 Pasta de backup de pacotes verificada');
+        } catch (error) {
+            console.log('⚠️ Erro ao criar pasta de backup:', error.message);
+        }
+    }
+
+    // Criar backup dos dados de pacotes
+    async criarBackupPacotes() {
+        try {
+            if (Object.keys(this.clientesAtivos).length === 0) {
+                return; // Não criar backup de dados vazios
+            }
+
+            await this.garantirPastaBackup();
+
+            const agora = new Date();
+            const timestamp = agora.toISOString().replace(/[:.]/g, '-');
+            const dadosBackup = {
+                timestamp: agora.toISOString(),
+                versao: '1.0',
+                totalClientes: Object.keys(this.clientesAtivos).length,
+                totalHistorico: this.historicoRenovacoes.length,
+                clientes: this.clientesAtivos,
+                historico: this.historicoRenovacoes.slice(-1000) // Últimos 1000 registros
             };
 
-            if (!tabelaTexto) {
-                console.log('⚠️ PACOTES: Tabela vazia - nenhum pacote renovável encontrado');
-                return pacotesRenovaveis;
-            }
+            // Backup principal (sempre sobrescreve)
+            await fs.writeFile(this.ARQUIVO_BACKUP_CLIENTES, JSON.stringify(dadosBackup, null, 2));
 
-            // Dividir a tabela em linhas
-            const linhas = tabelaTexto.split('\n');
+            // Backup rotativo (manter últimos 7 dias)
+            const arquivoRotativo = `${this.ARQUIVO_BACKUP_ROTATIVO}${timestamp}.json`;
+            await fs.writeFile(arquivoRotativo, JSON.stringify(dadosBackup, null, 2));
 
-            let secaoAtual = null;
+            // Limpar backups antigos
+            await this.limparBackupsAntigosPacotes();
 
-            for (const linha of linhas) {
-                const linhaTrim = linha.trim();
-
-                // Detectar seções de pacotes renováveis
-                if (linhaTrim.includes('3 Dias') && linhaTrim.includes('Renováveis')) {
-                    secaoAtual = '3';
-                    continue;
-                } else if (linhaTrim.includes('5 Dias') && linhaTrim.includes('Renováveis')) {
-                    secaoAtual = '5';
-                    continue;
-                } else if (linhaTrim.includes('15 Dias') && linhaTrim.includes('Renováveis')) {
-                    secaoAtual = '15';
-                    continue;
-                }
-
-                // Resetar seção quando encontrar outras seções ou linhas de bônus
-                if (linhaTrim.includes('PACOTES MENSAIS') ||
-                    linhaTrim.includes('DIAMANTE') ||
-                    linhaTrim.includes('PACOTES DIÁRIOS') ||
-                    linhaTrim.includes('Bônus:') ||
-                    linhaTrim.includes('🔄') ||
-                    linhaTrim.startsWith('📍')) {
-                    secaoAtual = null;
-                    continue;
-                }
-
-                // Extrair pacotes no formato: 2000MB = 44MT
-                if (secaoAtual && linhaTrim.match(/(\d+)MB\s*=\s*(\d+)MT/)) {
-                    const match = linhaTrim.match(/(\d+)MB\s*=\s*(\d+)MT/);
-                    if (match) {
-                        const mb = parseInt(match[1]);
-                        const valor = parseInt(match[2]);
-
-                        pacotesRenovaveis[secaoAtual].push({ mb, valor });
-                    }
-                }
-
-                // Também suportar formato com GB: 10GB = 219MT -> converter para MB
-                if (secaoAtual && linhaTrim.match(/(\d+(?:\.\d+)?)GB\s*=\s*(\d+)MT/)) {
-                    const match = linhaTrim.match(/(\d+(?:\.\d+)?)GB\s*=\s*(\d+)MT/);
-                    if (match) {
-                        const gb = parseFloat(match[1]);
-                        const mb = Math.round(gb * 1024); // Converter GB para MB
-                        const valor = parseInt(match[2]);
-
-                        pacotesRenovaveis[secaoAtual].push({ mb, valor });
-                    }
-                }
-            }
-
-            // Log dos pacotes encontrados
-            console.log('📦 PACOTES RENOVÁVEIS EXTRAÍDOS:');
-            for (const [tipo, pacotes] of Object.entries(pacotesRenovaveis)) {
-                console.log(`   ${tipo} dias: ${pacotes.length} pacotes`);
-            }
-
-            return pacotesRenovaveis;
+            console.log(`💾 Backup de pacotes criado: ${Object.keys(this.clientesAtivos).length} clientes ativos`);
 
         } catch (error) {
-            console.error('❌ PACOTES: Erro ao extrair pacotes renováveis:', error);
-            return { '3': [], '5': [], '15': [] };
+            console.error('❌ Erro ao criar backup de pacotes:', error.message);
+        }
+    }
+
+    // Restaurar backup de pacotes
+    async restaurarBackupPacotes() {
+        try {
+            console.log('🔄 Tentando restaurar backup de pacotes...');
+
+            // Tentar restaurar backup principal primeiro
+            try {
+                const dadosBackup = await fs.readFile(this.ARQUIVO_BACKUP_CLIENTES, 'utf8');
+                const backup = JSON.parse(dadosBackup);
+
+                if (backup.clientes && typeof backup.clientes === 'object') {
+                    this.clientesAtivos = backup.clientes;
+                    if (backup.historico && Array.isArray(backup.historico)) {
+                        this.historicoRenovacoes = backup.historico;
+                    }
+                    console.log(`✅ Backup principal de pacotes restaurado: ${Object.keys(this.clientesAtivos).length} clientes`);
+                    await this.salvarDados();
+                    return true;
+                }
+            } catch (error) {
+                console.log('⚠️ Backup principal de pacotes não disponível, tentando backups rotativos...');
+            }
+
+            // Tentar restaurar do backup rotativo mais recente
+            try {
+                const arquivos = await fs.readdir(this.PASTA_BACKUP);
+                const backupsRotativos = arquivos
+                    .filter(arquivo => arquivo.startsWith('dados_pacotes_backup_') && arquivo.endsWith('.json'))
+                    .sort()
+                    .reverse(); // Mais recente primeiro
+
+                for (const arquivo of backupsRotativos) {
+                    try {
+                        const caminhoBackup = path.join(this.PASTA_BACKUP, arquivo);
+                        const dadosBackup = await fs.readFile(caminhoBackup, 'utf8');
+                        const backup = JSON.parse(dadosBackup);
+
+                        if (backup.clientes && typeof backup.clientes === 'object') {
+                            this.clientesAtivos = backup.clientes;
+                            if (backup.historico && Array.isArray(backup.historico)) {
+                                this.historicoRenovacoes = backup.historico;
+                            }
+                            console.log(`✅ Backup rotativo de pacotes restaurado (${arquivo}): ${Object.keys(this.clientesAtivos).length} clientes`);
+                            await this.salvarDados();
+                            return true;
+                        }
+                    } catch (error) {
+                        console.log(`⚠️ Backup ${arquivo} corrompido, tentando próximo...`);
+                        continue;
+                    }
+                }
+            } catch (error) {
+                console.log('⚠️ Erro ao acessar backups rotativos de pacotes:', error.message);
+            }
+
+            console.log('❌ Nenhum backup válido de pacotes encontrado');
+            return false;
+
+        } catch (error) {
+            console.error('❌ Erro ao restaurar backup de pacotes:', error.message);
+            return false;
+        }
+    }
+
+    // Limpar backups antigos de pacotes
+    async limparBackupsAntigosPacotes() {
+        try {
+            const arquivos = await fs.readdir(this.PASTA_BACKUP);
+            const agora = new Date();
+            const limiteDias = 7 * 24 * 60 * 60 * 1000; // 7 dias
+
+            const backupsRotativos = arquivos.filter(arquivo =>
+                arquivo.startsWith('dados_pacotes_backup_') && arquivo.endsWith('.json')
+            );
+
+            for (const arquivo of backupsRotativos) {
+                try {
+                    const caminhoArquivo = path.join(this.PASTA_BACKUP, arquivo);
+                    const stats = await fs.stat(caminhoArquivo);
+                    const idadeArquivo = agora - stats.mtime;
+
+                    if (idadeArquivo > limiteDias) {
+                        await fs.unlink(caminhoArquivo);
+                        console.log(`🗑️ Backup antigo de pacotes removido: ${arquivo}`);
+                    }
+                } catch (error) {
+                    console.log(`⚠️ Erro ao processar backup de pacotes ${arquivo}:`, error.message);
+                }
+            }
+
+        } catch (error) {
+            console.log('⚠️ Erro ao limpar backups antigos de pacotes:', error.message);
         }
     }
 }

@@ -48,6 +48,126 @@ class WhatsAppAI {
     this.rateLimiter.requests.push(now);
   }
 
+  // === CALCULAR VALOR DE 10GB BASEADO NA TABELA DO GRUPO ===
+  calcularValor10GB(tabelaPrecos) {
+    try {
+      if (!tabelaPrecos) {
+        console.log(`⚠️ Tabela de preços não fornecida, usando valor padrão`);
+        return 170; // Valor padrão: 10GB = 170MT
+      }
+
+      // Buscar padrões de 10GB ou 10240MB na tabela
+      const patterns = [
+        /10240\s*MB.*?(\d+)\s*MT/i,
+        /10GB.*?(\d+)\s*MT/i,
+        /10000\s*MB.*?(\d+)\s*MT/i,
+        /(\d+)\s*MT.*?10240\s*MB/i,
+        /(\d+)\s*MT.*?10GB/i
+      ];
+
+      for (const pattern of patterns) {
+        const match = tabelaPrecos.match(pattern);
+        if (match && match[1]) {
+          const valor = parseFloat(match[1]);
+          console.log(`✅ Valor de 10GB encontrado na tabela: ${valor}MT`);
+          return valor;
+        }
+      }
+
+      // Se não encontrar 10GB, calcular proporcionalmente baseado em 1GB
+      const pattern1GB = /1024\s*MB.*?(\d+)\s*MT/i;
+      const match1GB = tabelaPrecos.match(pattern1GB);
+
+      if (match1GB && match1GB[1]) {
+        const valor1GB = parseFloat(match1GB[1]);
+        const valor10GB = valor1GB * 10;
+        console.log(`💡 Valor de 10GB calculado proporcionalmente: ${valor10GB}MT (1GB=${valor1GB}MT × 10)`);
+        return valor10GB;
+      }
+
+      console.log(`⚠️ Não foi possível encontrar valor de 10GB na tabela, usando padrão`);
+      return 170; // Valor padrão
+
+    } catch (error) {
+      console.error(`❌ Erro ao calcular valor de 10GB:`, error.message);
+      return 170; // Valor padrão em caso de erro
+    }
+  }
+
+  // === DIVIDIR TRANSFERÊNCIA EM BLOCOS DE 10GB (VENDAS AVULSAS) ===
+  dividirEmBlocos(referenciaOriginal, megasTotais, numeros, tabelaPrecos = null) {
+    try {
+      console.log(`🔧 DIVISÃO: Iniciando divisão de ${megasTotais}MB para ${numeros.length} número(s)`);
+
+      const BLOCO_MAX = 10240; // 10GB em MB
+      const megasPorNumero = Math.floor(megasTotais / numeros.length);
+
+      console.log(`📊 Cada número receberá: ${megasPorNumero}MB`);
+
+      // Calcular valor de 10GB baseado na tabela
+      const valor10GB = this.calcularValor10GB(tabelaPrecos);
+
+      const todosPedidos = [];
+      let contadorSufixoGlobal = 0;
+
+      // Para cada número, dividir seus megas em blocos
+      for (let numIndex = 0; numIndex < numeros.length; numIndex++) {
+        const numero = numeros[numIndex];
+        const megasNumero = megasPorNumero;
+        const numBlocos = Math.ceil(megasNumero / BLOCO_MAX);
+
+        console.log(`📱 Número ${numIndex + 1}/${numeros.length} (${numero}): ${megasNumero}MB → ${numBlocos} blocos`);
+
+        let megasRestantes = megasNumero;
+
+        for (let i = 0; i < numBlocos; i++) {
+          const megasBloco = Math.min(BLOCO_MAX, megasRestantes);
+
+          // PRIMEIRA transação usa referência ORIGINAL (sem sufixo)
+          // Demais usam sufixo 01, 02, 03...
+          let referenciaBloco;
+          if (contadorSufixoGlobal === 0) {
+            referenciaBloco = referenciaOriginal;
+          } else {
+            const sufixo = String(contadorSufixoGlobal).padStart(2, '0');
+            referenciaBloco = `${referenciaOriginal}${sufixo}`;
+          }
+
+          // Calcular valor proporcional
+          const valorBloco = megasBloco === BLOCO_MAX
+            ? valor10GB
+            : (valor10GB * megasBloco / BLOCO_MAX).toFixed(2);
+
+          todosPedidos.push({
+            referencia: referenciaBloco,
+            megas: megasBloco,
+            numero: numero,
+            valor: parseFloat(valorBloco)
+          });
+
+          megasRestantes -= megasBloco;
+          contadorSufixoGlobal++;
+
+          console.log(`   📦 Bloco ${contadorSufixoGlobal}: ${referenciaBloco} → ${megasBloco}MB → ${numero} (${valorBloco}MT)`);
+        }
+      }
+
+      console.log(`✅ DIVISÃO CONCLUÍDA: ${todosPedidos.length} blocos no total`);
+
+      return {
+        sucesso: true,
+        pedidos: todosPedidos,
+        totalBlocos: todosPedidos.length,
+        megasPorNumero: megasPorNumero,
+        valorTotal: todosPedidos.reduce((sum, p) => sum + p.valor, 0)
+      };
+
+    } catch (error) {
+      console.error(`❌ DIVISÃO: Erro ao dividir em blocos:`, error);
+      return { sucesso: false, erro: error.message };
+    }
+  }
+
   // === RECONSTRUIR REFERÊNCIAS QUEBRADAS ===
   reconstruirReferenciasQuebradas(texto) {
     console.log('🔧 Reconstruindo referências quebradas...');
@@ -177,11 +297,11 @@ Procura por:
 INSTRUÇÕES IMPORTANTES:
 - A REFERÊNCIA pode estar QUEBRADA em múltiplas linhas. Ex: "PP250901.1250.B" + "64186" = "PP250901.1250.B64186"
 - RECONSTRÓI referências que estão separadas por quebras de linha
-- Procura por "ID da transacao", "Confirmado", "Transferiste"
+- Procura por "ID da transacao", "Confirmado", "Transferiste", "Recebeste"
 - Junta códigos que aparecem próximos e parecem ser parte da mesma referência
 - O valor pode estar em formato "100.00MT", "100MT", "100,00MT"
-- ATENÇÃO: Procura pelo valor após "Transferiste" - NÃO o saldo da conta!
-- Exemplo: "Transferiste 17.00MT" = valor é 17.00, não o saldo mencionado depois
+- ATENÇÃO: Procura pelo valor após "Transferiste" ou "Recebeste" - NÃO o saldo da conta!
+- Exemplo: "Transferiste 17.00MT" ou "Recebeste 51.00MT" = valor é 17.00 ou 51.00, não o saldo mencionado depois
 
 EXEMPLOS DE RECONSTRUÇÃO:
 - Se vês "PP250901.1250.B" e depois "64186", a referência é "PP250901.1250.B64186"
@@ -473,23 +593,51 @@ Se não conseguires extrair os dados:
           
           // Determinar tipo de pacote
           let tipo = 'diario';
-          if (linhaLower.includes('mensal') || linhaLower.includes('30 dias')) {
+          let isDiamante = false;
+          let isPacotePonto8 = false;
+
+          // Detectar pacote .8GB (12.8, 22.8, 32.8, etc.) - PRIORITÁRIO
+          if (temGB && quantidade % 1 !== 0) {
+            const parteDecimal = (quantidade % 1).toFixed(1);
+            if (parteDecimal === '0.8') {
+              tipo = 'pacote_ponto_8gb';
+              isPacotePonto8 = true;
+              isDiamante = false;
+            }
+          }
+          // Detectar pacote DIAMANTE (pelos critérios definidos)
+          else if (linha.includes('💎') ||
+              linhaLower.includes('diamante') ||
+              (linhaLower.includes('chamadas') && linhaLower.includes('sms') && linhaLower.includes('ilimitad'))) {
+            tipo = 'diamante';
+            isDiamante = true;
+          }
+          // Detectar pacote 2.8GB fixo (critério: 📦 emoji ou "2.8" ou "2.8GB")
+          else if (linha.includes('📦') ||
+                   linhaLower.includes('2.8gb') ||
+                   linhaLower.includes('2.8 gb') ||
+                   (linhaLower.includes('2.8') && (linhaLower.includes('gb') || linhaLower.includes('giga')))) {
+            tipo = 'pacote_2_8gb';
+            isDiamante = false;
+          }
+          else if (linhaLower.includes('mensal') || linhaLower.includes('30 dias')) {
             tipo = 'mensal';
           } else if (linhaLower.includes('semanal') || linhaLower.includes('7 dias')) {
             tipo = 'semanal';
-          } else if (linhaLower.includes('diamante')) {
-            tipo = 'diamante';
           } else if (linha.includes('💫')) {
             tipo = 'saldo';
           }
           
           // console.log(`     ✅ Processado: ${descricao} = ${preco}MT (${quantidadeMB}MB, ${tipo})`);
-          
+
           precos.push({
             quantidade: quantidadeMB,
             preco: preco,
             descricao: descricao,
             tipo: tipo,
+            isDiamante: isDiamante,
+            isPacotePonto8: isPacotePonto8,
+            gbTotal: temGB ? quantidade : null,
             original: linha.trim()
           });
         }
@@ -820,20 +968,20 @@ Se não conseguires extrair os dados:
   // === SEPARAR COMPROVANTE E NÚMEROS (CORRIGIDO) ===
   separarComprovanteENumeros(mensagem, ehLegenda = false) {
     // console.log(`   🔍 Separando comprovante e números ${ehLegenda ? '(LEGENDA)' : '(TEXTO)'}...`);
-    
+
     if (!mensagem || typeof mensagem !== 'string') {
       console.log(`   ❌ Mensagem inválida para separação`);
       return { textoComprovante: '', numeros: [] };
     }
-    
+
     // Usar função específica para legendas
-    const numeros = ehLegenda ? 
-      this.extrairNumerosDeLegenda(mensagem) : 
+    const numeros = ehLegenda ?
+      this.extrairNumerosDeLegenda(mensagem) :
       this.extrairTodosNumeros(mensagem);
-    
+
     // Criar texto do comprovante removendo números e contexto
     let textoComprovante = mensagem;
-    
+
     for (const numero of numeros) {
       // Remover o número e possível contexto ao redor
       const padroes = [
@@ -848,18 +996,18 @@ Se não conseguires extrair os dados:
         new RegExp(`\\s*${numero}\\s*`, 'gi'), // Número no final
         new RegExp(`\\s+${numero}\\s*`, 'gi') // Número com espaços
       ];
-      
+
       for (const padrao of padroes) {
         textoComprovante = textoComprovante.replace(padrao, ' ');
       }
     }
-    
+
     // Limpar espaços extras
     textoComprovante = textoComprovante.replace(/\s+/g, ' ').trim();
-    
+
     console.log(`   📄 Texto do comprovante processado`);
     console.log(`   📱 Números extraídos: ${numeros.length}`);
-    
+
     return {
       textoComprovante: textoComprovante,
       numeros: numeros
@@ -879,8 +1027,49 @@ Se não conseguires extrair os dados:
       }
       
       const valorNumerico = parseFloat(valorPago);
-      
-      // Verificar se o valor é exatamente um pacote
+
+      // === VERIFICAR SE É PACOTE ESPECIAL ANTES DE TUDO ===
+
+      // 1. Verificar se é Pacote .8GB (12.8, 22.8, etc.) - PRIORITÁRIO
+      const pacotePonto8 = precos.find(p => p.preco === valorNumerico && p.isPacotePonto8 === true);
+      if (pacotePonto8) {
+        console.log(`   📦 PACOTE .8GB DETECTADO: ${pacotePonto8.descricao} (${valorNumerico}MT)`);
+        console.log(`   ✂️ Divisão especial: ${pacotePonto8.gbTotal - 2.8}GB comuns + 2.8GB especial`);
+        return {
+          deveDividir: false,
+          isPacotePonto8: true,
+          pacoteDiamante: pacotePonto8,
+          motivo: `Pacote .8GB: ${pacotePonto8.descricao}`
+        };
+      }
+
+      // 2. Verificar se é Pacote Diamante
+      const pacoteDiamante = precos.find(p => p.preco === valorNumerico && p.isDiamante === true);
+      if (pacoteDiamante) {
+        console.log(`   💎 DIAMANTE DETECTADO: ${pacoteDiamante.descricao} (${valorNumerico}MT)`);
+        console.log(`   🚫 Divisão automática BLOQUEADA para pacote diamante`);
+        return {
+          deveDividir: false,
+          isDiamante: true,
+          pacoteDiamante: pacoteDiamante,
+          motivo: `Pacote Diamante: ${pacoteDiamante.descricao}`
+        };
+      }
+
+      // 3. Verificar se é Pacote 2.8GB fixo ou outro especial
+      const pacoteEspecial = precos.find(p => p.preco === valorNumerico && p.tipo === 'pacote_2_8gb');
+      if (pacoteEspecial) {
+        console.log(`   📦 PACOTE ESPECIAL 2.8GB DETECTADO: ${pacoteEspecial.descricao} (${valorNumerico}MT)`);
+        console.log(`   🚫 Divisão automática BLOQUEADA para pacote 2.8GB`);
+        return {
+          deveDividir: false,
+          isDiamante: true, // Usar flag isDiamante para indicar pacote especial
+          pacoteDiamante: pacoteEspecial, // Reutilizar estrutura existente
+          motivo: `Pacote Especial 2.8GB: ${pacoteEspecial.descricao}`
+        };
+      }
+
+      // 4. Verificar se o valor é exatamente um pacote comum
       const pacoteExato = precos.find(p => p.preco === valorNumerico);
       if (pacoteExato) {
         console.log(`   ⚡ Valor exato para: ${pacoteExato.descricao}`);
@@ -1208,39 +1397,39 @@ Se não conseguires extrair os dados:
       const pedidosEspecificos = this.analisarPedidosEspecificos(mensagem, configGrupo);
       if (pedidosEspecificos) {
         console.log(`   🎯 PEDIDOS ESPECÍFICOS DETECTADOS!`);
-        
+
         // Verificar se há comprovante na mensagem ou no histórico
         const { textoComprovante } = this.separarComprovanteENumeros(mensagem);
         let comprovante = null;
-        
+
         if (textoComprovante && textoComprovante.length > 10) {
           comprovante = await this.analisarComprovante(textoComprovante);
         }
-        
+
         // Se não encontrou comprovante na mensagem, buscar no histórico
         if (!comprovante) {
           comprovante = await this.buscarComprovanteRecenteNoHistorico(remetente, timestamp);
         }
-        
+
         if (comprovante) {
           const valorPago = parseFloat(comprovante.valor);
           const valorCalculado = pedidosEspecificos.valorTotal;
-          
+
           console.log(`   💰 Valor pago: ${valorPago}MT`);
           console.log(`   🧮 Valor calculado: ${valorCalculado}MT`);
-          
+
           // Verificar se valores batem (tolerância de ±5MT)
           if (Math.abs(valorPago - valorCalculado) <= 5) {
             console.log(`   ✅ VALORES COMPATÍVEIS! Processando pedidos específicos...`);
-            
-            const resultados = pedidosEspecificos.pedidos.map(pedido => 
+
+            const resultados = pedidosEspecificos.pedidos.map(pedido =>
               `${comprovante.referencia}|${pedido.preco}|${pedido.numero}`
             );
-            
+
             console.log(`   ✅ PEDIDOS ESPECÍFICOS PROCESSADOS: ${resultados.join(' + ')}`);
-            
-            return { 
-              sucesso: true, 
+
+            return {
+              sucesso: true,
               dadosCompletos: resultados.join('\n'),
               tipo: 'pedidos_especificos_processados',
               numeros: pedidosEspecificos.numeros,
@@ -1250,7 +1439,7 @@ Se não conseguires extrair os dados:
             };
           } else {
             console.log(`   ❌ VALORES INCOMPATÍVEIS! Diferença: ${Math.abs(valorPago - valorCalculado)}MT`);
-            
+
             return {
               sucesso: false,
               tipo: 'valores_incompativeis',
@@ -1263,22 +1452,22 @@ Se não conseguires extrair os dados:
         }
       }
     }
-    
+
     // MELHORAR DETECÇÃO: Verificar se é uma mensagem que contém apenas números
     const mensagemLimpa = mensagem.trim();
     const apenasNumeroRegex = /^8[0-9]{8}$/; // Exatamente um número de 9 dígitos
     const multiplosNumerosRegex = /^(8[0-9]{8}[\s,]*)+$/; // Múltiplos números separados por espaço ou vírgula
-    
+
     console.log(`   🔍 Verificando se é apenas número(s)...`);
     // console.log(`   📝 Mensagem limpa: "${mensagemLimpa}"`);
-    
+
     if (apenasNumeroRegex.test(mensagemLimpa) || multiplosNumerosRegex.test(mensagemLimpa)) {
       console.log(`   📱 DETECTADO: Mensagem contém apenas número(s)!`);
-      
+
       // Extrair números da mensagem
       const numerosDetectados = mensagemLimpa.match(/8[0-9]{8}/g) || [];
       console.log(`   📱 Números detectados: ${numerosDetectados.length}`);
-      
+
       if (numerosDetectados.length > 0) {
         return await this.processarNumeros(numerosDetectados, remetente, timestamp, mensagem, configGrupo);
       }
@@ -1302,6 +1491,39 @@ Se não conseguires extrair os dados:
       // Processar imediatamente como pedido completo
       if (configGrupo && parseFloat(comprovante.valor) >= 32) {
         const analiseAutomatica = await this.analisarDivisaoAutomatica(comprovante.valor, configGrupo);
+
+        // === VERIFICAR SE É PACOTE .8GB ===
+        if (analiseAutomatica.isPacotePonto8 && analiseAutomatica.pacoteDiamante) {
+          console.log(`   📦 Retornando pacote .8GB detectado automaticamente`);
+          return {
+            sucesso: true,
+            tipo: 'comprovante_ponto8_detectado',
+            referencia: comprovante.referencia,
+            valor: comprovante.valor,
+            valorComprovante: comprovante.valor,
+            megas: analiseAutomatica.pacoteDiamante.quantidade,
+            numero: numeros[0],
+            pacoteDiamante: analiseAutomatica.pacoteDiamante,
+            mensagem: `📦 Pacote .8GB detectado: ${analiseAutomatica.pacoteDiamante.descricao}`
+          };
+        }
+
+        // === VERIFICAR SE É PACOTE DIAMANTE ===
+        if (analiseAutomatica.isDiamante && analiseAutomatica.pacoteDiamante) {
+          console.log(`   💎 Retornando pacote diamante detectado automaticamente`);
+          return {
+            sucesso: true,
+            tipo: 'comprovante_diamante_detectado',
+            referencia: comprovante.referencia,
+            valor: comprovante.valor,
+            valorComprovante: comprovante.valor,
+            megas: analiseAutomatica.pacoteDiamante.quantidade,
+            numero: numeros[0],
+            pacoteDiamante: analiseAutomatica.pacoteDiamante,
+            mensagem: `💎 Pacote Diamante detectado: ${analiseAutomatica.pacoteDiamante.descricao}`
+          };
+        }
+
         if (analiseAutomatica.deveDividir) {
           const comprovanteComDivisao = {
             referencia: comprovante.referencia,
@@ -1311,39 +1533,103 @@ Se não conseguires extrair os dados:
             tipo: 'divisao_automatica',
             analiseAutomatica: analiseAutomatica
           };
-          
+
           return await this.processarNumerosComDivisaoAutomatica(numeros, remetente, comprovanteComDivisao);
         }
       }
       
       // Processamento normal (sem divisão automática)
+      // === VERIFICAR SE É PACOTE DIAMANTE ANTES DE CALCULAR MEGAS ===
+      if (configGrupo) {
+        const precos = this.extrairPrecosTabela(configGrupo.tabela);
+        const pacoteDiamante = precos.find(p => p.preco === comprovante.valor && p.isDiamante === true);
+
+        if (pacoteDiamante) {
+          console.log(`   💎 DIAMANTE DETECTADO NA IA: ${pacoteDiamante.descricao} (${comprovante.valor}MT)`);
+
+          // Retornar indicação de pacote diamante para o index.js processar
+          return {
+            sucesso: true,
+            tipo: 'comprovante_diamante_detectado',
+            referencia: comprovante.referencia,
+            valor: comprovante.valor,
+            valorComprovante: comprovante.valor,
+            megas: pacoteDiamante.quantidade, // MB do pacote
+            numero: numeros[0], // Primeiro número
+            pacoteDiamante: pacoteDiamante,
+            mensagem: `💎 Pacote Diamante detectado: ${pacoteDiamante.descricao}`
+          };
+        }
+      }
+
+      // Calcular megas totais baseado no valor e tabela do grupo
+      const megasTotais = configGrupo ? this.calcularMegasPorValor(comprovante.valor, configGrupo.tabela) : comprovante.valor;
+      const LIMITE_BLOCO = 10240; // 10GB
+
+      console.log(`   📊 Megas totais (imediato): ${megasTotais}MB para ${numeros.length} número(s)`);
+
+      // === VERIFICAR SE PRECISA DIVIDIR EM BLOCOS DE 10GB ===
+      if (megasTotais > LIMITE_BLOCO || (numeros.length > 1 && (megasTotais / numeros.length) > LIMITE_BLOCO)) {
+        console.log(`   🔧 Transferência > 10GB - DIVIDINDO EM BLOCOS (fluxo imediato)`);
+
+        const tabelaPrecos = configGrupo ? configGrupo.tabela : null;
+        const divisao = this.dividirEmBlocos(comprovante.referencia, megasTotais, numeros, tabelaPrecos);
+
+        if (!divisao.sucesso) {
+          console.error(`   ❌ Erro na divisão em blocos:`, divisao.erro);
+          return {
+            sucesso: false,
+            tipo: 'erro_divisao',
+            erro: divisao.erro
+          };
+        }
+
+        // Criar dadosCompletos a partir dos blocos
+        const dadosCompletos = divisao.pedidos.map(p =>
+          `${p.referencia}|${p.megas}|${p.numero}`
+        ).join('\n');
+
+        console.log(`   ✅ DIVISÃO CONCLUÍDA (imediato): ${divisao.totalBlocos} blocos criados`);
+
+        return {
+          sucesso: true,
+          dadosCompletos: dadosCompletos,
+          tipo: 'divisao_blocos',
+          numeros: numeros,
+          totalBlocos: divisao.totalBlocos,
+          megasPorNumero: divisao.megasPorNumero,
+          valorTotal: divisao.valorTotal,
+          divisao: divisao,
+          valorComprovante: comprovante.valor,
+          origem: 'comprovante_numero_imediato_com_divisao'
+        };
+      }
+
+      // === PROCESSAMENTO NORMAL (SEM DIVISÃO) ===
       if (numeros.length === 1) {
-        // Calcular megas baseado no valor e tabela do grupo
-        const megas = configGrupo ? this.calcularMegasPorValor(comprovante.valor, configGrupo.tabela) : comprovante.valor;
-        // DEBUG removido para performance
-        const resultado = `${comprovante.referencia}|${megas}|${numeros[0]}`;
-        console.log(`   ✅ PEDIDO COMPLETO IMEDIATO: ${resultado} (${comprovante.valor}MT → ${megas}MB)`);
-        return { 
-          sucesso: true, 
+        const resultado = `${comprovante.referencia}|${megasTotais}|${numeros[0]}`;
+        console.log(`   ✅ PEDIDO COMPLETO IMEDIATO: ${resultado} (${comprovante.valor}MT → ${megasTotais}MB)`);
+        return {
+          sucesso: true,
           dadosCompletos: resultado,
           tipo: 'numero_processado',
           numero: numeros[0],
           valorComprovante: comprovante.valor,
           valorPago: comprovante.valor,
-          megas: megas
+          megas: megasTotais
         };
       } else {
         // Múltiplos números - dividir valor igualmente
         const valorTotal = parseFloat(comprovante.valor);
         const valorPorNumero = (valorTotal / numeros.length).toFixed(2);
-        
-        const resultados = numeros.map(numero => 
+
+        const resultados = numeros.map(numero =>
           `${comprovante.referencia}|${valorPorNumero}|${numero}`
         );
-        
+
         console.log(`   ✅ PEDIDOS MÚLTIPLOS IMEDIATOS: ${resultados.join(' + ')}`);
-        return { 
-          sucesso: true, 
+        return {
+          sucesso: true,
           dadosCompletos: resultados.join('\n'),
           tipo: 'numeros_multiplos_processados',
           numeros: numeros,
@@ -1449,7 +1735,7 @@ Procura por:
 2. Valor transferido (em MT - Meticais)
 
 ATENÇÃO: 
-- Procura por palavras como "Confirmado", "ID da transacao", "Transferiste"
+- Procura por palavras como "Confirmado", "ID da transacao", "Transferiste", "Recebeste"
 - O valor pode estar em formato "100.00MT", "100MT", "100,00MT"
 - A referência é geralmente um código alfanumérico
 
@@ -1555,39 +1841,82 @@ Se não conseguires ler a imagem ou extrair os dados:
         return await this.processarNumerosComDivisaoAutomatica(numeros, remetente, comprovante);
       }
       
-      if (numeros.length === 1) {
-        // Calcular megas baseado no valor e tabela do grupo
-        const megas = configGrupo ? this.calcularMegasPorValor(comprovante.valor, configGrupo.tabela) : comprovante.valor;
-        const resultado = `${comprovante.referencia}|${megas}|${numeros[0]}`;
+      // Calcular megas totais baseado no valor e tabela do grupo
+      const megasTotais = configGrupo ? this.calcularMegasPorValor(comprovante.valor, configGrupo.tabela) : comprovante.valor;
+      const LIMITE_BLOCO = 10240; // 10GB
+
+      console.log(`   📊 Megas totais: ${megasTotais}MB para ${numeros.length} número(s)`);
+
+      // === VERIFICAR SE PRECISA DIVIDIR EM BLOCOS DE 10GB ===
+      if (megasTotais > LIMITE_BLOCO || (numeros.length > 1 && (megasTotais / numeros.length) > LIMITE_BLOCO)) {
+        console.log(`   🔧 Transferência > 10GB - DIVIDINDO EM BLOCOS`);
+
+        const tabelaPrecos = configGrupo ? configGrupo.tabela : null;
+        const divisao = this.dividirEmBlocos(comprovante.referencia, megasTotais, numeros, tabelaPrecos);
+
+        if (!divisao.sucesso) {
+          console.error(`   ❌ Erro na divisão em blocos:`, divisao.erro);
+          return {
+            sucesso: false,
+            tipo: 'erro_divisao',
+            erro: divisao.erro
+          };
+        }
+
+        // Criar dadosCompletos a partir dos blocos
+        const dadosCompletos = divisao.pedidos.map(p =>
+          `${p.referencia}|${p.megas}|${p.numero}`
+        ).join('\n');
+
         delete this.comprovantesEmAberto[remetente];
-        
-        console.log(`   ✅ PEDIDO COMPLETO: ${resultado} (${comprovante.valor}MT → ${megas}MB)`);
-        return { 
-          sucesso: true, 
+
+        console.log(`   ✅ DIVISÃO CONCLUÍDA: ${divisao.totalBlocos} blocos criados`);
+
+        return {
+          sucesso: true,
+          dadosCompletos: dadosCompletos,
+          tipo: 'divisao_blocos',
+          numeros: numeros,
+          totalBlocos: divisao.totalBlocos,
+          megasPorNumero: divisao.megasPorNumero,
+          valorTotal: divisao.valorTotal,
+          divisao: divisao,
+          origem: 'comprovante_em_aberto_com_divisao'
+        };
+      }
+
+      // === PROCESSAMENTO NORMAL (SEM DIVISÃO) ===
+      if (numeros.length === 1) {
+        const resultado = `${comprovante.referencia}|${megasTotais}|${numeros[0]}`;
+        delete this.comprovantesEmAberto[remetente];
+
+        console.log(`   ✅ PEDIDO COMPLETO: ${resultado} (${comprovante.valor}MT → ${megasTotais}MB)`);
+        return {
+          sucesso: true,
           dadosCompletos: resultado,
           tipo: 'numero_processado',
           numero: numeros[0],
           valorComprovante: comprovante.valor,
           origem: 'comprovante_em_aberto',
           valorPago: comprovante.valor,
-          megas: megas
+          megas: megasTotais
         };
-        
+
       } else {
         const valorTotal = parseFloat(comprovante.valor);
         const valorPorNumero = (valorTotal / numeros.length).toFixed(2);
-        
+
         console.log(`   🔄 Dividindo ${valorTotal}MT por ${numeros.length} números = ${valorPorNumero}MT cada`);
-        
-        const resultados = numeros.map(numero => 
+
+        const resultados = numeros.map(numero =>
           `${comprovante.referencia}|${valorPorNumero}|${numero}`
         );
-        
+
         delete this.comprovantesEmAberto[remetente];
-        
+
         console.log(`   ✅ PEDIDOS MÚLTIPLOS: ${resultados.join(' + ')}`);
-        return { 
-          sucesso: true, 
+        return {
+          sucesso: true,
           dadosCompletos: resultados.join('\n'),
           tipo: 'numeros_multiplos_processados',
           numeros: numeros,
@@ -1745,9 +2074,10 @@ Se não conseguires ler a imagem ou extrair os dados:
     }
     
     const temConfirmado = /^confirmado/i.test(mensagemLimpa);
-    const temID = /^id\s/i.test(mensagemLimpa);
-    
-    if (!temConfirmado && !temID) {
+    const temID = /^id\s|^id\sda\stransacao/i.test(mensagemLimpa);
+    const temRecebeste = /recebeste\s+\d+\.?\d*\s*mt/i.test(mensagemLimpa);
+
+    if (!temConfirmado && !temID && !temRecebeste) {
       return null;
     }
 
@@ -1758,8 +2088,12 @@ Analisa esta mensagem de comprovante de pagamento M-Pesa ou E-Mola de Moçambiqu
 
 Extrai a referência da transação e o valor transferido.
 Procura especialmente por padrões como:
-- "Confirmado [REFERENCIA]" 
+- "Confirmado [REFERENCIA]"
+- "ID da transacao: [REFERENCIA]"
 - "Transferiste [VALOR]MT"
+- "Recebeste [VALOR]MT"
+
+IMPORTANTE: O valor é o que foi transferido ou recebido, NÃO o saldo da conta!
 
 Responde APENAS no formato JSON:
 {
@@ -1831,41 +2165,44 @@ Se não conseguires extrair, responde:
     for (let msg of mensagensRecentes.reverse()) {
       if (msg.tipo === 'texto') {
         console.log(`   🔍 Verificando mensagem: "${msg.mensagem.substring(0, 50)}..."`);
-        
+
         const comprovante = await this.analisarComprovante(msg.mensagem);
         if (comprovante) {
           const valorTotal = parseFloat(comprovante.valor);
           const tempoDecorrido = Math.floor((timestamp - msg.timestamp) / 60000);
-          
+
           console.log(`   ✅ Comprovante encontrado: ${comprovante.referencia} - ${comprovante.valor}MT (${tempoDecorrido} min atrás)`);
-          
+
           if (numeros.length === 1) {
             // Calcular megas baseado no valor e tabela do grupo
             const megas = configGrupo ? this.calcularMegasPorValor(comprovante.valor, configGrupo.tabela) : comprovante.valor;
+
             const resultado = `${comprovante.referencia}|${megas}|${numeros[0]}`;
             console.log(`   ✅ ENCONTRADO NO HISTÓRICO: ${resultado} (${comprovante.valor}MT → ${megas}MB)`);
-            return { 
-              sucesso: true, 
+            return {
+              sucesso: true,
               dadosCompletos: resultado,
               tipo: 'numero_processado',
               numero: numeros[0],
               tempoDecorrido: tempoDecorrido,
               valorPago: comprovante.valor,
+              valorComprovante: comprovante.valor, // === CORREÇÃO: Adicionar valorComprovante ===
               megas: megas
             };
           } else {
             const valorPorNumero = (valorTotal / numeros.length).toFixed(2);
-            const resultados = numeros.map(numero => 
+            const resultados = numeros.map(numero =>
               `${comprovante.referencia}|${valorPorNumero}|${numero}`
             );
-            
+
             console.log(`   ✅ ENCONTRADO NO HISTÓRICO (MÚLTIPLO): ${resultados.join(' + ')}`);
-            return { 
-              sucesso: true, 
+            return {
+              sucesso: true,
               dadosCompletos: resultados.join('\n'),
               tipo: 'numeros_multiplos_processados',
               numeros: numeros,
               valorCada: valorPorNumero,
+              valorComprovante: comprovante.valor, // === CORREÇÃO: Adicionar valorComprovante ===
               tempoDecorrido: tempoDecorrido
             };
           }
