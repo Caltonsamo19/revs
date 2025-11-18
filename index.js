@@ -3901,7 +3901,8 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
                         numero,
                         grupoId,
                         tipoPacoteDetectado,
-                        new Date() // Horário de ativação = agora
+                        valor, // Megas do pacote inicial (ex: 2000MB)
+                        valorMTEncontrado // Valor em MT do pacote inicial (ex: 44MT)
                     );
 
                     if (resultadoPacote.sucesso) {
@@ -5099,7 +5100,7 @@ async function processMessage(message) {
                         const partes = message.body.trim().split(' ');
 
                         if (partes.length < 4) {
-                            await message.reply(`❌ *USO INCORRETO*\n\n✅ **Formato correto:**\n*.pacote DIAS REF NUMERO*\n\n📝 **Exemplos:**\n• *.pacote 3 ABC123 845123456*\n• *.pacote 30 XYZ789 847654321*\n\n📦 **Tipos disponíveis:**\n• 3 - Pacote de 3 dias (300MB)\n• 5 - Pacote de 5 dias (500MB)\n• 15 - Pacote de 15 dias (1.5GB)\n• 30 - Pacote de 30 dias (3GB)`);
+                            await message.reply(`❌ *USO INCORRETO*\n\n✅ **Formato correto:**\n*.pacote DIAS REF NUMERO*\n\n📝 **Exemplos:**\n• *.pacote 3 ABC123 845123456*\n• *.pacote 5 XYZ789 847654321*\n• *.pacote 15 DEF456 841234567*\n\n📦 **Dias disponíveis:** 3, 5, 15, 30\n\n⚠️ **IMPORTANTE:**\nEste comando serve APENAS para agendar renovações automáticas.\nVocê deve ter enviado o pacote principal MANUALMENTE antes de usar este comando.\n\n🔄 O sistema agendará renovações diárias de 100MB durante o período especificado.`);
                             return;
                         }
 
@@ -5108,7 +5109,12 @@ async function processMessage(message) {
 
                         console.log(`📦 COMANDO PACOTE: Dias=${diasPacote}, Ref=${referencia}, Numero=${numero}`);
 
-                        const resultado = await sistemaPacotes.processarComprovante(referencia, numero, grupoId, diasPacote);
+                        // Modo manual: não precisa de megas/valor inicial (apenas agenda renovações)
+                        // Usar valores simbólicos (não serão enviados, apenas para registro)
+                        const megasIniciais = 0; // Não usado em modo manual
+                        const valorMTInicial = 0; // Não usado em modo manual
+
+                        const resultado = await sistemaPacotes.processarComprovante(referencia, numero, grupoId, diasPacote, megasIniciais, valorMTInicial, true); // true = modo manual
 
                         if (resultado.sucesso) {
                             await message.reply(resultado.mensagem);
