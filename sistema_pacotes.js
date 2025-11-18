@@ -91,37 +91,38 @@ class SistemaPacotes {
     }
     
     // === CRIAR PACOTE (SEM VERIFICAÇÃO DE PAGAMENTO) ===
-    async processarComprovante(referencia, numero, grupoId, tipoPacote) {
+    async processarComprovante(referencia, numero, grupoId, tipoPacote, megasIniciais, valorMTInicial) {
         try {
             console.log(`📦 Processando pacote: ${referencia}`);
-            
+            console.log(`   📊 Pacote inicial: ${megasIniciais}MB por ${valorMTInicial}MT`);
+
             // 1. Verificar se a referência já foi usada (evitar duplicatas)
             const referenciaExiste = await this.verificarReferenciaExistente(referencia);
             if (referenciaExiste) {
                 console.log(`❌ PACOTES: Referência ${referencia} já foi utilizada`);
                 return { sucesso: false, erro: 'Esta referência já foi utilizada para criar um pacote' };
             }
-            
+
             // 2. Verificar se é um tipo de pacote válido
             if (!this.TIPOS_PACOTES[tipoPacote]) {
                 console.log(`❌ PACOTES: Tipo de pacote inválido: ${tipoPacote}`);
                 return { sucesso: false, erro: 'Tipo de pacote inválido' };
             }
-            
+
             // 3. Calcular datas
             const agora = new Date();
             const diasPacote = this.TIPOS_PACOTES[tipoPacote].dias;
             const dataExpiracao = new Date(agora.getTime() + (diasPacote * 24 * 60 * 60 * 1000));
-            
-            // 4. Criar primeiro PEDIDO e PAGAMENTO usando referência + D1
-            const primeiraRef = `${referencia}D1`;
-            const valor100MB = this.calcularValor100MB(grupoId);
-            
-            // Criar PEDIDO na planilha de pedidos
-            await this.criarPedidoPacote(primeiraRef, 100, numero, grupoId, agora);
-            
-            // Criar PAGAMENTO na planilha de pagamentos (mesma referência)
-            await this.criarPagamentoPacote(primeiraRef, valor100MB, numero, grupoId, agora);
+
+            // 4. Criar primeiro PEDIDO e PAGAMENTO usando PACOTE ORIGINAL (não D1!)
+            // IMPORTANTE: Usa os megas e valor REAIS do pacote comprado
+            console.log(`📦 Criando pacote inicial: ${referencia} (${megasIniciais}MB - ${valorMTInicial}MT)`);
+
+            // Criar PEDIDO na planilha de pedidos (PACOTE ORIGINAL)
+            await this.criarPedidoPacote(referencia, megasIniciais, numero, grupoId, agora);
+
+            // Criar PAGAMENTO na planilha de pagamentos (PACOTE ORIGINAL)
+            await this.criarPagamentoPacote(referencia, valorMTInicial, numero, grupoId, agora);
             
             // 5. Registrar cliente no sistema
             const clienteId = `${numero}_${referencia}`;
@@ -131,7 +132,9 @@ class SistemaPacotes {
                 grupoId: grupoId,
                 tipoPacote: tipoPacote,
                 diasTotal: diasPacote,
-                diasRestantes: diasPacote - 1,
+                diasRestantes: diasPacote, // CORRIGIDO: Começa com dias totais (renovações ainda não iniciaram)
+                megasIniciais: megasIniciais,
+                valorMTInicial: valorMTInicial,
                 dataInicio: agora.toISOString(),
                 dataExpiracao: dataExpiracao.toISOString(),
                 horaEnvioOriginal: agora.toISOString(),
@@ -140,12 +143,12 @@ class SistemaPacotes {
                 status: 'ativo',
                 ultimaRenovacao: agora.toISOString()
             };
-            
+
             // 6. Salvar dados
             await this.salvarDados();
-            
+
             console.log(`✅ Cliente ativado com ${this.TIPOS_PACOTES[tipoPacote].nome}`);
-            
+
             return {
                 sucesso: true,
                 cliente: this.clientesAtivos[clienteId],
@@ -153,10 +156,10 @@ class SistemaPacotes {
                          `📱 **Número:** ${numero}\n` +
                          `📋 **Referência:** ${referencia}\n` +
                          `📅 **Duração:** ${diasPacote} dias\n` +
-                         `⚡ **Primeira transferência:** ${primeiraRef} (100MB criada)\n` +
-                         `🔄 **Renovações automáticas:** ${diasPacote - 1}x (100MB cada, 2h antes do horário anterior)\n` +
+                         `📦 **Pacote inicial:** ${megasIniciais}MB (${valorMTInicial}MT) - JÁ ENVIADO\n` +
+                         `🔄 **Renovações automáticas:** ${diasPacote}x de 100MB (diárias, 2h antes do horário anterior)\n` +
                          `📅 **Expira em:** ${dataExpiracao.toLocaleDateString('pt-BR')}\n\n` +
-                         `💡 *O cliente pode verificar a validade com: .validade ${numero}*`
+                         `💡 *Verifique a validade com: .validade ${numero}*`
             };
             
         } catch (error) {

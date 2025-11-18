@@ -3916,7 +3916,8 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
                         numero,
                         grupoId,
                         tipoPacoteDetectado,
-                        new Date() // Horário de ativação = agora
+                        valor, // Megas do pacote inicial (ex: 2000MB)
+                        valorMTEncontrado // Valor em MT do pacote inicial (ex: 44MT)
                     );
 
                     if (resultadoPacote.sucesso) {
@@ -5118,12 +5119,38 @@ async function processMessage(message) {
                             return;
                         }
 
-                        const [, diasPacote, referencia, numero] = partes;
+                        const [, diasPacote, referencia, numero, megasParam, valorMTParam] = partes;
                         const grupoId = message.from;
 
                         console.log(`📦 COMANDO PACOTE: Dias=${diasPacote}, Ref=${referencia}, Numero=${numero}`);
 
-                        const resultado = await sistemaPacotes.processarComprovante(referencia, numero, grupoId, diasPacote);
+                        // Se megas e valorMT não foram fornecidos, usar valores padrão baseados nos dias
+                        let megasIniciais = megasParam ? parseInt(megasParam) : null;
+                        let valorMTInicial = valorMTParam ? parseFloat(valorMTParam) : null;
+
+                        // Se não fornecidos, tentar buscar da tabela do grupo
+                        if (!megasIniciais || !valorMTInicial) {
+                            const configGrupo = CONFIGURACAO_GRUPOS[grupoId];
+                            if (configGrupo) {
+                                const pacotesRenovaveis = sistemaPacotes.extrairPacotesRenovaveis(configGrupo.tabela);
+                                const pacotesDoDia = pacotesRenovaveis[diasPacote];
+
+                                if (pacotesDoDia && pacotesDoDia.length > 0) {
+                                    // Usar o primeiro pacote encontrado como padrão
+                                    megasIniciais = pacotesDoDia[0].mb;
+                                    valorMTInicial = pacotesDoDia[0].valor;
+                                    console.log(`📦 Usando valores da tabela: ${megasIniciais}MB - ${valorMTInicial}MT`);
+                                }
+                            }
+                        }
+
+                        // Se ainda não definidos, usar valores genéricos
+                        if (!megasIniciais || !valorMTInicial) {
+                            await message.reply(`❌ *ERRO*\n\nNão foi possível determinar os valores do pacote.\n\n✅ **Use:**\n*.pacote DIAS REF NUMERO MEGAS VALORMT*\n\n📝 **Exemplo:**\n*.pacote 3 ABC123 845123456 2000 44*`);
+                            return;
+                        }
+
+                        const resultado = await sistemaPacotes.processarComprovante(referencia, numero, grupoId, diasPacote, megasIniciais, valorMTInicial);
 
                         if (resultado.sucesso) {
                             await message.reply(resultado.mensagem);
