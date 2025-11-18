@@ -276,9 +276,9 @@ class SistemaPacotes {
             }
 
             if (!isSuccess) {
-                // Se for erro de duplicata com status PROCESSADO, apenas loga e continua
-                if (response.data && response.data.duplicado && response.data.status_existente === 'PROCESSADO') {
-                    console.log(`⚠️ PACOTES: Pedido ${novaReferencia} já existe com status PROCESSADO - pulando criação`);
+                // Se for erro de duplicata (qualquer status), apenas loga e continua
+                if (response.data && response.data.duplicado) {
+                    console.log(`⚠️ PACOTES: Pedido ${novaReferencia} já existe (Status: ${response.data.status_existente}) - pulando criação`);
                     return; // Retorna sem erro para não quebrar o fluxo
                 }
                 throw new Error(`Erro ao salvar pedido pacote: ${JSON.stringify(response.data)}`);
