@@ -1542,7 +1542,8 @@ Se não conseguires extrair os dados:
       // === VERIFICAR SE É PACOTE DIAMANTE ANTES DE CALCULAR MEGAS ===
       if (configGrupo) {
         const precos = this.extrairPrecosTabela(configGrupo.tabela);
-        const pacoteDiamante = precos.find(p => p.preco === comprovante.valor && p.isDiamante === true);
+        const valorNumerico = parseFloat(comprovante.valor);
+        const pacoteDiamante = precos.find(p => p.preco === valorNumerico && p.isDiamante === true);
 
         if (pacoteDiamante) {
           console.log(`   💎 DIAMANTE DETECTADO NA IA: ${pacoteDiamante.descricao} (${comprovante.valor}MT)`);
@@ -1844,7 +1845,8 @@ Se não conseguires ler a imagem ou extrair os dados:
       // === VERIFICAR SE É PACOTE DIAMANTE ANTES DE CALCULAR MEGAS ===
       if (configGrupo && numeros.length === 1) {
         const precos = this.extrairPrecosTabela(configGrupo.tabela);
-        const pacoteDiamante = precos.find(p => p.preco === comprovante.valor && p.isDiamante === true);
+        const valorNumerico = parseFloat(comprovante.valor);
+        const pacoteDiamante = precos.find(p => p.preco === valorNumerico && p.isDiamante === true);
 
         if (pacoteDiamante) {
           console.log(`   💎 DIAMANTE DETECTADO (comprovante em aberto): ${pacoteDiamante.descricao} (${comprovante.valor}MT)`);
