@@ -112,7 +112,8 @@ async function axiosComRetry(config, maxTentativas = 3) {
             const ehUltimaTentativa = tentativa === maxTentativas;
 
             if (ehTimeout && !ehUltimaTentativa) {
-                const delayMs = Math.min(1000 * Math.pow(2, tentativa - 1), 10000); // Max 10s
+                // Aumentado delay progressivo: 3s, 5s, 7s (para dar tempo do cache do Google Sheets)
+                const delayMs = Math.min(3000 + (2000 * (tentativa - 1)), 10000); // 3s, 5s, 7s
                 console.log(`⏳ Timeout na tentativa ${tentativa}/${maxTentativas}, aguardando ${delayMs}ms antes de tentar novamente...`);
                 await new Promise(resolve => setTimeout(resolve, delayMs));
                 continue;
@@ -174,6 +175,9 @@ const SistemaRelatorios = require('./sistema_relatorios');
 // === IMPORTAR SISTEMA DE BÔNUS ===
 const SistemaBonus = require('./sistema_bonus');
 
+// === IMPORTAR SISTEMA DE CONFIGURAÇÃO DE GRUPOS ===
+const SistemaConfigGrupos = require('./sistema_config_grupos');
+
 // === CONFIGURAÇÃO GOOGLE SHEETS - BOT RETALHO (SCRIPT PRÓPRIO) ===
 const GOOGLE_SHEETS_CONFIG = {
     scriptUrl: process.env.GOOGLE_SHEETS_SCRIPT_URL_RETALHO || 'https://script.google.com/macros/s/AKfycbyMilUC5bYKGXV95LR4MmyaRHzMf6WCmXeuztpN0tDpQ9_2qkgCxMipSVqYK_Q6twZG/exec',
@@ -184,13 +188,42 @@ const GOOGLE_SHEETS_CONFIG = {
     retryDelay: 2000
 };
 
+// === CONFIGURAÇÃO GOOGLE SHEETS - PACOTES ESPECIAIS ===
+const GOOGLE_SHEETS_CONFIG_DIAMANTE = {
+    scriptUrl: process.env.GOOGLE_SHEETS_SCRIPT_URL_DIAMANTE || 'https://script.google.com/macros/s/AKfycbw_wHnKiZROpl720GduLz-KvVw4pEtS8njzPvHCnqdWgYHFRIoXlUCxrNpqt7OnZsr8/exec',
+    timeout: 30000,
+    retryAttempts: 3,
+    retryDelay: 2000
+};
+
+// === MAPEAMENTO DE CÓDIGOS DE PACOTES ESPECIAIS ===
+const CODIGOS_PACOTES_ESPECIAIS = {
+    1: {
+        nome: 'Pacote Diamante',
+        descricao: 'Chamadas + SMS ilimitados + GB',
+        gbBase: 11, // GB base do pacote diamante
+        identificador: 'diamante',
+        emoji: '💎'
+    },
+    2: {
+        nome: 'Pacote 2.8GB',
+        descricao: 'Pacote fixo de 2.8GB',
+        gbFixo: 2.8, // GB fixo (não divide)
+        identificador: 'pacote_2_8gb',
+        emoji: '📦'
+    }
+    // Adicionar mais códigos conforme necessário:
+    // 3: { nome: 'Pacote X', ... },
+    // 4: { nome: 'Pacote Y', ... },
+};
+
 // === CONFIGURAÇÃO DE PAGAMENTOS (MESMA PLANILHA DO BOT ATACADO) ===
 const PAGAMENTOS_CONFIG = {
     scriptUrl: 'https://script.google.com/macros/s/AKfycbzzifHGu1JXc2etzG3vqK5Jd3ihtULKezUTQQIDJNsr6tXx3CmVmKkOlsld0x1Feo0H/exec',
     timeout: 30000
 };
 
-console.log(`📊 Google Sheets configurado`);
+console.log(`📊 Google Sheets configurado (Comum + Diamante)`);
 
 // Função helper para reply com fallback
 async function safeReply(message, client, texto) {
@@ -225,7 +258,12 @@ const client = new Client({
             '--disable-backgrounding-occluded-windows',
             '--disable-renderer-backgrounding',
             '--disable-features=TranslateUI',
-            '--disable-ipc-flooding-protection'
+            '--disable-ipc-flooding-protection',
+            '--disable-gpu',
+            '--disable-software-rasterizer',
+            '--disable-notifications',
+            '--disable-sync',
+            '--mute-audio'
         ],
         timeout: 60000
     }
@@ -239,6 +277,160 @@ const ia = new WhatsAppAI(process.env.OPENAI_API_KEY);
 let sistemaPacotes = null;
 let sistemaCompras = null;
 let sistemaBonus = null;
+let sistemaConfigGrupos = null;
+
+// === LISTA DE BOTS PARA IGNORAR ===
+// Adicione aqui nomes de bots que devem ser ignorados
+const BOTS_IGNORADOS = [
+    'safe',
+    'bot safe',
+    'safebot',
+    'safe bot',
+    'safeguard',
+    'safeguard autodata',
+    'autodata',
+    'bot atacado',
+    'bot retalho',
+    'whatsapp bot',
+    // Adicione mais nomes aqui conforme necessário
+];
+
+// Função para verificar se é bot ignorado
+function ehBotIgnorado(contact) {
+    const nomePushname = (contact.pushname || '').toLowerCase();
+    const nomeContato = (contact.name || '').toLowerCase();
+
+    return BOTS_IGNORADOS.some(botNome =>
+        nomePushname.includes(botNome.toLowerCase()) ||
+        nomeContato.includes(botNome.toLowerCase())
+    );
+}
+
+// === SISTEMA ANTI-DUPLICATAS DE COMPROVANTES ===
+// Cache de COMPROVANTES recentes para evitar processamento duplicado
+const cacheComprovantesRecentes = new Map();
+const CACHE_COMPROVANTE_TTL = 5 * 60 * 1000; // 5 minutos
+const MAX_CACHE_SIZE = 500; // Máximo de comprovantes no cache
+
+// Função para identificar se mensagem é um comprovante M-Pesa/E-Mola
+function ehComprovante(conteudo) {
+    if (!conteudo || typeof conteudo !== 'string') return false;
+
+    const conteudoLower = conteudo.toLowerCase();
+
+    // Padrões REAIS de comprovantes M-Pesa e E-Mola (PORTUGUÊS)
+    const iniciaComConfirmado = /^confirmado/i.test(conteudo);
+    const contemIdTransacao = /id\s*da\s*transac[aã]o/i.test(conteudo);
+    const contemTransferiste = /transferiste.*mt/i.test(conteudo);
+
+    // Padrões de comprovantes em INGLÊS
+    const contemTransactionId = /transaction\s*id/i.test(conteudo);
+    const contemYouTransfered = /you\s+transfer(r?ed|ed)/i.test(conteudo);
+    const contemFeeBalance = /fee.*balance/i.test(conteudo);
+
+    // É comprovante se:
+    // 1. Inicia com "Confirmado" OU
+    // 2. Contém "ID da transação" OU
+    // 3. Contém "Transferiste X.XXMT" OU
+    // 4. Contém "Transaction ID" OU
+    // 5. Contém "You transferred" OU
+    // 6. Contém "Fee" E "Balance" (padrão típico de comprovantes em inglês)
+    return iniciaComConfirmado || contemIdTransacao || contemTransferiste ||
+           contemTransactionId || contemYouTransfered || contemFeeBalance;
+}
+
+// Função para gerar hash único do comprovante
+function gerarHashComprovante(remetente, conteudo) {
+    // Normalizar conteúdo (remover espaços extras, quebras de linha, etc)
+    const conteudoNormalizado = conteudo
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .replace(/[^\w\s@.-]/gi, '')
+        .trim();
+
+    return `${remetente}_${conteudoNormalizado}`;
+}
+
+// Função para verificar se COMPROVANTE é duplicado
+function ehComprovanteDuplicado(remetente, conteudo) {
+    // PRIMEIRO: Verificar se é um comprovante
+    if (!ehComprovante(conteudo)) {
+        // NÃO é comprovante, não controlar duplicatas
+        return { duplicada: false, naoEhComprovante: true };
+    }
+
+    const hashComprovante = gerarHashComprovante(remetente, conteudo);
+    const agora = Date.now();
+
+    // Verificar se comprovante já foi processado recentemente
+    const registro = cacheComprovantesRecentes.get(hashComprovante);
+
+    if (registro && (agora - registro.timestamp < CACHE_COMPROVANTE_TTL)) {
+        const tempoDecorrido = Math.floor((agora - registro.timestamp) / 1000);
+        console.log(`⚠️ COMPROVANTE DUPLICADO: De ${remetente} já processado há ${tempoDecorrido}s`);
+        return {
+            duplicada: true,
+            tempoDecorrido: tempoDecorrido,
+            primeiroEnvio: registro.timestamp
+        };
+    }
+
+    return { duplicada: false };
+}
+
+// Função para registrar comprovante processado
+function registrarComprovanteProcessado(remetente, conteudo) {
+    // Só registrar se for comprovante
+    if (!ehComprovante(conteudo)) {
+        return; // Não cachear mensagens normais
+    }
+
+    const hashComprovante = gerarHashComprovante(remetente, conteudo);
+
+    // Adicionar ao cache
+    cacheComprovantesRecentes.set(hashComprovante, {
+        timestamp: Date.now(),
+        remetente: remetente
+    });
+
+    // Limpar cache se estiver muito grande
+    if (cacheComprovantesRecentes.size > MAX_CACHE_SIZE) {
+        limparCacheComprovantesAntigos();
+    }
+}
+
+// Função para limpar comprovantes antigos do cache
+function limparCacheComprovantesAntigos() {
+    const agora = Date.now();
+    let removidos = 0;
+
+    for (const [hash, registro] of cacheComprovantesRecentes.entries()) {
+        if (agora - registro.timestamp > CACHE_COMPROVANTE_TTL) {
+            cacheComprovantesRecentes.delete(hash);
+            removidos++;
+        }
+    }
+
+    if (removidos > 0) {
+        console.log(`🧹 Cache de comprovantes limpo: ${removidos} comprovantes antigos removidos`);
+    }
+
+    // Se ainda estiver muito grande, remover as mais antigas
+    if (cacheComprovantesRecentes.size > MAX_CACHE_SIZE) {
+        const entries = Array.from(cacheComprovantesRecentes.entries());
+        entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+
+        const paraRemover = entries.slice(0, cacheComprovantesRecentes.size - MAX_CACHE_SIZE);
+        paraRemover.forEach(([hash]) => cacheComprovantesRecentes.delete(hash));
+
+        console.log(`🧹 Cache adicional: ${paraRemover.length} comprovantes mais antigos removidos`);
+    }
+}
+
+// Limpeza automática do cache a cada 10 minutos
+setInterval(() => {
+    limparCacheComprovantesAntigos();
+}, 10 * 60 * 1000);
 
 // REMOVIDO: Sistema de encaminhamento de mensagens
 // (Movido para outro bot)
@@ -319,13 +511,39 @@ const messageQueue = new MessageQueue();
 // === CACHE DE TRANSAÇÕES SIMPLIFICADO (SEGUINDO PADRÃO BOT1) ===
 let cacheTransacoes = new Map();
 
+// === CACHE DE PACOTES DIAMANTE PENDENTES (SISTEMA PARALELO) ===
+let pacotesDiamantePendentes = {};
+// Formato: {
+//     'PP250924.1129': {
+//         referencia: 'PP250924.1129',
+//         numero: '842223344',
+//         totalGB: 24,
+//         gbDiamante: 11,
+//         gbExtras: 13,
+//         divisoes: ['PP250924.112901', 'PP250924.112902'],
+//         confirmacoesRecebidas: [],
+//         grupoId: '...',
+//         grupoNome: '...',
+//         timestamp: Date.now()
+//     }
+// }
+
 // === SISTEMA DE RETRY SILENCIOSO PARA PAGAMENTOS ===
 let pagamentosPendentes = {}; // {id: {dados do pedido}}
 let timerRetryPagamentos = null;
 const ARQUIVO_PAGAMENTOS_PENDENTES = './pagamentos_pendentes.json';
-const RETRY_INTERVAL = 60000; // 60 segundos
-const RETRY_TIMEOUT = 30 * 60 * 1000; // 30 minutos
-const MAX_RETRY_ATTEMPTS = 3; // Máximo 3 tentativas por pagamento
+const RETRY_INTERVAL = 25000; // 25 segundos - verificação otimizada (planilha mantém apenas 48h de dados)
+const RETRY_TIMEOUT = 5 * 60 * 1000; // 5 minutos - tempo máximo de tentativas
+const MAX_RETRY_ATTEMPTS = 12; // 12 tentativas em 5 minutos (1 a cada 25s)
+
+// === CONTROLE DE RATE LIMITING ===
+let ultimaRequisicao = 0;
+const DELAY_ENTRE_REQUISICOES = 3000; // 3 segundos entre cada verificação (otimizado para planilha pequena com 48h de dados)
+const MAX_REQUISICOES_POR_MINUTO = 20; // Aumentado para 20 req/min
+let requisicoesUltimoMinuto = [];
+let erros429Consecutivos = 0;
+const MAX_ERROS_429 = 3; // Após 3 erros 429, pausar temporariamente
+let timeoutSalvamentoPagamentos = null; // Timer para debounce de salvamento
 
 // === SISTEMA DE REFERÊNCIAS E BÔNUS ===
 let codigosReferencia = {}; // codigo -> dados do dono
@@ -1315,9 +1533,83 @@ function gerarCodigoReferencia(remetente) {
 }
 
 // Processar bônus de compra
-async function processarBonusCompra(remetenteCompra, valorCompra) {
+async function processarBonusCompra(remetenteCompra, valorCompra, grupoId = null) {
     console.log(`🎁 Verificando bônus para compra`);
-    
+
+    // CORRIGIDO: Usar sistemaBonus se disponível (método robusto e persistente)
+    if (sistemaBonus) {
+        console.log(`✅ Usando SistemaBonus para processar bônus`);
+        const resultado = await sistemaBonus.processarBonusCompra(remetenteCompra, valorCompra);
+
+        if (!resultado) {
+            console.log(`   ❌ Cliente não tem referência ou já atingiu limite de compras`);
+            return false;
+        }
+
+        // Enviar notificação de bônus
+        try {
+            const nomeComprador = await obterNomeContato(remetenteCompra);
+            const convidadorId = resultado.convidadorId;
+            const bonusMB = resultado.bonusMB;
+            const comprasRealizadas = resultado.comprasRealizadas;
+
+            // Buscar saldo atualizado
+            const saldoObj = sistemaBonus.buscarSaldo(convidadorId);
+            const novoSaldo = saldoObj ? saldoObj.saldo : bonusMB;
+            const novoSaldoFormatado = novoSaldo >= 1024 ? `${(novoSaldo/1024).toFixed(2)}GB` : `${novoSaldo}MB`;
+
+            // Buscar referência para saber se é automática ou manual
+            const formatos = [
+                remetenteCompra,
+                remetenteCompra.replace('@c.us', '@lid'),
+                remetenteCompra.replace('@lid', '@c.us')
+            ];
+            let referencia = null;
+            for (const formato of formatos) {
+                if (sistemaBonus.referenciasClientes[formato]) {
+                    referencia = sistemaBonus.referenciasClientes[formato];
+                    break;
+                }
+            }
+
+            const isAutomatico = referencia?.automatico;
+            const tipoReferencia = isAutomatico ? 'adicionou ao grupo' : `usou seu código ${referencia?.codigo || ''}`;
+
+            // CORRIGIDO: Remover @lid e @c.us das menções
+            const convidadorLimpo = convidadorId.replace('@c.us', '').replace('@lid', '');
+            const remetenteCompraLimpo = remetenteCompra.replace('@c.us', '').replace('@lid', '');
+
+            // CORRIGIDO: Usar grupoId ou convidadorId como destino da mensagem
+            const destinoMensagem = grupoId || convidadorId;
+
+            await client.sendMessage(destinoMensagem,
+                `🎉 *BÔNUS DE REFERÊNCIA CREDITADO!*\n\n` +
+                `💎 @${convidadorLimpo}, recebeste *${bonusMB}MB* de bônus!\n\n` +
+                `👤 *Referenciado:* @${remetenteCompraLimpo}\n` +
+                `📢 *Motivo:* @${remetenteCompraLimpo} que você ${tipoReferencia} fez uma compra!\n` +
+                `🛒 *Compra:* ${comprasRealizadas}ª de 5\n` +
+                `💰 *Novo saldo:* ${novoSaldoFormatado}\n\n` +
+                `${novoSaldo >= 1024 ? '🚀 *Já podes sacar!* Use: *.sacar*' : '⏳ *Continua a convidar amigos para ganhar mais bônus!*'}`, {
+                mentions: [convidadorId, remetenteCompra]
+            });
+
+            console.log(`   ✅ Bônus creditado via SistemaBonus: ${bonusMB}MB (${comprasRealizadas}/5)`);
+        } catch (error) {
+            console.error('❌ Erro ao enviar notificação de bônus:', error);
+        }
+
+        return {
+            convidador: resultado.convidadorId,
+            bonusGanho: resultado.bonusMB,
+            compraAtual: resultado.comprasRealizadas,
+            totalCompras: 5,
+            novoSaldo: sistemaBonus.buscarSaldo(resultado.convidadorId)?.saldo || 0
+        };
+    }
+
+    // === FALLBACK: Sistema antigo (caso sistemaBonus não esteja disponível) ===
+    console.log(`⚠️ SistemaBonus não disponível, usando sistema antigo`);
+
     // Verificar se cliente tem referência
     const referencia = referenciasClientes[remetenteCompra];
     if (!referencia) {
@@ -1333,7 +1625,7 @@ async function processarBonusCompra(remetenteCompra, valorCompra) {
 
     // Atualizar contador de compras
     referencia.comprasRealizadas++;
-    
+
     // Creditar bônus ao convidador
     const convidador = referencia.convidadoPor;
     if (!bonusSaldos[convidador]) {
@@ -1348,7 +1640,7 @@ async function processarBonusCompra(remetenteCompra, valorCompra) {
     // Adicionar 200MB ao saldo
     const bonusAtual = 200;
     bonusSaldos[convidador].saldo += bonusAtual;
-    
+
     // Atualizar detalhes da referência
     if (!bonusSaldos[convidador].detalhesReferencias[remetenteCompra]) {
         bonusSaldos[convidador].detalhesReferencias[remetenteCompra] = {
@@ -1358,10 +1650,10 @@ async function processarBonusCompra(remetenteCompra, valorCompra) {
             ativo: true
         };
     }
-    
+
     bonusSaldos[convidador].detalhesReferencias[remetenteCompra].compras = referencia.comprasRealizadas;
     bonusSaldos[convidador].detalhesReferencias[remetenteCompra].bonusGanho += bonusAtual;
-    
+
     // Enviar notificação de bônus por referência
     try {
         const nomeComprador = await obterNomeContato(remetenteCompra);
@@ -1377,7 +1669,10 @@ async function processarBonusCompra(remetenteCompra, valorCompra) {
         const convidadorLimpo = convidador.replace('@c.us', '').replace('@lid', '');
         const remetenteCompraLimpo = remetenteCompra.replace('@c.us', '').replace('@lid', '');
 
-        await client.sendMessage(message.from,
+        // CORRIGIDO: Usar grupoId ou convidador como destino da mensagem
+        const destinoMensagem = grupoId || convidador;
+
+        await client.sendMessage(destinoMensagem,
             `🎉 *BÔNUS DE REFERÊNCIA CREDITADO!*\n\n` +
             `💎 @${convidadorLimpo}, recebeste *${bonusAtual}MB* de bônus!\n\n` +
             `👤 *Referenciado:* @${remetenteCompraLimpo}\n` +
@@ -1563,9 +1858,46 @@ function calcularValorPedido(megas, precosGrupo) {
     return Math.round(megasNum * valorPorMB);
 }
 
+// === FUNÇÃO PARA VERIFICAR RATE LIMIT ===
+async function aguardarRateLimit() {
+    const agora = Date.now();
+
+    // Limpar requisições antigas (mais de 1 minuto) - LIMITA TAMANHO DO ARRAY
+    requisicoesUltimoMinuto = requisicoesUltimoMinuto.filter(timestamp => agora - timestamp < 60000);
+
+    // IMPORTANTE: Limitar tamanho do array para evitar uso excessivo de memória
+    if (requisicoesUltimoMinuto.length > 50) {
+        requisicoesUltimoMinuto = requisicoesUltimoMinuto.slice(-30); // Manter apenas últimos 30
+    }
+
+    // Verificar se atingiu limite de requisições por minuto
+    if (requisicoesUltimoMinuto.length >= MAX_REQUISICOES_POR_MINUTO) {
+        const maisAntiga = requisicoesUltimoMinuto[0];
+        const tempoEspera = 60000 - (agora - maisAntiga);
+        if (tempoEspera > 0) {
+            console.log(`⏳ RATE LIMIT: Aguardando ${Math.ceil(tempoEspera/1000)}s antes de continuar...`);
+            await new Promise(resolve => setTimeout(resolve, tempoEspera));
+        }
+    }
+
+    // Aguardar delay mínimo entre requisições
+    const tempoDesdeUltima = agora - ultimaRequisicao;
+    if (tempoDesdeUltima < DELAY_ENTRE_REQUISICOES) {
+        const delayNecessario = DELAY_ENTRE_REQUISICOES - tempoDesdeUltima;
+        await new Promise(resolve => setTimeout(resolve, delayNecessario));
+    }
+
+    // Registrar requisição
+    ultimaRequisicao = Date.now();
+    requisicoesUltimoMinuto.push(ultimaRequisicao);
+}
+
 // === FUNÇÃO PARA VERIFICAR PAGAMENTO (SÓ BUSCA, NÃO MARCA) ===
 async function verificarPagamentoIndividual(referencia, valorEsperado) {
     try {
+        // AGUARDAR RATE LIMIT ANTES DE FAZER REQUISIÇÃO
+        await aguardarRateLimit();
+
         const valorNormalizado = normalizarValor(valorEsperado);
 
         console.log(`🔍 REVENDEDORES: Verificando pagamento ${referencia} - ${valorNormalizado}MT (original: ${valorEsperado})`);
@@ -1594,13 +1926,34 @@ async function verificarPagamentoIndividual(referencia, valorEsperado) {
             }
 
             console.log(`✅ REVENDEDORES: Pagamento encontrado e PENDENTE (valor exato)!`);
+            erros429Consecutivos = 0; // Resetar contador de erros 429
             return true;
         }
 
         console.log(`❌ REVENDEDORES: Pagamento não encontrado`);
+        erros429Consecutivos = 0; // Resetar contador de erros 429
         return false;
 
     } catch (error) {
+        // Detectar erro 429 (Too Many Requests)
+        if (error.response && error.response.status === 429) {
+            erros429Consecutivos++;
+            console.error(`🚨 REVENDEDORES: Rate limit atingido (429) - Erro ${erros429Consecutivos}/${MAX_ERROS_429}`);
+
+            // Pausar progressivamente baseado no número de erros
+            if (erros429Consecutivos >= MAX_ERROS_429) {
+                const pausaEmergencia = 2 * 60 * 1000; // 2 minutos (reduzido de 5)
+                console.error(`⏸️ REVENDEDORES: Pausando verificações por ${pausaEmergencia/1000}s devido a múltiplos erros 429`);
+                await new Promise(resolve => setTimeout(resolve, pausaEmergencia));
+                erros429Consecutivos = 0; // Resetar após pausa
+            } else {
+                // Pausa menor para primeiro ou segundo erro
+                const pausaCurta = 10000; // 10 segundos
+                await new Promise(resolve => setTimeout(resolve, pausaCurta));
+            }
+            return false;
+        }
+
         const ehTimeout = error.code === 'ECONNABORTED' || error.message.includes('timeout');
         if (ehTimeout) {
             console.error(`⏰ REVENDEDORES: Timeout ao verificar pagamento ${referencia} - planilha demorou muito para responder`);
@@ -1615,6 +1968,9 @@ async function verificarPagamentoIndividual(referencia, valorEsperado) {
 // === FUNÇÃO PARA MARCAR PAGAMENTO COMO PROCESSADO ===
 async function marcarPagamentoComoProcessado(referencia, valor) {
     try {
+        // AGUARDAR RATE LIMIT ANTES DE FAZER REQUISIÇÃO
+        await aguardarRateLimit();
+
         const valorNormalizado = normalizarValor(valor);
 
         console.log(`✅ REVENDEDORES: Marcando pagamento ${referencia} como PROCESSADO`);
@@ -1668,11 +2024,32 @@ async function carregarPagamentosPendentes() {
     }
 }
 
-// Salvar pagamentos pendentes no arquivo
+// Salvar pagamentos pendentes no arquivo (com debounce)
 async function salvarPagamentosPendentes() {
+    // Limpar timeout anterior
+    if (timeoutSalvamentoPagamentos) {
+        clearTimeout(timeoutSalvamentoPagamentos);
+    }
+
+    // Aguardar 2 segundos antes de salvar (agrupar múltiplas mudanças)
+    timeoutSalvamentoPagamentos = setTimeout(async () => {
+        try {
+            await fs.writeFile(ARQUIVO_PAGAMENTOS_PENDENTES, JSON.stringify(pagamentosPendentes, null, 2));
+            console.log(`💾 RETRY: Pagamentos pendentes salvos - ${Object.keys(pagamentosPendentes).length} pendências`);
+        } catch (error) {
+            console.error(`❌ RETRY: Erro ao salvar pendências:`, error);
+        }
+    }, 2000);
+}
+
+// Forçar salvamento imediato (para casos críticos)
+async function salvarPagamentosPendentesImediato() {
+    if (timeoutSalvamentoPagamentos) {
+        clearTimeout(timeoutSalvamentoPagamentos);
+    }
     try {
         await fs.writeFile(ARQUIVO_PAGAMENTOS_PENDENTES, JSON.stringify(pagamentosPendentes, null, 2));
-        console.log(`💾 RETRY: Pagamentos pendentes salvos - ${Object.keys(pagamentosPendentes).length} pendências`);
+        console.log(`💾 RETRY: Salvamento imediato - ${Object.keys(pagamentosPendentes).length} pendências`);
     } catch (error) {
         console.error(`❌ RETRY: Erro ao salvar pendências:`, error);
     }
@@ -1755,38 +2132,97 @@ async function verificarPagamentosPendentes() {
     }
 
     console.log(`🔍 RETRY: Verificando ${pendencias.length} pagamentos pendentes...`);
+    console.log(`⏱️ RATE LIMIT: Verificações com delay de ${DELAY_ENTRE_REQUISICOES/1000}s entre cada uma`);
+
+    // PROCESSAR MAIS PAGAMENTOS POR VEZ (10 em vez de 5)
+    const LOTE_MAXIMO = 10;
+    let processados = 0;
 
     for (const pendencia of pendencias) {
-        // Verificar se expirou
+        // Parar se já processou o lote máximo
+        if (processados >= LOTE_MAXIMO) {
+            console.log(`⏸️ RETRY: Processados ${processados} pagamentos neste ciclo. Restantes serão verificados no próximo.`);
+            break;
+        }
+
+        // Verificar se expirou (5 minutos)
         if (agora > pendencia.expira) {
-            console.log(`⏰ RETRY: Pagamento ${pendencia.referencia} expirou após 30min`);
+            const tempoDecorrido = Math.floor((agora - pendencia.timestamp) / 1000 / 60);
+            console.log(`⏰ RETRY: Pagamento ${pendencia.referencia} expirou após ${tempoDecorrido}min sem confirmação`);
+
+            // NOTIFICAR USUÁRIO SOBRE FALHA - DESABILITADO
+            // await notificarPagamentoExpirado(pendencia);
             await removerPagamentoPendente(pendencia.id);
             continue;
         }
 
         // Verificar se atingiu limite de tentativas
         if (pendencia.tentativas >= MAX_RETRY_ATTEMPTS) {
-            console.log(`❌ RETRY: Pagamento ${pendencia.referencia} atingiu limite de ${MAX_RETRY_ATTEMPTS} tentativas - removendo da fila`);
+            console.log(`❌ RETRY: Pagamento ${pendencia.referencia} atingiu limite de ${MAX_RETRY_ATTEMPTS} tentativas`);
+
+            // NOTIFICAR USUÁRIO SOBRE FALHA - DESABILITADO
+            // await notificarPagamentoExpirado(pendencia);
             await removerPagamentoPendente(pendencia.id);
             continue;
         }
 
-        // Verificar pagamento
+        // Verificar pagamento (COM RATE LIMIT AUTOMÁTICO)
         pendencia.tentativas++;
         console.log(`🔍 RETRY: Tentativa ${pendencia.tentativas}/${MAX_RETRY_ATTEMPTS} para ${pendencia.referencia}`);
 
         const pagamentoConfirmado = await verificarPagamentoIndividual(pendencia.referencia, pendencia.valorComprovante);
 
-        if (pagamentoConfirmado) {
+        // Verificar se pagamento já foi processado anteriormente
+        if (pagamentoConfirmado === 'JA_PROCESSADO') {
+            console.log(`⚠️ RETRY: Pagamento ${pendencia.referencia} já foi processado - removendo da fila silenciosamente`);
+            await removerPagamentoPendente(pendencia.id);
+        } else if (pagamentoConfirmado) {
             console.log(`✅ RETRY: Pagamento ${pendencia.referencia} confirmado! Processando...`);
             await processarPagamentoConfirmado(pendencia);
             await removerPagamentoPendente(pendencia.id);
         }
+
+        processados++;
+    }
+
+    // Salvar progresso apenas UMA VEZ ao final (em vez de a cada verificação)
+    if (processados > 0) {
+        await salvarPagamentosPendentes();
     }
 
     // Se não há mais pendências, parar timer
     if (Object.keys(pagamentosPendentes).length === 0) {
         pararTimerRetryPagamentos();
+    }
+}
+
+// Notificar usuário quando pagamento expirar sem confirmação
+async function notificarPagamentoExpirado(pendencia) {
+    try {
+        const { chatId, referencia, valorComprovante, tentativas } = pendencia;
+        const tempoDecorrido = Math.floor((Date.now() - pendencia.timestamp) / 1000 / 60);
+
+        console.log(`📢 RETRY: Notificando usuário sobre pagamento expirado ${referencia}`);
+
+        await client.sendMessage(chatId,
+            `❌ *NÃO FOI POSSÍVEL CONFIRMAR O PAGAMENTO*\n\n` +
+            `💳 Referência: ${referencia}\n` +
+            `💰 Valor: ${valorComprovante}MT\n` +
+            `🔄 Tentativas: ${tentativas}\n` +
+            `⏰ Tempo: ${tempoDecorrido} minutos\n\n` +
+            `⚠️ *Possíveis causas:*\n` +
+            `• A mensagem de confirmação ainda não foi recebida pelo sistema\n` +
+            `• Referência incorreta no comprovante\n` +
+            `• Valor diferente do esperado\n\n` +
+            `💡 *O que fazer:*\n` +
+            `1. Aguarde mais alguns minutos e envie o comprovante novamente\n` +
+            `2. Verifique se a referência está correta\n` +
+            `3. Entre em contato com o suporte se o problema persistir\n\n` +
+            `🕐 ${new Date().toLocaleString('pt-BR')}`
+        );
+
+    } catch (error) {
+        console.error(`❌ RETRY: Erro ao notificar pagamento expirado:`, error.message);
     }
 }
 
@@ -1825,7 +2261,7 @@ async function processarPagamentoConfirmado(pendencia) {
         );
 
         // Processar bônus de referência
-        const bonusInfo = await processarBonusCompra(chatId, megas);
+        const bonusInfo = await processarBonusCompra(chatId, megas, chatId);
 
         // Enviar para Tasker/Planilha
         const resultadoEnvio = await enviarParaTasker(referencia, megas, numero, chatId, messageData.author);
@@ -1886,7 +2322,19 @@ const ADMINISTRADORES_GLOBAIS = [
     '258858891101@c.us',    // +258 85 889 1101 - Isaac
     '85307059867830@lid',   // @lid do Isaac
     '258865627840@c.us',    // +258 86 562 7840 - Ercílio
-    '170725386272876@lid'   // @lid do Ercílio
+    '170725386272876@lid',  // @lid do Ercílio
+    '258857013922@c.us',    // +258 85 701 3922 - Frederico
+    '29945149558840@lid',   // @lid do Frederico
+    '258879833297@c.us',    // +258 87 983 3297 - Astro Tech
+    '278438854287537@lid',  // @lid do Astro Tech
+    '258844093189@c.us',    // +258 84 409 3189 - Leonel
+    '67611928871020@lid',   // @lid do Leonel
+    '258871784594@c.us',    // +258 87 178 4594 - Shop NET
+    '49603198071035@lid',   // @lid do Shop NET
+    '258879914172@c.us',    // +258 87 991 4172 - walter
+    '40811249045561@lid',   // @lid do walter
+    '258844345161@c.us',    // +258 84 434 5161 - Mozstream's
+    '144478891450544@lid'   // @lid do Mozstream's
 ];
 
 // Mapeamento de IDs internos (@lid) para números reais (@c.us) - SISTEMA DINÂMICO
@@ -1897,7 +2345,13 @@ let MAPEAMENTO_IDS = {
     '216054655656152@lid': '258850401416@c.us', // Kelven Junior
     '85307059867830@lid': '258858891101@c.us',  // Isaac
     '170725386272876@lid': '258865627840@c.us',  // Ercílio
-    '251032533737504@lid': '258874100607@c.us'  // Mr Durst
+    '251032533737504@lid': '258874100607@c.us', // Mr Durst
+    '67611928871020@lid': '258844093189@c.us',   // Leonel
+    '278438854287537@lid': '258879833297@c.us',  // Astro Tech
+    '29945149558840@lid': '258857013922@c.us',   // Frederico
+    '49603198071035@lid': '258871784594@c.us',   // Shop NET
+    '40811249045561@lid': '258879914172@c.us',   // walter
+    '144478891450544@lid': '258844345161@c.us'   // Mozstream's
 };
 
 // === SISTEMA AUTOMÁTICO DE MAPEAMENTO LID ===
@@ -1988,7 +2442,7 @@ const MODERACAO_CONFIG = {
     },
     detectarLinks: true,
     apagarMensagem: true,
-    removerUsuario: false, // DESATIVADO: não remove mais usuários, apenas apaga a mensagem
+    removerUsuario: true, // DESATIVADO: não remove mais usuários, apenas apaga a mensagem
     excecoes: [
         '258861645968@c.us',
         '258871112049@c.us',
@@ -1998,56 +2452,69 @@ const MODERACAO_CONFIG = {
 
 // Configuração para cada grupo
 const CONFIGURACAO_GRUPOS = {
-       '258820749141-1441573529@g.us': {
+    '258820749141-1441573529@g.us': {
         nome: 'Data Store - Vodacom',
-        tabela: `✅🔥🚨PROMOÇÃO  DE 🛜MEGAS VODACOM A MELHOR PREÇO DO MERCADO - Outubro - 2025🚨🔥✅
+        tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - OUTUBRO 2025 🚨🔥✅
 
 📆 PACOTES DIÁRIOS
-1024MB 💎 17MT 💵💽
-1200MB 💎 20MT 💵💽
-2048MB 💎 34MT 💵💽
-2200MB 💎 40MT 💵💽
-3096MB 💎 51MT 💵💽
-4096MB 💎 68MT 💵💽
-5120MB 💎 85MT 💵💽
-6144MB 💎 102MT 💵💽
-7168MB 💎 119MT 💵💽
-8192MB 💎 136MT 💵💽
-9144MB 💎 153MT 💵💽
-10240MB 💎 170MT 💵💽
+512MB = 10MT 💵💽
+1024MB = 17MT 💵💽
+1200MB = 20MT 💵💽
+2048MB = 34MT 💵💽
+2200MB = 40MT 💵💽
+3072MB = 51MT 💵💽
+4096MB = 68MT 💵💽
+5120MB = 85MT 💵💽
+6144MB = 102MT 💵💽
+7168MB = 119MT 💵💽
+8192MB = 136MT 💵💽
+9144MB = 153MT 💵💽
+10240MB = 170MT 💵💽
 
-📅 PACOTES DIÁRIOS PREMIUM (3 Dias – Renováveis)
-2000MB 💎 44MT 💵💽
-3000MB 💎 66MT 💵💽
-4000MB 💎 88MT 💵💽
-5000MB 💎 109MT 💵💽
-6000MB 💎 133MT 💵💽
-7000MB 💎 149MT 💵💽
-10000MB 💎 219MT 💵💽
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+2000MB = 44MT 💵💽
+3000MB = 66MT 💵💽
+4000MB = 88MT 💵💽
+5000MB = 109MT 💵💽
+6000MB = 133MT 💵💽
+7000MB = 149MT 💵💽
+10000MB = 219MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
 
-📅 PACOTES SEMANAIS PREMIUM (15 Dias – Renováveis)
-3000MB 💎 100MT 💵💽
-5000MB 💎 149MT 💵💽
-8000MB 💎 201MT 💵💽
-10000MB 💎 231MT 💵💽
-20000MB 💎 352MT 💵💽
+📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
+1700MB = 45MT 💵💽
+2900MB = 80MT 💵💽
+3400MB = 110MT 💵💽
+5500MB = 150MT 💵💽
+7800MB = 200MT 💵💽
+11400MB = 300MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
+
+📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
+3000MB = 100MT 💵💽
+5000MB = 149MT 💵💽
+8000MB = 201MT 💵💽
+10000MB = 231MT 💵💽
+20000MB = 352MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
 
 📅 PACOTES MENSAIS
-12.8GB 💎 270MT 💵💽
-22.8GB 💎 435MT 💵💽
-32.8GB 💎 605MT 💵💽
-52.8GB 💎 945MT 💵💽
-102.8GB 💎 1605MT 💵💽
+12.8GB = 270MT 💵💽
+22.8GB = 435MT 💵💽
+32.8GB = 605MT 💵💽
+52.8GB = 945MT 💵💽
+60.2GB = 1249MT 💵💽
+80.2GB = 1449MT 💵💽
+100.2GB = 1700MT 💵💽
 
+💎 PACOTES DIAMANTE MENSAIS
+Chamadas + SMS ilimitadas + 11GB = 460MT 💵
+Chamadas + SMS ilimitadas + 24GB = 820MT 💵
+Chamadas + SMS ilimitadas + 50GB = 1550MT 💵
+Chamadas + SMS ilimitadas + 100GB = 2250MT 💵
 
-PACOTES DIAMANTE MENSAIS
-Chamadas + SMS ilimitadas + 11GB 💎 460MT 💵
-Chamadas + SMS ilimitadas + 24GB 💎 820MT 💵
-Chamadas + SMS ilimitadas + 50GB 💎 1550MT 💵
-Chamadas + SMS ilimitadas + 100GB 💎 2250MT 💵
-
-📍NB: Válido apenas para Vodacom
-📍Para o Pacote Mensal e Diamante, não deve ter txuna crédito ativo!
+📍 NB: Válido apenas para Vodacom  
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!
 `,
 
         pagamento: `FORMAS DE PAGAMENTO ATUALIZADAS
@@ -2059,111 +2526,80 @@ NOME:  NATACHA ALICE
 NÚMERO: 871112049
 NOME: NATACHA ALICE`
     },
-    '258840161370-1471468657@g.us': {
-        nome: 'Venda Automática 24/7',
-        tabela: `📢🔥 TABELA ATUALIZADA – OUTUBRO 2025 🔥📢
-Internet e Chamadas Ilimitadas – Vodacom
-Pacotes Diários | Semanais | Mensais
+    '120363402609218031@g.us': {
+        nome: 'NET PROMOÇÃO 17MT V12',
+        tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - NOVEMBRO 2025 🚨🔥✅
 
-OFERTA ESPECIAL – 24 HORAS ⏱
-750MB - 15MT
-1024MB - 17MT
-1200MB - 20MT
-2048MB - 34MT
+📆 PACOTES DIÁRIOS
+1024MB = 17MT 💵💽
+1200MB = 20MT 💵💽
+2048MB = 34MT 💵💽
+2200MB = 40MT 💵💽
+3072MB = 51MT 💵💽
+4096MB = 68MT 💵💽
+5120MB = 85MT 💵💽
+6144MB = 102MT 💵💽
+7168MB = 119MT 💵💽
+8192MB = 136MT 💵💽
+9144MB = 153MT 💵💽
+10240MB = 170MT 💵💽
 
-PACOTES DIÁRIOS (24H ⏱)
-2400MB - 40MT
-3072MB - 51MT
-4096MB - 68MT
-5120MB - 85MT
-6144MB - 102MT
-7168MB - 119MT
-8192MB - 136MT
-9144MB - 153MT
-10240MB - 170MT
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+2000MB = 44MT 💵💽
+3000MB = 66MT 💵💽
+4000MB = 88MT 💵💽
+5000MB = 109MT 💵💽
+6000MB = 133MT 💵💽
+7000MB = 149MT 💵💽
+10000MB = 219MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
 
-PACOTES PREMIUM (3 DIAS 🗓 – RENOVÁVEIS)
-2000MB - 44MT
-3000MB - 66MT
-4000MB - 88MT
-5000MB - 109MT
-6000MB - 133MT
-7000MB - 149MT
-10000MB - 219MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 3 dias
+📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
+1700MB = 45MT 💵💽
+2900MB = 80MT 💵💽
+3400MB = 110MT 💵💽
+5500MB = 150MT 💵💽
+7800MB = 200MT 💵💽
+11400MB = 300MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
 
-SEMANAIS BÁSICOS (5 DIAS 🗓 – RENOVÁVEIS)
-1700MB - 45MT
-2900MB - 80MT
-3400MB - 110MT
-5500MB - 150MT
-7800MB - 200MT
-11400MB - 300MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 5 dias
+📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
+3000MB = 100MT 💵💽
+5000MB = 149MT 💵💽
+8000MB = 201MT 💵💽
+10000MB = 231MT 💵💽
+20000MB = 352MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
 
-SEMANAIS PREMIUM (15 DIAS 🗓 – RENOVÁVEIS)
-3000MB - 100MT
-5000MB - 149MT
-8000MB - 201MT
-10000MB - 231MT
-20000MB - 352MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 15 dias
+📅 PACOTES MENSAIS
+12.8GB = 270MT 💵💽
+22.8GB = 435MT 💵💽
+32.8GB = 605MT 💵💽
+52.8GB = 945MT 💵💽
+60.2GB = 1249MT 💵💽
+80.2GB = 1449MT 💵💽
+100.2GB = 1700MT 💵💽
 
-PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
-2.8GB - 100MT
-5.8GB - 175MT
-8.8GB - 200MT
-10.8GB - 249MT
-12.8GB - 300MT
-15.8GB - 349MT
-18.8GB - 400MT
-20.8GB - 449MT
-25.8GB - 549MT
-32.8GB - 649MT
-51.2GB - 1049MT
-60.2GB - 1249MT
-80.2GB - 1449MT
-100.2GB - 1700MT
-Observação: Pacotes mensais não compatíveis com Txuna
+💎 PACOTES DIAMANTE MENSAIS
+Chamadas + SMS ilimitadas + 11GB = 460MT 💵
+Chamadas + SMS ilimitadas + 24GB = 820MT 💵
+Chamadas + SMS ilimitadas + 50GB = 1550MT 💵
+Chamadas + SMS ilimitadas + 100GB = 2250MT 💵
 
-CHAMADAS ILIMITADAS — VODACOM 📞 ♾
-7.5GB - 280MT - Ilimitadas
-11GB - 449MT - Ilimitadas ✨
-14.5GB - 500MT - Ilimitadas
-26.5GB - 700MT - Ilimitadas
-37.5GB - 1000MT - Ilimitadas
-53.5GB - 1500MT - Ilimitadas
-102.5GB - 2150MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
+📍 NB: Válido apenas para Vodacom  
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!
 
-CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
-7.1GB - 280MT - Ilimitadas
-9GB - 449MT - Ilimitadas ✨
-23GB - 950MT - Ilimitadas
-38GB - 1450MT - Ilimitadas
-46GB - 1700MT - Ilimitadas
-53GB - 1900MT - Ilimitadas
-68GB - 2400MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
-
-🔹 CONEXÃO SEM LIMITES 🔹
-Internet rápida, chamadas e SMS ilimitadas.
-Pacotes exclusivos Vodacom e Movitel.
-Sempre conectado, sempre no controle!
 `,
 
-        pagamento: `💸 FORMAS DE PAGAMENTO
+        pagamento: `🤖 Formas de Pagamento
 
-🟠 E-Mola – Glória | 📲 860186270  
-🔴 M-Pesa – Leonor | 📲 857451196  
+🟧E-mola:870718396__[FREDERICO FELICIANO SIMANGO]
 
-⚠ ATENÇÃO  
-▪ Após o pagamento, envie a confirmação ✉ ** e o seu número para receber o seu pacote 📲  
-▪ Envie ** o valor exato da tabela 💰  
+🟥M-Pesa:857013922__[SHAT TERCIANA]
 
-NB: Válido apenas para Vodacom  
-🚀 Garanta seus Megabytes agora!
-`
+
+Em seguida mande a mensagem de comprovativo
+Aqui no grupo`
     },
     '120363020570328377@g.us': {
         nome: ' NET VODACOM ACESSÍVEL',
@@ -2246,7 +2682,7 @@ FORMAS DE PAGAMENTO💰💶
 🌐9216MB = 153MT
 🌐10240MB = 170MT
 
- 📅PACOTE SEMANAL🛒📦
+ 📅PACOTE SEMANAL BÁSICO 🛒📦
 ⚠ Vai receber 100MB por dia durante 6 dias, totalizando +0.6GB. ⚠
 
 📡3.0GB = 89MT 
@@ -2254,6 +2690,16 @@ FORMAS DE PAGAMENTO💰💶
 📡6.0GB = 158MT 
 📡7.0GB = 175MT 
 📡10.0GB = 265MT
+
+🗓PACOTE SEMANAL PREMIUM (15 Dias – Renováveis) 🛒📦
+⚠ Vai receber 100MB por dia durante 14 dias, totalizando +1.4GB. ⚠
+
+📡4096MB = 143MT 
+📡4608MB = 156MT 
+📡5120MB = 186MT 
+📡8192MB = 238MT 
+📡9150MB = 259MT
+📡10240MB = 278MT 
 
 > PARA VER TABELA DO PACOTE MENSAL DIGITE: Mensal
 
@@ -2267,9 +2713,7 @@ M-Pesa: 853529033 📱
 e-Mola: 865627840 📱
 - Alexandre UANELA 
 
-✨ Mais Rápido, Mais Barato, Mais Confiável! ✨
-
-`,
+✨ Mais Rápido, Mais Barato, Mais Confiável! ✨`,
 
         pagamento: `formas de pagamento💰💶
 
@@ -2290,7 +2734,7 @@ e-Mola: 865627840 📱
     },
     '120363402302455817@g.us': {
         nome: 'KA-NET',
-        tabela: `SUPER PROMOÇÃO NA VODACOM🛑🔥😍
+        tabela: `🆕🛜TABELA ATUALIZADA VODACOM - 2025🔄
 
 📆 PACOTES DIÁRIOS
 512MB = 10MT
@@ -2303,148 +2747,564 @@ e-Mola: 865627840 📱
 5350MB = 90MT 
 10240MB = 160MT
 
-⿣PACOTE DIÁRIO PREMIUM (3 Dias)
-300MB + 2000MB = 40MT
-300MB + 3000MB = 66MT 
-300MB + 4000MB = 72MT 
-300MB + 5000MB = 85MT
-300MB + 6000MB = 110MT 
-300MB + 7000MB = 125MT 
-300MB + 10000MB = 180MT 
+📆 PACOTE DIÁRIO PREMIUM (3 Dias)
+2000MB = 40MT
+3000MB = 66MT 
+4000MB = 72MT 
+5000MB = 85MT
+6000MB = 110MT 
+7000MB = 125MT 
+10000MB = 185MT 
+🔄Bônus: 100MB extra ao atualizar dentro de 3 dias
 
-⿧PACOTE SEMANAL (5 dias)
-500MB + 5000MB = 95MT
-500MB + 8000MB = 140MT
-500MB + 10000MB = 190MT
-500MB + 15000MB = 290MT
+📆 PACOTE SEMANAL (5 dias)
+5000MB = 95MT
+8000MB = 140MT
+10000MB = 190MT
+15000MB = 290MT
+🔄Bônus: 100MB extra ao atualizar dentro de 5 dias
+
+📆 SEMANAIS PREMIUM (15 Dias - Renováveis)
+3000MB = 100MT
+5000MB = 145MT
+8000MB = 205MT
+10000MB = 240MT
+20000MB = 360MT
+🔄Bônus: 100MB extra ao atualizar dentro de 15 dias
 
 Mensal (Válido Por 30 Dias)
 5GB = 150MT
-10GB = 250MT
+10GB = 260MT
 35GB = 710MT
 50GB = 1030MT
 100GB = 2040MT
 
 📅 PACOTES DIAMANTE MENSAIS 💎
-Chamadas + SMS ilimitadas + 11GB = 440MT 
+Chamadas + SMS ilimitadas + 11GB = 450MT 
 Chamadas + SMS ilimitadas + 24GB = 820MT 
 Chamadas + SMS ilimitadas + 50GB = 1550MT 
 Chamadas + SMS ilimitadas + 100GB = 2250MT
+
+❗NB: Internet só para vodacom
+❗Para o pacote mensal e Diamante, não pode ter TXUNA crédito.
 `,
         pagamento: `- 📲 𝗘-𝗠𝗢𝗟𝗔: 864882152💶💰
 - Catia Anabela Nharrava 
 - 📲 𝗠-𝗣𝗘𝗦𝗔: 856268811💷💰 
 - ↪📞Kelven Junior Anabela Nharrava
 `
-    }, 
-'258876291014-1634575097@g.us': {
-        nome: '🪐V2 Megabytes NetConnect 🌍',
-        tabela: `📢🔥 TABELA ATUALIZADA – OUTUBRO 2025 🔥📢
-Internet e Chamadas Ilimitadas – Vodacom
-Pacotes Diários | Semanais | Mensais
+    },
+'120363043964227338@g.us': {
+        nome: 'ASTRO BOOSTING I',
+        tabela: `📢 SUPER PROMOÇÃO DE INTERNET - VODACOM  
 
-OFERTA ESPECIAL – 24 HORAS ⏱
-512MB - 10MT
-750MB - 15MT
-1024MB - 17MT
-1200MB - 20MT
-2048MB - 34MT
+📋 TABELA DE MEGAS DIÁRIOS
+1GB  =  18MT  
+2GB  =  36MT  
+3GB  =  54MT  
+4GB  =  72MT  
+5GB  =  90MT  
+6GB  =  108MT  
+7GB  =  126MT  
+8GB  =  144MT  
+9GB  =  162MT  
+10GB =  180MT  (Para Patrões 🤩)  
 
-PACOTES DIÁRIOS (24H ⏱)
-2400MB - 40MT
-3072MB - 51MT
-4096MB - 68MT
-5120MB - 85MT
-6144MB - 102MT
-7168MB - 119MT
-8192MB - 136MT
-9144MB - 153MT
-10240MB - 170MT
+📅 MEGAS SEMANAIS
+4.36GB =  110MT  
+6.50GB =  180MT  
+9.76GB =  250MT  
 
-PACOTES PREMIUM (3 DIAS 🗓 – RENOVÁVEIS)
-2000MB - 44MT
-3000MB - 66MT
-4000MB - 88MT
-5000MB - 109MT
-6000MB - 133MT
-7000MB - 149MT
-10000MB - 219MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 3 dias
+📅 MEGAS MENSAIS
+3GB  =  160MT  
+6GB  =  200MT  
+10GB =  300MT  
 
-SEMANAIS BÁSICOS (5 DIAS 🗓 – RENOVÁVEIS)
-1700MB - 45MT
-2900MB - 80MT
-3400MB - 110MT
-5500MB - 150MT
-7800MB - 200MT
-11400MB - 300MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 5 dias
-
-SEMANAIS PREMIUM (15 DIAS 🗓 – RENOVÁVEIS)
-3000MB - 100MT
-5000MB - 149MT
-8000MB - 201MT
-10000MB - 231MT
-20000MB - 352MT
-Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 15 dias
-
-PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
-2.8GB - 100MT
-5.8GB - 175MT
-8.8GB - 200MT
-10.8GB - 249MT
-12.8GB - 300MT
-15.8GB - 349MT
-18.8GB - 400MT
-20.8GB - 449MT
-25.8GB - 549MT
-32.8GB - 649MT
-51.2GB - 1049MT
-60.2GB - 1249MT
-80.2GB - 1449MT
-100.2GB - 1700MT
-Observação: Pacotes mensais não compatíveis com Txuna
-
-CHAMADAS ILIMITADAS — VODACOM 📞 ♾
-7.5GB - 280MT - Ilimitadas
-11GB - 449MT - Ilimitadas ✨
-14.5GB - 500MT - Ilimitadas
-26.5GB - 700MT - Ilimitadas
-37.5GB - 1000MT - Ilimitadas
-53.5GB - 1500MT - Ilimitadas
-102.5GB - 2150MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
-
-CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
-7.1GB - 280MT - Ilimitadas
-9GB - 449MT - Ilimitadas ✨
-23GB - 950MT - Ilimitadas
-38GB - 1450MT - Ilimitadas
-46GB - 1700MT - Ilimitadas
-53GB - 1900MT - Ilimitadas
-68GB - 2400MT - Ilimitadas
-Inclui chamadas e SMS ilimitadas para todas as redes
-
-🔹 CONEXÃO SEM LIMITES 🔹
-Internet rápida, chamadas e SMS ilimitadas.
-Pacotes exclusivos Vodacom e Movitel.
-Sempre conectado, sempre no controle!
+= PACOTES DIAMANTE
+11GB + Chamadas e SMS Ilimitadas + 10min Internacionais + 30MB Roaming  =  450MT
 `,
 
-        pagamento: `💸 FORMAS DE PAGAMENTO
-
-🟠 E-Mola – Glória | 📲 860186270  
-🔴 M-Pesa – Leonor | 📲 857451196  
-
-⚠ ATENÇÃO  
-▪ Após o pagamento, envie a confirmação ✉ ** e o seu número para receber o seu pacote 📲  
-▪ Envie ** o valor exato da tabela 💰  
-
-NB: Válido apenas para Vodacom  
-🚀 Garanta seus Megabytes agora!
+        pagamento: `╭━━━┛ 💸  𝗙𝗢𝗥𝗠𝗔𝗦 𝗗𝗘 𝗣𝗔𝗚𝗔𝗠𝗘𝗡𝗧𝗢:  
+┃  
+┃ 🪙 𝗘-𝗠𝗼𝗹𝗮:  
+┃    879833297  
+┃     👤 𝗧𝗶𝘁𝘂𝗹𝗮𝗿: 𝗖𝗵𝗲𝗹𝘁𝗼𝗻  
+┃  
+┃ 🪙 𝗠-𝗣𝗲𝘀𝗮:  
+┃   856629444  
+┃     👤 𝗧𝗶𝘁𝘂𝗹𝗮𝗿: 𝗖𝗵𝗲𝗹𝘁𝗼𝗻
+┃   
+┃  
+┃ ⚠ 𝗜𝗠𝗣𝗢𝗥𝗧𝗔𝗡𝗧𝗘:  
+┃     ▪ 𝗣𝗮𝗿𝗮 𝗮𝗾𝘂𝗶𝘀𝗶𝗰̧𝗮̃𝗼, 𝗲𝗻𝘃𝗶𝗲:  
+┃         𝟭⃣ 𝗢 𝘃𝗮𝗹𝗼𝗿  
+┃         𝟮⃣ 𝗢 𝗰𝗼𝗺𝗽𝗿𝗼𝘃𝗮𝘁𝗶𝘃𝗼  
+┃         𝟯⃣ 𝗢 𝗻𝘂́𝗺𝗲𝗿𝗼 𝗾𝘂𝗲 𝘃𝗮𝗶 𝗿𝗲𝗰𝗲𝗯𝗲𝗿 𝗼𝘀 𝗺𝗲𝗴𝗮𝘀  
+┃  
+╰━━━━━━━━━━━━━━━━━━━━━  
+        🚀 𝗢 𝗳𝘂𝘁𝘂𝗿𝗼 𝗲́ 𝗮𝗴𝗼𝗿𝗮. 𝗩𝗮𝗺𝗼𝘀?
 `
+    },
+'120363419388089635@g.us': {
+        nome: 'NET VODACOM 18MT',
+        tabela: `🤖❤INTERNET VODACOM- a melhor preço do mercado 🎉
+
+📆 PACOTES DIÁRIOS
+
+1024MB = 18MT 💵💽
+1100MB = 20MT 💵💽
+1300MB =24MT 💵💽
+2048MB = 36MT 💵💽
+2200MB = 40MT 💵💽
+3072MB = 54MT 💵💽
+4096MB = 72MT 💵💽
+5120MB = 90MT 💵💽
+6144MB = 108MT 💵💽
+7168MB = 126MT 💵💽
+8192MB = 144MT 💵💽
+9144MB = 162MT 💵💽
+10240MB = 180MT 💵💽
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+2000MB = 44MT 💵💽
+3000MB = 66MT 💵💽
+4000MB = 88MT 💵💽
+5000MB = 109MT 💵💽
+6000MB = 133MT 💵💽
+7000MB = 149MT 💵💽
+10000MB = 219MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
+
+📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
+1700MB = 45MT 💵💽
+2900MB = 80MT 💵💽
+3400MB = 110MT 💵💽
+5500MB = 150MT 💵💽
+7800MB = 200MT 💵💽
+11400MB = 300MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
+
+📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
+3000MB = 100MT 💵💽
+5000MB = 149MT 💵💽
+8000MB = 201MT 💵💽
+10000MB = 231MT 💵💽
+20000MB = 352MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
+
+📅 PACOTE MENSAL (APENAS MEGAS)
+5.8GB  =  175MT  
+10.8GB =  290MT  
+15.8GB =  425MT  
+21.8GB =  555MT  
+25.8GB =  720MT  
+37.8GB =  835MT  
+54.8GB   =  995MT 
+64.8GB   =  1245MT
+
+💎 DIAMANTE MENSAL TUDO TOP ILIMITADO
+11GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  460MT  
+14.5GB + Chamadas e SMS ilimitadas para todas redes  =  540MT  
+20GB + Chamadas e SMS ilimitadas + 10min int + 30MB ROAM  =  640MT  
+31.1GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  820MT  
+41.1GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  995MT  
+51.1GB + Chamadas e SMS ilimitadas + 10min int + 30MB ROAM  =  1245MT  
+64.1GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  1445MT  
+100GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  2145MT
+
+
+📍 NB: Válido apenas para Vodacom  
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!
+`,
+
+        pagamento: `💳 Formas de Pagamento:  
+
+💵 M-Pesa: 844093189 (Leonel Amâncio Nhantumbo)  
+
+💵 E-Mola: 878184842 (Leonel Amâncio Nhantumbo)  
+
+📤 Envie o comprovativo em (screenshot) da transferência + o número  84 que deverá receber os GB's.`
+    },
+'258843851507-1502735322@g.us': {
+        nome: 'DKNET',
+        tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - OUTUBRO 2025 🚨🔥✅
+
+📆 PACOTES DIÁRIOS
+512MB = 10MT 💵💽
+800MB = 15MT 💵💽
+1024MB = 18MT 💵💽
+1100MB = 20MT 💵💽
+1300MB = 25MT 💵💽
+1600MB = 30MT 💵💽
+2048MB = 36MT 💵💽
+2200MB = 40MT 💵💽
+2800MB = 50MT 💵💽
+3072MB = 54MT 💵💽
+4096MB = 72MT 💵💽
+5120MB = 90MT 💵💽
+6144MB = 108MT 💵💽
+7168MB = 126MT 💵💽
+8192MB = 144MT 💵💽
+9144MB = 162MT 💵💽
+10240MB = 180MT 💵💽
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+2000MB = 44MT 💵💽
+3000MB = 66MT 💵💽
+4000MB = 88MT 💵💽
+5000MB = 109MT 💵💽
+6000MB = 133MT 💵💽
+7000MB = 149MT 💵💽
+10000MB = 219MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
+
+📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
+1700MB = 45MT 💵💽
+2900MB = 80MT 💵💽
+3400MB = 110MT 💵💽
+5500MB = 150MT 💵💽
+7800MB = 200MT 💵💽
+11400MB = 300MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
+
+📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
+3000MB = 100MT 💵💽
+5000MB = 149MT 💵💽
+8000MB = 201MT 💵💽
+10000MB = 231MT 💵💽
+20000MB = 352MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
+
+📅 PACOTES MENSAIS
+12.8GB = 315MT 💵💽
+22.8GB = 550MT 💵💽
+32.8GB = 725MT 💵💽
+52.8GB = 945MT 💵💽
+60.2GB = 1249MT 💵💽
+80.2GB = 1449MT 💵💽
+100.2GB = 1700MT 💵💽
+
+💎 PACOTES DIAMANTE MENSAIS
+Chamadas + SMS ilimitadas + 11GB = 450MT 💵
+Chamadas + SMS ilimitadas + 24GB = 820MT 💵
+Chamadas + SMS ilimitadas + 50GB = 1550MT 💵
+Chamadas + SMS ilimitadas + 100GB = 2250MT 💵
+
+📍 NB: Válido apenas para Vodacom  
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!
+`,
+
+        pagamento: `M-Pesa:  
+845060515  
+> Nome: WALTER
+
+E-Mola:  
+879914172
+> Nome: MARIA JOAQUIM JAMIRO`
+    },
+'120363401912741383@g.us': {
+    nome: 'Shop Net ✅🌐🔥🇬🇧',
+    tabela: `🅿️/Consumidores🔥🥳🥳
+Nós oferecemos a solução para suas necessidades de dados a preços acessíveis.
+
+🔥🎉 PACOTE DIÁRIO 👌 🔥🎉
+🌐 500MB = 10MT 💸
+🌐 1024MB = 17MT 💸
+🌐 1150MB = 20MT 💸
+🌐 1500MB = 27MT 💸
+🌐 2048MB = 34MT 💸
+🌐 3300MB = 40MT 💸
+🌐 3072MB = 51MT 💸
+🌐 3900MB = 60MT 💸
+🌐 4096MB = 68MT 💸
+🌐 5120MB = 85MT 💸
+🌐 7168MB = 120MT 💸
+🌐 10240MB = 170MT 💸
+🌐 11264MB = 190MT 💸
+🌐 20480MB = 340MT 💸
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+🌐 2000MB = 44MT 💵💽
+🌐 3000MB = 66MT 💵💽
+🌐 4000MB = 88MT 💵💽
+🌐 5000MB = 109MT 💵💽
+🌐 6000MB = 133MT 💵💽
+🌐 7000MB = 149MT 💵💽
+🌐 10000MB = 219MT 💵💽
+🔄 Bônus: +100MB ao atualizar dentro de 3 dias
+
+📅 PACOTES SEMANAIS BÁSICOS (5 Dias – Renováveis)
+🌐 1700MB = 45MT 💵💽
+🌐 2900MB = 80MT 💵💽
+🌐 3400MB = 110MT 💵💽
+🌐 5500MB = 150MT 💵💽
+🌐 7800MB = 200MT 💵💽
+🌐 11400MB = 300MT 💵💽
+🔄 Bônus: +100MB ao atualizar dentro de 5 dias
+
+📅 PACOTES SEMANAIS PREMIUM (15 Dias – Renováveis)
+🌐 3000MB = 100MT 💵💽
+🌐 5000MB = 149MT 💵💽
+🌐 8000MB = 201MT 💵💽
+🌐 10000MB = 231MT 💵💽
+🌐 20000MB = 352MT 💵💽
+🔄 Bônus: +100MB ao atualizar dentro de 15 dias
+
+🔥📞 PACOTE MENSAL 📞🔥
+🌐 3072MB = 115MT 💸
+🌐 5120MB = 165MT 💸
+🌐 7168MB = 195MT 💸
+🌐 10240MB = 260MT 💸
+🌐 11264MB = 290MT 💸
+🌐 20480MB = 480MT 💸
+🌐 40960MB = 900MT 💸
+
+💳 FORMAS DE PAGAMENTO: ⤵️
+📲 E-MOLA: 872685743 💶💰
+👤 Almeida Vasco
+
+📲 M-PESA: 851923280 💷💰
+👤 Almeida
+
+📩 Envie o seu comprovante no grupo, juntamente com o número que receberá os dados.
+✅`,
+    pagamento: `💳 FORMAS DE PAGAMENTO:⤵  
+- 📲 *𝗘-𝗠𝗢𝗟𝗔: *872685743💶💰  
+- Almeida Vasco 
+- 📲 *𝗠-𝗣𝗘𝗦𝗔: 851923280💷💰  
+- ↪📞📱 Almeida  
+
+📩 Envie o seu comprovante no grupo, juntamente com o número que receberá os dados.`
+},
+    '120363041024889744@g.us': {
+        nome: 'NET PROMOÇÃO 17MT V12',
+        tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - NOVEMBRO 2025 🚨🔥✅
+
+📆 PACOTES DIÁRIOS
+1024MB = 17MT 💵💽
+1200MB = 20MT 💵💽
+2048MB = 34MT 💵💽
+2200MB = 40MT 💵💽
+3072MB = 51MT 💵💽
+4096MB = 68MT 💵💽
+5120MB = 85MT 💵💽
+6144MB = 102MT 💵💽
+7168MB = 119MT 💵💽
+8192MB = 136MT 💵💽
+9144MB = 153MT 💵💽
+10240MB = 170MT 💵💽
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+2000MB = 44MT 💵💽
+3000MB = 66MT 💵💽
+4000MB = 88MT 💵💽
+5000MB = 109MT 💵💽
+6000MB = 133MT 💵💽
+7000MB = 149MT 💵💽
+10000MB = 219MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
+
+📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
+1700MB = 45MT 💵💽
+2900MB = 80MT 💵💽
+3400MB = 110MT 💵💽
+5500MB = 150MT 💵💽
+7800MB = 200MT 💵💽
+11400MB = 300MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
+
+📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
+3000MB = 100MT 💵💽
+5000MB = 149MT 💵💽
+8000MB = 201MT 💵💽
+10000MB = 231MT 💵💽
+20000MB = 352MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
+
+📅 PACOTES MENSAIS
+12.8GB = 270MT 💵💽
+22.8GB = 435MT 💵💽
+32.8GB = 605MT 💵💽
+52.8GB = 945MT 💵💽
+60.2GB = 1249MT 💵💽
+80.2GB = 1449MT 💵💽
+100.2GB = 1700MT 💵💽
+
+💎 PACOTES DIAMANTE MENSAIS
+Chamadas + SMS ilimitadas + 11GB = 460MT 💵
+Chamadas + SMS ilimitadas + 24GB = 820MT 💵
+Chamadas + SMS ilimitadas + 50GB = 1550MT 💵
+Chamadas + SMS ilimitadas + 100GB = 2250MT 💵
+
+📍 NB: Válido apenas para Vodacom  
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!
+
+`,
+
+        pagamento: `🤖 Formas de Pagamento
+
+🟧E-mola:870718396__[FREDERICO FELICIANO SIMANGO]
+
+🟥M-Pesa:857013922__[SHAT TERCIANA]
+
+
+Em seguida mande a mensagem de comprovativo
+Aqui no grupo`
+    },
+    '120363131493688789@g.us': {
+        nome: 'NET PROMOÇÃO 17MT V12',
+        tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - NOVEMBRO 2025 🚨🔥✅
+
+📆 PACOTES DIÁRIOS
+1024MB = 17MT 💵💽
+1200MB = 20MT 💵💽
+2048MB = 34MT 💵💽
+2200MB = 40MT 💵💽
+3072MB = 51MT 💵💽
+4096MB = 68MT 💵💽
+5120MB = 85MT 💵💽
+6144MB = 102MT 💵💽
+7168MB = 119MT 💵💽
+8192MB = 136MT 💵💽
+9144MB = 153MT 💵💽
+10240MB = 170MT 💵💽
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+2000MB = 44MT 💵💽
+3000MB = 66MT 💵💽
+4000MB = 88MT 💵💽
+5000MB = 109MT 💵💽
+6000MB = 133MT 💵💽
+7000MB = 149MT 💵💽
+10000MB = 219MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
+
+📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
+1700MB = 45MT 💵💽
+2900MB = 80MT 💵💽
+3400MB = 110MT 💵💽
+5500MB = 150MT 💵💽
+7800MB = 200MT 💵💽
+11400MB = 300MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
+
+📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
+3000MB = 100MT 💵💽
+5000MB = 149MT 💵💽
+8000MB = 201MT 💵💽
+10000MB = 231MT 💵💽
+20000MB = 352MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
+
+📅 PACOTES MENSAIS
+12.8GB = 270MT 💵💽
+22.8GB = 435MT 💵💽
+32.8GB = 605MT 💵💽
+52.8GB = 945MT 💵💽
+60.2GB = 1249MT 💵💽
+80.2GB = 1449MT 💵💽
+100.2GB = 1700MT 💵💽
+
+💎 PACOTES DIAMANTE MENSAIS
+Chamadas + SMS ilimitadas + 11GB = 460MT 💵
+Chamadas + SMS ilimitadas + 24GB = 820MT 💵
+Chamadas + SMS ilimitadas + 50GB = 1550MT 💵
+Chamadas + SMS ilimitadas + 100GB = 2250MT 💵
+
+📍 NB: Válido apenas para Vodacom  
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!
+
+`,
+
+        pagamento: `🤖 Formas de Pagamento
+
+🟧E-mola:870718396__[FREDERICO FELICIANO SIMANGO]
+
+🟥M-Pesa:857013922__[SHAT TERCIANA]
+
+
+Em seguida mande a mensagem de comprovativo
+Aqui no grupo`
+    },
+    '120363403399939386@g.us': {
+        nome: 'Megas Auto 24/7',
+        tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - NOVEMBRO 2025 🚨🔥✅
+
+📆 PACOTES DIÁRIOS
+1024MB = 17MT 💵💽
+1200MB = 19MT 💵💽
+2048MB = 33MT 💵💽
+2200MB = 39MT 💵💽
+3072MB = 50MT 💵💽
+4096MB = 67MT 💵💽
+5120MB = 84MT 💵💽
+6144MB = 101MT 💵💽
+7168MB = 118MT 💵💽
+8192MB = 135MT 💵💽
+9144MB = 152MT 💵💽
+10240MB = 179MT 💵💽
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+2000MB = 43MT 💵💽
+3000MB = 65MT 💵💽
+4000MB = 87MT 💵💽
+5000MB = 108MT 💵💽
+6000MB = 132MT 💵💽
+7000MB = 148MT 💵💽
+10000MB = 218MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
+
+📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
+1700MB = 45MT 💵💽
+2900MB = 80MT 💵💽
+3400MB = 110MT 💵💽
+5500MB = 150MT 💵💽
+7800MB = 200MT 💵💽
+11400MB = 300MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
+
+📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
+3000MB = 100MT 💵💽
+5000MB = 149MT 💵💽
+8000MB = 201MT 💵💽
+10000MB = 231MT 💵💽
+20000MB = 352MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
+
+📅 PACOTES MENSAIS
+12.8GB = 270MT 💵💽
+22.8GB = 435MT 💵💽
+32.8GB = 605MT 💵💽
+52.8GB = 945MT 💵💽
+60.2GB = 1249MT 💵💽
+80.2GB = 1449MT 💵💽
+100.2GB = 1700MT 💵💽
+
+💎 PACOTES DIAMANTE MENSAIS
+Chamadas + SMS ilimitadas + 11GB = 460MT 💵
+Chamadas + SMS ilimitadas + 24GB = 820MT 💵
+Chamadas + SMS ilimitadas + 50GB = 1550MT 💵
+Chamadas + SMS ilimitadas + 100GB = 2250MT 💵
+
+📍 NB: Válido apenas para Vodacom  
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!
+
+`,
+
+        pagamento: `✅FORMAS DE PAGAMENTO ATUALIZADAS
+
+💡M-PESA
+NÚMERO: 844768478
+NOME: Alexandre Zacarias
+
+💡eMola
+NÚMERO: 866086464
+NOME: Alexandre Zacarias
+
+📝 Após a transferência, mande:
+1️⃣ Comprovativo
+2️⃣ UM número que vai receber`
     }
-    
 };
 
 
@@ -2469,9 +3329,12 @@ async function tentarComRetry(funcao, maxTentativas = 3, delay = 2000) {
     }
 }
 async function enviarParaGoogleSheets(referencia, valor, numero, grupoId, grupoNome, autorMensagem) {
+    // AGUARDAR RATE LIMIT ANTES DE ENVIAR
+    await aguardarRateLimit();
+
     // Formato igual ao Bot Atacado: transacao já concatenada
     const transacaoFormatada = `${referencia}|${valor}|${numero}`;
-    
+
     const dados = {
         transacao: transacaoFormatada,  // Formato concatenado igual ao Bot Atacado
         grupo_id: grupoId,
@@ -2479,7 +3342,7 @@ async function enviarParaGoogleSheets(referencia, valor, numero, grupoId, grupoN
         message: `Dados enviados pelo Bot: ${transacaoFormatada}`,
         timestamp: new Date().toISOString()
     };
-    
+
     try {
         console.log(`📊 Enviando para Google Sheets: ${referencia}`);
         console.log(`🔍 Dados enviados:`, JSON.stringify(dados, null, 2));
@@ -2529,10 +3392,358 @@ async function enviarParaGoogleSheets(referencia, valor, numero, grupoId, grupoN
                 throw new Error(`Resposta inesperada: ${responseText}`);
             }
         }
-        
+
     } catch (error) {
+        // Tratar erro 429 especificamente
+        if (error.response && error.response.status === 429) {
+            erros429Consecutivos++;
+            console.error(`🚨 Google Sheets: Rate limit atingido (429) - Erro ${erros429Consecutivos}/${MAX_ERROS_429}`);
+
+            // Pausar se necessário
+            if (erros429Consecutivos >= MAX_ERROS_429) {
+                const pausaEmergencia = 2 * 60 * 1000;
+                console.error(`⏸️ Google Sheets: Pausando envios por ${pausaEmergencia/1000}s devido a múltiplos erros 429`);
+                await new Promise(resolve => setTimeout(resolve, pausaEmergencia));
+                erros429Consecutivos = 0;
+            }
+            return { sucesso: false, erro: 'Rate limit atingido, tentando novamente em instantes...' };
+        }
+
         console.error(`❌ Erro Google Sheets [${grupoNome}]: ${error.message}`);
         return { sucesso: false, erro: error.message };
+    }
+}
+
+// === FUNÇÃO PARA ENVIAR PACOTES ESPECIAIS (DIAMANTE, 2.8GB, ETC) ===
+async function enviarParaGoogleSheetsDiamante(referencia, numero, codigoPacote, grupoId, grupoNome, autorMensagem) {
+    // AGUARDAR RATE LIMIT ANTES DE ENVIAR
+    await aguardarRateLimit();
+
+    // Formato NOVO: REF|CODIGO|NUMERO
+    // CODIGO: 1=Diamante, 2=Pacote 2.8GB, etc.
+    const transacaoFormatada = `${referencia}|${codigoPacote}|${numero}`;
+
+    // Obter nome do pacote para logs
+    const infoPacote = CODIGOS_PACOTES_ESPECIAIS[codigoPacote] || { nome: 'Especial', emoji: '📦' };
+
+    const dados = {
+        transacao: transacaoFormatada,
+        grupo_id: grupoId,
+        sender: `WhatsApp-Bot-${infoPacote.nome}`,
+        message: `Pedido ${infoPacote.emoji} ${infoPacote.nome} enviado pelo Bot: ${transacaoFormatada}`,
+        timestamp: new Date().toISOString()
+    };
+
+    try {
+        console.log(`💎 Enviando para Google Sheets DIAMANTE: ${referencia}`);
+        console.log(`🔍 Dados enviados:`, JSON.stringify(dados, null, 2));
+        console.log(`🔗 URL destino:`, GOOGLE_SHEETS_CONFIG_DIAMANTE.scriptUrl);
+
+        // Usar axios COM RETRY para Google Sheets Diamante
+        const response = await axiosComRetry({
+            method: 'post',
+            url: GOOGLE_SHEETS_CONFIG_DIAMANTE.scriptUrl,
+            data: dados,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Bot-Source': 'WhatsApp-Bot-Diamante'
+            }
+        }, 3); // 3 tentativas
+
+        const responseData = response.data;
+        console.log(`📥 Resposta Google Sheets Diamante:`, JSON.stringify(responseData, null, 2));
+
+        // Verificar se é uma resposta JSON válida
+        if (typeof responseData === 'object') {
+            if (responseData.success) {
+                console.log(`✅ Google Sheets Diamante: Dados enviados!`);
+                return { sucesso: true, referencia: responseData.referencia, duplicado: false };
+            } else if (responseData.duplicado) {
+                console.log(`⚠️ Google Sheets Diamante: Pedido duplicado detectado - ${responseData.referencia} (Status: ${responseData.status_existente})`);
+                return {
+                    sucesso: false,
+                    duplicado: true,
+                    referencia: responseData.referencia,
+                    status_existente: responseData.status_existente,
+                    message: responseData.message
+                };
+            } else {
+                throw new Error(responseData.message || 'Erro desconhecido');
+            }
+        } else {
+            // Fallback para compatibilidade com resposta em texto
+            const responseText = String(responseData);
+            if (responseText.includes('Sucesso!')) {
+                console.log(`✅ Google Sheets Diamante: Dados enviados!`);
+                return { sucesso: true, row: 'N/A', duplicado: false };
+            } else if (responseText.includes('Erro:')) {
+                throw new Error(responseText);
+            } else {
+                throw new Error(`Resposta inesperada: ${responseText}`);
+            }
+        }
+
+    } catch (error) {
+        // Tratar erro 429 especificamente
+        if (error.response && error.response.status === 429) {
+            erros429Consecutivos++;
+            console.error(`🚨 Google Sheets Diamante: Rate limit atingido (429) - Erro ${erros429Consecutivos}/${MAX_ERROS_429}`);
+
+            // Pausar se necessário
+            if (erros429Consecutivos >= MAX_ERROS_429) {
+                const pausaEmergencia = 2 * 60 * 1000;
+                console.error(`⏸️ Google Sheets Diamante: Pausando envios por ${pausaEmergencia/1000}s devido a múltiplos erros 429`);
+                await new Promise(resolve => setTimeout(resolve, pausaEmergencia));
+                erros429Consecutivos = 0;
+            }
+            return { sucesso: false, erro: 'Rate limit atingido, tentando novamente em instantes...' };
+        }
+
+        console.error(`❌ Erro Google Sheets Diamante [${grupoNome}]: ${error.message}`);
+        return { sucesso: false, erro: error.message };
+    }
+}
+
+// === FUNÇÃO PARA PROCESSAR PACOTES ESPECIAIS (DIAMANTE, 2.8GB, ETC) ===
+async function processarPacoteDiamante(comprovante, configGrupo, pacoteDiamante) {
+    try {
+        const { referencia, valor, numero } = comprovante;
+        const grupoId = configGrupo.grupoId;
+        const grupoNome = configGrupo.nome;
+
+        // Identificar código do pacote baseado no tipo
+        let codigoPacote = 1; // Padrão: Diamante
+        let gbBase = 11; // GB base para divisão (padrão diamante)
+
+        // Identificar tipo de pacote especial
+        if (pacoteDiamante.isDiamante) {
+            codigoPacote = 1;
+            gbBase = CODIGOS_PACOTES_ESPECIAIS[1].gbBase;
+        } else if (pacoteDiamante.tipo === 'pacote_2_8gb' || pacoteDiamante.descricao.includes('2.8GB') || pacoteDiamante.descricao.includes('2,8GB')) {
+            codigoPacote = 2;
+            gbBase = CODIGOS_PACOTES_ESPECIAIS[2].gbFixo;
+        }
+
+        const infoPacote = CODIGOS_PACOTES_ESPECIAIS[codigoPacote];
+
+        console.log(`${infoPacote.emoji} ${infoPacote.nome.toUpperCase()}: Processando pacote especial`);
+        console.log(`${infoPacote.emoji} Ref: ${referencia} | Valor: ${valor}MT | Número: ${numero}`);
+        console.log(`${infoPacote.emoji} Pacote: ${pacoteDiamante.descricao} (${pacoteDiamante.quantidade}MB)`);
+
+        // Converter MB para GB
+        const totalGB = Math.round(pacoteDiamante.quantidade / 1024);
+        console.log(`${infoPacote.emoji} Total GB: ${totalGB}GB`);
+
+        // === CASO 1: Pacote até GB base (SIMPLES - SEM DIVISÃO) ===
+        if (totalGB <= gbBase) {
+            console.log(`${infoPacote.emoji} ${infoPacote.nome}: Pacote ≤${gbBase}GB, enviando direto para planilha especial`);
+
+            // Enviar direto para planilha de pacotes especiais
+            const resultado = await enviarParaGoogleSheetsDiamante(
+                referencia,
+                numero,
+                codigoPacote,
+                grupoId,
+                grupoNome,
+                'WhatsApp-Bot'
+            );
+
+            if (resultado.sucesso) {
+                console.log(`✅ ${infoPacote.nome}: Pacote enviado com sucesso!`);
+                return {
+                    sucesso: true,
+                    mensagem: `${infoPacote.emoji} *${infoPacote.nome.toUpperCase()} PROCESSADO*\n\n✅ Seu pacote foi enviado para processamento!\n\n📱 Número: ${numero}\n${infoPacote.emoji} Pacote: ${pacoteDiamante.descricao}\n🔖 Referência: ${referencia}\n\n⏰ Aguarde a ativação em instantes!`
+                };
+            } else {
+                throw new Error(resultado.erro || 'Erro ao enviar para planilha de pacotes especiais');
+            }
+        }
+
+        // === CASO 2: Pacote > GB base (COMPLEXO - COM DIVISÃO) ===
+        console.log(`${infoPacote.emoji} ${infoPacote.nome}: Pacote >${gbBase}GB, iniciando divisão`);
+
+        const gbDiamante = gbBase;
+        const gbExtras = totalGB - gbDiamante;
+        console.log(`${infoPacote.emoji} ${infoPacote.nome}: ${totalGB}GB = ${gbDiamante}GB (${infoPacote.identificador}) + ${gbExtras}GB (extras)`);
+
+        // Calcular divisões dos GB extras (limite 10GB por transação)
+        const divisoes = [];
+        let gbRestante = gbExtras * 1024; // Converter para MB
+        let contadorDivisao = 1;
+
+        while (gbRestante > 0) {
+            const mbDivisao = Math.min(gbRestante, 10240); // Máximo 10GB por transação
+            const refDivisao = `${referencia}${String(contadorDivisao).padStart(2, '0')}`;
+
+            divisoes.push({
+                referencia: refDivisao,
+                megas: mbDivisao,
+                numero: numero
+            });
+
+            gbRestante -= mbDivisao;
+            contadorDivisao++;
+        }
+
+        console.log(`${infoPacote.emoji} ${infoPacote.nome}: ${gbExtras}GB divididos em ${divisoes.length} transação(ões):`);
+        divisoes.forEach((div, i) => {
+            console.log(`   ${i + 1}. ${div.referencia} = ${div.megas}MB`);
+        });
+
+        // Adicionar ao cache de pacotes especiais pendentes
+        pacotesDiamantePendentes[referencia] = {
+            referencia: referencia,
+            numero: numero,
+            codigoPacote: codigoPacote,
+            totalGB: totalGB,
+            gbDiamante: gbDiamante,
+            gbExtras: gbExtras,
+            divisoes: divisoes.map(d => d.referencia),
+            confirmacoesRecebidas: [],
+            grupoId: grupoId,
+            grupoNome: grupoNome,
+            timestamp: Date.now()
+        };
+
+        console.log(`${infoPacote.emoji} ${infoPacote.nome}: Adicionado ao cache de pendentes`);
+
+        // Enviar divisões para planilha comum (sistema existente)
+        for (const divisao of divisoes) {
+            console.log(`📤 Enviando divisão: ${divisao.referencia} = ${divisao.megas}MB`);
+
+            const resultado = await enviarParaGoogleSheets(
+                divisao.referencia,
+                divisao.megas,
+                divisao.numero,
+                grupoId,
+                grupoNome,
+                'WhatsApp-Bot-Diamante-Divisao'
+            );
+
+            if (!resultado.sucesso) {
+                console.error(`❌ Erro ao enviar divisão ${divisao.referencia}`);
+                // Continuar enviando outras divisões
+            }
+        }
+
+        console.log(`✅ ${infoPacote.nome}: Todas as divisões enviadas para planilha comum`);
+        console.log(`⏳ ${infoPacote.nome}: Aguardando confirmações do bot secundário...`);
+
+        return {
+            sucesso: true,
+            mensagem: `${infoPacote.emoji} *${infoPacote.nome.toUpperCase()} PROCESSADO*\n\n✅ Seu pacote está sendo processado!\n\n📱 Número: ${numero}\n${infoPacote.emoji} Pacote: ${pacoteDiamante.descricao}\n🔖 Referência: ${referencia}\n\n📊 *Divisão:*\n• ${gbExtras}GB de megas comuns (processando...)\n• ${gbDiamante}GB + ${infoPacote.descricao} (aguardando)\n\n⏰ O ${infoPacote.nome.toLowerCase()} será ativado assim que os megas extras forem confirmados!`
+        };
+
+    } catch (error) {
+        console.error(`❌ DIAMANTE: Erro ao processar pacote:`, error.message);
+        return {
+            sucesso: false,
+            erro: error.message
+        };
+    }
+}
+
+// === FUNÇÃO PARA PROCESSAR PACOTES .8GB (12.8, 22.8, etc.) ===
+async function processarPacotePonto8(comprovante, configGrupo, pacoteDiamante) {
+    try {
+        const { referencia, valor, numero } = comprovante;
+
+        // Verificação de segurança para configGrupo
+        if (!configGrupo) {
+            console.error(`❌ PACOTE .8GB: configGrupo está undefined!`);
+            throw new Error('Configuração do grupo não encontrada');
+        }
+
+        const grupoId = configGrupo.grupoId;
+        const grupoNome = configGrupo.nome || 'Desconhecido';
+
+        console.log(`📦 PACOTE .8GB: Processando pacote especial .8GB`);
+        console.log(`📦 Ref: ${referencia} | Valor: ${valor}MT | Número: ${numero}`);
+        console.log(`📦 Grupo ID: ${grupoId} | Nome: ${grupoNome}`);
+        console.log(`📦 Pacote: ${pacoteDiamante.descricao} (${pacoteDiamante.gbTotal}GB total)`);
+
+        const totalGB = pacoteDiamante.gbTotal; // Ex: 12.8, 22.8, etc.
+        const gbComuns = totalGB - 2.8; // Ex: 10, 20, etc.
+        const gb28 = 2.8;
+
+        console.log(`📦 DIVISÃO: ${totalGB}GB = ${gbComuns}GB (comuns) + ${gb28}GB (especial código 2)`);
+
+        // === PASSO 1: Calcular divisões dos GB comuns (limite 10GB por transação) ===
+        const divisoes = [];
+        let gbRestante = gbComuns * 1024; // Converter para MB
+        let contadorDivisao = 1;
+
+        while (gbRestante > 0) {
+            const mbDivisao = Math.min(gbRestante, 10240); // Máximo 10GB por transação
+            const refDivisao = `${referencia}${String(contadorDivisao).padStart(2, '0')}`;
+
+            divisoes.push({
+                referencia: refDivisao,
+                megas: mbDivisao,
+                numero: numero
+            });
+
+            gbRestante -= mbDivisao;
+            contadorDivisao++;
+        }
+
+        console.log(`📦 ${gbComuns}GB comuns divididos em ${divisoes.length} transação(ões):`);
+        divisoes.forEach((div, i) => {
+            console.log(`   ${i + 1}. ${div.referencia} = ${div.megas}MB`);
+        });
+
+        // === PASSO 2: Adicionar ao cache de pacotes .8GB pendentes ===
+        pacotesDiamantePendentes[referencia] = {
+            referencia: referencia,
+            numero: numero,
+            codigoPacote: 2, // Código 2 para os 2.8GB
+            totalGB: totalGB,
+            gbComuns: gbComuns,
+            gb28: gb28,
+            divisoes: divisoes.map(d => d.referencia),
+            confirmacoesRecebidas: [],
+            grupoId: grupoId,
+            grupoNome: grupoNome,
+            timestamp: Date.now(),
+            tipo: 'pacote_ponto_8gb'
+        };
+
+        console.log(`📦 Adicionado ao cache de pendentes (tipo: pacote_ponto_8gb)`);
+
+        // === PASSO 3: Enviar divisões comuns para planilha comum ===
+        for (const divisao of divisoes) {
+            console.log(`📤 Enviando divisão comum: ${divisao.referencia} = ${divisao.megas}MB`);
+
+            const resultado = await enviarParaGoogleSheets(
+                divisao.referencia,
+                divisao.megas,
+                divisao.numero,
+                grupoId,
+                grupoNome,
+                'WhatsApp-Bot-Ponto8-Divisao'
+            );
+
+            if (!resultado.sucesso) {
+                console.error(`❌ Erro ao enviar divisão ${divisao.referencia}`);
+                // Continuar enviando outras divisões
+            }
+        }
+
+        console.log(`✅ PACOTE .8GB: Todas as divisões comuns enviadas`);
+        console.log(`⏳ PACOTE .8GB: Aguardando confirmações para enviar os 2.8GB especiais...`);
+
+        // === PASSO 4: Retornar mensagem ao cliente ===
+        return {
+            sucesso: true,
+            mensagem: `📦 *PACOTE ${totalGB}GB PROCESSADO*\n\n✅ Seu pacote está sendo processado!\n\n📱 Número: ${numero}\n📦 Pacote: ${pacoteDiamante.descricao}\n🔖 Referência: ${referencia}\n\n📊 *Divisão:*\n• ${gbComuns}GB comuns (processando...)\n• ${gb28}GB mensais código 2 (aguardando confirmação)\n\n⏰ O pacote completo será ativado após confirmação dos megas comuns!`
+        };
+
+    } catch (error) {
+        console.error(`❌ PACOTE .8GB: Erro ao processar:`, error.message);
+        return {
+            sucesso: false,
+            erro: error.message
+        };
     }
 }
 
@@ -2653,6 +3864,88 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
             }
         }
 
+        // === DETECTAR E ATIVAR PACOTES AUTOMÁTICOS (3, 5, 15 DIAS) ===
+        if (sistemaPacotes && CONFIGURACAO_GRUPOS[grupoId]) {
+            try {
+                const tabelaGrupo = CONFIGURACAO_GRUPOS[grupoId].tabela;
+
+                // Extrair pacotes renováveis da tabela para fazer lookup
+                const pacotesRenovaveis = sistemaPacotes.extrairPacotesRenovaveis(tabelaGrupo);
+
+                // Procurar o valor em MT correspondente aos MB
+                let valorMTEncontrado = null;
+                let tipoPacoteDetectado = null;
+
+                for (const [tipoDias, listaPacotes] of Object.entries(pacotesRenovaveis)) {
+                    for (const pacote of listaPacotes) {
+                        // Comparar com tolerância de 1%
+                        if (Math.abs(pacote.mb - valor) <= (valor * 0.01)) {
+                            valorMTEncontrado = pacote.valor;
+                            tipoPacoteDetectado = tipoDias;
+                            break;
+                        }
+                    }
+                    if (tipoPacoteDetectado) break;
+                }
+
+                if (tipoPacoteDetectado && valorMTEncontrado) {
+                    console.log(`🎯 PACOTES: Detectado pacote de ${tipoPacoteDetectado} dias - Ativando automaticamente!`);
+                    console.log(`   📋 Referência: ${referencia}`);
+                    console.log(`   📱 Número: ${numero}`);
+                    console.log(`   💰 Valor: ${valorMTEncontrado}MT`);
+                    console.log(`   📊 Megas: ${valor}MB`);
+
+                    // Ativar pacote automático
+                    const resultadoPacote = await sistemaPacotes.processarComprovante(
+                        referencia,
+                        numero,
+                        grupoId,
+                        tipoPacoteDetectado,
+                        new Date() // Horário de ativação = agora
+                    );
+
+                    if (resultadoPacote.sucesso) {
+                        console.log(`✅ PACOTES: Pacote automático ativado com sucesso!`);
+                        console.log(`   📅 Primeira renovação: ${new Date(resultadoPacote.cliente.proximaRenovacao).toLocaleString('pt-BR')}`);
+
+                        // Enviar notificação ao grupo
+                        try {
+                            const primeiraRenovacaoData = new Date(resultadoPacote.cliente.proximaRenovacao);
+                            const dataExpiracao = new Date(resultadoPacote.cliente.dataExpiracao);
+                            const nomeTipoPacote = sistemaPacotes.TIPOS_PACOTES[tipoPacoteDetectado].nome;
+
+                            const mensagemNotificacao =
+                                `🎉 *PACOTE AUTOMÁTICO ATIVADO!*\n\n` +
+                                `📱 *Número:* ${numero}\n` +
+                                `📦 *Tipo:* ${nomeTipoPacote}\n` +
+                                `📊 *Pacote:* ${valor}MB\n` +
+                                `💰 *Valor:* ${valorMTEncontrado}MT\n` +
+                                `📋 *Referência:* ${referencia}\n\n` +
+                                `🔄 *Renovações Automáticas Agendadas:*\n` +
+                                `   • Total: ${tipoPacoteDetectado} renovações de 100MB\n` +
+                                `   • Primeira: ${primeiraRenovacaoData.toLocaleDateString('pt-BR')} às ${primeiraRenovacaoData.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}\n` +
+                                `   • Frequência: Diária (2h antes do horário anterior)\n\n` +
+                                `📅 *Validade Total:* Até ${dataExpiracao.toLocaleDateString('pt-BR')}\n\n` +
+                                `💡 *Como funciona:*\n` +
+                                `O sistema enviará automaticamente 100MB por dia durante ${tipoPacoteDetectado} dias para manter seu pacote principal válido.\n\n` +
+                                `✨ *Total de dados:* ${valor}MB + ${parseInt(tipoPacoteDetectado) * 100}MB bônus = ${valor + (parseInt(tipoPacoteDetectado) * 100)}MB!`;
+
+                            await client.sendMessage(grupoId, mensagemNotificacao);
+                            console.log(`📢 Notificação de pacote automático enviada ao grupo!`);
+                        } catch (errorNotificacao) {
+                            console.error(`❌ Erro ao enviar notificação de pacote automático:`, errorNotificacao.message);
+                            // Não falhar a ativação por causa da notificação
+                        }
+                    } else {
+                        console.error(`❌ PACOTES: Erro ao ativar pacote automático: ${resultadoPacote.erro}`);
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Erro ao detectar/ativar pacote automático:', error);
+                // Não falhar o envio por causa disso
+            }
+        }
+
         return {
             sucesso: true,
             referencia: referencia,
@@ -2746,6 +4039,9 @@ function obterRenovacoesPendentesTasker() {
 
 // === COMANDOS CUSTOMIZADOS - FUNÇÕES ===
 
+let gatilhosAutomaticos = {}; // { chatId: { gatilho: { resposta, criadoPor, criadoEm } } }
+const ARQUIVO_GATILHOS = './gatilhos_automaticos.json';
+
 async function carregarComandosCustomizados() {
     try {
         const data = await fs.readFile(ARQUIVO_COMANDOS, 'utf8');
@@ -2754,6 +4050,17 @@ async function carregarComandosCustomizados() {
     } catch (error) {
         comandosCustomizados = {};
         console.log('📝 Arquivo de comandos não existe, criando estrutura vazia');
+    }
+}
+
+async function carregarGatilhosAutomaticos() {
+    try {
+        const data = await fs.readFile(ARQUIVO_GATILHOS, 'utf8');
+        gatilhosAutomaticos = JSON.parse(data);
+        console.log(`🎯 Gatilhos automáticos carregados: ${Object.keys(gatilhosAutomaticos).length} grupos`);
+    } catch (error) {
+        gatilhosAutomaticos = {};
+        console.log('🎯 Arquivo de gatilhos não existe, criando estrutura vazia');
     }
 }
 
@@ -2766,14 +4073,39 @@ async function salvarComandosCustomizados() {
     }
 }
 
+async function salvarGatilhosAutomaticos() {
+    try {
+        await fs.writeFile(ARQUIVO_GATILHOS, JSON.stringify(gatilhosAutomaticos));
+        console.log('✅ Gatilhos automáticos salvos');
+    } catch (error) {
+        console.error('❌ Erro ao salvar gatilhos:', error);
+    }
+}
+
 function parsearComandoCustomizado(texto) {
-    // Regex para capturar: .addcomando Nome_do_comando(resposta)
-    const regex = /^\.addcomando\s+(\w+)\s*\((.+)\)$/s;
+    // Regex para capturar: .addcomando Nome do comando(resposta)
+    // Aceita múltiplas palavras e caracteres especiais (ç, á, õ, etc)
+    const regex = /^\.addcomando\s+(.+?)\s*\((.+)\)$/s;
     const match = texto.match(regex);
-    
+
     if (match) {
         return {
-            nome: match[1].toLowerCase(),
+            nome: match[1].trim().toLowerCase(),
+            resposta: match[2].trim()
+        };
+    }
+    return null;
+}
+
+function parsearGatilhoAutomatico(texto) {
+    // Regex para capturar: .addgatilho Texto inicial(resposta)
+    // Aceita múltiplas palavras e caracteres especiais
+    const regex = /^\.addgatilho\s+(.+?)\s*\((.+)\)$/s;
+    const match = texto.match(regex);
+
+    if (match) {
+        return {
+            gatilho: match[1].trim().toLowerCase(),
             resposta: match[2].trim()
         };
     }
@@ -2795,17 +4127,47 @@ async function adicionarComandoCustomizado(chatId, nomeComando, resposta, autorI
     console.log(`✅ Comando '${nomeComando}' adicionado ao grupo ${chatId}`);
 }
 
+async function adicionarGatilhoAutomatico(chatId, gatilho, resposta, autorId) {
+    if (!gatilhosAutomaticos[chatId]) {
+        gatilhosAutomaticos[chatId] = {};
+    }
+
+    gatilhosAutomaticos[chatId][gatilho] = {
+        resposta: resposta,
+        criadoPor: autorId,
+        criadoEm: new Date().toISOString()
+    };
+
+    await salvarGatilhosAutomaticos();
+    console.log(`✅ Gatilho '${gatilho}' adicionado ao grupo ${chatId}`);
+}
+
 async function removerComandoCustomizado(chatId, nomeComando) {
     if (comandosCustomizados[chatId] && comandosCustomizados[chatId][nomeComando]) {
         delete comandosCustomizados[chatId][nomeComando];
-        
+
         // Se não há mais comandos no grupo, remove a entrada do grupo
         if (Object.keys(comandosCustomizados[chatId]).length === 0) {
             delete comandosCustomizados[chatId];
         }
-        
+
         await salvarComandosCustomizados();
         console.log(`🗑️ Comando '${nomeComando}' removido do grupo ${chatId}`);
+        return true;
+    }
+    return false;
+}
+
+async function removerGatilhoAutomatico(chatId, gatilho) {
+    if (gatilhosAutomaticos[chatId] && gatilhosAutomaticos[chatId][gatilho]) {
+        delete gatilhosAutomaticos[chatId][gatilho];
+
+        if (Object.keys(gatilhosAutomaticos[chatId]).length === 0) {
+            delete gatilhosAutomaticos[chatId];
+        }
+
+        await salvarGatilhosAutomaticos();
+        console.log(`🗑️ Gatilho '${gatilho}' removido do grupo ${chatId}`);
         return true;
     }
     return false;
@@ -2815,6 +4177,21 @@ function executarComandoCustomizado(chatId, comando) {
     if (comandosCustomizados[chatId] && comandosCustomizados[chatId][comando]) {
         return comandosCustomizados[chatId][comando].resposta;
     }
+    return null;
+}
+
+function verificarGatilhoAutomatico(chatId, mensagem) {
+    if (!gatilhosAutomaticos[chatId]) return null;
+
+    const mensagemLower = mensagem.toLowerCase().trim();
+
+    // Verifica cada gatilho do grupo
+    for (const gatilho in gatilhosAutomaticos[chatId]) {
+        if (mensagemLower.startsWith(gatilho)) {
+            return gatilhosAutomaticos[chatId][gatilho].resposta;
+        }
+    }
+
     return null;
 }
 
@@ -2888,7 +4265,32 @@ function isGrupoMonitorado(chatId) {
 }
 
 function getConfiguracaoGrupo(chatId) {
-    return CONFIGURACAO_GRUPOS[chatId] || null;
+    // Verificar se existe configuração customizada
+    if (sistemaConfigGrupos) {
+        const configCustomizada = sistemaConfigGrupos.obterConfig(chatId);
+        if (configCustomizada && configCustomizada.tabela) {
+            // Usar config customizada, mas manter nome do padrão se existir
+            const configPadrao = CONFIGURACAO_GRUPOS[chatId];
+            return {
+                grupoId: chatId, // ADICIONAR grupoId ao retorno
+                nome: configPadrao?.nome || configCustomizada.nome || 'Grupo',
+                tabela: configCustomizada.tabela,
+                pagamento: configCustomizada.pagamento || configPadrao?.pagamento || ''
+            };
+        }
+    }
+
+    // Usar configuração padrão do código
+    const configPadrao = CONFIGURACAO_GRUPOS[chatId];
+    if (configPadrao) {
+        // Adicionar grupoId ao objeto retornado
+        return {
+            grupoId: chatId,
+            ...configPadrao
+        };
+    }
+
+    return null;
 }
 
 // Função para resolver ID interno (@lid) para número real (@c.us)
@@ -2964,7 +4366,12 @@ function contemConteudoSuspeito(mensagem) {
 
     // Detectar apenas URLs reais, não a palavra "link"
     // Regex atualizado para detectar apenas links reais (http://, https://, www., ou domínios completos)
-    const temLink = /(?:https?:\/\/[^\s]+|www\.[^\s]+|(?:bit\.ly|tinyurl\.com|t\.me|wa\.me|whatsapp\.com|telegram\.me)\/[^\s]+)/i.test(texto);
+    // Explicação:
+    // - https?://...  -> URLs com esquema
+    // - www....       -> URLs começando com www
+    // - domínio.tld    -> detectar padrões como example.com (lista de TLDs comuns)
+    // - encurtadores  -> bit.ly, tinyurl.com, t.me, wa.me, whatsapp.com, telegram.me
+    const temLink = /(?:https?:\/\/[\S]+|www\.[\S]+|(?:bit\.ly|tinyurl\.com|t\.me|wa\.me|whatsapp\.com|telegram\.me)\/[\S]+|[a-z0-9\-]+\.(?:com|net|org|io|br|co|xyz|online|info|biz|me|us|edu|gov)(?:[\/\s]|$))/i.test(texto);
 
     return {
         temLink: MODERACAO_CONFIG.detectarLinks && temLink,
@@ -3000,9 +4407,12 @@ async function aplicarModeracao(message, motivoDeteccao) {
     const authorId = message.author || message.from;
     
     try {
-        if (!MODERACAO_CONFIG.ativado[chatId]) {
-            return;
-        }
+        // Ativar moderação para todos os grupos que estiverem em CONFIGURACAO_GRUPOS.
+        // Se o grupo está listado em CONFIGURACAO_GRUPOS a moderação será aplicada independente de entradas conflitantes em MODERACAO_CONFIG.ativado.
+        const ativadoExplicit = CONFIGURACAO_GRUPOS.hasOwnProperty(chatId) ||
+            (MODERACAO_CONFIG.ativado && MODERACAO_CONFIG.ativado[chatId]);
+
+        if (!ativadoExplicit) return;
 
         if (MODERACAO_CONFIG.excecoes.includes(authorId) || isAdministrador(authorId)) {
             return;
@@ -3015,7 +4425,63 @@ async function aplicarModeracao(message, motivoDeteccao) {
         }
 
         if (MODERACAO_CONFIG.removerUsuario) {
-            await removerParticipante(chatId, authorId, motivoDeteccao);
+            // Tentar obter informações do contato para menção/nomes
+            let mentionId = String(authorId).replace('@c.us', '').replace('@lid', '');
+            let nomeExibicao = mentionId;
+            try {
+                const contato = await client.getContactById(authorId);
+                if (contato) {
+                    nomeExibicao = contato.pushname || contato.name || contato.number || mentionId;
+                }
+            } catch (err) {
+                // ignora erro de obtenção de contato, usaremos o ID reduzido
+            }
+
+            // Enviar aviso ao grupo antes/depois da remoção
+            try {
+                // VALIDAÇÃO CRÍTICA: Verificar se é um ID válido de usuário
+                const ehIDValido = authorId &&
+                                  typeof authorId === 'string' &&
+                                  (authorId.includes('@c.us') || authorId.includes('@lid')) &&
+                                  !authorId.startsWith('SAQUE_BONUS_') &&
+                                  !authorId.startsWith('SAQ');
+
+                const aviso = `🚫 @${mentionId} foi removido(a) do grupo por enviar link.`;
+
+                if (ehIDValido) {
+                    await client.sendMessage(chatId, aviso, { mentions: [authorId] });
+                } else {
+                    console.warn(`⚠️ ID inválido para menção de remoção: ${authorId}`);
+                    await client.sendMessage(chatId, aviso);
+                }
+            } catch (errAviso) {
+                // Se o envio do aviso falhar, não interromper a remoção
+                console.log('⚠️ Não foi possível enviar aviso de remoção:', errAviso.message);
+            }
+
+            const removido = await removerParticipante(chatId, authorId, motivoDeteccao);
+
+            if (!removido) {
+                try {
+                    // VALIDAÇÃO CRÍTICA: Verificar se é um ID válido de usuário
+                    const ehIDValido = authorId &&
+                                      typeof authorId === 'string' &&
+                                      (authorId.includes('@c.us') || authorId.includes('@lid')) &&
+                                      !authorId.startsWith('SAQUE_BONUS_') &&
+                                      !authorId.startsWith('SAQ');
+
+                    const avisoErro = `⚠️ Não foi possível remover @${mentionId}. Verifique se o bot tem permissões de administrador.`;
+
+                    if (ehIDValido) {
+                        await client.sendMessage(chatId, avisoErro, { mentions: [authorId] });
+                    } else {
+                        console.warn(`⚠️ ID inválido para menção de erro: ${authorId}`);
+                        await client.sendMessage(chatId, avisoErro);
+                    }
+                } catch (err2) {
+                    console.log('⚠️ Falha ao notificar sobre remoção mal-sucedida:', err2.message);
+                }
+            }
         }
 
     } catch (error) {
@@ -3222,8 +4688,44 @@ client.on('ready', async () => {
     await sistemaBonus.carregarDados();
     console.log('💰 Sistema de Bônus ATIVADO');
 
+    // === INICIALIZAR SISTEMA DE CONFIGURAÇÃO DE GRUPOS ===
+    sistemaConfigGrupos = new SistemaConfigGrupos();
+    await sistemaConfigGrupos.carregarConfiguracoes();
+    console.log('⚙️ Sistema de Configuração de Grupos ATIVADO');
+
     // Carregar dados de referência (legado - será migrado)
     await carregarDadosReferencia();
+
+    // CORRIGIDO: Sincronizar dados legados com SistemaBonus
+    console.log('🔄 Sincronizando dados legados com SistemaBonus...');
+
+    // Sincronizar códigos de referência
+    if (Object.keys(codigosReferencia).length > 0) {
+        sistemaBonus.codigosReferencia = { ...codigosReferencia };
+        console.log(`   ✅ ${Object.keys(codigosReferencia).length} códigos sincronizados`);
+    }
+
+    // Sincronizar referências de clientes
+    if (Object.keys(referenciasClientes).length > 0) {
+        sistemaBonus.referenciasClientes = { ...referenciasClientes };
+        console.log(`   ✅ ${Object.keys(referenciasClientes).length} referências sincronizadas`);
+    }
+
+    // Sincronizar saldos de bônus (mesclar dados)
+    if (Object.keys(bonusSaldos).length > 0) {
+        for (const [clienteId, saldoLegado] of Object.entries(bonusSaldos)) {
+            const saldoNovo = sistemaBonus.buscarSaldo(clienteId);
+            if (!saldoNovo || saldoNovo.saldo === 0) {
+                // Se não existe no novo sistema ou está zerado, usar dados legados
+                sistemaBonus.bonusSaldos[clienteId] = { ...saldoLegado };
+            }
+        }
+        console.log(`   ✅ ${Object.keys(bonusSaldos).length} saldos mesclados`);
+    }
+
+    // Salvar dados sincronizados
+    await sistemaBonus.salvarDados();
+    console.log('✅ Sincronização concluída e salva!');
     
     await carregarHistorico();
     
@@ -3233,7 +4735,7 @@ client.on('ready', async () => {
         console.log(`   📋 ${config.nome} (${grupoId})`);
     });
     
-    console.log('\n🔧 Comandos admin: .ia .stats .sheets .test_sheets .test_grupo .grupos_status .grupos .grupo_atual .addcomando .comandos .delcomando .test_vision .ranking .inativos .detetives .semcompra .resetranking .bonus .testreferencia .config-relatorio .list-relatorios .remove-relatorio .test-relatorio');
+    console.log('\n🔧 Comandos admin: .ia .stats .sheets .test_sheets .test_grupo .grupos_status .grupos .grupo_atual .addcomando .comandos .delcomando .addgatilho .gatilhos .delgatilho .test_vision .ranking .inativos .detetives .semcompra .resetranking .bonus .testreferencia .config-relatorio .list-relatorios .remove-relatorio .test-relatorio');
 
     // Monitoramento de novos membros DESATIVADO
     console.log('⏸️ Monitoramento automático de novos membros DESATIVADO');
@@ -3347,7 +4849,8 @@ async function processMessage(message) {
         const isAdmin = isAdministrador(autorMensagem);
 
         // DEBUG DETALHADO DA MENSAGEM
-        if (message.body.startsWith('.addcomando') || message.body.startsWith('.comandos') || message.body.startsWith('.delcomando')) {
+        if (message.body.startsWith('.addcomando') || message.body.startsWith('.comandos') || message.body.startsWith('.delcomando') ||
+            message.body.startsWith('.addgatilho') || message.body.startsWith('.gatilhos') || message.body.startsWith('.delgatilho')) {
             smartLog(LOG_LEVEL.DEBUG, `🔍 DEBUG MENSAGEM ADMIN:`);
             console.log(`   📱 message.from: ${message.from}`);
             console.log(`   👤 message.author: ${message.author}`);
@@ -4071,8 +5574,18 @@ async function processMessage(message) {
                         
                         mensagem += `🆕 *Total sem compras: ${semCompra.length}*\n\n`;
                         mensagem += `💡 *Dica:* Considere campanhas de incentivo para estes usuários!`;
-                        
-                        await client.sendMessage(message.from, mensagem, { mentions: mentions });
+
+                        // VALIDAÇÃO CRÍTICA: Filtrar IDs inválidos do array mentions
+                        const mentionsValidos = mentions.filter(id => {
+                            return id &&
+                                   typeof id === 'string' &&
+                                   (id.includes('@c.us') || id.includes('@lid')) &&
+                                   !id.startsWith('SAQUE_BONUS_') &&
+                                   !id.startsWith('SAQ');
+                        });
+
+                        console.log(`📊 Sem compra: ${mentions.length} mentions, ${mentionsValidos.length} válidos`);
+                        await client.sendMessage(message.from, mensagem, { mentions: mentionsValidos });
                         return;
                     } catch (error) {
                         console.error('❌ Erro ao obter sem compra:', error);
@@ -4199,14 +5712,11 @@ async function processMessage(message) {
                         console.log(`🔍 Autor: ${autorMensagem}`);
                         console.log(`📝 Comando completo: "${comando}"`);
 
-                        // Verificar permissão de admin
-                        const admins = ['258861645968', '258123456789', '258852118624', '23450974470333', '251032533737504', '203109674577958']; // Lista de admins
-                        const numeroAdmin = autorMensagem.replace('@c.us', '').replace('@lid', '');
-                        console.log(`🔑 Número admin processado: ${numeroAdmin}`);
-                        console.log(`📋 Admins permitidos: ${admins.join(', ')}`);
+                        // Verificar permissão de admin usando a lista global
+                        console.log(`🔑 Verificando permissão de admin para: ${autorMensagem}`);
 
-                        if (!admins.includes(numeroAdmin)) {
-                            console.log(`❌ Admin NÃO autorizado`);
+                        if (!isAdministrador(autorMensagem)) {
+                            console.log(`❌ Admin NÃO autorizado: ${autorMensagem}`);
                             return; // Falha silenciosa para segurança
                         }
 
@@ -4436,6 +5946,19 @@ async function processMessage(message) {
                             `${novoSaldo >= 1024 ? '🚀 *Já podes sacar!* Use: *.sacar*' : '💡 *Continua a acumular para sacar!*'}`;
 
                         try {
+                            // VALIDAÇÃO CRÍTICA: Verificar se é um ID válido de usuário
+                            const ehIDValido = idParaSalvar &&
+                                              typeof idParaSalvar === 'string' &&
+                                              (idParaSalvar.includes('@c.us') || idParaSalvar.includes('@lid')) &&
+                                              !idParaSalvar.startsWith('SAQUE_BONUS_') &&
+                                              !idParaSalvar.startsWith('SAQ');
+
+                            if (!ehIDValido) {
+                                console.warn(`⚠️ ID inválido para menção: ${idParaSalvar}`);
+                                // Usar fallback sem menção
+                                throw new Error('ID inválido para menção');
+                            }
+
                             // SEGUIR PADRÃO DO RANKING (linha 3635-3657)
                             const mentionId = String(idParaSalvar).replace('@c.us', '').replace('@lid', '');
 
@@ -4535,7 +6058,7 @@ async function processMessage(message) {
                 const comandoParsado = parsearComandoCustomizado(message.body);
                 
                 if (!comandoParsado) {
-                    await message.reply(`❌ *Sintaxe incorreta!*\n\n✅ *Sintaxe correta:*\n\`.addcomando NomeComando(Sua resposta aqui)\`\n\n📝 *Exemplo:*\n\`.addcomando horario(Funcionamos de 8h às 18h)\`\n\n⚠️ *Importante:*\n• Nome sem espaços\n• Resposta entre parênteses\n• Pode usar quebras de linha`);
+                    await message.reply(`❌ *Sintaxe incorreta!*\n\n✅ *Sintaxe correta:*\n\`.addcomando Nome do Comando(Sua resposta aqui)\`\n\n📝 *Exemplos:*\n\`.addcomando horário(Funcionamos de 8h às 18h)\`\n\`.addcomando promoção mb(Promoção especial hoje!)\`\n\`.addcomando como comprar(Envie o valor que deseja)\`\n\n⚠️ *Importante:*\n• Aceita múltiplas palavras\n• Aceita caracteres especiais (ç, á, õ, etc)\n• Resposta entre parênteses\n• Pode usar quebras de linha`);
                     return;
                 }
                 
@@ -4562,7 +6085,7 @@ async function processMessage(message) {
                 const comandosGrupo = comandosCustomizados[grupoId];
                 
                 if (!comandosGrupo || Object.keys(comandosGrupo).length === 0) {
-                    await message.reply('📋 *Nenhum comando customizado criado ainda*\n\n💡 **Para criar:** `.addcomando nome(resposta)`');
+                    await message.reply('📋 *Nenhum comando customizado criado ainda*\n\n💡 **Para criar:** `.addcomando nome do comando(resposta)`');
                     return;
                 }
                 
@@ -4586,15 +6109,15 @@ async function processMessage(message) {
             // === COMANDO PARA REMOVER COMANDOS CUSTOMIZADOS ===
             if (message.body.startsWith('.delcomando ')) {
                 const nomeComando = message.body.replace('.delcomando ', '').trim().toLowerCase();
-                
+
                 if (!nomeComando) {
                     await message.reply(`❌ *Nome do comando é obrigatório!*\n\n✅ *Sintaxe:* \`.delcomando nomecomando\`\n\n📝 *Para ver comandos:* \`.comandos\``);
                     return;
                 }
-                
+
                 try {
                     const removido = await removerComandoCustomizado(message.from, nomeComando);
-                    
+
                     if (removido) {
                         await message.reply(`✅ *Comando removido!*\n\n🗑️ **Comando:** \`${nomeComando}\`\n\n📝 **Para ver restantes:** \`.comandos\``);
                         console.log(`✅ Admin ${message.author || message.from} removeu comando '${nomeComando}' do grupo ${message.from}`);
@@ -4604,6 +6127,84 @@ async function processMessage(message) {
                 } catch (error) {
                     await message.reply(`❌ **Erro ao remover comando**\n\nTente novamente ou contacte o desenvolvedor.`);
                     console.error('❌ Erro ao remover comando customizado:', error);
+                }
+                return;
+            }
+
+            // === COMANDO PARA ADICIONAR GATILHOS AUTOMÁTICOS ===
+            if (message.body.startsWith('.addgatilho ')) {
+                const gatilhoParsado = parsearGatilhoAutomatico(message.body);
+
+                if (!gatilhoParsado) {
+                    await message.reply(`❌ *Sintaxe incorreta!*\n\n✅ *Sintaxe correta:*\n\`.addgatilho Início da mensagem(Resposta automática)\`\n\n📝 *Exemplos:*\n\`.addgatilho posso(Sim, como posso ajudar?)\`\n\`.addgatilho oi(Olá! Bem-vindo ao nosso grupo!)\`\n\`.addgatilho bom dia(Bom dia! Como posso te ajudar hoje?)\`\n\n⚠️ *Importante:*\n• Responde quando a mensagem COMEÇA com o texto\n• Aceita múltiplas palavras e caracteres especiais\n• Não diferencia maiúsculas/minúsculas`);
+                    return;
+                }
+
+                try {
+                    await adicionarGatilhoAutomatico(
+                        message.from,
+                        gatilhoParsado.gatilho,
+                        gatilhoParsado.resposta,
+                        message.author || message.from
+                    );
+
+                    await message.reply(`✅ *Gatilho criado com sucesso!*\n\n🎯 **Gatilho:** \`${gatilhoParsado.gatilho}\`\n📝 **Resposta:** ${gatilhoParsado.resposta.substring(0, 100)}${gatilhoParsado.resposta.length > 100 ? '...' : ''}\n\n💡 **Funcionamento:** Quando uma mensagem começar com "${gatilhoParsado.gatilho}", responderá automaticamente`);
+                    console.log(`✅ Admin ${message.author || message.from} criou gatilho '${gatilhoParsado.gatilho}' no grupo ${message.from}`);
+                } catch (error) {
+                    await message.reply(`❌ **Erro ao criar gatilho**\n\nTente novamente ou contacte o desenvolvedor.`);
+                    console.error('❌ Erro ao adicionar gatilho automático:', error);
+                }
+                return;
+            }
+
+            // === COMANDO PARA LISTAR GATILHOS AUTOMÁTICOS ===
+            if (comando === '.gatilhos') {
+                const grupoId = message.from;
+                const gatilhosGrupo = gatilhosAutomaticos[grupoId];
+
+                if (!gatilhosGrupo || Object.keys(gatilhosGrupo).length === 0) {
+                    await message.reply('🎯 *Nenhum gatilho automático criado ainda*\n\n💡 **Para criar:** `.addgatilho texto inicial(resposta)`');
+                    return;
+                }
+
+                let listaGatilhos = '🎯 *GATILHOS AUTOMÁTICOS*\n━━━━━━━━\n\n';
+
+                Object.keys(gatilhosGrupo).forEach(gatilho => {
+                    const g = gatilhosGrupo[gatilho];
+                    const preview = g.resposta.length > 50 ?
+                        g.resposta.substring(0, 50) + '...' :
+                        g.resposta;
+
+                    listaGatilhos += `🔔 **"${gatilho}"**\n📝 ${preview}\n\n`;
+                });
+
+                listaGatilhos += `📊 **Total:** ${Object.keys(gatilhosGrupo).length} gatilho(s)`;
+
+                await message.reply(listaGatilhos);
+                return;
+            }
+
+            // === COMANDO PARA REMOVER GATILHOS AUTOMÁTICOS ===
+            if (message.body.startsWith('.delgatilho ')) {
+                const nomeGatilho = message.body.replace('.delgatilho ', '').trim().toLowerCase();
+
+                if (!nomeGatilho) {
+                    await message.reply(`❌ *Texto do gatilho é obrigatório!*\n\n✅ *Sintaxe:* \`.delgatilho texto inicial\`\n\n📝 *Para ver gatilhos:* \`.gatilhos\``);
+                    return;
+                }
+
+                try {
+                    const removido = await removerGatilhoAutomatico(message.from, nomeGatilho);
+
+                    if (removido) {
+                        await message.reply(`✅ *Gatilho removido!*\n\n🗑️ **Gatilho:** \`${nomeGatilho}\`\n\n📝 **Para ver restantes:** \`.gatilhos\``);
+                        console.log(`✅ Admin ${message.author || message.from} removeu gatilho '${nomeGatilho}' do grupo ${message.from}`);
+                    } else {
+                        await message.reply(`❌ *Gatilho não encontrado!*\n\n🔍 **Gatilho:** \`${nomeGatilho}\`\n📝 **Ver gatilhos:** \`.gatilhos\``);
+                    }
+                } catch (error) {
+                    await message.reply(`❌ **Erro ao remover gatilho**\n\nTente novamente ou contacte o desenvolvedor.`);
+                    console.error('❌ Erro ao remover gatilho automático:', error);
                 }
                 return;
             }
@@ -4763,6 +6364,362 @@ async function processMessage(message) {
                     await message.reply(`❌ *Erro ao gerar relatório*\n\n${error.message}`);
                     console.error('❌ Erro ao gerar relatório de teste:', error);
                 }
+                return;
+            }
+
+            // === COMANDO PARA ADICIONAR NOVO GRUPO AO SISTEMA ===
+            if (comando === '.configurar') {
+                const grupoId = message.from;
+                const chat = await message.getChat();
+                const grupoNome = chat.name || 'Grupo';
+                const autorId = message.author || message.from;
+
+                // VERIFICAR SE É ADMINISTRADOR GLOBAL
+                const ehAdminGlobal = ADMINISTRADORES_GLOBAIS.includes(autorId);
+
+                if (!ehAdminGlobal) {
+                    await message.reply(
+                        `🔒 *ACESSO NEGADO*\n\n` +
+                        `⚠️ Apenas **administradores globais** podem adicionar grupos ao sistema.\n\n` +
+                        `📞 Solicite a um administrador do sistema.`
+                    );
+                    console.log(`🚫 ${autorId} tentou usar .configurar sem permissão global`);
+                    return;
+                }
+
+                // VERIFICAR SE GRUPO JÁ ESTÁ CONFIGURADO
+                const grupoJaConfigurado = CONFIGURACAO_GRUPOS.hasOwnProperty(grupoId);
+
+                if (grupoJaConfigurado) {
+                    await message.reply(
+                        `ℹ️ *GRUPO JÁ CONFIGURADO*\n\n` +
+                        `✅ Este grupo já está cadastrado no sistema.\n\n` +
+                        `📊 **Nome:** ${grupoNome}\n` +
+                        `🆔 **ID:** \`${grupoId}\`\n\n` +
+                        `💡 **Para alterar configurações:**\n` +
+                        `• \`.config-tabela\` - Alterar tabela de preços\n` +
+                        `• \`.config-pagamento\` - Alterar formas de pagamento\n` +
+                        `• \`.ver-config\` - Ver configuração atual`
+                    );
+                    return;
+                }
+
+                try {
+                    // ADICIONAR GRUPO AO SISTEMA
+                    CONFIGURACAO_GRUPOS[grupoId] = {
+                        nome: grupoNome,
+                        tabela: `📋 *TABELA DE PREÇOS*\n\n⚠️ Configure a tabela usando o comando \`.config-tabela\``,
+                        pagamento: `💳 *FORMAS DE PAGAMENTO*\n\n⚠️ Configure o pagamento usando o comando \`.config-pagamento\``
+                    };
+
+                    // Salvar também no sistema de configuração
+                    await sistemaConfigGrupos.atualizarTabela(
+                        grupoId,
+                        `📋 *TABELA DE PREÇOS*\n\n⚠️ Configure a tabela usando o comando \`.config-tabela\``,
+                        autorId,
+                        grupoNome
+                    );
+
+                    await message.reply(
+                        `✅ *GRUPO ADICIONADO AO SISTEMA!*\n\n` +
+                        `🎉 O grupo foi cadastrado com sucesso!\n\n` +
+                        `📊 **Grupo:** ${grupoNome}\n` +
+                        `🆔 **ID:** \`${grupoId}\`\n` +
+                        `👤 **Adicionado por:** Admin Global\n` +
+                        `⏰ **Data:** ${new Date().toLocaleString('pt-BR')}\n\n` +
+                        `📝 **PRÓXIMOS PASSOS:**\n\n` +
+                        `1️⃣ Configure a tabela de preços:\n` +
+                        `   \`.config-tabela\`\n` +
+                        `   \`[Cole sua tabela aqui]\`\n\n` +
+                        `2️⃣ Configure as formas de pagamento:\n` +
+                        `   \`.config-pagamento\`\n` +
+                        `   \`[Cole informações de pagamento]\`\n\n` +
+                        `3️⃣ Verifique a configuração:\n` +
+                        `   \`.ver-config\`\n\n` +
+                        `💡 **Dica:** Prepare suas tabelas em um arquivo de texto antes de colar!`
+                    );
+
+                    console.log(`✅ NOVO GRUPO ADICIONADO: ${grupoNome} (${grupoId}) por admin global ${autorId}`);
+
+                } catch (error) {
+                    await message.reply(`❌ *Erro ao adicionar grupo:* ${error.message}`);
+                    console.error('❌ Erro ao adicionar grupo:', error);
+                }
+
+                return;
+            }
+
+            // === COMANDO PARA CONFIGURAR TABELA DE PREÇOS ===
+            if (message.body.startsWith('.config-tabela ')) {
+                const grupoId = message.from;
+                const chat = await message.getChat();
+                const grupoNome = chat.name || 'Grupo';
+                const autorId = message.author || message.from;
+
+                // VERIFICAR SE É ADMINISTRADOR GLOBAL
+                const ehAdminGlobal = ADMINISTRADORES_GLOBAIS.includes(autorId);
+
+                if (!ehAdminGlobal) {
+                    await message.reply(
+                        `🔒 *ACESSO NEGADO*\n\n` +
+                        `⚠️ Apenas **administradores globais** podem alterar configurações.\n\n` +
+                        `📞 Solicite a um administrador do sistema.`
+                    );
+                    console.log(`🚫 ${autorId} tentou usar .config-tabela sem permissão global`);
+                    return;
+                }
+
+                // VERIFICAR SE GRUPO ESTÁ CONFIGURADO
+                const grupoConfigurado = CONFIGURACAO_GRUPOS.hasOwnProperty(grupoId);
+
+                if (!grupoConfigurado) {
+                    await message.reply(
+                        `❌ *GRUPO NÃO CONFIGURADO*\n\n` +
+                        `⚠️ Este grupo ainda não está cadastrado no sistema.\n\n` +
+                        `📝 **ID do grupo:** \`${grupoId}\`\n` +
+                        `📊 **Nome:** ${grupoNome}\n\n` +
+                        `💡 **Para adicionar:** Entre em contato com o desenvolvedor para adicionar este grupo ao código.`
+                    );
+                    console.log(`⚠️ Tentativa de configurar grupo não cadastrado: ${grupoNome} (${grupoId})`);
+                    return;
+                }
+
+                // Extrair tabela (tudo após ".config-tabela ")
+                const novaTabela = message.body.substring(15).trim();
+
+                console.log(`📝 Admin global ${autorId} solicitou atualização de tabela para grupo ${grupoNome}`);
+                console.log(`📏 Tamanho da tabela: ${novaTabela.length} caracteres`);
+
+                try {
+                    await message.reply('⏳ *Atualizando tabela...*');
+
+                    // Atualizar tabela (passar nome do grupo também)
+                    const resultado = await sistemaConfigGrupos.atualizarTabela(
+                        grupoId,
+                        novaTabela,
+                        autorId,
+                        grupoNome
+                    );
+
+                    if (resultado.sucesso) {
+                        // Recarregar configuração mesclada
+                        const configMesclada = sistemaConfigGrupos.mesclarComConfigPadrao(CONFIGURACAO_GRUPOS);
+                        Object.assign(CONFIGURACAO_GRUPOS, configMesclada);
+
+                        await message.reply(
+                            `✅ *TABELA ATUALIZADA COM SUCESSO!*\n\n` +
+                            `📊 **Grupo:** ${grupoNome}\n` +
+                            `📦 **Pacotes encontrados:** ${resultado.precosCont}\n` +
+                            `⏰ **Atualizado em:** ${new Date().toLocaleString('pt-BR')}\n\n` +
+                            `💡 **Para visualizar:** Digite "tabela"\n` +
+                            `🔄 **Para restaurar:** Use \`.restaurar-tabela\``
+                        );
+
+                        console.log(`✅ Tabela do grupo ${grupoNome} atualizada por admin global ${autorId}`);
+                    } else {
+                        await message.reply(
+                            `❌ *ERRO AO ATUALIZAR TABELA*\n\n` +
+                            `⚠️ ${resultado.erro}\n\n` +
+                            `💡 **Formato correto:**\n` +
+                            `\`.config-tabela\n` +
+                            `TABELA DE MEGAS\n` +
+                            `1GB = 17MT\n` +
+                            `2GB = 34MT\`\n\n` +
+                            `📝 **Dica:** Copie a tabela formatada e cole após o comando`
+                        );
+                    }
+                } catch (error) {
+                    await message.reply(`❌ *Erro inesperado:* ${error.message}`);
+                    console.error('❌ Erro ao configurar tabela:', error);
+                }
+
+                return;
+            }
+
+            // === COMANDO PARA CONFIGURAR FORMAS DE PAGAMENTO ===
+            if (message.body.startsWith('.config-pagamento ')) {
+                const grupoId = message.from;
+                const chat = await message.getChat();
+                const grupoNome = chat.name || 'Grupo';
+                const autorId = message.author || message.from;
+
+                // VERIFICAR SE É ADMINISTRADOR GLOBAL
+                const ehAdminGlobal = ADMINISTRADORES_GLOBAIS.includes(autorId);
+
+                if (!ehAdminGlobal) {
+                    await message.reply(
+                        `🔒 *ACESSO NEGADO*\n\n` +
+                        `⚠️ Apenas **administradores globais** podem alterar configurações.\n\n` +
+                        `📞 Solicite a um administrador do sistema.`
+                    );
+                    console.log(`🚫 ${autorId} tentou usar .config-pagamento sem permissão global`);
+                    return;
+                }
+
+                // VERIFICAR SE GRUPO ESTÁ CONFIGURADO
+                const grupoConfigurado = CONFIGURACAO_GRUPOS.hasOwnProperty(grupoId);
+
+                if (!grupoConfigurado) {
+                    await message.reply(
+                        `❌ *GRUPO NÃO CONFIGURADO*\n\n` +
+                        `⚠️ Este grupo ainda não está cadastrado no sistema.\n\n` +
+                        `📝 Configure primeiro com \`.config-tabela\``
+                    );
+                    return;
+                }
+
+                const novoPagamento = message.body.substring(19).trim();
+
+                try {
+                    await message.reply('⏳ *Atualizando formas de pagamento...*');
+
+                    const resultado = await sistemaConfigGrupos.atualizarPagamento(
+                        grupoId,
+                        novoPagamento,
+                        autorId
+                    );
+
+                    if (resultado.sucesso) {
+                        // Recarregar configuração
+                        const configMesclada = sistemaConfigGrupos.mesclarComConfigPadrao(CONFIGURACAO_GRUPOS);
+                        Object.assign(CONFIGURACAO_GRUPOS, configMesclada);
+
+                        await message.reply(
+                            `✅ *FORMAS DE PAGAMENTO ATUALIZADAS!*\n\n` +
+                            `📊 **Grupo:** ${grupoNome}\n` +
+                            `⏰ **Atualizado em:** ${new Date().toLocaleString('pt-BR')}`
+                        );
+
+                        console.log(`✅ Pagamento do grupo ${grupoNome} atualizado por admin global ${autorId}`);
+                    } else {
+                        await message.reply(`❌ *ERRO:* ${resultado.erro}`);
+                    }
+                } catch (error) {
+                    await message.reply(`❌ *Erro inesperado:* ${error.message}`);
+                    console.error('❌ Erro ao configurar pagamento:', error);
+                }
+
+                return;
+            }
+
+            // === COMANDO PARA VISUALIZAR CONFIGURAÇÃO ATUAL ===
+            if (comando === '.ver-config') {
+                const grupoId = message.from;
+                const chat = await message.getChat();
+                const grupoNome = chat.name || 'Grupo';
+
+                const config = sistemaConfigGrupos.obterConfig(grupoId);
+                const configPadrao = CONFIGURACAO_GRUPOS[grupoId];
+
+                let resposta = `⚙️ *CONFIGURAÇÃO DO GRUPO*\n\n`;
+                resposta += `📊 **Nome:** ${grupoNome}\n`;
+                resposta += `🆔 **ID:** \`${grupoId}\`\n\n`;
+
+                if (config) {
+                    const pacotesNaTabela = sistemaConfigGrupos.contarPrecos(config.tabela);
+                    const tabelaConfigurada = pacotesNaTabela > 0;
+                    const pagamentoConfigurado = config.pagamento && !config.pagamento.includes('Configure');
+
+                    // Status baseado na configuração
+                    if (tabelaConfigurada && pagamentoConfigurado) {
+                        resposta += `✅ **Status:** Completamente configurado\n`;
+                    } else {
+                        resposta += `⚠️ **Status:** Configuração incompleta\n`;
+                        if (!tabelaConfigurada) {
+                            resposta += `   ❌ Tabela de preços pendente\n`;
+                        }
+                        if (!pagamentoConfigurado) {
+                            resposta += `   ❌ Formas de pagamento pendentes\n`;
+                        }
+                    }
+
+                    resposta += `⏰ **Última atualização:** ${new Date(config.ultimaAtualizacao).toLocaleString('pt-BR')}\n`;
+                    resposta += `👤 **Atualizado por:** ${config.atualizadoPor}\n`;
+                    resposta += `📦 **Pacotes na tabela:** ${pacotesNaTabela}\n`;
+
+                    const historico = sistemaConfigGrupos.obterHistorico(grupoId);
+                    if (historico.sucesso) {
+                        resposta += `📜 **Histórico:** ${historico.versoes} versões salvas\n`;
+                    }
+
+                    // Mostrar o que falta fazer
+                    if (!tabelaConfigurada || !pagamentoConfigurado) {
+                        resposta += `\n📝 **PENDENTE:**\n`;
+                        if (!tabelaConfigurada) {
+                            resposta += `1️⃣ Configure a tabela: \`.config-tabela\`\n`;
+                        }
+                        if (!pagamentoConfigurado) {
+                            resposta += `2️⃣ Configure o pagamento: \`.config-pagamento\`\n`;
+                        }
+                    }
+
+                } else if (configPadrao) {
+                    const pacotesNaTabela = sistemaConfigGrupos.contarPrecos(configPadrao.tabela);
+                    resposta += `📋 **Status:** Usando configuração padrão do código\n`;
+                    resposta += `📦 **Pacotes na tabela:** ${pacotesNaTabela}`;
+                } else {
+                    resposta += `❌ **Status:** Não configurado\n\n`;
+                    resposta += `💡 **Para adicionar este grupo:**\n`;
+                    resposta += `Use o comando \`.configurar\` (apenas admin global)`;
+                }
+
+                if (configPadrao || config) {
+                    resposta += `\n\n💡 **Comandos disponíveis:**\n`;
+                    resposta += `• \`.config-tabela\` - Alterar tabela\n`;
+                    resposta += `• \`.config-pagamento\` - Alterar pagamento\n`;
+                    resposta += `• \`.restaurar-tabela\` - Restaurar versão anterior`;
+                }
+
+                await message.reply(resposta);
+                return;
+            }
+
+            // === COMANDO PARA RESTAURAR VERSÃO ANTERIOR ===
+            if (comando === '.restaurar-tabela') {
+                const grupoId = message.from;
+                const chat = await message.getChat();
+                const grupoNome = chat.name || 'Grupo';
+                const autorId = message.author || message.from;
+
+                // VERIFICAR SE É ADMINISTRADOR GLOBAL
+                const ehAdminGlobal = ADMINISTRADORES_GLOBAIS.includes(autorId);
+
+                if (!ehAdminGlobal) {
+                    await message.reply(
+                        `🔒 *ACESSO NEGADO*\n\n` +
+                        `⚠️ Apenas **administradores globais** podem restaurar configurações.\n\n` +
+                        `📞 Solicite a um administrador do sistema.`
+                    );
+                    console.log(`🚫 ${autorId} tentou usar .restaurar-tabela sem permissão global`);
+                    return;
+                }
+
+                try {
+                    await message.reply('⏳ *Restaurando versão anterior...*');
+
+                    const resultado = await sistemaConfigGrupos.restaurarVersaoAnterior(grupoId, autorId);
+
+                    if (resultado.sucesso) {
+                        // Recarregar configuração
+                        const configMesclada = sistemaConfigGrupos.mesclarComConfigPadrao(CONFIGURACAO_GRUPOS);
+                        Object.assign(CONFIGURACAO_GRUPOS, configMesclada);
+
+                        await message.reply(
+                            `✅ *VERSÃO ANTERIOR RESTAURADA!*\n\n` +
+                            `📊 **Grupo:** ${grupoNome}\n` +
+                            `⏰ **Restaurado em:** ${new Date().toLocaleString('pt-BR')}\n\n` +
+                            `💡 Digite "tabela" para visualizar`
+                        );
+
+                        console.log(`✅ Tabela do grupo ${grupoNome} restaurada por admin global ${autorId}`);
+                    } else {
+                        await message.reply(`❌ *ERRO:* ${resultado.erro}`);
+                    }
+                } catch (error) {
+                    await message.reply(`❌ *Erro inesperado:* ${error.message}`);
+                    console.error('❌ Erro ao restaurar tabela:', error);
+                }
+
                 return;
             }
 
@@ -5123,15 +7080,25 @@ async function processMessage(message) {
             if (!codigo) {
                 console.log(`📝 Criando NOVO código para: ${remetente}`);
                 codigo = gerarCodigoReferencia(remetente);
-                codigosReferencia[codigo] = {
+                const dadosCodigo = {
                     dono: remetente,
                     nome: message._data.notifyName || 'N/A',
                     criado: new Date().toISOString(),
                     ativo: true
                 };
 
-                // CORRIGIDO: Salvar IMEDIATAMENTE (não agendar) para garantir persistência
-                console.log(`💾 Salvando código ${codigo} IMEDIATAMENTE...`);
+                // Salvar no sistema legado
+                codigosReferencia[codigo] = dadosCodigo;
+
+                // CORRIGIDO: Sincronizar com SistemaBonus
+                if (sistemaBonus) {
+                    sistemaBonus.codigosReferencia[codigo] = { ...dadosCodigo };
+                    await sistemaBonus.salvarDados();
+                    console.log(`✅ Código ${codigo} salvo no SistemaBonus`);
+                }
+
+                // Salvar sistema legado
+                console.log(`💾 Salvando código ${codigo} no sistema legado...`);
                 await salvarDadosReferencia();
                 console.log(`✅ Código ${codigo} salvo com sucesso!`);
             }
@@ -5200,12 +7167,15 @@ async function processMessage(message) {
                 }
                 
                 // Registrar referência
-                referenciasClientes[remetente] = {
+                const dadosReferencia = {
                     convidadoPor: codigosReferencia[codigo].dono,
                     codigo: codigo,
                     dataRegistro: new Date().toISOString(),
                     comprasRealizadas: 0
                 };
+
+                // Salvar no sistema legado
+                referenciasClientes[remetente] = dadosReferencia;
 
                 const convidadorId = codigosReferencia[codigo].dono;
                 const nomeConvidador = codigosReferencia[codigo].nome;
@@ -5226,8 +7196,50 @@ async function processMessage(message) {
                 }
                 bonusSaldos[convidadorId].totalReferencias++;
 
+                // CORRIGIDO: Sincronizar com SistemaBonus
+                if (sistemaBonus) {
+                    console.log(`🔄 Sincronizando referência com SistemaBonus...`);
+
+                    // Atualizar referência em todos os formatos (compatibilidade)
+                    const formatos = [
+                        remetente,
+                        remetente.replace('@c.us', '@lid'),
+                        remetente.replace('@lid', '@c.us')
+                    ];
+
+                    formatos.forEach(formato => {
+                        sistemaBonus.referenciasClientes[formato] = { ...dadosReferencia };
+                    });
+
+                    // Atualizar código
+                    sistemaBonus.codigosReferencia[codigo] = { ...codigosReferencia[codigo] };
+
+                    // Inicializar saldo no sistemaBonus
+                    const formatosConvidador = [
+                        convidadorId,
+                        convidadorId.replace('@c.us', '@lid'),
+                        convidadorId.replace('@lid', '@c.us')
+                    ];
+
+                    formatosConvidador.forEach(formato => {
+                        if (!sistemaBonus.bonusSaldos[formato]) {
+                            sistemaBonus.bonusSaldos[formato] = {
+                                saldo: 0,
+                                detalhesReferencias: {},
+                                historicoSaques: [],
+                                totalReferencias: 0
+                            };
+                        }
+                        sistemaBonus.bonusSaldos[formato].totalReferencias++;
+                    });
+
+                    // Salvar no SistemaBonus
+                    await sistemaBonus.salvarDados();
+                    console.log(`✅ Referência sincronizada com SistemaBonus`);
+                }
+
                 // CORRIGIDO: Salvar IMEDIATAMENTE para garantir persistência
-                console.log(`💾 Salvando uso do código ${codigo} IMEDIATAMENTE...`);
+                console.log(`💾 Salvando uso do código ${codigo} no sistema legado...`);
                 await salvarDadosReferencia();
 
                 // Salvar arquivo de membros se foi atualizado
@@ -5251,6 +7263,56 @@ async function processMessage(message) {
                     `🚀 *Próximo passo:* Faz tua primeira compra!`, {
                     mentions: [convidadorId]
                 });
+                return;
+            }
+
+            // .ignorados - Ver lista de bots ignorados (ADMIN ONLY)
+            if (comando === '.ignorados' || comando === '.bots') {
+                if (!isAdministrador(remetente)) {
+                    await message.reply('❌ Comando disponível apenas para administradores.');
+                    return;
+                }
+
+                const listaBots = BOTS_IGNORADOS.map((bot, index) =>
+                    `${index + 1}. ${bot}`
+                ).join('\n');
+
+                await message.reply(
+                    `🤖 *BOTS IGNORADOS*\n\n` +
+                    `O bot ignora automaticamente mensagens de:\n\n` +
+                    `${listaBots}\n\n` +
+                    `📝 Total: ${BOTS_IGNORADOS.length} bots\n\n` +
+                    `💡 Para adicionar mais bots, edite a lista BOTS_IGNORADOS no código.`
+                );
+                return;
+            }
+
+            // .cache - Ver estatísticas do cache anti-duplicatas de comprovantes (ADMIN ONLY)
+            if (comando === '.cache') {
+                if (!isAdministrador(remetente)) {
+                    await message.reply('❌ Comando disponível apenas para administradores.');
+                    return;
+                }
+
+                const totalComprovantesCache = cacheComprovantesRecentes.size;
+                const agora = Date.now();
+                let comprovantesAtivos = 0;
+
+                for (const [hash, registro] of cacheComprovantesRecentes.entries()) {
+                    if (agora - registro.timestamp < CACHE_COMPROVANTE_TTL) {
+                        comprovantesAtivos++;
+                    }
+                }
+
+                await message.reply(
+                    `🗂️ *CACHE ANTI-DUPLICATAS DE COMPROVANTES*\n\n` +
+                    `📊 Total no cache: ${totalComprovantesCache} comprovantes\n` +
+                    `✅ Ativos (< 5min): ${comprovantesAtivos}\n` +
+                    `⏰ TTL: 5 minutos\n` +
+                    `📦 Limite máximo: 500 comprovantes\n\n` +
+                    `💡 Apenas COMPROVANTES duplicados são bloqueados.\n` +
+                    `📝 Outras mensagens (comandos, números) não são controladas.`
+                );
                 return;
             }
 
@@ -5376,22 +7438,7 @@ async function processMessage(message) {
                     return;
                 }
 
-                // Verificar limite diário de saques
-                const hoje = new Date().toDateString();
-                const saquesHoje = Object.values(pedidosSaque).filter(s =>
-                    s.cliente === remetente &&
-                    new Date(s.dataSolicitacao).toDateString() === hoje
-                );
-
-                if (saquesHoje.length >= 3) {
-                    await message.reply(
-                        `❌ *LIMITE DIÁRIO ATINGIDO*\n\n` +
-                        `🚫 Limite: 3 saques por dia\n` +
-                        `📊 Já solicitados hoje: ${saquesHoje.length}\n\n` +
-                        `⏰ Tente novamente amanhã!`
-                    );
-                    return;
-                }
+                // Limite diário de saques REMOVIDO - Agora sem limite!
 
                 // === GERAR REFERÊNCIA ÚNICA PARA SAQUE ===
                 const agora = new Date();
@@ -5715,6 +7762,9 @@ async function processMessage(message) {
                 message.body.startsWith('.addcomando ') ||
                 message.body.startsWith('.delcomando ') ||
                 message.body.startsWith('.comandos') ||
+                message.body.startsWith('.addgatilho ') ||
+                message.body.startsWith('.delgatilho ') ||
+                message.body.startsWith('.gatilhos') ||
                 message.body.startsWith('.ia') ||
                 message.body.startsWith('.stats') ||
                 message.body.startsWith('.sheets') ||
@@ -5732,12 +7782,14 @@ async function processMessage(message) {
             const autorModeracaoMsg = message.author || message.from;
             const isAdminExecutando = isAdministrador(autorModeracaoMsg);
 
-            // Pular moderação para comandos administrativos executados por admins
-            if (!isComandoAdmin || !isAdminExecutando) {
+            // Pular moderação SOMENTE para comandos administrativos executados por admins
+            const isPularModeracao = isComandoAdmin && isAdminExecutando;
+
+            if (!isPularModeracao) {
                 const analise = contemConteudoSuspeito(message.body);
-                
+
                 if (analise.suspeito) {
-                    console.log(`🚨 Conteúdo suspeito detectado`);
+                    console.log(`🚨 Conteúdo suspeito detectado de ${autorModeracaoMsg}`);
                     await aplicarModeracao(message, "Link detectado");
                     return;
                 }
@@ -5789,10 +7841,19 @@ async function processMessage(message) {
         // === VERIFICAR COMANDOS CUSTOMIZADOS ===
         const textoMensagem = message.body.trim().toLowerCase();
         const respostaComando = executarComandoCustomizado(message.from, textoMensagem);
-        
+
         if (respostaComando) {
             await message.reply(respostaComando);
             console.log(`🎯 Comando customizado '${textoMensagem}' executado no grupo ${message.from}`);
+            return;
+        }
+
+        // === VERIFICAR GATILHOS AUTOMÁTICOS ===
+        const respostaGatilho = verificarGatilhoAutomatico(message.from, message.body);
+
+        if (respostaGatilho) {
+            await message.reply(respostaGatilho);
+            console.log(`🔔 Gatilho automático acionado no grupo ${message.from}`);
             return;
         }
 
@@ -5812,17 +7873,31 @@ async function processMessage(message) {
                 console.log(`🛒 CONFIRMAÇÃO BOT: Detectada transação concluída - Ref: ${referenciaConfirmada} | Número: ${numeroConfirmado}`);
                 console.log(`🔍 CONFIRMAÇÃO BOT: Tipo detectado: ${/emola|e-mola/i.test(message.body) ? 'EMOLA' : /mpesa|m-pesa/i.test(message.body) ? 'MPESA' : 'DESCONHECIDO'}`);
                 
-                // Processar confirmação
+                // Processar confirmação no sistema de compras
                 const resultadoConfirmacao = await sistemaCompras.processarConfirmacao(referenciaConfirmada, numeroConfirmado);
-                
+
                 if (resultadoConfirmacao) {
                     console.log(`✅ COMPRAS: Confirmação processada - ${resultadoConfirmacao.numero} | ${resultadoConfirmacao.megas}MB`);
-                    
+
                     // Enviar mensagem de parabenização com menção clicável (igual às boas-vindas)
                     if (resultadoConfirmacao.mensagem && resultadoConfirmacao.contactId) {
                         try {
                             // Normalizar ID para formato @c.us igual às boas-vindas
                             const participantId = resultadoConfirmacao.contactId; // IGUAL ÀS BOAS-VINDAS
+
+                            // VALIDAÇÃO CRÍTICA: Verificar se é um ID válido de usuário
+                            const ehIDValido = participantId &&
+                                              typeof participantId === 'string' &&
+                                              (participantId.includes('@c.us') || participantId.includes('@lid')) &&
+                                              !participantId.startsWith('SAQUE_BONUS_') &&
+                                              !participantId.startsWith('SAQ');
+
+                            if (!ehIDValido) {
+                                console.warn(`⚠️ ID inválido para menção: ${participantId}`);
+                                // Usar fallback sem menção
+                                throw new Error('ID inválido para menção');
+                            }
+
                             // Usar exato formato das boas-vindas
                             const mensagemFinal = resultadoConfirmacao.mensagem.replace('@NOME_PLACEHOLDER', `@${participantId.replace('@c.us', '').replace('@lid', '')}`);
 
@@ -5838,12 +7913,90 @@ async function processMessage(message) {
                             await message.reply(mensagemFallback);
                         }
                     }
-                } else {
-                    console.log(`⚠️ COMPRAS: Confirmação ${referenciaConfirmada} não encontrada ou já processada`);
+                    return; // Confirmação processada com sucesso, sair
                 }
+
+                // === SE NÃO ENCONTROU NO SISTEMA DE COMPRAS, VERIFICAR NO CACHE DE DIAMANTES ===
+                console.log(`🔍 COMPRAS: Não encontrado em compras normais, verificando cache de pacotes especiais...`);
+
+                // Verificar se é divisão de pacote diamante/.8GB
+                const pacoteDiamante = Object.values(pacotesDiamantePendentes).find(
+                    p => p.divisoes && p.divisoes.includes(referenciaConfirmada)
+                );
+
+                if (pacoteDiamante) {
+                    console.log(`💎 PACOTE ESPECIAL: Confirmação de divisão detectada!`);
+                    console.log(`💎 Ref Divisão: ${referenciaConfirmada} | Pacote Original: ${pacoteDiamante.referencia}`);
+                    console.log(`💎 Tipo: ${pacoteDiamante.tipo || 'diamante'}`);
+
+                    // Adicionar à lista de confirmações recebidas (evitar duplicatas)
+                    if (!pacoteDiamante.confirmacoesRecebidas.includes(referenciaConfirmada)) {
+                        pacoteDiamante.confirmacoesRecebidas.push(referenciaConfirmada);
+                        console.log(`💎 PACOTE ESPECIAL: Confirmação adicionada (${pacoteDiamante.confirmacoesRecebidas.length}/${pacoteDiamante.divisoes.length})`);
+                    }
+
+                    // Verificar se TODAS as divisões foram confirmadas
+                    if (pacoteDiamante.confirmacoesRecebidas.length === pacoteDiamante.divisoes.length) {
+                        // Obter informações do tipo de pacote
+                        const codigoPacote = pacoteDiamante.codigoPacote || 1;
+                        const tipoPacote = pacoteDiamante.tipo || 'diamante';
+
+                        // Para pacotes .8GB, sempre usar código 2
+                        const codigoFinal = tipoPacote === 'pacote_ponto_8gb' ? 2 : codigoPacote;
+                        const infoPacote = CODIGOS_PACOTES_ESPECIAIS[codigoFinal];
+
+                        console.log(`${infoPacote.emoji} ${tipoPacote === 'pacote_ponto_8gb' ? 'PACOTE .8GB' : infoPacote.nome}: TODAS as divisões confirmadas! Enviando para planilha...`);
+
+                        // Enviar para planilha de pacotes especiais
+                        const resultado = await enviarParaGoogleSheetsDiamante(
+                            pacoteDiamante.referencia,
+                            pacoteDiamante.numero,
+                            codigoFinal,
+                            pacoteDiamante.grupoId,
+                            pacoteDiamante.grupoNome,
+                            'WhatsApp-Bot-Diamante'
+                        );
+
+                        if (resultado.sucesso) {
+                            console.log(`✅ ${tipoPacote === 'pacote_ponto_8gb' ? 'PACOTE .8GB' : infoPacote.nome}: Pacote ${pacoteDiamante.referencia} enviado com sucesso!`);
+
+                            // Enviar mensagem ao usuário
+                            try {
+                                let mensagemFinal;
+                                if (tipoPacote === 'pacote_ponto_8gb') {
+                                    mensagemFinal = `📦 *PACOTE ${pacoteDiamante.totalGB}GB ATIVADO!*\n\n✅ Todos os megas comuns foram confirmados!\n\n📱 Número: ${pacoteDiamante.numero}\n📦 Total: ${pacoteDiamante.totalGB}GB (${pacoteDiamante.gbComuns}GB comuns + ${pacoteDiamante.gb28}GB mensais)\n🔖 Referência: ${pacoteDiamante.referencia}\n\n🎉 Seu pacote completo está sendo ativado agora!`;
+                                } else {
+                                    mensagemFinal = `${infoPacote.emoji} *${infoPacote.nome.toUpperCase()} ATIVADO!*\n\n✅ Todos os megas extras foram confirmados!\n\n📱 Número: ${pacoteDiamante.numero}\n${infoPacote.emoji} Total: ${pacoteDiamante.totalGB}GB + ${infoPacote.descricao}\n🔖 Referência: ${pacoteDiamante.referencia}\n\n🎉 Seu ${infoPacote.nome.toLowerCase()} completo está sendo ativado agora!`;
+                                }
+                                await client.sendMessage(message.from, mensagemFinal);
+                            } catch (error) {
+                                console.error(`❌ Erro ao enviar mensagem de ativação:`, error);
+                            }
+
+                            // Remover do cache
+                            delete pacotesDiamantePendentes[pacoteDiamante.referencia];
+                            console.log(`${tipoPacote === 'pacote_ponto_8gb' ? '📦 PACOTE .8GB' : infoPacote.emoji + ' ' + infoPacote.nome}: Pacote removido do cache de pendentes`);
+                        } else {
+                            console.error(`❌ ${tipoPacote === 'pacote_ponto_8gb' ? 'PACOTE .8GB' : infoPacote.nome}: Erro ao enviar para planilha: ${resultado.erro}`);
+                        }
+                    } else {
+                        const codigoPacote = pacoteDiamante.codigoPacote || 1;
+                        const tipoPacote = pacoteDiamante.tipo || 'diamante';
+                        const codigoFinal = tipoPacote === 'pacote_ponto_8gb' ? 2 : codigoPacote;
+                        const infoPacote = CODIGOS_PACOTES_ESPECIAIS[codigoFinal];
+                        console.log(`⏳ ${tipoPacote === 'pacote_ponto_8gb' ? 'PACOTE .8GB' : infoPacote.nome}: Aguardando mais confirmações (${pacoteDiamante.confirmacoesRecebidas.length}/${pacoteDiamante.divisoes.length})`);
+                    }
+                    return; // Processado como pacote especial, sair
+                }
+
+                // Se não encontrou em nenhum dos dois sistemas
+                console.log(`⚠️ CONFIRMAÇÃO: ${referenciaConfirmada} não encontrada em compras nem em pacotes especiais`);
                 return;
             }
         }
+
+        // === MONITORAMENTO ADICIONAL PARA PACOTES DIAMANTE ===
+        // REMOVIDO: Código duplicado - agora processado no bloco acima (linhas 7493-7568)
 
         // === PROCESSAMENTO COM IA (LÓGICA SIMPLES IGUAL AO BOT ATACADO) ===
         const remetente = message.author || message.from;
@@ -5855,7 +8008,59 @@ async function processMessage(message) {
         }
 
         if (resultadoIA.sucesso) {
-            
+
+            // === NOVO: TRATAMENTO DE PACOTE .8GB DETECTADO ===
+            if (resultadoIA.tipo === 'comprovante_ponto8_detectado') {
+                console.log(`📦 PROCESSANDO PACOTE .8GB NO INDEX.JS`);
+
+                const { referencia, valor, numero, pacoteDiamante } = resultadoIA;
+
+                // Verificar configGrupo antes de passar
+                console.log(`🔍 configGrupo disponível:`, configGrupo ? `✅ Sim (ID: ${configGrupo.grupoId})` : '❌ Não');
+
+                const comprovante = {
+                    referencia: referencia,
+                    valor: valor,
+                    numero: numero
+                };
+
+                const resultadoProcessamento = await processarPacotePonto8(comprovante, configGrupo, pacoteDiamante);
+
+                if (resultadoProcessamento.sucesso) {
+                    await message.reply(resultadoProcessamento.mensagem);
+                } else {
+                    await message.reply(`❌ Erro ao processar pacote .8GB: ${resultadoProcessamento.erro}`);
+                }
+
+                return;
+            }
+
+            // === NOVO: TRATAMENTO DE PACOTE DIAMANTE DETECTADO ===
+            if (resultadoIA.tipo === 'comprovante_diamante_detectado') {
+                console.log(`💎 PROCESSANDO PACOTE DIAMANTE NO INDEX.JS`);
+
+                const { referencia, valor, numero, pacoteDiamante } = resultadoIA;
+
+                // Processar pacote diamante
+                const resultado = await processarPacoteDiamante(
+                    { referencia, valor, numero },
+                    { grupoId: message.from, nome: configGrupo.nome, tabela: configGrupo.tabela },
+                    pacoteDiamante
+                );
+
+                if (resultado.sucesso) {
+                    await message.reply(resultado.mensagem);
+                } else {
+                    await message.reply(
+                        `❌ *ERRO AO PROCESSAR PACOTE DIAMANTE*\n\n` +
+                        `💰 Referência: ${referencia}\n` +
+                        `⚠️ Erro: ${resultado.erro}\n\n` +
+                        `📞 Entre em contato com o suporte.`
+                    );
+                }
+                return;
+            }
+
             if (resultadoIA.tipo === 'comprovante_recebido' || resultadoIA.tipo === 'comprovante_imagem_recebido') {
                 const metodoInfo = resultadoIA.metodo ? ` (${resultadoIA.metodo})` : '';
                 await message.reply(
@@ -5865,7 +8070,7 @@ async function processMessage(message) {
                     `📱 *Envie UM número que vai receber ${resultadoIA.megas}!*`
                 );
                 return;
-                
+
             } else if (resultadoIA.tipo === 'numero_processado_com_aviso') {
                 const dadosCompletos = resultadoIA.dadosCompletos;
                 const [referencia, megas, numero] = dadosCompletos.split('|');
@@ -5890,7 +8095,7 @@ async function processMessage(message) {
                 }
 
                 // PROCESSAR BÔNUS DE REFERÊNCIA
-                const bonusInfo = await processarBonusCompra(remetente, megas);
+                const bonusInfo = await processarBonusCompra(remetente, megas, message.from);
 
                 // VERIFICAR PAGAMENTO ANTES DE ENVIAR PARA PLANILHA
                 // Usar o valor real do comprovante (não o valor calculado dos megas)
@@ -5933,6 +8138,35 @@ async function processMessage(message) {
 
                 console.log(`✅ REVENDEDORES: Pagamento confirmado para texto! Processando...`);
 
+                // === VERIFICAR SE É PACOTE DIAMANTE ===
+                const precos = ia.extrairPrecosTabela(configGrupo.tabela);
+                const pacoteDiamante = precos.find(p => p.preco === valorComprovante && p.isDiamante === true);
+
+                if (pacoteDiamante) {
+                    console.log(`💎 DIAMANTE DETECTADO: ${pacoteDiamante.descricao} (${valorComprovante}MT)`);
+
+                    // Processar pacote diamante
+                    const resultado = await processarPacoteDiamante(
+                        { referencia, valor: valorComprovante, numero },
+                        { grupoId: message.from, nome: configGrupo.nome, tabela: configGrupo.tabela },
+                        pacoteDiamante
+                    );
+
+                    if (resultado.sucesso) {
+                        await message.reply(resultado.mensagem);
+                        await marcarPagamentoComoProcessado(referencia, valorComprovante);
+                    } else {
+                        await message.reply(
+                            `❌ *ERRO AO PROCESSAR PACOTE DIAMANTE*\n\n` +
+                            `💰 Referência: ${referencia}\n` +
+                            `⚠️ Erro: ${resultado.erro}\n\n` +
+                            `📞 Entre em contato com o suporte.`
+                        );
+                    }
+                    return; // NÃO enviar para planilha comum
+                }
+
+                // Continuar fluxo normal (pedidos comuns)
                 const resultadoEnvio = await enviarParaTasker(referencia, megas, numero, message.from, autorMensagem);
 
                 // Verificar se é pedido duplicado
@@ -5993,7 +8227,7 @@ async function processMessage(message) {
                 }
 
                 // PROCESSAR BÔNUS DE REFERÊNCIA
-                const bonusInfo = await processarBonusCompra(remetente, megas);
+                const bonusInfo = await processarBonusCompra(remetente, megas, message.from);
 
                 // VERIFICAR PAGAMENTO ANTES DE ENVIAR PARA PLANILHA
                 // Usar o valor real do comprovante (não o valor calculado dos megas)
@@ -6036,6 +8270,35 @@ async function processMessage(message) {
 
                 console.log(`✅ REVENDEDORES: Pagamento confirmado para texto! Processando...`);
 
+                // === VERIFICAR SE É PACOTE DIAMANTE ===
+                const precos = ia.extrairPrecosTabela(configGrupo.tabela);
+                const pacoteDiamante = precos.find(p => p.preco === valorComprovante && p.isDiamante === true);
+
+                if (pacoteDiamante) {
+                    console.log(`💎 DIAMANTE DETECTADO: ${pacoteDiamante.descricao} (${valorComprovante}MT)`);
+
+                    // Processar pacote diamante
+                    const resultado = await processarPacoteDiamante(
+                        { referencia, valor: valorComprovante, numero },
+                        { grupoId: message.from, nome: configGrupo.nome, tabela: configGrupo.tabela },
+                        pacoteDiamante
+                    );
+
+                    if (resultado.sucesso) {
+                        await message.reply(resultado.mensagem);
+                        await marcarPagamentoComoProcessado(referencia, valorComprovante);
+                    } else {
+                        await message.reply(
+                            `❌ *ERRO AO PROCESSAR PACOTE DIAMANTE*\n\n` +
+                            `💰 Referência: ${referencia}\n` +
+                            `⚠️ Erro: ${resultado.erro}\n\n` +
+                            `📞 Entre em contato com o suporte.`
+                        );
+                    }
+                    return; // NÃO enviar para planilha comum
+                }
+
+                // Continuar fluxo normal (pedidos comuns)
                 const resultadoEnvio = await enviarParaTasker(referencia, megas, numero, message.from, autorMensagem);
 
                 // Verificar se é pedido duplicado
@@ -6070,6 +8333,103 @@ async function processMessage(message) {
                     `_⏳Processando... Aguarde enquanto o Sistema executa a transferência_`
                 );
                 return;
+
+            } else if (resultadoIA.tipo === 'divisao_blocos') {
+                // === PROCESSAR DIVISÃO EM BLOCOS ===
+                console.log(`🔧 Processando divisão em blocos...`);
+
+                const dadosCompletos = resultadoIA.dadosCompletos;
+                const blocos = dadosCompletos.split('\n');
+                const valorComprovante = resultadoIA.valorComprovante;
+                const nomeContato = message._data.notifyName || 'N/A';
+                const autorMensagem = message.author || 'Desconhecido';
+
+                console.log(`📦 Total de blocos a enviar: ${blocos.length}`);
+
+                // Verificar pagamento antes de processar
+                const primeiraLinha = blocos[0].split('|');
+                const referenciaOriginal = primeiraLinha[0];
+
+                const pagamentoConfirmado = await verificarPagamentoIndividual(referenciaOriginal, valorComprovante);
+
+                if (pagamentoConfirmado === 'JA_PROCESSADO') {
+                    console.log(`⚠️ REVENDEDORES: Pagamento ${referenciaOriginal} já foi processado anteriormente!`);
+                    await message.reply(
+                        `⚠️ *PAGAMENTO JÁ PROCESSADO*\n\n` +
+                        `💰 Referência: ${referenciaOriginal}\n` +
+                        `📊 Total: ${resultadoIA.megasPorNumero}MB\n` +
+                        `📦 Blocos: ${blocos.length}\n\n` +
+                        `❌ Este pagamento já foi processado anteriormente.\n\n` +
+                        `⏰ ${new Date().toLocaleString('pt-BR')}`
+                    );
+                    return;
+                }
+
+                if (!pagamentoConfirmado) {
+                    console.log(`❌ REVENDEDORES: Pagamento não confirmado para divisão - ${referenciaOriginal} (${valorComprovante}MT)`);
+                    await message.reply(
+                        `⏳ *AGUARDANDO CONFIRMAÇÃO DE PAGAMENTO*\n\n` +
+                        `💰 Referência: ${referenciaOriginal}\n` +
+                        `📊 Total: ${resultadoIA.megasPorNumero}MB\n` +
+                        `📦 Blocos: ${blocos.length}\n` +
+                        `💳 Valor: ${valorComprovante}MT\n\n` +
+                        `📨 A mensagem de confirmação ainda não foi recebida no sistema.\n` +
+                        `🔄 Verificação automática ativa - você será notificado quando confirmado!\n` +
+                        `⏰ ${new Date().toLocaleString('pt-BR')}`
+                    );
+                    return;
+                }
+
+                console.log(`✅ REVENDEDORES: Pagamento confirmado! Enviando ${blocos.length} blocos...`);
+
+                // Enviar cada bloco para a planilha
+                let sucessos = 0;
+                let falhas = 0;
+
+                for (let i = 0; i < blocos.length; i++) {
+                    const bloco = blocos[i];
+                    const [refBloco, megasBloco, numeroBloco] = bloco.split('|');
+
+                    console.log(`📤 Enviando bloco ${i + 1}/${blocos.length}: ${refBloco} - ${megasBloco}MB`);
+
+                    const resultadoEnvio = await enviarParaTasker(refBloco, megasBloco, numeroBloco, message.from, autorMensagem);
+
+                    if (resultadoEnvio && resultadoEnvio.sucesso) {
+                        sucessos++;
+                    } else if (resultadoEnvio && resultadoEnvio.duplicado) {
+                        console.log(`⚠️ Bloco ${refBloco} já existe, continuando...`);
+                        sucessos++; // Contar como sucesso se já existe
+                    } else {
+                        falhas++;
+                        console.error(`❌ Falha ao enviar bloco ${refBloco}`);
+                    }
+
+                    // Pequeno delay entre envios
+                    if (i < blocos.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                    }
+                }
+
+                // Marcar pagamento como processado após todos os blocos
+                if (sucessos > 0) {
+                    await marcarPagamentoComoProcessado(referenciaOriginal, valorComprovante);
+                }
+
+                // Registrar comprador (com megas totais)
+                const primeiroNumero = blocos[0].split('|')[2];
+                await registrarComprador(message.from, primeiroNumero, nomeContato, resultadoIA.megasPorNumero);
+
+                // Responder ao cliente (mesma mensagem padrão, sem mencionar divisão)
+                await message.reply(
+                    `✅ *Pedido Recebido!*\n\n` +
+                    `💰 Referência: ${referenciaOriginal}\n` +
+                    `📊 Megas: ${resultadoIA.megasPorNumero}\n` +
+                    `📱 Número: ${primeiroNumero}\n\n` +
+                    `_⏳Processando... Aguarde enquanto o Sistema executa a transferência_`
+                );
+
+                console.log(`✅ Divisão concluída: ${sucessos} sucessos, ${falhas} falhas`);
+                return;
             }
         }
 
@@ -6091,6 +8451,42 @@ async function processMessage(message) {
 // Novo handler principal com queue
 client.on('message', async (message) => {
     try {
+        // === FILTRO 1: IGNORAR BOTS (Safe e outros) ===
+        const contact = await message.getContact();
+        const numeroRemetente = message.author || message.from;
+
+        // Verificar se é bot ignorado
+        if (ehBotIgnorado(contact)) {
+            const nomeBotIgnorado = contact.pushname || contact.name || 'Bot desconhecido';
+            console.log(`🤖 IGNORADO: Mensagem de bot ignorado (${nomeBotIgnorado} - ${numeroRemetente})`);
+            return; // Ignora completamente
+        }
+
+        // === VERIFICAÇÃO ANTI-DUPLICATAS DE COMPROVANTES (SEGUNDO FILTRO) ===
+        const remetente = numeroRemetente;
+        const conteudo = message.body || '';
+
+        // Verificar se é COMPROVANTE duplicado (apenas comprovantes são controlados)
+        const verificacaoDuplicata = ehComprovanteDuplicado(remetente, conteudo);
+
+        if (verificacaoDuplicata.duplicada) {
+            // Comprovante duplicado detectado - responder e sair
+            console.log(`🚫 BLOQUEADO: Comprovante duplicado de ${remetente} (enviado há ${verificacaoDuplicata.tempoDecorrido}s)`);
+
+            await message.reply(
+                `⚠️ *Comprovante Duplicado*\n\n` +
+                `Você já enviou este comprovante há ${verificacaoDuplicata.tempoDecorrido} segundos.\n\n` +
+                `✅ Seu pedido já está sendo processado!\n` +
+                `🔄 *Não precisa enviar novamente*\n\n` +
+                `_Aguarde a confirmação do sistema._`
+            );
+
+            return; // Bloqueia processamento
+        }
+
+        // Registrar comprovante como processado (se for comprovante)
+        registrarComprovanteProcessado(remetente, conteudo);
+
         // LOG: Verificar se é administrador enviando mensagem em grupo
         if (message.from.endsWith('@g.us')) {
             const autorMensagem = message.author || message.from;
@@ -6150,7 +8546,8 @@ process.on('uncaughtException', (error) => {
 (async function inicializar() {
     console.log('🚀 Iniciando bot...');
     await carregarComandosCustomizados();
-    console.log('🔧 Comandos carregados, inicializando cliente WhatsApp...');
+    await carregarGatilhosAutomaticos();
+    console.log('🔧 Comandos e gatilhos carregados, inicializando cliente WhatsApp...');
     
     try {
         client.initialize();
@@ -6222,7 +8619,6 @@ process.on('SIGINT', async () => {
     console.log(ia.getStatus());
     process.exit(0);
 });
-
 
 
 
