@@ -3244,10 +3244,11 @@ Aqui no grupo`
     },
 '120363403399939386@g.us': {
         nome: 'Megas Auto 24/7',
-        tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - NOVEMBRO 2025 🚨🔥✅
+        tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - OUTUBRO 2025 🚨🔥✅
 
 📆 PACOTES DIÁRIOS
-1024MB = 17MT 💵💽
+512MB = 9MT 💵💽
+1024MB = 16MT 💵💽
 1200MB = 19MT 💵💽
 2048MB = 33MT 💵💽
 2200MB = 39MT 💵💽
@@ -3258,7 +3259,7 @@ Aqui no grupo`
 7168MB = 118MT 💵💽
 8192MB = 135MT 💵💽
 9144MB = 152MT 💵💽
-10240MB = 179MT 💵💽
+10240MB = 169MT 💵💽
 
 📅 PACOTES PREMIUM (3 Dias – Renováveis)
 2000MB = 43MT 💵💽
@@ -3271,41 +3272,39 @@ Aqui no grupo`
 🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
 
 📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
-1700MB = 45MT 💵💽
-2900MB = 80MT 💵💽
-3400MB = 110MT 💵💽
-5500MB = 150MT 💵💽
-7800MB = 200MT 💵💽
-11400MB = 300MT 💵💽
+1700MB = 44MT 💵💽
+2900MB = 79MT 💵💽
+3400MB = 109MT 💵💽
+5500MB = 149MT 💵💽
+7800MB = 199MT 💵💽
+11400MB = 299MT 💵💽
 🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
 
 📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
-3000MB = 100MT 💵💽
-5000MB = 149MT 💵💽
-8000MB = 201MT 💵💽
-10000MB = 231MT 💵💽
-20000MB = 352MT 💵💽
+3000MB = 99MT 💵💽
+5000MB = 148MT 💵💽
+8000MB = 200MT 💵💽
+10000MB = 230MT 💵💽
+20000MB = 351MT 💵💽
 🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
 
 📅 PACOTES MENSAIS
-12.8GB = 270MT 💵💽
-22.8GB = 435MT 💵💽
-32.8GB = 605MT 💵💽
-52.8GB = 945MT 💵💽
-60.2GB = 1249MT 💵💽
-80.2GB = 1449MT 💵💽
-100.2GB = 1700MT 💵💽
+12.8GB = 269MT 💵💽
+22.8GB = 434MT 💵💽
+32.8GB = 604MT 💵💽
+52.8GB = 944MT 💵💽
+60.2GB = 1248MT 💵💽
+80.2GB = 1448MT 💵💽
+100.2GB = 1699MT 💵💽
 
 💎 PACOTES DIAMANTE MENSAIS
-Chamadas + SMS ilimitadas + 11GB = 460MT 💵
-Chamadas + SMS ilimitadas + 24GB = 820MT 💵
-Chamadas + SMS ilimitadas + 50GB = 1550MT 💵
-Chamadas + SMS ilimitadas + 100GB = 2250MT 💵
+Chamadas + SMS ilimitadas + 11GB = 459MT 💵
+Chamadas + SMS ilimitadas + 24GB = 819MT 💵
+Chamadas + SMS ilimitadas + 50GB = 1549MT 💵
+Chamadas + SMS ilimitadas + 100GB = 2249MT 💵
 
-📍 NB: Válido apenas para Vodacom  
-📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!
-
-`,
+📍 NB: Válido apenas para Vodacom
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!`,
 
         pagamento: `✅FORMAS DE PAGAMENTO ATUALIZADAS
 
@@ -3944,7 +3943,7 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
                                 `📅 *Validade Total:* Até ${dataExpiracao.toLocaleDateString('pt-BR')}\n\n` +
                                 `💡 *Como funciona:*\n` +
                                 `O sistema enviará automaticamente 100MB por dia durante ${tipoPacoteDetectado} dias para manter seu pacote principal válido.\n\n` +
-                                `✨ *Total de dados:* ${valor}MB + ${parseInt(tipoPacoteDetectado) * 100}MB bônus = ${valor + (parseInt(tipoPacoteDetectado) * 100)}MB!`;
+                                `✨ *Total de dados:* ${valor}MB + ${parseInt(tipoPacoteDetectado) * 100}MB bônus = ${parseInt(valor) + (parseInt(tipoPacoteDetectado) * 100)}MB!`;
 
                             await client.sendMessage(grupoId, mensagemNotificacao);
                             console.log(`📢 Notificação de pacote automático enviada ao grupo!`);

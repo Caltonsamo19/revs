@@ -641,6 +641,89 @@ class SistemaPacotes {
             historicoSize: this.historicoRenovacoes.length
         };
     }
+
+    // === EXTRAIR PACOTES RENOVÁVEIS DA TABELA ===
+    extrairPacotesRenovaveis(tabelaTexto) {
+        try {
+            const pacotesRenovaveis = {
+                '3': [],
+                '5': [],
+                '15': []
+            };
+
+            if (!tabelaTexto) {
+                console.log('⚠️ PACOTES: Tabela vazia - nenhum pacote renovável encontrado');
+                return pacotesRenovaveis;
+            }
+
+            // Dividir a tabela em linhas
+            const linhas = tabelaTexto.split('\n');
+
+            let secaoAtual = null;
+
+            for (const linha of linhas) {
+                const linhaTrim = linha.trim();
+
+                // Detectar seções de pacotes renováveis
+                if (linhaTrim.includes('3 Dias') && linhaTrim.includes('Renováveis')) {
+                    secaoAtual = '3';
+                    continue;
+                } else if (linhaTrim.includes('5 Dias') && linhaTrim.includes('Renováveis')) {
+                    secaoAtual = '5';
+                    continue;
+                } else if (linhaTrim.includes('15 Dias') && linhaTrim.includes('Renováveis')) {
+                    secaoAtual = '15';
+                    continue;
+                }
+
+                // Resetar seção quando encontrar outras seções ou linhas de bônus
+                if (linhaTrim.includes('PACOTES MENSAIS') ||
+                    linhaTrim.includes('DIAMANTE') ||
+                    linhaTrim.includes('PACOTES DIÁRIOS') ||
+                    linhaTrim.includes('Bônus:') ||
+                    linhaTrim.includes('🔄') ||
+                    linhaTrim.startsWith('📍')) {
+                    secaoAtual = null;
+                    continue;
+                }
+
+                // Extrair pacotes no formato: 2000MB = 44MT
+                if (secaoAtual && linhaTrim.match(/(\d+)MB\s*=\s*(\d+)MT/)) {
+                    const match = linhaTrim.match(/(\d+)MB\s*=\s*(\d+)MT/);
+                    if (match) {
+                        const mb = parseInt(match[1]);
+                        const valor = parseInt(match[2]);
+
+                        pacotesRenovaveis[secaoAtual].push({ mb, valor });
+                    }
+                }
+
+                // Também suportar formato com GB: 10GB = 219MT -> converter para MB
+                if (secaoAtual && linhaTrim.match(/(\d+(?:\.\d+)?)GB\s*=\s*(\d+)MT/)) {
+                    const match = linhaTrim.match(/(\d+(?:\.\d+)?)GB\s*=\s*(\d+)MT/);
+                    if (match) {
+                        const gb = parseFloat(match[1]);
+                        const mb = Math.round(gb * 1024); // Converter GB para MB
+                        const valor = parseInt(match[2]);
+
+                        pacotesRenovaveis[secaoAtual].push({ mb, valor });
+                    }
+                }
+            }
+
+            // Log dos pacotes encontrados
+            console.log('📦 PACOTES RENOVÁVEIS EXTRAÍDOS:');
+            for (const [tipo, pacotes] of Object.entries(pacotesRenovaveis)) {
+                console.log(`   ${tipo} dias: ${pacotes.length} pacotes`);
+            }
+
+            return pacotesRenovaveis;
+
+        } catch (error) {
+            console.error('❌ PACOTES: Erro ao extrair pacotes renováveis:', error);
+            return { '3': [], '5': [], '15': [] };
+        }
+    }
 }
 
 module.exports = SistemaPacotes;
