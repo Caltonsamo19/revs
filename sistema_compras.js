@@ -76,7 +76,13 @@ class SistemaCompras {
 
                 // Validar se os dados carregados são válidos
                 if (dadosParsados && typeof dadosParsados === 'object') {
-                    this.historicoCompradores = dadosParsados;
+                    // CORRIGIDO: Se tem a estrutura com .dados, usar apenas essa propriedade
+                    if (dadosParsados.dados && typeof dadosParsados.dados === 'object') {
+                        this.historicoCompradores = dadosParsados.dados;
+                    } else {
+                        // Formato antigo direto
+                        this.historicoCompradores = dadosParsados;
+                    }
                     console.log(`✅ Histórico carregado com sucesso: ${Object.keys(this.historicoCompradores).length} compradores`);
 
                     // Criar backup automático após carregamento bem-sucedido
