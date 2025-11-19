@@ -240,6 +240,36 @@ async function safeReply(message, client, texto) {
     }
 }
 
+// === FUNÇÃO DE NORMALIZAÇÃO DE NÚMEROS DE TELEFONE ===
+/**
+ * Normaliza números de telefone removendo espaços, caracteres especiais e códigos de país
+ * Suporta formatos:
+ * - Internacional: +258 849 123 456, 258849123456
+ * - Nacional: 849 123 456, 849123456
+ * - Com formatação: (849) 123-456, 849-123-456
+ * @param {string} numero - Número de telefone a normalizar
+ * @returns {string} - Número normalizado (apenas dígitos, sem código de país)
+ */
+function normalizarNumeroTelefone(numero) {
+    if (!numero) return '';
+
+    // Remover todos os caracteres não numéricos
+    let numeroLimpo = String(numero).replace(/[^0-9]/g, '');
+
+    // Remover código de país 258 se presente
+    if (numeroLimpo.startsWith('258') && numeroLimpo.length > 9) {
+        numeroLimpo = numeroLimpo.substring(3);
+    }
+
+    // Garantir que temos pelo menos 9 dígitos
+    if (numeroLimpo.length < 9) {
+        return ''; // Número inválido
+    }
+
+    // Retornar os últimos 9 dígitos (formato moçambicano padrão)
+    return numeroLimpo.slice(-9);
+}
+
 // Criar instância do cliente (SEGUINDO PADRÃO BOT1)
 const client = new Client({
     authStrategy: new LocalAuth({
@@ -5100,14 +5130,20 @@ async function processMessage(message) {
                         const partes = message.body.trim().split(' ');
 
                         if (partes.length < 4) {
-                            await message.reply(`❌ *USO INCORRETO*\n\n✅ **Formato correto:**\n*.pacote DIAS REF NUMERO*\n\n📝 **Exemplos:**\n• *.pacote 3 ABC123 845123456*\n• *.pacote 5 XYZ789 847654321*\n• *.pacote 15 DEF456 841234567*\n\n📦 **Dias disponíveis:** 3, 5, 15, 30\n\n⚠️ **IMPORTANTE:**\nEste comando serve APENAS para agendar renovações automáticas.\nVocê deve ter enviado o pacote principal MANUALMENTE antes de usar este comando.\n\n🔄 O sistema agendará renovações diárias de 100MB durante o período especificado.`);
+                            await message.reply(`❌ *USO INCORRETO*\n\n✅ **Formato correto:**\n*.pacote DIAS REF NUMERO*\n\n📝 **Exemplos:**\n• *.pacote 3 ABC123 845123456*\n• *.pacote 5 XYZ789 847654321*\n• *.pacote 15 DEF456 841234567*\n\n📦 **Dias disponíveis:** 3, 5, 15, 30\n\n🌍 **Formatos de número aceitos:**\n• 845123456\n• +258 845 123 456\n• 258845123456\n\n⚠️ **IMPORTANTE:**\nEste comando serve APENAS para agendar renovações automáticas.\nVocê deve ter enviado o pacote principal MANUALMENTE antes de usar este comando.\n\n🔄 O sistema agendará renovações diárias de 100MB durante o período especificado.`);
                             return;
                         }
 
-                        const [, diasPacote, referencia, numero] = partes;
+                        const [, diasPacote, referencia, numeroInput] = partes;
+                        const numero = normalizarNumeroTelefone(numeroInput);
                         const grupoId = message.from;
 
-                        console.log(`📦 COMANDO PACOTE: Dias=${diasPacote}, Ref=${referencia}, Numero=${numero}`);
+                        if (!numero || numero.length !== 9) {
+                            await message.reply(`❌ *NÚMERO INVÁLIDO*\n\nAceita formatos:\n• 845123456\n• +258 845 123 456\n• 258845123456`);
+                            return;
+                        }
+
+                        console.log(`📦 COMANDO PACOTE: Dias=${diasPacote}, Ref=${referencia}, NumeroInput=${numeroInput}, NumeroNormalizado=${numero}`);
 
                         // Modo manual: não precisa de megas/valor inicial (apenas agenda renovações)
                         // Usar valores simbólicos (não serão enviados, apenas para registro)
@@ -5171,13 +5207,20 @@ async function processMessage(message) {
                 // .validade NUMERO - Verificar validade do pacote (comando para CLIENTES)
                 if (comando.startsWith('.validade ')) {
                     const partes = message.body.trim().split(' ');
-                    
+
                     if (partes.length < 2) {
-                        await message.reply(`❌ *USO INCORRETO*\n\n✅ **Formato correto:**\n*.validade NUMERO*\n\n📝 **Exemplo:**\n• *.validade 845123456*\n\n💡 Digite seu número para verificar a validade do seu pacote de 100MB diários.`);
+                        await message.reply(`❌ *USO INCORRETO*\n\n✅ **Formato correto:**\n*.validade NUMERO*\n\n📝 **Exemplo:**\n• *.validade 845123456*\n\n💡 Digite seu número para verificar a validade do seu pacote de 100MB diários.\n\n🌍 Aceita formatos: 845123456, +258 845 123 456, 258845123456`);
                         return;
                     }
-                    
-                    const numero = partes[1];
+
+                    const numeroInput = partes[1];
+                    const numero = normalizarNumeroTelefone(numeroInput);
+
+                    if (!numero || numero.length !== 9) {
+                        await message.reply(`❌ *NÚMERO INVÁLIDO*\n\nAceita formatos:\n• 845123456\n• +258 845 123 456\n• 258845123456`);
+                        return;
+                    }
+
                     const resultado = sistemaPacotes.verificarValidadePacote(numero);
                     
                     await message.reply(resultado);
@@ -6925,14 +6968,15 @@ async function processMessage(message) {
                     await message.reply('❌ Sistema de compras não está ativo!');
                     return;
                 }
-                
-                const numero = comando.replace('.comprador ', '').trim();
-                
-                if (!/^\d{9}$/.test(numero)) {
-                    await message.reply('❌ Use: *.comprador 849123456*');
+
+                const numeroInput = comando.replace('.comprador ', '').trim();
+                const numero = normalizarNumeroTelefone(numeroInput);
+
+                if (!numero || numero.length !== 9) {
+                    await message.reply('❌ Use: *.comprador 849123456*\nAceita formatos: 849123456, +258 849 123 456, 258849123456');
                     return;
                 }
-                
+
                 const cliente = sistemaCompras.historicoCompradores[numero];
                 
                 if (!cliente) {
