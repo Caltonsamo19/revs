@@ -754,20 +754,20 @@ Se não conseguires extrair os dados:
 
     console.log(`   📱 LEGENDA: Números brutos encontrados: ${numerosEncontrados.join(', ')}`);
 
-    // Normalizar todos os números encontrados
-    const numerosNormalizados = new Set();
+    // Normalizar todos os números encontrados e manter mapeamento com original
+    const numerosNormalizados = new Map(); // numero normalizado -> numero original
     for (const numeroRaw of numerosEncontrados) {
       const numeroNormalizado = this.normalizarNumero(numeroRaw);
       if (numeroNormalizado) {
-        numerosNormalizados.add(numeroNormalizado);
+        numerosNormalizados.set(numeroNormalizado, numeroRaw);
       }
     }
 
     const numerosValidos = [];
 
-    for (const numero of numerosNormalizados) {
+    for (const [numero, numeroOriginal] of numerosNormalizados.entries()) {
       // Procurar o número original na legenda para análise de contexto
-      const posicao = legendaLimpa.indexOf(numero);
+      const posicao = legendaLimpa.indexOf(numeroOriginal);
       const comprimentoLegenda = legendaLimpa.length;
       
       // Análise de número removida para privacidade
@@ -889,19 +889,19 @@ Se não conseguires extrair os dados:
 
     console.log(`   📱 TEXTO: Números brutos encontrados: ${numerosEncontrados.join(', ')}`);
 
-    // Normalizar todos os números encontrados
-    const numerosNormalizados = new Set();
+    // Normalizar todos os números encontrados e manter mapeamento com original
+    const numerosNormalizados = new Map(); // numero normalizado -> numero original
     for (const numeroRaw of numerosEncontrados) {
       const numeroNormalizado = this.normalizarNumero(numeroRaw);
       if (numeroNormalizado) {
-        numerosNormalizados.add(numeroNormalizado);
+        numerosNormalizados.set(numeroNormalizado, numeroRaw);
       }
     }
 
     const numerosValidos = [];
 
-    for (const numero of numerosNormalizados) {
-      const posicao = mensagem.indexOf(numero);
+    for (const [numero, numeroOriginal] of numerosNormalizados.entries()) {
+      const posicao = mensagem.indexOf(numeroOriginal);
       const tamanhoMensagem = mensagem.length;
       const percentualPosicao = (posicao / tamanhoMensagem) * 100;
       
