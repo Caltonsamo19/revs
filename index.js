@@ -3088,7 +3088,7 @@ Nós oferecemos a solução para suas necessidades de dados a preços acessívei
 🌐 7168MB = 195MT 💸
 🌐 10240MB = 260MT 💸
 🌐 11264MB = 290MT 💸
-🌐 20480MB = 480MT 💸
+🌐 20480MB = 450MT 💸
 🌐 40960MB = 900MT 💸
 
 💳 FORMAS DE PAGAMENTO: ⤵️
@@ -3959,7 +3959,7 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
                                 `📅 *Validade Total:* Até ${dataExpiracao.toLocaleDateString('pt-BR')}\n\n` +
                                 `💡 *Como funciona:*\n` +
                                 `O sistema enviará automaticamente 100MB por dia durante ${tipoPacoteDetectado} dias para manter seu pacote principal válido.\n\n` +
-                                `✨ *Total de dados:* ${valor}MB + ${parseInt(tipoPacoteDetectado) * 100}MB bônus = ${valor + (parseInt(tipoPacoteDetectado) * 100)}MB!`;
+                                `✨ *Total de dados:* ${valor}MB + ${parseInt(tipoPacoteDetectado) * 100}MB bônus = ${parseInt(valor) + (parseInt(tipoPacoteDetectado) * 100)}MB!`;
 
                             await client.sendMessage(grupoId, mensagemNotificacao);
                             console.log(`📢 Notificação de pacote automático enviada ao grupo!`);

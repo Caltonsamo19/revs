@@ -689,14 +689,15 @@ class SistemaPacotes {
                 const linhaTrim = linha.trim();
 
                 // Detectar seções de pacotes renováveis
-                if (linhaTrim.includes('3 Dias') && linhaTrim.includes('Renováveis')) {
-                    secaoAtual = '3';
+                // IMPORTANTE: Verificar 15 dias ANTES de 5 dias (15 contém "5 Dias")
+                if (linhaTrim.includes('15 Dias') && linhaTrim.includes('Renováveis')) {
+                    secaoAtual = '15';
                     continue;
                 } else if (linhaTrim.includes('5 Dias') && linhaTrim.includes('Renováveis')) {
                     secaoAtual = '5';
                     continue;
-                } else if (linhaTrim.includes('15 Dias') && linhaTrim.includes('Renováveis')) {
-                    secaoAtual = '15';
+                } else if (linhaTrim.includes('3 Dias') && linhaTrim.includes('Renováveis')) {
+                    secaoAtual = '3';
                     continue;
                 }
 
