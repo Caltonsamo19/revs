@@ -2280,7 +2280,7 @@ async function processarPagamentoConfirmado(pendencia) {
         const bonusInfo = await processarBonusCompra(chatId, megas, chatId);
 
         // Enviar para Tasker/Planilha
-        const resultadoEnvio = await enviarParaTasker(referencia, megas, numero, chatId, messageData.author);
+        const resultadoEnvio = await enviarParaTasker(referencia, megas, numero, chatId, messageData.author, pendencia.valorComprovante);
 
         // Verificar duplicatas
         if (resultadoEnvio && resultadoEnvio.duplicado) {
@@ -3778,7 +3778,7 @@ async function processarPacotePonto8(comprovante, configGrupo, pacoteDiamante) {
 }
 
 // === FUNÇÃO PRINCIPAL PARA TASKER ===
-async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensagem) {
+async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensagem, valorMT = null) {
     const grupoNome = getConfiguracaoGrupo(grupoId)?.nome || 'Desconhecido';
     const timestamp = new Date().toLocaleString('pt-BR');
     const linhaCompleta = `${referencia}|${valor}|${numero}`;
@@ -3908,8 +3908,13 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
 
                 for (const [tipoDias, listaPacotes] of Object.entries(pacotesRenovaveis)) {
                     for (const pacote of listaPacotes) {
-                        // Comparar com tolerância de 1%
-                        if (Math.abs(pacote.mb - valor) <= (valor * 0.01)) {
+                        // Comparar MB com tolerância de 1%
+                        const mbMatch = Math.abs(pacote.mb - valor) <= (valor * 0.01);
+
+                        // Se valorMT foi fornecido, também comparar o valor MT
+                        const mtMatch = valorMT ? (parseInt(pacote.valor) === parseInt(valorMT)) : true;
+
+                        if (mbMatch && mtMatch) {
                             valorMTEncontrado = pacote.valor;
                             tipoPacoteDetectado = tipoDias;
                             break;
@@ -3922,7 +3927,8 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
                     console.log(`🎯 PACOTES: Detectado pacote de ${tipoPacoteDetectado} dias - Ativando automaticamente!`);
                     console.log(`   📋 Referência: ${referencia}`);
                     console.log(`   📱 Número: ${numero}`);
-                    console.log(`   💰 Valor: ${valorMTEncontrado}MT`);
+                    console.log(`   💰 Valor Pago: ${valorMT || 'N/A'}MT`);
+                    console.log(`   💰 Valor do Pacote: ${valorMTEncontrado}MT`);
                     console.log(`   📊 Megas: ${valor}MB`);
 
                     // Ativar pacote automático
@@ -8217,7 +8223,7 @@ async function processMessage(message) {
                 }
 
                 // Continuar fluxo normal (pedidos comuns)
-                const resultadoEnvio = await enviarParaTasker(referencia, megas, numero, message.from, autorMensagem);
+                const resultadoEnvio = await enviarParaTasker(referencia, megas, numero, message.from, autorMensagem, valorComprovante);
 
                 // Verificar se é pedido duplicado
                 if (resultadoEnvio && resultadoEnvio.duplicado) {
@@ -8349,7 +8355,7 @@ async function processMessage(message) {
                 }
 
                 // Continuar fluxo normal (pedidos comuns)
-                const resultadoEnvio = await enviarParaTasker(referencia, megas, numero, message.from, autorMensagem);
+                const resultadoEnvio = await enviarParaTasker(referencia, megas, numero, message.from, autorMensagem, valorComprovante);
 
                 // Verificar se é pedido duplicado
                 if (resultadoEnvio && resultadoEnvio.duplicado) {
@@ -8442,7 +8448,7 @@ async function processMessage(message) {
 
                     console.log(`📤 Enviando bloco ${i + 1}/${blocos.length}: ${refBloco} - ${megasBloco}MB`);
 
-                    const resultadoEnvio = await enviarParaTasker(refBloco, megasBloco, numeroBloco, message.from, autorMensagem);
+                    const resultadoEnvio = await enviarParaTasker(refBloco, megasBloco, numeroBloco, message.from, autorMensagem, valorComprovante);
 
                     if (resultadoEnvio && resultadoEnvio.sucesso) {
                         sucessos++;
