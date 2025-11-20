@@ -3493,7 +3493,57 @@ NOME: Alexandre Zacarias
 📝 Após a transferência, mande:
 1️⃣ Comprovativo
 2️⃣ UM número que vai receber`
-    }
+    },'120363404432607275@g.us': {
+    nome: 'AUTODATA VODACOM [1GB-17Mts]',
+    tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - OUTUBRO 2025 🚨🔥✅
+
+📆 PACOTES DIÁRIOS
+1024MB = 17MT 💵💽
+1100MB = 20MT 💵💽
+2048MB = 34MT 💵💽
+2200MB = 40MT 💵💽
+3072MB = 51MT 💵💽
+4096MB = 68MT 💵💽
+5120MB = 85MT 💵💽
+6144MB = 102MT 💵💽
+7168MB = 119MT 💵💽
+8192MB = 136MT 💵💽
+9144MB = 153MT 💵💽
+10240MB = 170MT 💵💽
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+2000MB = 50MT 💵💽
+3000MB = 70MT 💵💽
+4000MB = 90MT 💵💽
+5000MB = 110MT 💵💽
+6000MB = 140MT 💵💽
+7000MB = 160MT 💵💽
+10000MB = 220MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
+
+📅 PACOTES MENSAIS
+12.8GB = 270MT 💵💽
+22.8GB = 535MT 💵💽
+32.8GB = 650MT 💵💽
+52.8GB = 980MT 💵💽
+60.2GB = 1249MT 💵💽
+80.2GB = 1500MT 💵💽
+100.2GB = 1700MT 💵💽
+
+💎 PACOTES DIAMANTE MENSAIS
+Chamadas + SMS ilimitadas + 11GB = 450MT 💵
+Chamadas + SMS ilimitadas + 24GB = 640MT 💵
+Chamadas + SMS ilimitadas + 50GB = 1480MT 💵
+Chamadas + SMS ilimitadas + 100GB = 2280MT 💵
+
+📍 NB: Válido apenas para Vodacom  
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!`,
+    pagamento: `💳 *FORMAS DE PAGAMENTO:*⤵️  
+- 📲 *𝗘-𝗠𝗢𝗟𝗔: 877860834*💶💰  
+- *Adinan Rafael* 
+- 📲 *𝗠-𝗣𝗘𝗦𝗔: 847206431*💷💰  
+- ↪️📞📱 *Adinan RafaelHélio*`
+},
 };
 
 
