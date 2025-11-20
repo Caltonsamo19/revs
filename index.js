@@ -2469,7 +2469,7 @@ const MODERACAO_CONFIG = {
         ativado: true,
         maxMensagensIguais: 5, // Máximo de mensagens iguais permitidas
         intervaloSegundos: 60, // Janela de tempo em segundos
-        removerUsuario: true,
+        removerUsuario: false, // Desativado - apenas apaga mensagens
         apagarMensagens: true
     }
 };
