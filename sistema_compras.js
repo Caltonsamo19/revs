@@ -1,5 +1,6 @@
 const fs = require('fs').promises;
 const path = require('path');
+const cron = require('node-cron');
 
 // Mapeamento de IDs internos (@lid) para números reais (@c.us) - SISTEMA DINÂMICO COMPARTILHADO
 const ARQUIVO_MAPEAMENTOS = path.join(__dirname, 'mapeamentos_lid.json');
@@ -38,6 +39,7 @@ class SistemaCompras {
         this.ARQUIVO_RANKING_DIARIO = path.join(__dirname, 'ranking_diario.json');
         this.ARQUIVO_RANKING_SEMANAL = path.join(__dirname, 'ranking_semanal.json');
         this.ARQUIVO_RANKING_DIARIO_MEGAS = path.join(__dirname, 'ranking_diario_megas.json');
+        this.ARQUIVO_RANKING_MENSAL = path.join(__dirname, 'ranking_mensal.json');
         this.ARQUIVO_MENSAGENS_RANKING = path.join(__dirname, 'mensagens_ranking.json');
         this.ARQUIVO_BLOCOS_DIVIDIDOS = path.join(__dirname, 'blocos_divididos.json');
 
@@ -56,7 +58,14 @@ class SistemaCompras {
         this.rankingPorGrupo = {}; // {grupoId: [{numero, megas, compras, posicao}]}
         this.rankingSemanalPorGrupo = {}; // {grupoId: [{numero, megasSemana, comprasSemana, posicao}]}
         this.rankingDiarioPorGrupo = {}; // {grupoId: [{numero, megasDia, comprasDia, posicao}]}
-        this.mensagensRanking = {}; // {grupoId: {messageId: string, ultimaAtualizacao: date, lideres: {dia: numero, semana: numero, geral: numero}}}
+        this.rankingMensalPorGrupo = {}; // {grupoId: [{numero, megasMes, comprasMes, posicao}]}
+        this.mensagensRanking = {}; // {grupoId: {messageId: string, ultimaAtualizacao: date, lideres: {dia: numero, semana: numero, mes: numero, geral: numero}}}
+
+        // Sistema de premiação do melhor comprador do dia
+        this.client = null; // WhatsApp client (será definido via setClient)
+        this.sistemaBonus = null; // Sistema de bônus (será definido via setSistemaBonus)
+        this.premioMelhorCompradorDia = 512; // MB de bônus para o melhor comprador do dia
+        this.gruposAtivos = []; // Lista de grupos para premiar
         
         // Carregar dados existentes
         this.carregarDados();
@@ -140,6 +149,17 @@ class SistemaCompras {
                 await this.salvarDados();
             }
 
+            // Carregar ranking mensal
+            try {
+                const dadosRankingMensal = await fs.readFile(this.ARQUIVO_RANKING_MENSAL, 'utf8');
+                this.rankingMensalPorGrupo = JSON.parse(dadosRankingMensal);
+                console.log(`📆 Rankings mensais carregados: ${Object.keys(this.rankingMensalPorGrupo).length} grupos`);
+            } catch (error) {
+                console.log('📆 Criando novo arquivo de ranking mensal...');
+                this.rankingMensalPorGrupo = {};
+                await this.salvarDados();
+            }
+
             // Carregar mensagens de ranking
             try {
                 const dadosMensagensRanking = await fs.readFile(this.ARQUIVO_MENSAGENS_RANKING, 'utf8');
@@ -207,6 +227,7 @@ class SistemaCompras {
                 this.salvarArquivoSeguro(this.ARQUIVO_RANKING_DIARIO, this.rankingPorGrupo),
                 this.salvarArquivoSeguro(this.ARQUIVO_RANKING_SEMANAL, this.rankingSemanalPorGrupo),
                 this.salvarArquivoSeguro(this.ARQUIVO_RANKING_DIARIO_MEGAS, this.rankingDiarioPorGrupo),
+                this.salvarArquivoSeguro(this.ARQUIVO_RANKING_MENSAL, this.rankingMensalPorGrupo),
                 this.salvarArquivoSeguro(this.ARQUIVO_MENSAGENS_RANKING, this.mensagensRanking)
             ];
 
@@ -287,6 +308,12 @@ class SistemaCompras {
             await this.salvarArquivoSeguro(this.ARQUIVO_RANKING_DIARIO_MEGAS, this.rankingDiarioPorGrupo);
         } catch (error) {
             console.error('❌ Falha ao salvar ranking diário:', error.message);
+        }
+
+        try {
+            await this.salvarArquivoSeguro(this.ARQUIVO_RANKING_MENSAL, this.rankingMensalPorGrupo);
+        } catch (error) {
+            console.error('❌ Falha ao salvar ranking mensal:', error.message);
         }
 
         try {
@@ -532,6 +559,9 @@ class SistemaCompras {
                     comprasSemana: 0,
                     megasSemana: 0,
                     ultimaCompraSemana: null,
+                    comprasMes: 0,
+                    megasMes: 0,
+                    ultimaCompraMes: null,
                     ultimaCompra: null // Para calcular dias sem comprar
                 };
             }
@@ -577,11 +607,31 @@ class SistemaCompras {
                     console.log(`📈 Compra semanal (${grupoData.comprasSemana}ª da semana) para ${numero} no grupo ${grupoId}`);
                 }
 
+                // Verificar se é uma nova compra do mês
+                const ultimaCompraMes = grupoData.ultimaCompraMes ? new Date(grupoData.ultimaCompraMes) : null;
+                const mesAtual = agora.getMonth();
+                const anoAtual = agora.getFullYear();
+                const mesUltimo = ultimaCompraMes ? ultimaCompraMes.getMonth() : null;
+                const anoUltimo = ultimaCompraMes ? ultimaCompraMes.getFullYear() : null;
+
+                if (mesUltimo === null || mesAtual !== mesUltimo || anoAtual !== anoUltimo) {
+                    // Novo mês - resetar contador mensal
+                    console.log(`📆 Novo mês detectado para ${numero} no grupo ${grupoId}`);
+                    grupoData.comprasMes = 1;
+                    grupoData.megasMes = megas;
+                } else {
+                    // Compra adicional do mesmo mês
+                    grupoData.comprasMes = (grupoData.comprasMes || 0) + 1;
+                    grupoData.megasMes = (grupoData.megasMes || 0) + megas;
+                    console.log(`📆 Compra mensal (${grupoData.comprasMes}ª do mês) para ${numero} no grupo ${grupoId}`);
+                }
+
                 // Atualizar contadores totais do grupo
                 grupoData.compras++;
                 grupoData.megas += megas;
                 grupoData.ultimaCompraDia = hoje;
                 grupoData.ultimaCompraSemana = hoje;
+                grupoData.ultimaCompraMes = hoje;
                 grupoData.ultimaCompra = hoje; // Para calcular dias sem comprar
             }
             
@@ -1283,6 +1333,323 @@ class SistemaCompras {
         }
     }
 
+    // === SISTEMA DE RANKING MENSAL ===
+
+    // === ATUALIZAR RANKING MENSAL POR GRUPO ===
+    async atualizarRankingMensalGrupo(grupoId) {
+        try {
+            if (!grupoId) return;
+
+            // Criar array de ranking mensal ordenado por megas do mês
+            const rankingMensal = Object.entries(this.historicoCompradores)
+                .filter(([numero, dados]) =>
+                    dados.grupos[grupoId] &&
+                    dados.grupos[grupoId].megasMes > 0
+                )
+                .map(([numero, dados]) => ({
+                    numero: numero,
+                    megasMes: dados.grupos[grupoId].megasMes,
+                    comprasMes: dados.grupos[grupoId].comprasMes,
+                    megasTotal: dados.megasTotal,
+                    comprasTotal: dados.grupos[grupoId].compras
+                }))
+                .sort((a, b) => b.megasMes - a.megasMes)
+                .map((item, index) => ({
+                    ...item,
+                    posicao: index + 1
+                }));
+
+            // Salvar ranking mensal do grupo
+            if (!this.rankingMensalPorGrupo[grupoId]) {
+                this.rankingMensalPorGrupo[grupoId] = [];
+            }
+            this.rankingMensalPorGrupo[grupoId] = rankingMensal;
+
+            await this.salvarDados();
+
+            console.log(`🏆📆 Ranking mensal atualizado - ${rankingMensal.length} participantes`);
+
+        } catch (error) {
+            console.error('❌ COMPRAS: Erro ao atualizar ranking mensal do grupo:', error);
+        }
+    }
+
+    // === OBTER MELHOR COMPRADOR DO MÊS ===
+    async obterMelhorCompradorMes(grupoId) {
+        if (!grupoId || !this.rankingMensalPorGrupo[grupoId] || this.rankingMensalPorGrupo[grupoId].length === 0) {
+            return null;
+        }
+
+        return this.rankingMensalPorGrupo[grupoId][0]; // Primeiro colocado
+    }
+
+    // === OBTER TOP 5 COMPRADORES DO MÊS ===
+    async obterTop5CompradoresMes(grupoId) {
+        if (!grupoId || !this.rankingMensalPorGrupo[grupoId]) {
+            return [];
+        }
+
+        return this.rankingMensalPorGrupo[grupoId].slice(0, 5);
+    }
+
+    // === OBTER POSIÇÃO MENSAL DO CLIENTE ===
+    async obterPosicaoClienteMes(numero, grupoId) {
+        console.log(`🔍 DEBUG MENSAL: Buscando ${numero} no grupo ${grupoId}`);
+        if (!grupoId || !this.rankingMensalPorGrupo[grupoId]) {
+            console.log(`❌ DEBUG MENSAL: Grupo ${grupoId} não encontrado ou vazio`);
+            return { posicao: 1, megasMes: 0, comprasMes: 0 };
+        }
+
+        console.log(`📊 DEBUG MENSAL: Ranking tem ${this.rankingMensalPorGrupo[grupoId].length} participantes`);
+        const posicao = this.rankingMensalPorGrupo[grupoId].find(item => item.numero === numero);
+        const resultado = posicao || {
+            posicao: this.rankingMensalPorGrupo[grupoId].length + 1,
+            megasMes: 0,
+            comprasMes: 0
+        };
+        console.log(`📊 DEBUG MENSAL: Resultado - ${resultado.posicao}º lugar (${resultado.megasMes}MB)`);
+        return resultado;
+    }
+
+    // === ESTATÍSTICAS MENSAIS POR GRUPO ===
+    async obterEstatisticasMensaisGrupo(grupoId) {
+        if (!grupoId || !this.rankingMensalPorGrupo[grupoId]) {
+            return {
+                melhorComprador: null,
+                totalCompradores: 0,
+                totalMegasMes: 0,
+                totalComprasMes: 0,
+                top5: [],
+                mesAtual: new Date().getMonth() + 1,
+                anoAtual: new Date().getFullYear()
+            };
+        }
+
+        const rankingMensal = this.rankingMensalPorGrupo[grupoId];
+        const melhorComprador = rankingMensal.length > 0 ? rankingMensal[0] : null;
+
+        return {
+            melhorComprador: melhorComprador,
+            totalCompradores: rankingMensal.length,
+            totalMegasMes: rankingMensal.reduce((sum, item) => sum + item.megasMes, 0),
+            totalComprasMes: rankingMensal.reduce((sum, item) => sum + item.comprasMes, 0),
+            top5: rankingMensal.slice(0, 5),
+            mesAtual: new Date().getMonth() + 1,
+            anoAtual: new Date().getFullYear()
+        };
+    }
+
+    // === RESET RANKING MENSAL (MANUAL) ===
+    async resetarRankingMensalGrupo(grupoId) {
+        try {
+            let clientesResetados = 0;
+            const dataReset = new Date().toISOString();
+
+            if (!grupoId) {
+                throw new Error('ID do grupo é obrigatório');
+            }
+
+            // Resetar contadores mensais do grupo específico
+            Object.entries(this.historicoCompradores).forEach(([numero, cliente]) => {
+                if (cliente.grupos[grupoId] &&
+                    (cliente.grupos[grupoId].comprasMes > 0 || cliente.grupos[grupoId].megasMes > 0)) {
+
+                    console.log(`🔄 Resetando dados mensais - ${cliente.grupos[grupoId].comprasMes} compras do mês`);
+                    cliente.grupos[grupoId].comprasMes = 0;
+                    cliente.grupos[grupoId].megasMes = 0;
+                    cliente.grupos[grupoId].ultimaCompraMes = null;
+                    clientesResetados++;
+                }
+            });
+
+            // Limpar ranking mensal do grupo
+            if (this.rankingMensalPorGrupo[grupoId]) {
+                this.rankingMensalPorGrupo[grupoId] = [];
+            }
+
+            // Salvar dados
+            await this.salvarDados();
+
+            console.log(`✅ Ranking mensal resetado - ${clientesResetados} clientes afetados`);
+
+            return {
+                success: true,
+                clientesResetados: clientesResetados,
+                dataReset: dataReset,
+                grupoId: grupoId,
+                message: `Ranking mensal do grupo resetado com sucesso! ${clientesResetados} clientes afetados.`
+            };
+
+        } catch (error) {
+            console.error('❌ COMPRAS: Erro ao resetar ranking mensal do grupo:', error);
+            return {
+                success: false,
+                error: error.message,
+                message: `Erro ao resetar ranking mensal do grupo: ${error.message}`
+            };
+        }
+    }
+
+    // === SISTEMA DE PREMIAÇÃO DO MELHOR COMPRADOR DO DIA ===
+
+    // Configurar dependências externas
+    setClient(client) {
+        this.client = client;
+        console.log('🔗 COMPRAS: WhatsApp client configurado');
+    }
+
+    setSistemaBonus(sistemaBonus) {
+        this.sistemaBonus = sistemaBonus;
+        console.log('🔗 COMPRAS: Sistema de bônus configurado');
+    }
+
+    setGruposAtivos(grupos) {
+        this.gruposAtivos = grupos;
+        console.log(`🔗 COMPRAS: ${grupos.length} grupos configurados para premiação`);
+    }
+
+    // Iniciar agendamento de premiação às 22h
+    iniciarAgendamentoPremiacaoDiaria() {
+        console.log('⏰ COMPRAS: Configurando agendamento de premiação do melhor comprador às 22:00...');
+
+        const job = cron.schedule('0 22 * * *', async () => {
+            console.log('🏆 COMPRAS: Executando premiação do melhor comprador do dia (22:00)...');
+            await this.premiarMelhoresCompradoresDoDia();
+        }, {
+            scheduled: false,
+            timezone: "Africa/Maputo"
+        });
+
+        job.start();
+
+        console.log('✅ COMPRAS: Agendamento de premiação configurado! Premiação às 22:00 (Maputo)');
+        return job;
+    }
+
+    // Premiar os melhores compradores de todos os grupos ativos
+    async premiarMelhoresCompradoresDoDia() {
+        try {
+            if (!this.client) {
+                console.error('❌ COMPRAS: WhatsApp client não configurado para premiação');
+                return;
+            }
+
+            if (!this.sistemaBonus) {
+                console.error('❌ COMPRAS: Sistema de bônus não configurado para premiação');
+                return;
+            }
+
+            console.log(`🏆 COMPRAS: Iniciando premiação para ${this.gruposAtivos.length} grupos...`);
+
+            for (const grupoId of this.gruposAtivos) {
+                try {
+                    await this.premiarMelhorCompradorGrupo(grupoId);
+                } catch (error) {
+                    console.error(`❌ Erro ao premiar grupo ${grupoId}:`, error.message);
+                }
+            }
+
+            console.log('✅ COMPRAS: Premiação diária concluída!');
+
+        } catch (error) {
+            console.error('❌ COMPRAS: Erro na premiação diária:', error);
+        }
+    }
+
+    // Premiar melhor comprador de um grupo específico
+    async premiarMelhorCompradorGrupo(grupoId) {
+        try {
+            // Atualizar ranking diário antes de premiar
+            await this.atualizarRankingDiarioGrupo(grupoId);
+
+            // Obter melhor comprador do dia
+            const melhorComprador = await this.obterMelhorCompradorDia(grupoId);
+
+            if (!melhorComprador || melhorComprador.megasDia <= 0) {
+                console.log(`📊 COMPRAS: Nenhuma compra hoje no grupo ${grupoId} - sem premiação`);
+                return;
+            }
+
+            const clienteId = melhorComprador.numero;
+            const megasComprados = melhorComprador.megasDia;
+            const comprasDia = melhorComprador.comprasDia;
+
+            console.log(`🏆 Premiando ${clienteId} - ${megasComprados}MB (${comprasDia} compras)`);
+
+            // Creditar bônus
+            const saldoAnterior = this.sistemaBonus.buscarSaldo(clienteId)?.saldo || 0;
+
+            await this.sistemaBonus.atualizarSaldo(clienteId, (saldo) => {
+                saldo.saldo += this.premioMelhorCompradorDia;
+
+                // Registrar no histórico
+                if (!saldo.historicoPremios) {
+                    saldo.historicoPremios = [];
+                }
+                saldo.historicoPremios.push({
+                    tipo: 'melhor_comprador_dia',
+                    quantidade: this.premioMelhorCompradorDia,
+                    data: new Date().toISOString(),
+                    grupoId: grupoId,
+                    megasComprados: megasComprados,
+                    comprasDia: comprasDia
+                });
+            });
+
+            const novoSaldo = this.sistemaBonus.buscarSaldo(clienteId)?.saldo || 0;
+
+            // Formatar valores para mensagem
+            const megasFormatados = megasComprados >= 1024 ?
+                `${(megasComprados / 1024).toFixed(1)}GB` : `${megasComprados}MB`;
+            const premioFormatado = this.premioMelhorCompradorDia >= 1024 ?
+                `${(this.premioMelhorCompradorDia / 1024).toFixed(1)}GB` : `${this.premioMelhorCompradorDia}MB`;
+            const novoSaldoFormatado = novoSaldo >= 1024 ?
+                `${(novoSaldo / 1024).toFixed(1)}GB` : `${novoSaldo}MB`;
+
+            // Gerar mensagem de parabenização
+            const mensagem = `🏆 *MELHOR COMPRADOR DO DIA!* 🏆\n\n` +
+                `🎉 Parabéns @NOME_PLACEHOLDER!\n\n` +
+                `Você foi o *MELHOR COMPRADOR* de hoje neste grupo!\n\n` +
+                `📊 *Suas compras hoje:*\n` +
+                `   💾 ${megasFormatados}\n` +
+                `   🛒 ${comprasDia} compras\n\n` +
+                `🎁 *PRÉMIO:* +${premioFormatado} de bônus!\n\n` +
+                `💰 *Novo saldo de bônus:* ${novoSaldoFormatado}\n\n` +
+                `${novoSaldo >= 1024 ? '🚀 *Já podes sacar!* Use: *.sacar*' : '💡 *Continua a acumular para sacar!*'}\n\n` +
+                `⏰ _Premiação automática às 22:00_`;
+
+            // Enviar mensagem com menção
+            const mentionId = String(clienteId).replace('@c.us', '').replace('@lid', '');
+            const mensagemFinal = mensagem.replace('@NOME_PLACEHOLDER', `@${mentionId}`);
+
+            await this.client.sendMessage(grupoId, mensagemFinal, {
+                mentions: [clienteId]
+            });
+
+            console.log(`✅ COMPRAS: ${clienteId} premiado com ${premioFormatado} no grupo ${grupoId}`);
+
+            return {
+                success: true,
+                clienteId: clienteId,
+                premio: this.premioMelhorCompradorDia,
+                novoSaldo: novoSaldo,
+                megasComprados: megasComprados
+            };
+
+        } catch (error) {
+            console.error(`❌ COMPRAS: Erro ao premiar melhor comprador do grupo ${grupoId}:`, error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    // Premiar manualmente (para testes)
+    async premiarMelhorCompradorManual(grupoId) {
+        return await this.premiarMelhorCompradorGrupo(grupoId);
+    }
+
     // === MIGRAÇÃO DE DADOS EXISTENTES ===
     async migrarDadosExistentes() {
         try {
@@ -1313,6 +1680,14 @@ class SistemaCompras {
                         // Adicionar campo megasDia se não existir
                         if (dadosGrupo.megasDia === undefined) {
                             dadosGrupo.megasDia = 0;
+                            precisaMigracao = true;
+                        }
+
+                        // Adicionar campos mensais se não existirem
+                        if (dadosGrupo.comprasMes === undefined || dadosGrupo.megasMes === undefined || dadosGrupo.ultimaCompraMes === undefined) {
+                            dadosGrupo.comprasMes = 0;
+                            dadosGrupo.megasMes = 0;
+                            dadosGrupo.ultimaCompraMes = null;
                             precisaMigracao = true;
                         }
 
@@ -1533,6 +1908,7 @@ class SistemaCompras {
         try {
             const melhorDia = await this.obterMelhorCompradorDia(grupoId);
             const melhorSemana = await this.obterMelhorCompradorSemana(grupoId);
+            const melhorMes = await this.obterMelhorCompradorMes(grupoId);
             const melhorGeral = await this.obterLiderGrupo(grupoId);
 
             let mensagem = '🏆 *RANKING DE LÍDERES* 🏆\n\n';
@@ -1559,13 +1935,24 @@ class SistemaCompras {
                 mensagem += '❌ Nenhuma compra esta semana\n\n';
             }
 
+            // Líder do Mês
+            mensagem += '📆 *COMPRADOR DO MÊS*\n';
+            if (melhorMes && melhorMes.megasMes > 0) {
+                const numero = melhorMes.numero.replace('@c.us', '');
+                mensagem += `👑 ${numero}\n`;
+                mensagem += `📊 ${melhorMes.megasMes} MB este mês\n`;
+                mensagem += `🛒 ${melhorMes.comprasMes} compras\n\n`;
+            } else {
+                mensagem += '❌ Nenhuma compra este mês\n\n';
+            }
+
             // Líder Geral
             mensagem += '💎 *COMPRADOR DE SEMPRE*\n';
-            if (melhorGeral && melhorGeral.megasTotal > 0) {
+            if (melhorGeral && melhorGeral.megas > 0) {
                 const numero = melhorGeral.numero.replace('@c.us', '');
                 mensagem += `👑 ${numero}\n`;
-                mensagem += `📊 ${melhorGeral.megasTotal} MB total\n`;
-                mensagem += `🛒 ${melhorGeral.comprasTotal} compras\n\n`;
+                mensagem += `📊 ${melhorGeral.megas} MB total\n`;
+                mensagem += `🛒 ${melhorGeral.compras} compras\n\n`;
             } else {
                 mensagem += '❌ Nenhuma compra registrada\n\n';
             }
@@ -1586,11 +1973,13 @@ class SistemaCompras {
         try {
             const melhorDia = await this.obterMelhorCompradorDia(grupoId);
             const melhorSemana = await this.obterMelhorCompradorSemana(grupoId);
+            const melhorMes = await this.obterMelhorCompradorMes(grupoId);
             const melhorGeral = await this.obterLiderGrupo(grupoId);
 
             const lideresAtuais = {
                 dia: melhorDia?.numero || null,
                 semana: melhorSemana?.numero || null,
+                mes: melhorMes?.numero || null,
                 geral: melhorGeral?.numero || null
             };
 
@@ -1599,7 +1988,7 @@ class SistemaCompras {
                 this.mensagensRanking[grupoId] = {
                     messageId: null,
                     ultimaAtualizacao: null,
-                    lideres: { dia: null, semana: null, geral: null }
+                    lideres: { dia: null, semana: null, mes: null, geral: null }
                 };
             }
 
@@ -1608,15 +1997,17 @@ class SistemaCompras {
             // Verificar se houve mudança
             const mudancaDia = lideresAtuais.dia !== lideresAnteriores.dia;
             const mudancaSemana = lideresAtuais.semana !== lideresAnteriores.semana;
+            const mudancaMes = lideresAtuais.mes !== lideresAnteriores.mes;
             const mudancaGeral = lideresAtuais.geral !== lideresAnteriores.geral;
 
-            const houveMudanca = mudancaDia || mudancaSemana || mudancaGeral;
+            const houveMudanca = mudancaDia || mudancaSemana || mudancaMes || mudancaGeral;
 
             return {
                 houveMudanca,
                 mudancas: {
                     dia: mudancaDia,
                     semana: mudancaSemana,
+                    mes: mudancaMes,
                     geral: mudancaGeral
                 },
                 lideresAtuais,
@@ -1662,7 +2053,7 @@ class SistemaCompras {
         return this.mensagensRanking[grupoId] || {
             messageId: null,
             ultimaAtualizacao: null,
-            lideres: { dia: null, semana: null, geral: null }
+            lideres: { dia: null, semana: null, mes: null, geral: null }
         };
     }
 
@@ -1737,12 +2128,17 @@ class SistemaCompras {
             const agora = new Date();
             const hojeDia = agora.toDateString();
             const inicioSemanaAtual = this.obterInicioSemana(agora);
+            const mesAtual = agora.getMonth();
+            const anoAtual = agora.getFullYear();
 
             // Limpar rankings diários antigos
             await this.limparRankingsDiariosAntigos(hojeDia);
 
             // Limpar rankings semanais antigos
             await this.limparRankingsSemanaisAntigos(inicioSemanaAtual);
+
+            // Limpar rankings mensais antigos
+            await this.limparRankingsMensaisAntigos(mesAtual, anoAtual);
 
             console.log('✅ Verificação de limpeza de rankings concluída');
 
@@ -1834,6 +2230,52 @@ class SistemaCompras {
 
         } catch (error) {
             console.error('❌ Erro ao limpar rankings semanais:', error);
+        }
+    }
+
+    // === LIMPAR RANKINGS MENSAIS ANTIGOS ===
+    async limparRankingsMensaisAntigos(mesAtual, anoAtual) {
+        try {
+            let rankingsLimpos = 0;
+
+            for (const [grupoId, ranking] of Object.entries(this.rankingMensalPorGrupo)) {
+                // Verificar se algum participante do ranking tem dados de um mês diferente
+                const rankingAtualizado = ranking.filter(participante => {
+                    const cliente = this.historicoCompradores[participante.numero];
+                    if (!cliente || !cliente.grupos[grupoId]) return false;
+
+                    const ultimaCompraMes = cliente.grupos[grupoId].ultimaCompraMes;
+                    if (!ultimaCompraMes) return false;
+
+                    const dataUltimaCompra = new Date(ultimaCompraMes);
+                    const mesUltimo = dataUltimaCompra.getMonth();
+                    const anoUltimo = dataUltimaCompra.getFullYear();
+
+                    return mesUltimo === mesAtual && anoUltimo === anoAtual && cliente.grupos[grupoId].megasMes > 0;
+                });
+
+                if (rankingAtualizado.length !== ranking.length) {
+                    console.log(`🗑️ Limpando ranking mensal do grupo ${grupoId}: ${ranking.length} → ${rankingAtualizado.length}`);
+
+                    // Recalcular posições
+                    this.rankingMensalPorGrupo[grupoId] = rankingAtualizado
+                        .sort((a, b) => b.megasMes - a.megasMes)
+                        .map((item, index) => ({
+                            ...item,
+                            posicao: index + 1
+                        }));
+
+                    rankingsLimpos++;
+                }
+            }
+
+            if (rankingsLimpos > 0) {
+                console.log(`🧹 ${rankingsLimpos} rankings mensais foram limpos`);
+                await this.salvarDados();
+            }
+
+        } catch (error) {
+            console.error('❌ Erro ao limpar rankings mensais:', error);
         }
     }
 }

@@ -2463,8 +2463,166 @@ const MODERACAO_CONFIG = {
         '258861645968@c.us',
         '258871112049@c.us',
         '258852118624@c.us'
-    ]
+    ],
+    // Configuração Anti-Spam
+    antiSpam: {
+        ativado: true,
+        maxMensagensIguais: 5, // Máximo de mensagens iguais permitidas
+        intervaloSegundos: 60, // Janela de tempo em segundos
+        removerUsuario: true,
+        apagarMensagens: true
+    }
 };
+
+// === CACHE ANTI-SPAM ===
+// Estrutura: { 'groupId': { 'userId': { 'mensagemHash': [{ timestamp, messageId }] } } }
+const antiSpamCache = new Map();
+
+// Função para limpar cache antigo (mensagens fora da janela de tempo)
+function limparCacheAntiSpam() {
+    const agora = Date.now();
+    const intervaloMs = MODERACAO_CONFIG.antiSpam.intervaloSegundos * 1000;
+
+    for (const [groupId, usuarios] of antiSpamCache.entries()) {
+        for (const [userId, mensagens] of usuarios.entries()) {
+            for (const [hash, lista] of mensagens.entries()) {
+                const listaFiltrada = lista.filter(item => (agora - item.timestamp) < intervaloMs);
+                if (listaFiltrada.length === 0) {
+                    mensagens.delete(hash);
+                } else {
+                    mensagens.set(hash, listaFiltrada);
+                }
+            }
+            if (mensagens.size === 0) {
+                usuarios.delete(userId);
+            }
+        }
+        if (usuarios.size === 0) {
+            antiSpamCache.delete(groupId);
+        }
+    }
+}
+
+// Limpar cache a cada 30 segundos
+setInterval(limparCacheAntiSpam, 30000);
+
+// Função para verificar e registrar spam
+async function verificarAntiSpam(message, client) {
+    if (!MODERACAO_CONFIG.antiSpam.ativado) return false;
+
+    const chatId = message.from;
+    const authorId = message.author || message.from;
+    const conteudo = message.body.trim().toLowerCase();
+
+    // Ignorar mensagens vazias
+    if (!conteudo) return false;
+
+    // Verificar se é grupo monitorado
+    const ativadoExplicit = CONFIGURACAO_GRUPOS.hasOwnProperty(chatId) ||
+        (MODERACAO_CONFIG.ativado && MODERACAO_CONFIG.ativado[chatId]);
+
+    if (!ativadoExplicit) return false;
+
+    // Ignorar exceções e admins
+    if (MODERACAO_CONFIG.excecoes.includes(authorId) || isAdministrador(authorId)) {
+        return false;
+    }
+
+    // Criar hash simples da mensagem
+    const mensagemHash = conteudo;
+    const agora = Date.now();
+    const intervaloMs = MODERACAO_CONFIG.antiSpam.intervaloSegundos * 1000;
+
+    // Inicializar estruturas se não existirem
+    if (!antiSpamCache.has(chatId)) {
+        antiSpamCache.set(chatId, new Map());
+    }
+    const grupoCache = antiSpamCache.get(chatId);
+
+    if (!grupoCache.has(authorId)) {
+        grupoCache.set(authorId, new Map());
+    }
+    const usuarioCache = grupoCache.get(authorId);
+
+    if (!usuarioCache.has(mensagemHash)) {
+        usuarioCache.set(mensagemHash, []);
+    }
+    const listaMensagens = usuarioCache.get(mensagemHash);
+
+    // Adicionar mensagem atual
+    listaMensagens.push({
+        timestamp: agora,
+        messageId: message.id._serialized,
+        message: message
+    });
+
+    // Filtrar apenas mensagens dentro da janela de tempo
+    const mensagensRecentes = listaMensagens.filter(item => (agora - item.timestamp) < intervaloMs);
+    usuarioCache.set(mensagemHash, mensagensRecentes);
+
+    // Verificar se atingiu o limite de spam
+    if (mensagensRecentes.length >= MODERACAO_CONFIG.antiSpam.maxMensagensIguais) {
+        console.log(`🚨 SPAM DETECTADO: ${authorId} enviou ${mensagensRecentes.length} mensagens iguais em ${MODERACAO_CONFIG.antiSpam.intervaloSegundos}s`);
+
+        // Apagar todas as mensagens de spam
+        if (MODERACAO_CONFIG.antiSpam.apagarMensagens) {
+            for (const item of mensagensRecentes) {
+                try {
+                    if (item.message && typeof item.message.delete === 'function') {
+                        await item.message.delete(true);
+                        console.log(`🗑️ Mensagem de spam deletada`);
+                    }
+                } catch (err) {
+                    console.error('❌ Erro ao deletar mensagem de spam:', err.message);
+                }
+            }
+        }
+
+        // Remover usuário
+        if (MODERACAO_CONFIG.antiSpam.removerUsuario) {
+            let mentionId = String(authorId).replace('@c.us', '').replace('@lid', '');
+            let nomeExibicao = mentionId;
+
+            try {
+                const contato = await client.getContactById(authorId);
+                if (contato) {
+                    nomeExibicao = contato.pushname || contato.name || contato.number || mentionId;
+                }
+            } catch (err) {
+                // ignora erro
+            }
+
+            // Enviar aviso
+            try {
+                const ehIDValido = authorId &&
+                    typeof authorId === 'string' &&
+                    (authorId.includes('@c.us') || authorId.includes('@lid')) &&
+                    !authorId.startsWith('SAQUE_BONUS_') &&
+                    !authorId.startsWith('SAQ');
+
+                const aviso = `🚫 @${mentionId} foi removido(a) do grupo por SPAM (${mensagensRecentes.length} mensagens iguais em menos de 1 minuto).`;
+
+                if (ehIDValido) {
+                    await client.sendMessage(chatId, aviso, { mentions: [authorId] });
+                } else {
+                    await client.sendMessage(chatId, aviso);
+                }
+            } catch (errAviso) {
+                console.log('⚠️ Não foi possível enviar aviso de spam:', errAviso.message);
+            }
+
+            // Remover participante
+            await removerParticipante(chatId, authorId, `SPAM: ${mensagensRecentes.length} mensagens iguais`);
+        }
+
+        // Limpar cache do usuário após ação
+        usuarioCache.delete(mensagemHash);
+
+        return true; // Spam detectado e tratado
+    }
+
+    return false; // Não é spam
+}
 
 // Configuração para cada grupo
 const CONFIGURACAO_GRUPOS = {
@@ -4763,7 +4921,14 @@ client.on('ready', async () => {
     // Salvar dados sincronizados
     await sistemaBonus.salvarDados();
     console.log('✅ Sincronização concluída e salva!');
-    
+
+    // === CONFIGURAR PREMIAÇÃO DO MELHOR COMPRADOR DO DIA ===
+    sistemaCompras.setClient(client);
+    sistemaCompras.setSistemaBonus(sistemaBonus);
+    sistemaCompras.setGruposAtivos(Object.keys(CONFIGURACAO_GRUPOS));
+    sistemaCompras.iniciarAgendamentoPremiacaoDiaria();
+    console.log('🏆 Sistema de Premiação do Melhor Comprador ATIVADO (22:00)');
+
     await carregarHistorico();
     
     console.log('\n🤖 Monitorando grupos:');
@@ -4772,7 +4937,7 @@ client.on('ready', async () => {
         console.log(`   📋 ${config.nome} (${grupoId})`);
     });
     
-    console.log('\n🔧 Comandos admin: .ia .stats .sheets .test_sheets .test_grupo .grupos_status .grupos .grupo_atual .addcomando .comandos .delcomando .addgatilho .gatilhos .delgatilho .test_vision .ranking .inativos .detetives .semcompra .resetranking .bonus .testreferencia .config-relatorio .list-relatorios .remove-relatorio .test-relatorio');
+    console.log('\n🔧 Comandos admin: .ia .stats .sheets .test_sheets .test_grupo .grupos_status .grupos .grupo_atual .addcomando .comandos .delcomando .addgatilho .gatilhos .delgatilho .test_vision .ranking .rankingdia .rankingsemana .rankingmes .inativos .detetives .semcompra .resetranking .bonus .testreferencia .config-relatorio .list-relatorios .remove-relatorio .test-relatorio');
 
     // Monitoramento de novos membros DESATIVADO
     console.log('⏸️ Monitoramento automático de novos membros DESATIVADO');
@@ -5356,7 +5521,172 @@ async function processMessage(message) {
                         return;
                     }
                 }
-                
+
+                // .rankingdia - Mostrar ranking do dia
+                if (comando === '.rankingdia') {
+                    try {
+                        await sistemaCompras.atualizarRankingDiarioGrupo(message.from);
+                        const top5 = await sistemaCompras.obterTop5CompradoresDia(message.from);
+                        const estatisticas = await sistemaCompras.obterEstatisticasDiariasGrupo(message.from);
+
+                        if (!top5 || top5.length === 0) {
+                            await message.reply(`🌟 *RANKING DO DIA*\n━━━━━━━━━━━━━━━━━━━━━━━\n\n🚫 Nenhuma compra registrada hoje.`);
+                            return;
+                        }
+
+                        let mensagem = `🌟 *RANKING DO DIA*\n━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+                        let mentions = [];
+
+                        for (let i = 0; i < top5.length; i++) {
+                            const item = top5[i];
+                            const participantId = item.numero;
+
+                            try {
+                                const contact = await client.getContactById(participantId);
+                                const nomeExibicao = contact.name || contact.pushname || item.numero;
+                                const posicaoEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`;
+                                const megasFormatados = (item.megasDia || 0) >= 1024 ?
+                                    `${((item.megasDia || 0)/1024).toFixed(1)}GB` : `${item.megasDia || 0}MB`;
+
+                                const mentionId = String(participantId).replace('@c.us', '').replace('@lid', '');
+                                mensagem += `${posicaoEmoji} @${mentionId}\n`;
+                                mensagem += `   💾 ${megasFormatados} hoje (${item.comprasDia || 0}x)\n\n`;
+                                mentions.push(participantId);
+                            } catch (error) {
+                                const posicaoEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`;
+                                const megasFormatados = (item.megasDia || 0) >= 1024 ?
+                                    `${((item.megasDia || 0)/1024).toFixed(1)}GB` : `${item.megasDia || 0}MB`;
+                                const mentionId = String(participantId).replace('@c.us', '').replace('@lid', '');
+                                mensagem += `${posicaoEmoji} @${mentionId}\n`;
+                                mensagem += `   💾 ${megasFormatados} hoje (${item.comprasDia || 0}x)\n\n`;
+                                mentions.push(participantId);
+                            }
+                        }
+
+                        const totalMegas = estatisticas.totalMegasDia >= 1024 ?
+                            `${(estatisticas.totalMegasDia/1024).toFixed(1)}GB` : `${estatisticas.totalMegasDia}MB`;
+                        mensagem += `📊 *Total do dia: ${totalMegas} (${estatisticas.totalComprasDia} compras)*`;
+
+                        const mentionsValidos = mentions.filter(id => id && typeof id === 'string' && (id.includes('@lid') || id.includes('@c.us')));
+                        await client.sendMessage(message.from, mensagem, { mentions: mentionsValidos });
+                        return;
+                    } catch (error) {
+                        console.error('❌ Erro ao obter ranking do dia:', error);
+                        await message.reply(`❌ Erro ao obter ranking do dia: ${error.message}`);
+                        return;
+                    }
+                }
+
+                // .rankingsemana - Mostrar ranking da semana
+                if (comando === '.rankingsemana') {
+                    try {
+                        await sistemaCompras.atualizarRankingSemanalGrupo(message.from);
+                        const top5 = await sistemaCompras.obterTop5CompradoresTodaSemana(message.from);
+                        const estatisticas = await sistemaCompras.obterEstatisticasSemanaisGrupo(message.from);
+
+                        if (!top5 || top5.length === 0) {
+                            await message.reply(`⭐ *RANKING DA SEMANA*\n━━━━━━━━━━━━━━━━━━━━━━━\n\n🚫 Nenhuma compra registrada esta semana.`);
+                            return;
+                        }
+
+                        let mensagem = `⭐ *RANKING DA SEMANA*\n━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+                        let mentions = [];
+
+                        for (let i = 0; i < top5.length; i++) {
+                            const item = top5[i];
+                            const participantId = item.numero;
+
+                            try {
+                                const contact = await client.getContactById(participantId);
+                                const nomeExibicao = contact.name || contact.pushname || item.numero;
+                                const posicaoEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`;
+                                const megasFormatados = (item.megasSemana || 0) >= 1024 ?
+                                    `${((item.megasSemana || 0)/1024).toFixed(1)}GB` : `${item.megasSemana || 0}MB`;
+
+                                const mentionId = String(participantId).replace('@c.us', '').replace('@lid', '');
+                                mensagem += `${posicaoEmoji} @${mentionId}\n`;
+                                mensagem += `   💾 ${megasFormatados} esta semana (${item.comprasSemana || 0}x)\n\n`;
+                                mentions.push(participantId);
+                            } catch (error) {
+                                const posicaoEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`;
+                                const megasFormatados = (item.megasSemana || 0) >= 1024 ?
+                                    `${((item.megasSemana || 0)/1024).toFixed(1)}GB` : `${item.megasSemana || 0}MB`;
+                                const mentionId = String(participantId).replace('@c.us', '').replace('@lid', '');
+                                mensagem += `${posicaoEmoji} @${mentionId}\n`;
+                                mensagem += `   💾 ${megasFormatados} esta semana (${item.comprasSemana || 0}x)\n\n`;
+                                mentions.push(participantId);
+                            }
+                        }
+
+                        const totalMegas = estatisticas.totalMegasSemana >= 1024 ?
+                            `${(estatisticas.totalMegasSemana/1024).toFixed(1)}GB` : `${estatisticas.totalMegasSemana}MB`;
+                        mensagem += `📊 *Total da semana: ${totalMegas} (${estatisticas.totalComprasSemana} compras)*`;
+
+                        const mentionsValidos = mentions.filter(id => id && typeof id === 'string' && (id.includes('@lid') || id.includes('@c.us')));
+                        await client.sendMessage(message.from, mensagem, { mentions: mentionsValidos });
+                        return;
+                    } catch (error) {
+                        console.error('❌ Erro ao obter ranking da semana:', error);
+                        await message.reply(`❌ Erro ao obter ranking da semana: ${error.message}`);
+                        return;
+                    }
+                }
+
+                // .rankingmes - Mostrar ranking do mês
+                if (comando === '.rankingmes') {
+                    try {
+                        await sistemaCompras.atualizarRankingMensalGrupo(message.from);
+                        const top5 = await sistemaCompras.obterTop5CompradoresMes(message.from);
+                        const estatisticas = await sistemaCompras.obterEstatisticasMensaisGrupo(message.from);
+
+                        if (!top5 || top5.length === 0) {
+                            await message.reply(`📆 *RANKING DO MÊS*\n━━━━━━━━━━━━━━━━━━━━━━━\n\n🚫 Nenhuma compra registrada este mês.`);
+                            return;
+                        }
+
+                        let mensagem = `📆 *RANKING DO MÊS*\n━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+                        let mentions = [];
+
+                        for (let i = 0; i < top5.length; i++) {
+                            const item = top5[i];
+                            const participantId = item.numero;
+
+                            try {
+                                const contact = await client.getContactById(participantId);
+                                const nomeExibicao = contact.name || contact.pushname || item.numero;
+                                const posicaoEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`;
+                                const megasFormatados = (item.megasMes || 0) >= 1024 ?
+                                    `${((item.megasMes || 0)/1024).toFixed(1)}GB` : `${item.megasMes || 0}MB`;
+
+                                const mentionId = String(participantId).replace('@c.us', '').replace('@lid', '');
+                                mensagem += `${posicaoEmoji} @${mentionId}\n`;
+                                mensagem += `   💾 ${megasFormatados} este mês (${item.comprasMes || 0}x)\n\n`;
+                                mentions.push(participantId);
+                            } catch (error) {
+                                const posicaoEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`;
+                                const megasFormatados = (item.megasMes || 0) >= 1024 ?
+                                    `${((item.megasMes || 0)/1024).toFixed(1)}GB` : `${item.megasMes || 0}MB`;
+                                const mentionId = String(participantId).replace('@c.us', '').replace('@lid', '');
+                                mensagem += `${posicaoEmoji} @${mentionId}\n`;
+                                mensagem += `   💾 ${megasFormatados} este mês (${item.comprasMes || 0}x)\n\n`;
+                                mentions.push(participantId);
+                            }
+                        }
+
+                        const totalMegas = estatisticas.totalMegasMes >= 1024 ?
+                            `${(estatisticas.totalMegasMes/1024).toFixed(1)}GB` : `${estatisticas.totalMegasMes}MB`;
+                        mensagem += `📊 *Total do mês: ${totalMegas} (${estatisticas.totalComprasMes} compras)*`;
+
+                        const mentionsValidos = mentions.filter(id => id && typeof id === 'string' && (id.includes('@lid') || id.includes('@c.us')));
+                        await client.sendMessage(message.from, mensagem, { mentions: mentionsValidos });
+                        return;
+                    } catch (error) {
+                        console.error('❌ Erro ao obter ranking do mês:', error);
+                        await message.reply(`❌ Erro ao obter ranking do mês: ${error.message}`);
+                        return;
+                    }
+                }
+
                 // .inativos - Mostrar membros do grupo que NUNCA compraram
                 if (comando === '.inativos') {
                     try {
@@ -7842,6 +8172,12 @@ async function processMessage(message) {
             const isPularModeracao = isComandoAdmin && isAdminExecutando;
 
             if (!isPularModeracao) {
+                // Verificar Anti-Spam primeiro
+                const ehSpam = await verificarAntiSpam(message, client);
+                if (ehSpam) {
+                    return; // Spam detectado e tratado
+                }
+
                 const analise = contemConteudoSuspeito(message.body);
 
                 if (analise.suspeito) {
