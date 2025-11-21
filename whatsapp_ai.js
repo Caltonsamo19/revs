@@ -1483,17 +1483,30 @@ Se não conseguires extrair os dados:
 
     // MELHORAR DETECÇÃO: Verificar se é uma mensagem que contém apenas números
     const mensagemLimpa = mensagem.trim();
-    const apenasNumeroRegex = /^8[0-9]{8}$/; // Exatamente um número de 9 dígitos
-    const multiplosNumerosRegex = /^(8[0-9]{8}[\s,]*)+$/; // Múltiplos números separados por espaço ou vírgula
+    const apenasNumeroRegex = /^8[45][0-9]{7}$/; // Exatamente um número Vodacom de 9 dígitos
+    const multiplosNumerosRegex = /^(8[45][0-9]{7}[\s,]*)+$/; // Múltiplos números Vodacom
+    const numeroNaoVodacomRegex = /^8[^45][0-9]{7}$/; // Número de outra operadora
+    const multiplosNaoVodacomRegex = /^(8[^45][0-9]{7}[\s,]*)+$/; // Múltiplos não-Vodacom
 
     console.log(`   🔍 Verificando se é apenas número(s)...`);
-    // console.log(`   📝 Mensagem limpa: "${mensagemLimpa}"`);
+
+    // Verificar se é número de outra operadora (enviado sozinho)
+    if (numeroNaoVodacomRegex.test(mensagemLimpa) || multiplosNaoVodacomRegex.test(mensagemLimpa)) {
+      const numerosRejeitados = mensagemLimpa.match(/8[^45][0-9]{7}/g) || [];
+      console.log(`   ❌ NÚMERO NÃO VODACOM DETECTADO (sozinho): ${numerosRejeitados.join(', ')}`);
+      return {
+        sucesso: false,
+        tipo: 'numero_nao_vodacom',
+        numerosRejeitados: numerosRejeitados,
+        mensagem: `❌ *NÚMERO NÃO SUPORTADO*\n\nO número *${numerosRejeitados[0]}* não é da Vodacom.\n\n📱 Este serviço é exclusivo para números *Vodacom (84 e 85)*.\n\n✅ Por favor, envie um número que comece com:\n• *84*XXXXXXX\n• *85*XXXXXXX`
+      };
+    }
 
     if (apenasNumeroRegex.test(mensagemLimpa) || multiplosNumerosRegex.test(mensagemLimpa)) {
-      console.log(`   📱 DETECTADO: Mensagem contém apenas número(s)!`);
+      console.log(`   📱 DETECTADO: Mensagem contém apenas número(s) Vodacom!`);
 
-      // Extrair números da mensagem
-      const numerosDetectados = mensagemLimpa.match(/8[0-9]{8}/g) || [];
+      // Extrair números Vodacom da mensagem
+      const numerosDetectados = mensagemLimpa.match(/8[45][0-9]{7}/g) || [];
       console.log(`   📱 Números detectados: ${numerosDetectados.length}`);
 
       if (numerosDetectados.length > 0) {
