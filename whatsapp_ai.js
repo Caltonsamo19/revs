@@ -852,6 +852,34 @@ Se não conseguires extrair os dados:
   }
 
   // === EXTRAIR NÚMEROS DE TEXTO (MELHORADO) ===
+  // Detectar números de outras operadoras (não Vodacom)
+  detectarNumerosNaoVodacom(mensagem) {
+    if (!mensagem || typeof mensagem !== 'string') return [];
+
+    // Padrões para detectar QUALQUER número moçambicano (8X com 9 dígitos)
+    const padroesGeral = [
+      /(?:\+?\s*258\s*)?8\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]/g,
+      /\b8[0-9]{8}\b/g
+    ];
+
+    const todosNumeros = [];
+    for (const padrao of padroesGeral) {
+      const matches = mensagem.match(padrao);
+      if (matches) todosNumeros.push(...matches);
+    }
+
+    // Filtrar apenas os que NÃO são Vodacom (não começam com 84 ou 85)
+    const numerosNaoVodacom = [];
+    for (const numeroRaw of todosNumeros) {
+      const limpo = numeroRaw.replace(/[\s\-\.+]/g, '').replace(/^258/, '');
+      if (limpo.length >= 9 && /^8[^45]/.test(limpo)) {
+        numerosNaoVodacom.push(limpo.slice(-9));
+      }
+    }
+
+    return [...new Set(numerosNaoVodacom)]; // Remover duplicados
+  }
+
   extrairTodosNumeros(mensagem) {
     // console.log(`   🔍 TEXTO: Extraindo números da mensagem...`);
 
@@ -883,7 +911,7 @@ Se não conseguires extrair os dados:
     }
 
     if (numerosEncontrados.length === 0) {
-      console.log(`   ❌ TEXTO: Nenhum número encontrado`);
+      console.log(`   ❌ TEXTO: Nenhum número Vodacom encontrado`);
       return [];
     }
 
@@ -1475,13 +1503,25 @@ Se não conseguires extrair os dados:
     
     // LÓGICA ORIGINAL: Separar comprovante e números
     const { textoComprovante, numeros } = this.separarComprovanteENumeros(mensagem);
-    
+
+    // VERIFICAR SE HÁ NÚMEROS DE OUTRAS OPERADORAS (não Vodacom)
+    const numerosNaoVodacom = this.detectarNumerosNaoVodacom(mensagem);
+    if (numerosNaoVodacom.length > 0 && numeros.length === 0) {
+      console.log(`   ❌ NÚMERO NÃO VODACOM DETECTADO: ${numerosNaoVodacom.join(', ')}`);
+      return {
+        sucesso: false,
+        tipo: 'numero_nao_vodacom',
+        numerosRejeitados: numerosNaoVodacom,
+        mensagem: `❌ *NÚMERO NÃO SUPORTADO*\n\nO número *${numerosNaoVodacom[0]}* não é da Vodacom.\n\n📱 Este serviço é exclusivo para números *Vodacom (84 e 85)*.\n\n✅ Por favor, envie um número que comece com:\n• *84*XXXXXXX\n• *85*XXXXXXX`
+      };
+    }
+
     // 1. Verificar se é um comprovante
     let comprovante = null;
     if (textoComprovante && textoComprovante.length > 10) {
       comprovante = await this.analisarComprovante(textoComprovante);
     }
-    
+
     // 2. Se encontrou comprovante E números na mesma mensagem
     if (comprovante && numeros.length > 0) {
       console.log(`   🎯 COMPROVANTE + NÚMEROS na mesma mensagem!`);

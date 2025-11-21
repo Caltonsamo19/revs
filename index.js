@@ -8883,6 +8883,12 @@ async function processMessage(message) {
         }
 
         // === TRATAMENTO DE ERROS ===
+        if (resultadoIA.tipo === 'numero_nao_vodacom') {
+            console.log(`❌ Número não Vodacom rejeitado: ${resultadoIA.numerosRejeitados?.join(', ')}`);
+            await message.reply(resultadoIA.mensagem);
+            return;
+        }
+
         if (resultadoIA.tipo === 'numeros_sem_comprovante') {
             await message.reply(
                 `📱 *Número detectado*\n\n` +
