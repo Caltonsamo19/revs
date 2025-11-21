@@ -266,8 +266,15 @@ function normalizarNumeroTelefone(numero) {
         return ''; // Número inválido
     }
 
-    // Retornar os últimos 9 dígitos (formato moçambicano padrão)
-    return numeroLimpo.slice(-9);
+    // Pegar os últimos 9 dígitos (formato moçambicano padrão)
+    const numero9digitos = numeroLimpo.slice(-9);
+
+    // Validar que é número Vodacom (começa com 84 ou 85)
+    if (!numero9digitos.startsWith('84') && !numero9digitos.startsWith('85')) {
+        return ''; // Não é Vodacom
+    }
+
+    return numero9digitos;
 }
 
 // Criar instância do cliente (SEGUINDO PADRÃO BOT1)

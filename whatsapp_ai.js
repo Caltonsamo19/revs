@@ -694,13 +694,13 @@ Se não conseguires extrair os dados:
     // Suporta formatos como: 258852118624, 258 852 118 624, +258852118624
     numeroLimpo = numeroLimpo.replace(/^258/, '');
 
-    // Retorna apenas se for um número válido de 9 dígitos começando com 8
-    if (/^8[0-9]{8}$/.test(numeroLimpo)) {
+    // Retorna apenas se for um número válido de 9 dígitos VODACOM (84 ou 85)
+    if (/^8[45][0-9]{7}$/.test(numeroLimpo)) {
       return numeroLimpo;
     }
 
-    // Se não conseguiu normalizar, tentar extrair apenas os 9 últimos dígitos se começar com 8
-    const match = numeroLimpo.match(/8[0-9]{8}/);
+    // Se não conseguiu normalizar, tentar extrair apenas os 9 dígitos VODACOM
+    const match = numeroLimpo.match(/8[45][0-9]{7}/);
     if (match) {
       return match[0];
     }
@@ -725,17 +725,17 @@ Se não conseguires extrair os dados:
 
     // console.log(`   📝 LEGENDA: Limpa "${legendaLimpa}"`);
 
-    // NOVOS PADRÕES DE DETECÇÃO:
-    // 1. Números com espaços: 85 211 8624 ou 848 715 208
+    // PADRÕES DE DETECÇÃO - APENAS VODACOM (84 e 85):
+    // 1. Números com espaços: 85 211 8624 ou 84 871 5208
     // 2. Números com +258: +258852118624 ou +258 85 211 8624
-    // 3. Números com 258: 25852118624 ou 258 85 211 8624
-    // 4. Números normais: 852118624
+    // 3. Números com 258: 258852118624 ou 258 85 211 8624
+    // 4. Números normais: 852118624, 848715208
     const padroes = [
-      /(?:\+?\s*258\s*)?8\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]/g,  // 258 8 5 2 1 1 8 6 2 4 ou 8 5 2 1 1 8 6 2 4
-      /\+?\s*258\s*8[0-9]\s*[0-9]{3}\s*[0-9]{4}/g,           // +258 85 211 8624 (com espaços variados)
-      /(?<!\d)\+?258\s*8[0-9]{8}(?!\d)/g,                    // +258852118624 ou 258852118624 (junto)
-      /\b8[0-9]\s*[0-9]{3}\s*[0-9]{4}\b/g,                   // 85 211 8624 (com espaços variados)
-      /\b8[0-9]{8}\b/g                                        // 852118624 (padrão normal)
+      /(?:\+?\s*258\s*)?8\s*[45]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]/g,  // 258 8 5 2 1 1 8 6 2 4 ou 8 4 8 7 1 5 2 0 8
+      /\+?\s*258\s*8[45]\s*[0-9]{3}\s*[0-9]{4}/g,           // +258 85 211 8624 (com espaços variados)
+      /(?<!\d)\+?258\s*8[45][0-9]{7}(?!\d)/g,               // +258852118624 ou 258848715208 (junto)
+      /\b8[45]\s*[0-9]{3}\s*[0-9]{4}\b/g,                   // 85 211 8624 ou 84 871 5208 (com espaços variados)
+      /\b8[45][0-9]{7}\b/g                                   // 852118624, 848715208 (padrão normal)
     ];
 
     const numerosEncontrados = [];
@@ -860,17 +860,17 @@ Se não conseguires extrair os dados:
       return [];
     }
 
-    // NOVOS PADRÕES DE DETECÇÃO (mesmos da legenda):
-    // 1. Números com espaços: 85 211 8624 ou 848 715 208
+    // PADRÕES DE DETECÇÃO - APENAS VODACOM (84 e 85):
+    // 1. Números com espaços: 85 211 8624 ou 84 871 5208
     // 2. Números com +258: +258852118624 ou +258 85 211 8624
-    // 3. Números com 258: 25852118624 ou 258 85 211 8624
-    // 4. Números normais: 852118624
+    // 3. Números com 258: 258852118624 ou 258 85 211 8624
+    // 4. Números normais: 852118624, 848715208
     const padroes = [
-      /(?:\+?\s*258\s*)?8\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]/g,  // 258 8 5 2 1 1 8 6 2 4 ou 8 5 2 1 1 8 6 2 4
-      /\+?\s*258\s*8[0-9]\s*[0-9]{3}\s*[0-9]{4}/g,           // +258 85 211 8624 (com espaços variados)
-      /(?<!\d)\+?258\s*8[0-9]{8}(?!\d)/g,                    // +258852118624 ou 258852118624 (junto)
-      /\b8[0-9]\s*[0-9]{3}\s*[0-9]{4}\b/g,                   // 85 211 8624 (com espaços variados)
-      /\b8[0-9]{8}\b/g                                        // 852118624 (padrão normal)
+      /(?:\+?\s*258\s*)?8\s*[45]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]/g,  // 258 8 5 2 1 1 8 6 2 4 ou 8 4 8 7 1 5 2 0 8
+      /\+?\s*258\s*8[45]\s*[0-9]{3}\s*[0-9]{4}/g,           // +258 85 211 8624 (com espaços variados)
+      /(?<!\d)\+?258\s*8[45][0-9]{7}(?!\d)/g,               // +258852118624 ou 258848715208 (junto)
+      /\b8[45]\s*[0-9]{3}\s*[0-9]{4}\b/g,                   // 85 211 8624 ou 84 871 5208 (com espaços variados)
+      /\b8[45][0-9]{7}\b/g                                   // 852118624, 848715208 (padrão normal)
     ];
 
     const numerosEncontrados = [];
