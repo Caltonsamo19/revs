@@ -726,6 +726,7 @@ Se não conseguires extrair os dados:
     // console.log(`   📝 LEGENDA: Limpa "${legendaLimpa}"`);
 
     // PADRÕES DE DETECÇÃO - APENAS VODACOM (84 e 85):
+    // Números de outras operadoras (86, 87, etc.) são ignorados - não podem receber megas
     // 1. Números com espaços: 85 211 8624 ou 84 871 5208
     // 2. Números com +258: +258852118624 ou +258 85 211 8624
     // 3. Números com 258: 258852118624 ou 258 85 211 8624
@@ -734,6 +735,7 @@ Se não conseguires extrair os dados:
       /(?:\+?\s*258\s*)?8\s*[45]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]/g,  // 258 8 5 2 1 1 8 6 2 4 ou 8 4 8 7 1 5 2 0 8
       /\+?\s*258\s*8[45]\s*[0-9]{3}\s*[0-9]{4}/g,           // +258 85 211 8624 (com espaços variados)
       /(?<!\d)\+?258\s*8[45][0-9]{7}(?!\d)/g,               // +258852118624 ou 258848715208 (junto)
+      /\b8[45]\s*[0-9]{2}\s*[0-9]{2}\s*[0-9]{3}\b/g,        // 84 78 49 481 (formato XX XX XXX)
       /\b8[45]\s*[0-9]{3}\s*[0-9]{4}\b/g,                   // 85 211 8624 ou 84 871 5208 (com espaços variados)
       /\b8[45][0-9]{7}\b/g                                   // 852118624, 848715208 (padrão normal)
     ];
@@ -869,11 +871,36 @@ Se não conseguires extrair os dados:
     }
 
     // Filtrar apenas os que NÃO são Vodacom (não começam com 84 ou 85)
+    // E que estão ISOLADOS no final da mensagem (não são números de pagamento)
     const numerosNaoVodacom = [];
+    const tamanhoMensagem = mensagem.length;
+
     for (const numeroRaw of todosNumeros) {
       const limpo = numeroRaw.replace(/[\s\-\.+]/g, '').replace(/^258/, '');
       if (limpo.length >= 9 && /^8[^45]/.test(limpo)) {
-        numerosNaoVodacom.push(limpo.slice(-9));
+        // Verificar posição do número na mensagem
+        const posicao = mensagem.indexOf(numeroRaw);
+        const percentualPosicao = (posicao / tamanhoMensagem) * 100;
+
+        // Verificar contexto - ignorar números de pagamento
+        const contextoBefore = mensagem.substring(Math.max(0, posicao - 50), posicao).toLowerCase();
+        const indicadoresPagamento = [
+          'transferiste', 'recebeste', 'para conta', 'de conta',
+          'conta de', 'beneficiário', 'destinatario', 'nome:'
+        ];
+
+        const eNumeroPagamento = indicadoresPagamento.some(ind => contextoBefore.includes(ind));
+
+        // IGNORAR números que são de pagamento (M-Pesa/e-Mola)
+        if (eNumeroPagamento) {
+          continue; // Ignorar este número
+        }
+
+        // Só considerar como "número não Vodacom enviado pelo cliente" se:
+        // - Estiver no final da mensagem (>70%) E não for número de pagamento
+        if (percentualPosicao > 70) {
+          numerosNaoVodacom.push(limpo.slice(-9));
+        }
       }
     }
 
@@ -889,6 +916,7 @@ Se não conseguires extrair os dados:
     }
 
     // PADRÕES DE DETECÇÃO - APENAS VODACOM (84 e 85):
+    // Números de outras operadoras (86, 87, etc.) são ignorados - não podem receber megas
     // 1. Números com espaços: 85 211 8624 ou 84 871 5208
     // 2. Números com +258: +258852118624 ou +258 85 211 8624
     // 3. Números com 258: 258852118624 ou 258 85 211 8624
@@ -897,6 +925,7 @@ Se não conseguires extrair os dados:
       /(?:\+?\s*258\s*)?8\s*[45]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]\s*[0-9]/g,  // 258 8 5 2 1 1 8 6 2 4 ou 8 4 8 7 1 5 2 0 8
       /\+?\s*258\s*8[45]\s*[0-9]{3}\s*[0-9]{4}/g,           // +258 85 211 8624 (com espaços variados)
       /(?<!\d)\+?258\s*8[45][0-9]{7}(?!\d)/g,               // +258852118624 ou 258848715208 (junto)
+      /\b8[45]\s*[0-9]{2}\s*[0-9]{2}\s*[0-9]{3}\b/g,        // 84 78 49 481 (formato XX XX XXX)
       /\b8[45]\s*[0-9]{3}\s*[0-9]{4}\b/g,                   // 85 211 8624 ou 84 871 5208 (com espaços variados)
       /\b8[45][0-9]{7}\b/g                                   // 852118624, 848715208 (padrão normal)
     ];
@@ -1517,22 +1546,31 @@ Se não conseguires extrair os dados:
     // LÓGICA ORIGINAL: Separar comprovante e números
     const { textoComprovante, numeros } = this.separarComprovanteENumeros(mensagem);
 
+    // 1. Verificar se é um comprovante PRIMEIRO
+    let comprovante = null;
+    if (textoComprovante && textoComprovante.length > 10) {
+      comprovante = await this.analisarComprovante(textoComprovante);
+    }
+
     // VERIFICAR SE HÁ NÚMEROS DE OUTRAS OPERADORAS (não Vodacom)
     const numerosNaoVodacom = this.detectarNumerosNaoVodacom(mensagem);
     if (numerosNaoVodacom.length > 0 && numeros.length === 0) {
       console.log(`   ❌ NÚMERO NÃO VODACOM DETECTADO: ${numerosNaoVodacom.join(', ')}`);
-      return {
-        sucesso: false,
-        tipo: 'numero_nao_vodacom',
-        numerosRejeitados: numerosNaoVodacom,
-        mensagem: `❌ *NÚMERO NÃO SUPORTADO*\n\nO número *${numerosNaoVodacom[0]}* não é da Vodacom.\n\n📱 Este serviço é exclusivo para números *Vodacom (84 e 85)*.\n\n✅ Por favor, envie um número que comece com:\n• *84*XXXXXXX\n• *85*XXXXXXX`
-      };
-    }
 
-    // 1. Verificar se é um comprovante
-    let comprovante = null;
-    if (textoComprovante && textoComprovante.length > 10) {
-      comprovante = await this.analisarComprovante(textoComprovante);
+      // Se há comprovante válido, o número não-Vodacom é provavelmente do pagamento (M-Pesa/e-Mola)
+      // Neste caso, pedir para enviar o número Vodacom destinatário
+      if (comprovante) {
+        console.log(`   💰 Comprovante detectado com número de pagamento não-Vodacom`);
+        // Continuar para o fluxo normal de "comprovante sem número"
+      } else {
+        // Sem comprovante, rejeitar o número não-Vodacom
+        return {
+          sucesso: false,
+          tipo: 'numero_nao_vodacom',
+          numerosRejeitados: numerosNaoVodacom,
+          mensagem: `❌ *NÚMERO NÃO SUPORTADO*\n\nO número *${numerosNaoVodacom[0]}* não é da Vodacom.\n\n📱 Este serviço é exclusivo para números *Vodacom (84 e 85)*.\n\n✅ Por favor, envie um número que comece com:\n• *84*XXXXXXX\n• *85*XXXXXXX`
+        };
+      }
     }
 
     // 2. Se encontrou comprovante E números na mesma mensagem
