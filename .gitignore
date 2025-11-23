@@ -1,3 +1,6 @@
 .env
 .claude/
 node_modules/
+backup_historico/
+api_database
+package-lock.json

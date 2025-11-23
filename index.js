@@ -112,7 +112,7 @@ async function axiosComRetry(config, maxTentativas = 3) {
             const ehUltimaTentativa = tentativa === maxTentativas;
 
             if (ehTimeout && !ehUltimaTentativa) {
-                // Aumentado delay progressivo: 3s, 5s, 7s (para dar tempo do cache do Google Sheets)
+                // Aumentado delay progressivo: 3s, 5s, 7s (para dar tempo do cache do API MariaDB)
                 const delayMs = Math.min(3000 + (2000 * (tentativa - 1)), 10000); // 3s, 5s, 7s
                 console.log(`⏳ Timeout na tentativa ${tentativa}/${maxTentativas}, aguardando ${delayMs}ms antes de tentar novamente...`);
                 await new Promise(resolve => setTimeout(resolve, delayMs));
@@ -178,22 +178,21 @@ const SistemaBonus = require('./sistema_bonus');
 // === IMPORTAR SISTEMA DE CONFIGURAÇÃO DE GRUPOS ===
 const SistemaConfigGrupos = require('./sistema_config_grupos');
 
-// === CONFIGURAÇÃO GOOGLE SHEETS - BOT RETALHO (SCRIPT PRÓPRIO) ===
-const GOOGLE_SHEETS_CONFIG = {
-    scriptUrl: process.env.GOOGLE_SHEETS_SCRIPT_URL_RETALHO || 'https://script.google.com/macros/s/AKfycbyMilUC5bYKGXV95LR4MmyaRHzMf6WCmXeuztpN0tDpQ9_2qkgCxMipSVqYK_Q6twZG/exec',
-    planilhaUrl: 'https://docs.google.com/spreadsheets/d/1vIv1Y0Hiu6NHEG37ubbFoa_vfbEe6sAb9I4JH-P38BQ/edit',
-    planilhaId: '1vIv1Y0Hiu6NHEG37ubbFoa_vfbEe6sAb9I4JH-P38BQ',
-    timeout: 30000,
+// === CONFIGURAÇÃO API MARIADB - BOT RETALHO ===
+const API_PEDIDOS_CONFIG = {
+    scriptUrl: process.env.API_PEDIDOS_URL || 'http://localhost:3002/api/pedidos',
+    baseUrl: 'http://localhost:3002',
+    timeout: 5000,
     retryAttempts: 3,
-    retryDelay: 2000
+    retryDelay: 500
 };
 
-// === CONFIGURAÇÃO GOOGLE SHEETS - PACOTES ESPECIAIS ===
-const GOOGLE_SHEETS_CONFIG_DIAMANTE = {
-    scriptUrl: process.env.GOOGLE_SHEETS_SCRIPT_URL_DIAMANTE || 'https://script.google.com/macros/s/AKfycbw_wHnKiZROpl720GduLz-KvVw4pEtS8njzPvHCnqdWgYHFRIoXlUCxrNpqt7OnZsr8/exec',
-    timeout: 30000,
+// === CONFIGURAÇÃO API MARIADB - PACOTES ESPECIAIS ===
+const API_DIAMANTE_CONFIG = {
+    scriptUrl: process.env.API_DIAMANTE_URL || 'http://localhost:3002/api/diamante',
+    timeout: 5000,
     retryAttempts: 3,
-    retryDelay: 2000
+    retryDelay: 500
 };
 
 // === MAPEAMENTO DE CÓDIGOS DE PACOTES ESPECIAIS ===
@@ -217,13 +216,13 @@ const CODIGOS_PACOTES_ESPECIAIS = {
     // 4: { nome: 'Pacote Y', ... },
 };
 
-// === CONFIGURAÇÃO DE PAGAMENTOS (MESMA PLANILHA DO BOT ATACADO) ===
-const PAGAMENTOS_CONFIG = {
-    scriptUrl: 'https://script.google.com/macros/s/AKfycbzzifHGu1JXc2etzG3vqK5Jd3ihtULKezUTQQIDJNsr6tXx3CmVmKkOlsld0x1Feo0H/exec',
-    timeout: 30000
+// === CONFIGURAÇÃO API MARIADB - PAGAMENTOS ===
+const API_PAGAMENTOS_CONFIG = {
+    scriptUrl: process.env.API_PAGAMENTOS_URL || 'http://localhost:3002/api/pagamentos',
+    timeout: 5000
 };
 
-console.log(`📊 Google Sheets configurado (Comum + Diamante)`);
+console.log(`📊 API MariaDB configurada (Pedidos + Diamante + Pagamentos)`);
 
 // Função helper para reply com fallback
 async function safeReply(message, client, texto) {
@@ -561,8 +560,8 @@ const MAX_RETRY_ATTEMPTS = 12; // 12 tentativas em 5 minutos (1 a cada 25s)
 
 // === CONTROLE DE RATE LIMITING ===
 let ultimaRequisicao = 0;
-const DELAY_ENTRE_REQUISICOES = 3000; // 3 segundos entre cada verificação (otimizado para planilha pequena com 48h de dados)
-const MAX_REQUISICOES_POR_MINUTO = 20; // Aumentado para 20 req/min
+const DELAY_ENTRE_REQUISICOES = 500; // 500ms entre cada verificação (otimizado para API MariaDB local)
+const MAX_REQUISICOES_POR_MINUTO = 60; // Aumentado para 60 req/min (MariaDB não tem rate limit)
 let requisicoesUltimoMinuto = [];
 let erros429Consecutivos = 0;
 const MAX_ERROS_429 = 3; // Após 3 erros 429, pausar temporariamente
@@ -1928,7 +1927,7 @@ async function verificarPagamentoIndividual(referencia, valorEsperado) {
         // Primeira tentativa: busca pelo valor exato (COM RETRY AUTOMÁTICO)
         let response = await axiosComRetry({
             method: 'post',
-            url: PAGAMENTOS_CONFIG.scriptUrl,
+            url: API_PAGAMENTOS_CONFIG.scriptUrl,
             data: {
                 action: "buscar_por_referencia",
                 referencia: referencia,
@@ -2000,7 +1999,7 @@ async function marcarPagamentoComoProcessado(referencia, valor) {
 
         const response = await axiosComRetry({
             method: 'post',
-            url: PAGAMENTOS_CONFIG.scriptUrl,
+            url: API_PAGAMENTOS_CONFIG.scriptUrl,
             data: {
                 action: "marcar_processado",
                 referencia: referencia,
@@ -3550,7 +3549,85 @@ Chamadas + SMS ilimitadas + 100GB = 2280MT 💵
 - *Adinan Rafael* 
 - 📲 *𝗠-𝗣𝗘𝗦𝗔: 847206431*💷💰  
 - ↪️📞📱 *Adinan RafaelHélio*`
-},
+},'120363424832106460@g.us': {
+    nome: 'Venda de Megas',
+    tabela: `🤖❤INTERNET VODACOM- a melhor preço do mercado 🎉
+
+📆 PACOTES DIÁRIOS
+
+1024MB = 18MT 💵💽
+1100MB = 20MT 💵💽
+1300MB =24MT 💵💽
+2048MB = 36MT 💵💽
+2200MB = 40MT 💵💽
+3072MB = 54MT 💵💽
+4096MB = 72MT 💵💽
+5120MB = 90MT 💵💽
+6144MB = 108MT 💵💽
+7168MB = 126MT 💵💽
+8192MB = 144MT 💵💽
+9144MB = 162MT 💵💽
+10240MB = 180MT 💵💽
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+2000MB = 44MT 💵💽
+3000MB = 66MT 💵💽
+4000MB = 88MT 💵💽
+5000MB = 109MT 💵💽
+6000MB = 133MT 💵💽
+7000MB = 149MT 💵💽
+10000MB = 219MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
+
+📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
+1700MB = 45MT 💵💽
+2900MB = 80MT 💵💽
+3400MB = 110MT 💵💽
+5500MB = 150MT 💵💽
+7800MB = 200MT 💵💽
+11400MB = 300MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
+
+📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
+3000MB = 100MT 💵💽
+5000MB = 149MT 💵💽
+8000MB = 201MT 💵💽
+10000MB = 231MT 💵💽
+20000MB = 352MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
+
+📅 PACOTE MENSAL (APENAS MEGAS)
+5.8GB  =  175MT  
+10.8GB =  290MT  
+15.8GB =  425MT  
+21.8GB =  555MT  
+25.8GB =  720MT  
+37.8GB =  835MT  
+54.8GB   =  995MT 
+64.8GB   =  1245MT
+
+💎 DIAMANTE MENSAL TUDO TOP ILIMITADO
+11GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  460MT  
+14.5GB + Chamadas e SMS ilimitadas para todas redes  =  540MT  
+20GB + Chamadas e SMS ilimitadas + 10min int + 30MB ROAM  =  640MT  
+31.1GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  820MT  
+41.1GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  995MT  
+51.1GB + Chamadas e SMS ilimitadas + 10min int + 30MB ROAM  =  1245MT  
+64.1GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  1445MT  
+100GB + Chamadas e SMS ilimitadas + 10min + 30MB ROAM  =  2145MT
+
+
+📍 NB: Válido apenas para Vodacom  
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!`,
+    pagamento: `*Call, sms & WhatsApp* *849430041 / 865147776*
+
+💰 *FORMAS/ PAGAMENTOS :*
+- 💵 *𝗘-𝗠𝗢𝗟𝗔: 865147776 💎 ANTÓNIO F. ZUCULA*
+- 💵 *𝗠-𝗣𝗘𝗦𝗔: 849430041 💎 ANTÓNIO ZUCULA*
+
+
+NB:*DEPOIS DE ENVIAR O VALOR, ENVIE O COMPROVANTE E O NR PARA RECEBER OS MEGAS NO GRUPO*`
+}
 };
 
 
@@ -3589,14 +3666,14 @@ async function enviarParaGoogleSheets(referencia, valor, numero, grupoId, grupoN
     };
 
     try {
-        console.log(`📊 Enviando para Google Sheets: ${referencia}`);
+        console.log(`📊 Enviando para API MariaDB: ${referencia}`);
         console.log(`🔍 Dados enviados:`, JSON.stringify(dados, null, 2));
-        console.log(`🔗 URL destino:`, GOOGLE_SHEETS_CONFIG.scriptUrl);
+        console.log(`🔗 URL destino:`, API_PEDIDOS_CONFIG.scriptUrl);
 
-        // Usar axios COM RETRY para Google Sheets
+        // Usar axios COM RETRY para API MariaDB
         const response = await axiosComRetry({
             method: 'post',
-            url: GOOGLE_SHEETS_CONFIG.scriptUrl,
+            url: API_PEDIDOS_CONFIG.scriptUrl,
             data: dados,
             headers: {
                 'Content-Type': 'application/json',
@@ -3606,15 +3683,15 @@ async function enviarParaGoogleSheets(referencia, valor, numero, grupoId, grupoN
         
         // Google Apps Script agora retorna JSON
         const responseData = response.data;
-        console.log(`📥 Resposta Google Sheets:`, JSON.stringify(responseData, null, 2));
+        console.log(`📥 Resposta API MariaDB:`, JSON.stringify(responseData, null, 2));
 
         // Verificar se é uma resposta JSON válida
         if (typeof responseData === 'object') {
             if (responseData.success) {
-                console.log(`✅ Google Sheets: Dados enviados!`);
+                console.log(`✅ API MariaDB: Dados enviados!`);
                 return { sucesso: true, referencia: responseData.referencia, duplicado: false };
             } else if (responseData.duplicado) {
-                console.log(`⚠️ Google Sheets: Pedido duplicado detectado - ${responseData.referencia} (Status: ${responseData.status_existente})`);
+                console.log(`⚠️ API MariaDB: Pedido duplicado detectado - ${responseData.referencia} (Status: ${responseData.status_existente})`);
                 return {
                     sucesso: false,
                     duplicado: true,
@@ -3629,7 +3706,7 @@ async function enviarParaGoogleSheets(referencia, valor, numero, grupoId, grupoN
             // Fallback para compatibilidade com resposta em texto
             const responseText = String(responseData);
             if (responseText.includes('Sucesso!')) {
-                console.log(`✅ Google Sheets: Dados enviados!`);
+                console.log(`✅ API MariaDB: Dados enviados!`);
                 return { sucesso: true, row: 'N/A', duplicado: false };
             } else if (responseText.includes('Erro:')) {
                 throw new Error(responseText);
@@ -3642,19 +3719,19 @@ async function enviarParaGoogleSheets(referencia, valor, numero, grupoId, grupoN
         // Tratar erro 429 especificamente
         if (error.response && error.response.status === 429) {
             erros429Consecutivos++;
-            console.error(`🚨 Google Sheets: Rate limit atingido (429) - Erro ${erros429Consecutivos}/${MAX_ERROS_429}`);
+            console.error(`🚨 API MariaDB: Rate limit atingido (429) - Erro ${erros429Consecutivos}/${MAX_ERROS_429}`);
 
             // Pausar se necessário
             if (erros429Consecutivos >= MAX_ERROS_429) {
                 const pausaEmergencia = 2 * 60 * 1000;
-                console.error(`⏸️ Google Sheets: Pausando envios por ${pausaEmergencia/1000}s devido a múltiplos erros 429`);
+                console.error(`⏸️ API MariaDB: Pausando envios por ${pausaEmergencia/1000}s devido a múltiplos erros 429`);
                 await new Promise(resolve => setTimeout(resolve, pausaEmergencia));
                 erros429Consecutivos = 0;
             }
             return { sucesso: false, erro: 'Rate limit atingido, tentando novamente em instantes...' };
         }
 
-        console.error(`❌ Erro Google Sheets [${grupoNome}]: ${error.message}`);
+        console.error(`❌ Erro API MariaDB [${grupoNome}]: ${error.message}`);
         return { sucesso: false, erro: error.message };
     }
 }
@@ -3680,14 +3757,14 @@ async function enviarParaGoogleSheetsDiamante(referencia, numero, codigoPacote, 
     };
 
     try {
-        console.log(`💎 Enviando para Google Sheets DIAMANTE: ${referencia}`);
+        console.log(`💎 Enviando para API MariaDB DIAMANTE: ${referencia}`);
         console.log(`🔍 Dados enviados:`, JSON.stringify(dados, null, 2));
-        console.log(`🔗 URL destino:`, GOOGLE_SHEETS_CONFIG_DIAMANTE.scriptUrl);
+        console.log(`🔗 URL destino:`, API_DIAMANTE_CONFIG.scriptUrl);
 
-        // Usar axios COM RETRY para Google Sheets Diamante
+        // Usar axios COM RETRY para API MariaDB Diamante
         const response = await axiosComRetry({
             method: 'post',
-            url: GOOGLE_SHEETS_CONFIG_DIAMANTE.scriptUrl,
+            url: API_DIAMANTE_CONFIG.scriptUrl,
             data: dados,
             headers: {
                 'Content-Type': 'application/json',
@@ -3696,15 +3773,15 @@ async function enviarParaGoogleSheetsDiamante(referencia, numero, codigoPacote, 
         }, 3); // 3 tentativas
 
         const responseData = response.data;
-        console.log(`📥 Resposta Google Sheets Diamante:`, JSON.stringify(responseData, null, 2));
+        console.log(`📥 Resposta API MariaDB Diamante:`, JSON.stringify(responseData, null, 2));
 
         // Verificar se é uma resposta JSON válida
         if (typeof responseData === 'object') {
             if (responseData.success) {
-                console.log(`✅ Google Sheets Diamante: Dados enviados!`);
+                console.log(`✅ API MariaDB Diamante: Dados enviados!`);
                 return { sucesso: true, referencia: responseData.referencia, duplicado: false };
             } else if (responseData.duplicado) {
-                console.log(`⚠️ Google Sheets Diamante: Pedido duplicado detectado - ${responseData.referencia} (Status: ${responseData.status_existente})`);
+                console.log(`⚠️ API MariaDB Diamante: Pedido duplicado detectado - ${responseData.referencia} (Status: ${responseData.status_existente})`);
                 return {
                     sucesso: false,
                     duplicado: true,
@@ -3719,7 +3796,7 @@ async function enviarParaGoogleSheetsDiamante(referencia, numero, codigoPacote, 
             // Fallback para compatibilidade com resposta em texto
             const responseText = String(responseData);
             if (responseText.includes('Sucesso!')) {
-                console.log(`✅ Google Sheets Diamante: Dados enviados!`);
+                console.log(`✅ API MariaDB Diamante: Dados enviados!`);
                 return { sucesso: true, row: 'N/A', duplicado: false };
             } else if (responseText.includes('Erro:')) {
                 throw new Error(responseText);
@@ -3732,19 +3809,19 @@ async function enviarParaGoogleSheetsDiamante(referencia, numero, codigoPacote, 
         // Tratar erro 429 especificamente
         if (error.response && error.response.status === 429) {
             erros429Consecutivos++;
-            console.error(`🚨 Google Sheets Diamante: Rate limit atingido (429) - Erro ${erros429Consecutivos}/${MAX_ERROS_429}`);
+            console.error(`🚨 API MariaDB Diamante: Rate limit atingido (429) - Erro ${erros429Consecutivos}/${MAX_ERROS_429}`);
 
             // Pausar se necessário
             if (erros429Consecutivos >= MAX_ERROS_429) {
                 const pausaEmergencia = 2 * 60 * 1000;
-                console.error(`⏸️ Google Sheets Diamante: Pausando envios por ${pausaEmergencia/1000}s devido a múltiplos erros 429`);
+                console.error(`⏸️ API MariaDB Diamante: Pausando envios por ${pausaEmergencia/1000}s devido a múltiplos erros 429`);
                 await new Promise(resolve => setTimeout(resolve, pausaEmergencia));
                 erros429Consecutivos = 0;
             }
             return { sucesso: false, erro: 'Rate limit atingido, tentando novamente em instantes...' };
         }
 
-        console.error(`❌ Erro Google Sheets Diamante [${grupoNome}]: ${error.message}`);
+        console.error(`❌ Erro API MariaDB Diamante [${grupoNome}]: ${error.message}`);
         return { sucesso: false, erro: error.message };
     }
 }
@@ -4028,12 +4105,12 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
         };
     }
 
-    // Validar URL do Google Sheets
-    if (!GOOGLE_SHEETS_CONFIG.scriptUrl || GOOGLE_SHEETS_CONFIG.scriptUrl === '') {
-        console.error(`❌ VALIDAÇÃO FALHOU: URL do Google Sheets não configurada`);
+    // Validar URL do API MariaDB
+    if (!API_PEDIDOS_CONFIG.scriptUrl || API_PEDIDOS_CONFIG.scriptUrl === '') {
+        console.error(`❌ VALIDAÇÃO FALHOU: URL do API MariaDB não configurada`);
         return {
             sucesso: false,
-            erro: 'Google Sheets não configurado'
+            erro: 'API MariaDB não configurado'
         };
     }
 
@@ -4058,7 +4135,7 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
         tentativas++;
 
         try {
-            console.log(`🔄 Tentativa ${tentativas}/${maxTentativas} de envio para Google Sheets...`);
+            console.log(`🔄 Tentativa ${tentativas}/${maxTentativas} de envio para API MariaDB...`);
             resultado = await enviarParaGoogleSheets(referencia, valor, numero, grupoId, grupoNome, autorMensagem);
 
             if (resultado.sucesso) {
@@ -4094,7 +4171,7 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
             transacao.metodo = 'google_sheets';
             transacao.row = resultado.row;
         }
-        console.log(`✅ [${grupoNome}] Enviado para Google Sheets com sucesso! Row: ${resultado.row}`);
+        console.log(`✅ [${grupoNome}] Enviado para API MariaDB com sucesso! Row: ${resultado.row}`);
 
         // === REGISTRAR COMPRA PENDENTE NO SISTEMA DE COMPRAS ===
         if (sistemaCompras) {
@@ -4229,7 +4306,7 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
 
         return {
             sucesso: false,
-            erro: resultado?.erro || 'Falha ao enviar para Google Sheets após múltiplas tentativas',
+            erro: resultado?.erro || 'Falha ao enviar para API MariaDB após múltiplas tentativas',
             tentativas: maxTentativas
         };
     }
@@ -4823,42 +4900,63 @@ function agendarSalvamentoHistorico() {
 }
 
 async function registrarComprador(grupoId, numeroComprador, nomeContato, valorTransferencia) {
-    const agora = new Date();
-    const timestamp = agora.toISOString();
+    try {
+        // Enviar para API MariaDB
+        const response = await axios.post('http://localhost:3002/api/compradores', {
+            grupo_id: grupoId,
+            numero: numeroComprador,
+            nome: nomeContato,
+            megas: parseInt(valorTransferencia) || 0
+        }, {
+            timeout: 5000
+        });
 
-    if (!historicoCompradores[grupoId]) {
-        historicoCompradores[grupoId] = {
-            nomeGrupo: getConfiguracaoGrupo(grupoId)?.nome || 'Grupo Desconhecido',
-            compradores: {}
-        };
+        if (response.data.success) {
+            console.log(`💰 Comprador registrado no MariaDB: ${nomeContato} (${numeroComprador}) - ${valorTransferencia}MB`);
+        } else {
+            console.error(`❌ Erro ao registrar comprador: ${response.data.error}`);
+        }
+    } catch (error) {
+        console.error(`❌ Erro ao registrar comprador no MariaDB: ${error.message}`);
+
+        // Fallback: salvar no JSON local (backup)
+        const agora = new Date();
+        const timestamp = agora.toISOString();
+
+        if (!historicoCompradores[grupoId]) {
+            historicoCompradores[grupoId] = {
+                nomeGrupo: getConfiguracaoGrupo(grupoId)?.nome || 'Grupo Desconhecido',
+                compradores: {}
+            };
+        }
+
+        if (!historicoCompradores[grupoId].compradores[numeroComprador]) {
+            historicoCompradores[grupoId].compradores[numeroComprador] = {
+                primeiraCompra: timestamp,
+                ultimaCompra: timestamp,
+                totalCompras: 1,
+                nomeContato: nomeContato,
+                historico: []
+            };
+        } else {
+            historicoCompradores[grupoId].compradores[numeroComprador].ultimaCompra = timestamp;
+            historicoCompradores[grupoId].compradores[numeroComprador].totalCompras++;
+            historicoCompradores[grupoId].compradores[numeroComprador].nomeContato = nomeContato;
+        }
+
+        historicoCompradores[grupoId].compradores[numeroComprador].historico.push({
+            data: timestamp,
+            valor: valorTransferencia
+        });
+
+        if (historicoCompradores[grupoId].compradores[numeroComprador].historico.length > 10) {
+            historicoCompradores[grupoId].compradores[numeroComprador].historico =
+                historicoCompradores[grupoId].compradores[numeroComprador].historico.slice(-10);
+        }
+
+        agendarSalvamentoHistorico();
+        console.log(`💾 Comprador registrado no JSON (fallback): ${nomeContato} (${numeroComprador}) - ${valorTransferencia}MB`);
     }
-
-    if (!historicoCompradores[grupoId].compradores[numeroComprador]) {
-        historicoCompradores[grupoId].compradores[numeroComprador] = {
-            primeiraCompra: timestamp,
-            ultimaCompra: timestamp,
-            totalCompras: 1,
-            nomeContato: nomeContato,
-            historico: []
-        };
-    } else {
-        historicoCompradores[grupoId].compradores[numeroComprador].ultimaCompra = timestamp;
-        historicoCompradores[grupoId].compradores[numeroComprador].totalCompras++;
-        historicoCompradores[grupoId].compradores[numeroComprador].nomeContato = nomeContato;
-    }
-
-    historicoCompradores[grupoId].compradores[numeroComprador].historico.push({
-        data: timestamp,
-        valor: valorTransferencia
-    });
-
-    if (historicoCompradores[grupoId].compradores[numeroComprador].historico.length > 10) {
-        historicoCompradores[grupoId].compradores[numeroComprador].historico =
-            historicoCompradores[grupoId].compradores[numeroComprador].historico.slice(-10);
-    }
-
-    agendarSalvamentoHistorico();
-    console.log(`💰 Comprador registrado: ${nomeContato} (${numeroComprador}) - ${valorTransferencia}MT`);
 }
 
 // === FILA DE MENSAGENS ===
@@ -4888,8 +4986,8 @@ client.on('loading_screen', (percent, message) => {
 client.on('ready', async () => {
     console.log('✅ Bot conectado e pronto!');
     console.log('🧠 IA WhatsApp ativa!');
-    console.log('📊 Google Sheets configurado!');
-    console.log(`🔗 URL: ${GOOGLE_SHEETS_CONFIG.scriptUrl}`);
+    console.log('📊 API MariaDB configurado!');
+    console.log(`🔗 URL: ${API_PEDIDOS_CONFIG.scriptUrl}`);
     console.log('🤖 Bot Retalho - Lógica simples igual ao Bot Atacado!');
 
     // Verificar se acabou de reiniciar e notificar grupos
@@ -4902,7 +5000,7 @@ client.on('ready', async () => {
 
     // === INICIALIZAR SISTEMA DE RELATÓRIOS ===
     try {
-        global.sistemaRelatorios = new SistemaRelatorios(client, GOOGLE_SHEETS_CONFIG, PAGAMENTOS_CONFIG);
+        global.sistemaRelatorios = new SistemaRelatorios(client, API_PEDIDOS_CONFIG, API_PAGAMENTOS_CONFIG);
 
         // Carregar configurações salvas
         await global.sistemaRelatorios.carregarConfiguracoes();
@@ -6448,14 +6546,14 @@ async function processMessage(message) {
 
             // === COMANDOS GOOGLE SHEETS ===
             if (comando === '.test_sheets') {
-                console.log(`🧪 Testando Google Sheets...`);
+                console.log(`🧪 Testando API MariaDB...`);
                 
                 const resultado = await enviarParaGoogleSheets('TEST123', '99', '842223344', 'test_group', 'Teste Admin', 'TestUser');
                 
                 if (resultado.sucesso) {
-                    await message.reply(`✅ *Google Sheets funcionando!*\n\n📊 URL: ${GOOGLE_SHEETS_CONFIG.scriptUrl}\n📝 Row: ${resultado.row}\n🎉 Dados enviados com sucesso!`);
+                    await message.reply(`✅ *API MariaDB funcionando!*\n\n📊 URL: ${API_PEDIDOS_CONFIG.scriptUrl}\n📝 Row: ${resultado.row}\n🎉 Dados enviados com sucesso!`);
                 } else {
-                    await message.reply(`❌ *Google Sheets com problema!*\n\n📊 URL: ${GOOGLE_SHEETS_CONFIG.scriptUrl}\n⚠️ Erro: ${resultado.erro}\n\n🔧 *Verifique:*\n• Script publicado corretamente\n• Permissões do Google Sheets\n• Internet funcionando`);
+                    await message.reply(`❌ *API MariaDB com problema!*\n\n📊 URL: ${API_PEDIDOS_CONFIG.scriptUrl}\n⚠️ Erro: ${resultado.erro}\n\n🔧 *Verifique:*\n• Script publicado corretamente\n• Permissões do API MariaDB\n• Internet funcionando`);
                 }
                 return;
             }
@@ -7174,7 +7272,7 @@ async function processMessage(message) {
                     return;
                 }
 
-                console.log(`🧪 Testando Google Sheets para grupo: ${configGrupo.nome}`);
+                console.log(`🧪 Testando API MariaDB para grupo: ${configGrupo.nome}`);
                 
                 const resultado = await enviarParaGoogleSheets('TEST999', '88', '847777777', grupoAtual, configGrupo.nome, 'TestAdmin');
                 
@@ -7217,7 +7315,7 @@ async function processMessage(message) {
                 let resposta = `📊 *GOOGLE SHEETS STATUS*\n⚠ NB: Válido apenas para Vodacom━━━━━━━━\n\n`;
                 resposta += `📈 Total enviado: ${dados.length}\n`;
                 resposta += `📅 Hoje: ${hoje.length}\n`;
-                resposta += `📊 Via Google Sheets: ${sheets}\n`;
+                resposta += `📊 Via API MariaDB: ${sheets}\n`;
                 resposta += `📱 Via WhatsApp: ${whatsapp}\n\n`;
                 // REMOVIDO: Fila de encaminhamento (sistema movido para outro bot)
                 
@@ -8098,7 +8196,7 @@ async function processMessage(message) {
                                     `👤 Cliente: ${nomeClienteSeguro}\n` +
                                     `💰 Valor: ${quantidadeMB}MB\n\n` +
                                     `✅ Saldo restaurado.\n` +
-                                    `🔧 Verifique Google Sheets.`
+                                    `🔧 Verifique API MariaDB.`
                                 );
                                 console.log(`📧 Notificação enviada ao admin`);
                             }
@@ -9068,8 +9166,8 @@ process.on('SIGINT', async () => {
     }
 
     console.log('🧠 IA: ATIVA');
-    console.log('📊 Google Sheets: CONFIGURADO');
-    console.log(`🔗 URL: ${GOOGLE_SHEETS_CONFIG.scriptUrl}`);
+    console.log('📊 API MariaDB: CONFIGURADO');
+    console.log(`🔗 URL: ${API_PEDIDOS_CONFIG.scriptUrl}`);
     console.log('🤖 Bot Retalho - Funcionamento otimizado');
     console.log(ia.getStatus());
     process.exit(0);

@@ -6,13 +6,17 @@ class SistemaPacotes {
     constructor() {
         console.log('📦 Inicializando Sistema de Pacotes Automáticos...');
         
-        // Configurações das planilhas
+        // Configurações da API MariaDB (substitui Google Sheets)
         this.PLANILHAS = {
-            // PEDIDOS: Usar a MESMA planilha do bot retalho
-            PEDIDOS: process.env.GOOGLE_SHEETS_SCRIPT_URL_RETALHO || 'https://script.google.com/macros/s/AKfycbyMilUC5bYKGXV95LR4MmyaRHzMf6WCmXeuztpN0tDpQ9_2qkgCxMipSVqYK_Q6twZG/exec',
-            // PAGAMENTOS: Planilha separada (universal)
-            PAGAMENTOS: process.env.GOOGLE_SHEETS_PAGAMENTOS
+            // PEDIDOS: API MariaDB local
+            PEDIDOS: process.env.API_PEDIDOS_URL || 'http://localhost:3002/api/pedidos',
+            // PAGAMENTOS: API MariaDB local
+            PAGAMENTOS: process.env.API_PAGAMENTOS_URL || 'http://localhost:3002/api/pagamentos'
         };
+
+        // API de Pacotes MariaDB
+        this.API_PACOTES_URL = process.env.API_PACOTES_URL || 'http://localhost:3002/api/pacotes';
+        this.timeout = 5000;
         
         // Tipos de pacotes disponíveis
         this.TIPOS_PACOTES = {
@@ -46,47 +50,152 @@ class SistemaPacotes {
         this.iniciarVerificacaoAutomatica();
     }
     
-    // === CARREGAR DADOS PERSISTIDOS ===
+    // === CARREGAR DADOS DO MARIADB ===
     async carregarDados() {
         try {
-            // Carregar clientes ativos
+            // Tentar carregar do MariaDB primeiro
             try {
-                const dadosClientes = await fs.readFile(this.ARQUIVO_CLIENTES, 'utf8');
-                this.clientesAtivos = JSON.parse(dadosClientes);
-                console.log(`📦 ${Object.keys(this.clientesAtivos).length} clientes ativos carregados`);
+                const response = await axios.get(`${this.API_PACOTES_URL}/ativos`, {
+                    timeout: this.timeout
+                });
+
+                if (response.data.success && response.data.pacotes) {
+                    // Converter array para objeto indexado por cliente_id
+                    this.clientesAtivos = {};
+                    for (const pacote of response.data.pacotes) {
+                        this.clientesAtivos[pacote.cliente_id] = {
+                            numero: pacote.numero,
+                            referenciaOriginal: pacote.referencia_original,
+                            grupoId: pacote.grupo_id,
+                            tipoPacote: pacote.tipo_pacote,
+                            diasTotal: pacote.dias_total,
+                            diasRestantes: pacote.dias_restantes,
+                            megasIniciais: pacote.megas_iniciais,
+                            valorMTInicial: pacote.valor_mt_inicial,
+                            dataInicio: pacote.data_inicio,
+                            dataExpiracao: pacote.data_expiracao,
+                            horaEnvioOriginal: pacote.hora_envio_original,
+                            proximaRenovacao: pacote.proxima_renovacao,
+                            renovacoes: pacote.renovacoes,
+                            status: pacote.status,
+                            ultimaRenovacao: pacote.ultima_renovacao
+                        };
+                    }
+                    console.log(`📦 ${Object.keys(this.clientesAtivos).length} clientes ativos carregados do MariaDB`);
+                }
             } catch (error) {
-                console.log(`📦 Nenhum arquivo de clientes encontrado - iniciando limpo`);
-                this.clientesAtivos = {};
+                console.log(`⚠️ PACOTES: Erro ao carregar do MariaDB, usando JSON: ${error.message}`);
+                // Fallback para JSON
+                try {
+                    const dadosClientes = await fs.readFile(this.ARQUIVO_CLIENTES, 'utf8');
+                    this.clientesAtivos = JSON.parse(dadosClientes);
+                    console.log(`📦 ${Object.keys(this.clientesAtivos).length} clientes ativos carregados do JSON (fallback)`);
+                } catch (err) {
+                    console.log(`📦 Nenhum arquivo de clientes encontrado - iniciando limpo`);
+                    this.clientesAtivos = {};
+                }
             }
-            
-            // Carregar histórico
-            try {
-                const dadosHistorico = await fs.readFile(this.ARQUIVO_HISTORICO, 'utf8');
-                this.historicoRenovacoes = JSON.parse(dadosHistorico);
-                console.log(`📦 ${this.historicoRenovacoes.length} registros de histórico carregados`);
-            } catch (error) {
-                console.log(`📦 Nenhum histórico encontrado - iniciando limpo`);
-                this.historicoRenovacoes = [];
-            }
-            
+
+            // Carregar histórico (manter em memória, não precisa carregar do DB a cada vez)
+            this.historicoRenovacoes = [];
+            console.log(`📦 Histórico de renovações está no MariaDB`);
+
         } catch (error) {
             console.error(`❌ PACOTES: Erro ao carregar dados:`, error);
         }
     }
     
-    // === SALVAR DADOS ===
+    // === SALVAR DADOS NO MARIADB ===
     async salvarDados() {
         try {
-            // Salvar clientes ativos
-            await fs.writeFile(this.ARQUIVO_CLIENTES, JSON.stringify(this.clientesAtivos, null, 2));
-            
-            // Salvar histórico (manter apenas últimos 1000 registros)
-            const historicoLimitado = this.historicoRenovacoes.slice(-1000);
-            await fs.writeFile(this.ARQUIVO_HISTORICO, JSON.stringify(historicoLimitado, null, 2));
-            
-            console.log(`💾 PACOTES: Dados salvos - ${Object.keys(this.clientesAtivos).length} clientes ativos`);
+            // Salvar cada cliente no MariaDB
+            for (const [clienteId, cliente] of Object.entries(this.clientesAtivos)) {
+                try {
+                    await axios.post(this.API_PACOTES_URL, {
+                        cliente_id: clienteId,
+                        numero: cliente.numero,
+                        referencia_original: cliente.referenciaOriginal,
+                        grupo_id: cliente.grupoId,
+                        tipo_pacote: cliente.tipoPacote,
+                        dias_total: cliente.diasTotal,
+                        dias_restantes: cliente.diasRestantes,
+                        megas_iniciais: cliente.megasIniciais,
+                        valor_mt_inicial: cliente.valorMTInicial,
+                        data_inicio: cliente.dataInicio,
+                        data_expiracao: cliente.dataExpiracao,
+                        hora_envio_original: cliente.horaEnvioOriginal,
+                        proxima_renovacao: cliente.proximaRenovacao,
+                        renovacoes: cliente.renovacoes,
+                        status: cliente.status,
+                        ultima_renovacao: cliente.ultimaRenovacao
+                    }, {
+                        timeout: this.timeout
+                    });
+                } catch (err) {
+                    console.error(`❌ Erro ao salvar pacote ${clienteId} no MariaDB: ${err.message}`);
+                }
+            }
+
+            console.log(`💾 PACOTES: Dados salvos no MariaDB - ${Object.keys(this.clientesAtivos).length} clientes ativos`);
+
         } catch (error) {
             console.error(`❌ PACOTES: Erro ao salvar dados:`, error);
+            // Fallback: salvar em JSON
+            try {
+                await fs.writeFile(this.ARQUIVO_CLIENTES, JSON.stringify(this.clientesAtivos, null, 2));
+                console.log(`💾 PACOTES: Dados salvos em JSON (fallback)`);
+            } catch (err) {
+                console.error(`❌ PACOTES: Erro ao salvar JSON: ${err.message}`);
+            }
+        }
+    }
+
+    // === SALVAR PACOTE INDIVIDUAL NO MARIADB ===
+    async salvarPacoteMariaDB(clienteId, cliente) {
+        try {
+            await axios.post(this.API_PACOTES_URL, {
+                cliente_id: clienteId,
+                numero: cliente.numero,
+                referencia_original: cliente.referenciaOriginal,
+                grupo_id: cliente.grupoId,
+                tipo_pacote: cliente.tipoPacote,
+                dias_total: cliente.diasTotal,
+                dias_restantes: cliente.diasRestantes,
+                megas_iniciais: cliente.megasIniciais,
+                valor_mt_inicial: cliente.valorMTInicial,
+                data_inicio: cliente.dataInicio,
+                data_expiracao: cliente.dataExpiracao,
+                hora_envio_original: cliente.horaEnvioOriginal,
+                proxima_renovacao: cliente.proximaRenovacao,
+                renovacoes: cliente.renovacoes,
+                status: cliente.status,
+                ultima_renovacao: cliente.ultimaRenovacao
+            }, {
+                timeout: this.timeout
+            });
+        } catch (error) {
+            console.error(`❌ Erro ao salvar pacote ${clienteId}: ${error.message}`);
+        }
+    }
+
+    // === REGISTRAR RENOVAÇÃO NO MARIADB ===
+    async registrarRenovacaoMariaDB(renovacao) {
+        try {
+            await axios.post(`${this.API_PACOTES_URL}/renovacao`, {
+                cliente_id: renovacao.clienteId,
+                numero: renovacao.numero,
+                referencia_original: renovacao.referenciaOriginal,
+                nova_referencia: renovacao.novaReferencia,
+                dia: renovacao.dia,
+                dias_restantes: renovacao.diasRestantes,
+                proxima_renovacao: renovacao.proximaRenovacao,
+                timestamp_renovacao: renovacao.timestamp,
+                grupo_id: renovacao.grupoId
+            }, {
+                timeout: this.timeout
+            });
+        } catch (error) {
+            console.error(`❌ Erro ao registrar renovação: ${error.message}`);
         }
     }
     
@@ -472,8 +581,8 @@ class SistemaPacotes {
                 cliente.proximaRenovacao = this.calcularProximaRenovacao(agora);
             }
             
-            // Registrar no histórico
-            this.historicoRenovacoes.push({
+            // Registrar no histórico (MariaDB)
+            const renovacao = {
                 clienteId: clienteId,
                 numero: cliente.numero,
                 referenciaOriginal: cliente.referenciaOriginal,
@@ -481,8 +590,16 @@ class SistemaPacotes {
                 dia: diaAtual + 1,
                 diasRestantes: cliente.diasRestantes,
                 proximaRenovacao: cliente.proximaRenovacao,
-                timestamp: agora.toISOString()
-            });
+                timestamp: agora.toISOString(),
+                grupoId: cliente.grupoId
+            };
+            this.historicoRenovacoes.push(renovacao);
+
+            // Salvar renovação no MariaDB
+            await this.registrarRenovacaoMariaDB(renovacao);
+
+            // Salvar pacote atualizado no MariaDB
+            await this.salvarPacoteMariaDB(clienteId, cliente);
             
             console.log(`✅ Renovação criada: ${novaReferencia} (${cliente.diasRestantes} dias)`);
             if (cliente.diasRestantes > 0) {
