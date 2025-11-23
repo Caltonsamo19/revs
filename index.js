@@ -2356,7 +2356,11 @@ const ADMINISTRADORES_GLOBAIS = [
     '258879914172@c.us',    // +258 87 991 4172 - walter
     '40811249045561@lid',   // @lid do walter
     '258844345161@c.us',    // +258 84 434 5161 - Mozstream's
-    '144478891450544@lid'   // @lid do Mozstream's
+    '144478891450544@lid',  // @lid do Mozstream's
+    '258849430041@c.us',    // +258 84 943 0041 - Junior Zucula
+    '216329281892468@lid',  // @lid do Junior Zucula
+    '258842577015@c.us',    // +258 84 257 7015 - Ercílio (2º número)
+    '113267548680269@lid'   // @lid do Ercílio (2º número)
 ];
 
 // Mapeamento de IDs internos (@lid) para números reais (@c.us) - SISTEMA DINÂMICO
@@ -2373,7 +2377,9 @@ let MAPEAMENTO_IDS = {
     '29945149558840@lid': '258857013922@c.us',   // Frederico
     '49603198071035@lid': '258871784594@c.us',   // Shop NET
     '40811249045561@lid': '258879914172@c.us',   // walter
-    '144478891450544@lid': '258844345161@c.us'   // Mozstream's
+    '144478891450544@lid': '258844345161@c.us',  // Mozstream's
+    '216329281892468@lid': '258849430041@c.us',  // Junior Zucula
+    '113267548680269@lid': '258842577015@c.us'   // Ercílio (2º número)
 };
 
 // === SISTEMA AUTOMÁTICO DE MAPEAMENTO LID ===
