@@ -5332,46 +5332,22 @@ function contemConteudoSuspeito(mensagem) {
     // ===== DETECÇÃO ULTRA-RIGOROSA DE LINKS =====
     // Detecta QUALQUER indício de link, URL, domínio ou encurtador
 
+    // ===== DETECÇÃO CONSERVADORA - APENAS LINKS ÓBVIOS =====
     const padroes = [
-        // 1. URLs com protocolo (http://, https://, ftp://) - detecta em qualquer posição
+        // 1. URLs com protocolo (http://, https://, ftp://) - 100% certeza
         /(?:https?|ftp):\/\/[^\s]+/gi,
 
-        // 2. URLs começando com www - detecta em qualquer posição
-        /(?:^|\s|[^\w])www\.[^\s]+/gi,
+        // 2. URLs começando com www. - 100% certeza
+        /(?:^|\s)www\.[a-z0-9\-]+\.[a-z]{2,}[^\s]*/gi,
 
-        // 3. Domínios completos (palavra.com, palavra.net, etc) - QUALQUER POSIÇÃO
-        // Lista expandida de TLDs mais comuns
-        /(?:^|\s|[^\w])([a-z0-9\-_]+\.(?:com|net|org|io|br|co|uk|us|edu|gov|mil|int|info|biz|name|pro|aero|asia|cat|coop|jobs|mobi|museum|tel|travel|xxx|xyz|top|site|online|store|tech|app|dev|ai|cloud|digital|email|life|live|news|photo|pics|shop|video|web|world|academy|accountant|actor|agency|apartments|army|associates|attorney|auction|audio|band|bar|beer|bike|bingo|blog|boutique|builders|business|cab|cafe|camera|camp|capital|cards|care|careers|cash|casino|catering|center|chat|cheap|church|city|claims|cleaning|clinic|clothing|club|coach|codes|coffee|college|community|company|computer|condos|construction|consulting|contractors|cooking|cool|country|coupons|credit|creditcard|cruises|dance|dating|deals|degree|delivery|dental|dentist|design|diamonds|diet|digital|direct|directory|discount|doctor|dog|domains|download|education|email|energy|engineer|engineering|enterprises|equipment|estate|events|exchange|expert|express|fail|farm|fashion|film|finance|financial|fish|fishing|fitness|flights|florist|flowers|football|forsale|foundation|fund|furniture|gallery|games|garden|gift|gifts|glass|global|gold|golf|graphics|gratis|green|gripe|group|guide|guitars|guru|haus|health|healthcare|hockey|holdings|holiday|homes|horse|hospital|host|hosting|house|immo|immobilien|industries|institute|insure|international|investments|jewelry|kaufen|kitchen|land|lawyer|lease|legal|lgbt|limited|limo|link|loan|loans|lol|luxury|maison|management|market|marketing|mba|media|memorial|men|menu|money|mortgage|movie|navy|network|ninja|partners|parts|party|photography|photos|pizza|place|plumbing|plus|poker|properties|property|pub|racing|recipes|reisen|rentals|repair|report|republican|restaurant|reviews|rocks|run|salon|school|schule|services|shoes|shopping|show|singles|soccer|social|software|solar|solutions|studio|style|supplies|supply|support|surf|surgery|systems|tax|taxi|team|technology|tennis|theater|tips|tires|today|tools|tours|town|toys|trade|training|university|vacations|ventures|vet|viajes|video|villas|vision|voyage|watch|website|wedding|wine|works|wtf|zone|mz|ao|za|pt|es|fr|de|it|ru|cn|jp|kr|in|au|nz|ca|mx|ar|cl|pe|ve|ec|py|uy|bo|cr|pa|ni|hn|sv|gt|cu|do|ht|jm|tt|bs|bb|gd|lc|vc|ag|dm|kn|ms|tc|vg|ai|bm|ky))(?:[\/\s\?\#\,\.\!\)]|$)/gi,
+        // 3. Encurtadores conhecidos - 100% certeza
+        /(?:bit\.ly|tinyurl\.com|cutt\.ly|rb\.gy|short\.io|t\.co|goo\.gl)\/[a-zA-Z0-9]+/gi,
 
-        // 4. Encurtadores de URL conhecidos - detecta em qualquer posição
-        /(?:bit\.ly|tinyurl\.com|short\.link|ow\.ly|buff\.ly|adf\.ly|goo\.gl|t\.co|is\.gd|cli\.gs|pic\.twitter\.com|soo\.gd|s2r\.co|clicky\.me|budurl\.com|bc\.vc|tinyurl\.com|url\.ie|tiny\.cc|prettylinkpro\.com|scrnch\.me|filoops\.info|vzturl\.com|qr\.net|1url\.com|tweez\.me|v\.gd|tr\.im|link\.zip|cutt\.ly|rb\.gy|short\.io|tny\.im|tiny\.one)(?:\/[^\s]*)?/gi,
+        // 4. Links de WhatsApp/Telegram para grupos - 100% certeza
+        /(?:chat\.whatsapp\.com\/[a-zA-Z0-9]+|wa\.me\/[0-9]+|t\.me\/[a-zA-Z0-9_]+)/gi,
 
-        // 5. Links do WhatsApp e Telegram - detecta em qualquer posição
-        /(?:wa\.me|api\.whatsapp\.com|chat\.whatsapp\.com|whatsapp\.com\/channel|t\.me|telegram\.me|telegram\.dog)(?:\/[^\s]*)?/gi,
-
-        // 6. Padrões específicos de convite - detecta em qualquer posição
-        /(?:chat\.whatsapp\.com|wa\.me\/join|invite\.whatsapp|group\.whatsapp)/gi,
-
-        // 7. Domínios genéricos - detecta abc.xyz MAS exclui valores monetários (45.00MT)
-        /(?:^|\s|[^\w@\d])([a-zA-Z][a-zA-Z0-9\-_]+\.[a-zA-Z]{2,})(?:[\/\?\#][^\s]*)?(?:\s|[\,\!\)\;]|$)/g,
-
-        // 8. Padrões como "nome ponto com" ou "site . com" (com espaços) - apenas letras antes
-        /(?:^|\s)([a-z][a-z0-9\-_]*)\s*(?:\(?\s*ponto\s*\)?|\[\s*ponto\s*\])\s*(?:com|net|org|br|io|co|mz)/gi,
-
-        // 9. IP addresses (xxx.xxx.xxx.xxx) - detecta em qualquer posição
-        /(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/g,
-
-        // 10. Padrões de link disfarçados (com espaços, parênteses, colchetes)
-        /(?:http|https|www)\s*[:\/\s]+/gi,
-
-        // 11. @ seguido de domínio (email-like que pode ser link)
-        /@[a-z0-9\-_]+\.[a-z]{2,}/gi,
-
-        // 12. Links sem protocolo tipo "site.com/pagina" no meio de texto
-        /(?:^|\s)([a-z0-9\-]+\.(?:com|net|org|br|io|co|mz)\/[^\s]+)/gi,
-
-        // 13. Padrões com "visite", "acesse", "veja" seguido de possível link
-        /(?:visite|acesse|veja|confira|clique|entre)\s*(?:em|no|na)?\s*[:\-]?\s*([a-z0-9\-\.]+\.[a-z]{2,})/gi
+        // 5. Padrões óbvios com palavras-gatilho + link completo
+        /(?:visite|acesse|clique|entre|veja)\s+(?:em\s+|no\s+)?(?:https?:\/\/|www\.)[^\s]+/gi
     ];
 
     let linkDetectado = false;
