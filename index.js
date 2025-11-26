@@ -2489,13 +2489,23 @@ const MODERACAO_CONFIG = {
         maxMensagensIguais: 5, // Máximo de mensagens iguais permitidas
         intervaloSegundos: 60, // Janela de tempo em segundos
         removerUsuario: true, // Remove usuário após spam
-        apagarMensagens: true
+        apagarMensagens: true,
+        // Anti-Flood: Detectar muitas mensagens diferentes em pouco tempo
+        antiFlood: {
+            ativado: true,
+            maxMensagens: 10, // Máximo de mensagens (diferentes) permitidas
+            intervaloSegundos: 5 // Janela de tempo em segundos
+        }
     }
 };
 
 // === CACHE ANTI-SPAM ===
 // Estrutura: { 'groupId': { 'userId': { 'mensagemHash': [{ timestamp, messageId }] } } }
 const antiSpamCache = new Map();
+
+// === CACHE ANTI-FLOOD ===
+// Estrutura: { 'groupId': { 'userId': [{ timestamp, messageId, message }] } }
+const antiFloodCache = new Map();
 
 // Função para limpar cache antigo (mensagens fora da janela de tempo)
 function limparCacheAntiSpam() {
@@ -2522,8 +2532,29 @@ function limparCacheAntiSpam() {
     }
 }
 
-// Limpar cache a cada 30 segundos
+// Função para limpar cache de flood antigo
+function limparCacheAntiFlood() {
+    const agora = Date.now();
+    const intervaloMs = MODERACAO_CONFIG.antiSpam.antiFlood.intervaloSegundos * 1000;
+
+    for (const [groupId, usuarios] of antiFloodCache.entries()) {
+        for (const [userId, mensagens] of usuarios.entries()) {
+            const mensagensFiltradas = mensagens.filter(item => (agora - item.timestamp) < intervaloMs);
+            if (mensagensFiltradas.length === 0) {
+                usuarios.delete(userId);
+            } else {
+                usuarios.set(userId, mensagensFiltradas);
+            }
+        }
+        if (usuarios.size === 0) {
+            antiFloodCache.delete(groupId);
+        }
+    }
+}
+
+// Limpar caches a cada 30 segundos
 setInterval(limparCacheAntiSpam, 30000);
+setInterval(limparCacheAntiFlood, 30000);
 
 // Função para verificar e registrar spam
 async function verificarAntiSpam(message, client) {
@@ -2654,6 +2685,125 @@ async function verificarAntiSpam(message, client) {
     }
 
     return false; // Não é spam
+}
+
+// Função para verificar e registrar flood (muitas mensagens rápidas)
+async function verificarAntiFlood(message, client) {
+    if (!MODERACAO_CONFIG.antiSpam.antiFlood.ativado) return false;
+
+    const chatId = message.from;
+    const authorId = message.author || message.from;
+    const agora = Date.now();
+    const intervaloMs = MODERACAO_CONFIG.antiSpam.antiFlood.intervaloSegundos * 1000;
+
+    // Verificar se é grupo monitorado
+    const ativadoExplicit = CONFIGURACAO_GRUPOS.hasOwnProperty(chatId) ||
+        (MODERACAO_CONFIG.ativado && MODERACAO_CONFIG.ativado[chatId]);
+
+    if (!ativadoExplicit) return false;
+
+    // Ignorar exceções e admins
+    if (MODERACAO_CONFIG.excecoes.includes(authorId) || isAdministrador(authorId)) {
+        return false;
+    }
+
+    // Inicializar estruturas se não existirem
+    if (!antiFloodCache.has(chatId)) {
+        antiFloodCache.set(chatId, new Map());
+    }
+    const grupoCache = antiFloodCache.get(chatId);
+
+    if (!grupoCache.has(authorId)) {
+        grupoCache.set(authorId, []);
+    }
+    const listaMensagens = grupoCache.get(authorId);
+
+    // Adicionar mensagem atual
+    listaMensagens.push({
+        timestamp: agora,
+        messageId: message.id._serialized,
+        message: message
+    });
+
+    // Filtrar apenas mensagens dentro da janela de tempo
+    const mensagensRecentes = listaMensagens.filter(item => (agora - item.timestamp) < intervaloMs);
+    grupoCache.set(authorId, mensagensRecentes);
+
+    // Verificar se atingiu o limite de flood
+    if (mensagensRecentes.length >= MODERACAO_CONFIG.antiSpam.antiFlood.maxMensagens) {
+        console.log(`🚨 FLOOD DETECTADO: ${authorId} enviou ${mensagensRecentes.length} mensagens em ${MODERACAO_CONFIG.antiSpam.antiFlood.intervaloSegundos}s`);
+
+        let mensagensDeletadas = 0;
+
+        // Apagar todas as mensagens ANTES de remover o usuário
+        if (MODERACAO_CONFIG.antiSpam.apagarMensagens) {
+            console.log(`🗑️ Tentando apagar ${mensagensRecentes.length} mensagens de flood...`);
+
+            for (const item of mensagensRecentes) {
+                try {
+                    if (item.message && typeof item.message.delete === 'function') {
+                        await item.message.delete(true);
+                        mensagensDeletadas++;
+                        console.log(`✅ Mensagem ${mensagensDeletadas}/${mensagensRecentes.length} deletada`);
+
+                        // Delay pequeno entre deleções para evitar rate limit
+                        if (mensagensDeletadas < mensagensRecentes.length) {
+                            await new Promise(resolve => setTimeout(resolve, 300));
+                        }
+                    }
+                } catch (err) {
+                    console.error(`❌ Erro ao deletar mensagem ${mensagensDeletadas + 1}:`, err.message);
+                }
+            }
+
+            console.log(`✅ Total de mensagens deletadas: ${mensagensDeletadas}/${mensagensRecentes.length}`);
+        }
+
+        // Remover usuário DEPOIS de apagar mensagens
+        if (MODERACAO_CONFIG.antiSpam.removerUsuario) {
+            let mentionId = String(authorId).replace('@c.us', '').replace('@lid', '');
+            let nomeExibicao = mentionId;
+
+            try {
+                const contato = await client.getContactById(authorId);
+                if (contato) {
+                    nomeExibicao = contato.pushname || contato.name || contato.number || mentionId;
+                }
+            } catch (err) {
+                // ignora erro
+            }
+
+            // Enviar aviso
+            try {
+                const ehIDValido = authorId &&
+                    typeof authorId === 'string' &&
+                    (authorId.includes('@c.us') || authorId.includes('@lid')) &&
+                    !authorId.startsWith('SAQUE_BONUS_') &&
+                    !authorId.startsWith('SAQ');
+
+                const aviso = `🚫 @${mentionId} foi removido(a) do grupo por FLOOD (${mensagensRecentes.length} mensagens em ${MODERACAO_CONFIG.antiSpam.antiFlood.intervaloSegundos} segundos).`;
+
+                if (ehIDValido) {
+                    await client.sendMessage(chatId, aviso, { mentions: [authorId] });
+                } else {
+                    await client.sendMessage(chatId, aviso);
+                }
+            } catch (errAviso) {
+                console.log('⚠️ Não foi possível enviar aviso de flood:', errAviso.message);
+            }
+
+            // Remover participante
+            console.log(`🚫 Removendo usuário ${authorId} do grupo...`);
+            await removerParticipante(chatId, authorId, `FLOOD: ${mensagensRecentes.length} mensagens em ${MODERACAO_CONFIG.antiSpam.antiFlood.intervaloSegundos}s`);
+        }
+
+        // Limpar cache do usuário após ação
+        grupoCache.delete(authorId);
+
+        return true; // Flood detectado e tratado
+    }
+
+    return false; // Não é flood
 }
 
 // Configuração para cada grupo
@@ -9008,6 +9158,12 @@ async function processMessage(message) {
                 const ehSpam = await verificarAntiSpam(message, client);
                 if (ehSpam) {
                     return; // Spam detectado e tratado
+                }
+
+                // Verificar Anti-Flood (muitas mensagens rápidas)
+                const ehFlood = await verificarAntiFlood(message, client);
+                if (ehFlood) {
+                    return; // Flood detectado e tratado
                 }
 
                 const analise = contemConteudoSuspeito(message.body);
