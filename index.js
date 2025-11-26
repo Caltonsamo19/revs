@@ -2472,7 +2472,8 @@ const MODERACAO_CONFIG = {
     ativado: {
         '258820749141-1441573529@g.us': true,
         '120363152151047451@g.us': true,
-        '258840161370-1471468657@g.us': true
+        '258840161370-1471468657@g.us': true,
+        '120363418742247460@g.us': true
     },
     detectarLinks: true,
     apagarMensagem: true,
@@ -2487,7 +2488,7 @@ const MODERACAO_CONFIG = {
         ativado: true,
         maxMensagensIguais: 5, // Máximo de mensagens iguais permitidas
         intervaloSegundos: 60, // Janela de tempo em segundos
-        removerUsuario: false, // Desativado - apenas apaga mensagens
+        removerUsuario: true, // Remove usuário após spam
         apagarMensagens: true
     }
 };
@@ -2582,21 +2583,33 @@ async function verificarAntiSpam(message, client) {
     if (mensagensRecentes.length >= MODERACAO_CONFIG.antiSpam.maxMensagensIguais) {
         console.log(`🚨 SPAM DETECTADO: ${authorId} enviou ${mensagensRecentes.length} mensagens iguais em ${MODERACAO_CONFIG.antiSpam.intervaloSegundos}s`);
 
-        // Apagar todas as mensagens de spam
+        let mensagensDeletadas = 0;
+
+        // Apagar todas as mensagens de spam ANTES de remover o usuário
         if (MODERACAO_CONFIG.antiSpam.apagarMensagens) {
+            console.log(`🗑️ Tentando apagar ${mensagensRecentes.length} mensagens de spam...`);
+
             for (const item of mensagensRecentes) {
                 try {
                     if (item.message && typeof item.message.delete === 'function') {
                         await item.message.delete(true);
-                        console.log(`🗑️ Mensagem de spam deletada`);
+                        mensagensDeletadas++;
+                        console.log(`✅ Mensagem ${mensagensDeletadas}/${mensagensRecentes.length} deletada`);
+
+                        // Delay pequeno entre deleções para evitar rate limit
+                        if (mensagensDeletadas < mensagensRecentes.length) {
+                            await new Promise(resolve => setTimeout(resolve, 300));
+                        }
                     }
                 } catch (err) {
-                    console.error('❌ Erro ao deletar mensagem de spam:', err.message);
+                    console.error(`❌ Erro ao deletar mensagem ${mensagensDeletadas + 1}:`, err.message);
                 }
             }
+
+            console.log(`✅ Total de mensagens deletadas: ${mensagensDeletadas}/${mensagensRecentes.length}`);
         }
 
-        // Remover usuário
+        // Remover usuário DEPOIS de apagar mensagens
         if (MODERACAO_CONFIG.antiSpam.removerUsuario) {
             let mentionId = String(authorId).replace('@c.us', '').replace('@lid', '');
             let nomeExibicao = mentionId;
@@ -2630,6 +2643,7 @@ async function verificarAntiSpam(message, client) {
             }
 
             // Remover participante
+            console.log(`🚫 Removendo usuário ${authorId} do grupo...`);
             await removerParticipante(chatId, authorId, `SPAM: ${mensagensRecentes.length} mensagens iguais`);
         }
 
@@ -3639,7 +3653,603 @@ Chamadas + SMS ilimitadas + 100GB = 2280MT 💵
 
 
 NB:*DEPOIS DE ENVIAR O VALOR, ENVIE O COMPROVANTE E O NR PARA RECEBER OS MEGAS NO GRUPO*`
-}
+}, '258840161370-1471468657@g.us': {
+        nome: 'Venda Automática 24/7',
+        tabela: `📢🔥 TABELA ATUALIZADA – OUTUBRO 2025 🔥📢
+Internet e Chamadas Ilimitadas – Vodacom
+Pacotes Diários | Semanais | Mensais
+
+OFERTA ESPECIAL – 24 HORAS ⏱
+600MB - 10MT
+800MB - 15MT
+1024MB - 17MT
+1200MB - 20MT
+2048MB - 34MT
+
+PACOTES DIÁRIOS (24H ⏱)
+2400MB - 40MT
+3072MB - 51MT
+4096MB - 68MT
+5120MB - 85MT
+6144MB - 102MT
+7168MB - 119MT
+8192MB - 136MT
+9144MB - 153MT
+10240MB - 170MT
+
+PACOTES PREMIUM (3 DIAS 🗓 – RENOVÁVEIS)
+2000MB - 44MT
+3000MB - 66MT
+4000MB - 88MT
+5000MB - 109MT
+6000MB - 133MT
+7000MB - 149MT
+10000MB - 219MT
+Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 3 dias
+
+SEMANAIS BÁSICOS (5 DIAS 🗓 – RENOVÁVEIS)
+1700MB - 45MT
+2900MB - 80MT
+3400MB - 110MT
+5500MB - 150MT
+7800MB - 200MT
+11400MB - 300MT
+Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 5 dias
+
+SEMANAIS PREMIUM (15 DIAS 🗓 – RENOVÁVEIS)
+3000MB - 100MT
+5000MB - 149MT
+8000MB - 201MT
+10000MB - 231MT
+20000MB - 352MT
+Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 15 dias
+
+PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
+2.8GB - 100MT
+5.8GB - 175MT
+8.8GB - 200MT
+10.8GB - 249MT
+12.8GB - 300MT
+15.8GB - 349MT
+18.8GB - 400MT
+20.8GB - 449MT
+25.8GB - 549MT
+32.8GB - 649MT
+51.2GB - 1049MT
+60.2GB - 1249MT
+80.2GB - 1449MT
+100.2GB - 1700MT
+Observação: Pacotes mensais não compatíveis com Txuna
+
+CHAMADAS ILIMITADAS — VODACOM 📞 ♾
+
+11GB - 449MT - Ilimitadas ✨
+14.5GB - 500MT - Ilimitadas
+26.5GB - 700MT - Ilimitadas
+37.5GB - 1000MT - Ilimitadas
+53.5GB - 1500MT - Ilimitadas
+102.5GB - 2150MT - Ilimitadas
+Inclui chamadas e SMS ilimitadas para todas as redes
+
+CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
+
+9GB - 469MT - Ilimitadas ✨
+23GB - 950MT - Ilimitadas
+38GB - 1450MT - Ilimitadas
+46GB - 1700MT - Ilimitadas
+53GB - 1900MT - Ilimitadas
+68GB - 2400MT - Ilimitadas
+Inclui chamadas e SMS ilimitadas para todas as redes
+
+🔹 CONEXÃO SEM LIMITES 🔹
+Internet rápida, chamadas e SMS ilimitadas.
+Pacotes exclusivos Vodacom e Movitel.
+Sempre conectado, sempre no controle!
+`,
+
+        pagamento: `💸 FORMAS DE PAGAMENTO
+
+🟠 E-Mola – Glória | 📲 860186270  
+🔴 M-Pesa – Leonor | 📲 857451196  
+
+⚠ ATENÇÃO  
+▪ Após o pagamento, envie a confirmação ✉ ** e o seu número para receber o seu pacote 📲  
+▪ Envie ** o valor exato da tabela 💰  
+
+NB: Válido apenas para Vodacom  
+🚀 Garanta seus Megabytes agora!
+`
+    },
+'258876291014-1634575097@g.us': {
+        nome: '🪐V2 Megabytes NetConnect 🌍',
+        tabela: `📢🔥 TABELA ATUALIZADA – OUTUBRO 2025 🔥📢
+Internet e Chamadas Ilimitadas – Vodacom
+Pacotes Diários | Semanais | Mensais
+
+OFERTA ESPECIAL – 24 HORAS ⏱
+600MB - 10MT
+800MB - 15MT
+1024MB - 17MT
+1200MB - 20MT
+2048MB - 34MT
+
+PACOTES DIÁRIOS (24H ⏱)
+2400MB - 40MT
+3072MB - 51MT
+4096MB - 68MT
+5120MB - 85MT
+6144MB - 102MT
+7168MB - 119MT
+8192MB - 136MT
+9144MB - 153MT
+10240MB - 170MT
+
+PACOTES PREMIUM (3 DIAS 🗓 – RENOVÁVEIS)
+2000MB - 44MT
+3000MB - 66MT
+4000MB - 88MT
+5000MB - 109MT
+6000MB - 133MT
+7000MB - 149MT
+10000MB - 219MT
+Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 3 dias
+
+SEMANAIS BÁSICOS (5 DIAS 🗓 – RENOVÁVEIS)
+1700MB - 45MT
+2900MB - 80MT
+3400MB - 110MT
+5500MB - 150MT
+7800MB - 200MT
+11400MB - 300MT
+Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 5 dias
+
+SEMANAIS PREMIUM (15 DIAS 🗓 – RENOVÁVEIS)
+3000MB - 100MT
+5000MB - 149MT
+8000MB - 201MT
+10000MB - 231MT
+20000MB - 352MT
+Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 15 dias
+
+PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
+2.8GB - 100MT
+5.8GB - 175MT
+8.8GB - 200MT
+10.8GB - 249MT
+12.8GB - 300MT
+15.8GB - 349MT
+18.8GB - 400MT
+20.8GB - 449MT
+25.8GB - 549MT
+32.8GB - 649MT
+51.2GB - 1049MT
+60.2GB - 1249MT
+80.2GB - 1449MT
+100.2GB - 1700MT
+Observação: Pacotes mensais não compatíveis com Txuna
+
+CHAMADAS ILIMITADAS — VODACOM 📞 ♾
+
+11GB - 449MT - Ilimitadas ✨
+14.5GB - 500MT - Ilimitadas
+26.5GB - 700MT - Ilimitadas
+37.5GB - 1000MT - Ilimitadas
+53.5GB - 1500MT - Ilimitadas
+102.5GB - 2150MT - Ilimitadas
+Inclui chamadas e SMS ilimitadas para todas as redes
+
+CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
+
+9GB - 469MT - Ilimitadas ✨
+23GB - 950MT - Ilimitadas
+38GB - 1450MT - Ilimitadas
+46GB - 1700MT - Ilimitadas
+53GB - 1900MT - Ilimitadas
+68GB - 2400MT - Ilimitadas
+Inclui chamadas e SMS ilimitadas para todas as redes
+
+🔹 CONEXÃO SEM LIMITES 🔹
+Internet rápida, chamadas e SMS ilimitadas.
+Pacotes exclusivos Vodacom e Movitel.
+Sempre conectado, sempre no controle!
+`,
+
+        pagamento: `💸 FORMAS DE PAGAMENTO
+
+🟠 E-Mola – Glória | 📲 860186270  
+🔴 M-Pesa – Leonor | 📲 857451196  
+
+⚠ ATENÇÃO  
+▪ Após o pagamento, envie a confirmação ✉ ** e o seu número para receber o seu pacote 📲  
+▪ Envie ** o valor exato da tabela 💰  
+
+NB: Válido apenas para Vodacom  
+🚀 Garanta seus Megabytes agora!
+`
+    },
+'120363419414311700@g.us': {
+        nome: '🪐Megabytes PROMO',
+        tabela: `📢🔥 TABELA ATUALIZADA – OUTUBRO 2025 🔥📢
+Internet e Chamadas Ilimitadas – Vodacom
+Pacotes Diários | Semanais | Mensais
+
+OFERTA ESPECIAL – 24 HORAS ⏱
+600MB - 10MT
+800MB - 15MT
+1024MB - 17MT
+1200MB - 20MT
+2048MB - 34MT
+
+PACOTES DIÁRIOS (24H ⏱)
+2400MB - 40MT
+3072MB - 51MT
+4096MB - 68MT
+5120MB - 85MT
+6144MB - 102MT
+7168MB - 119MT
+8192MB - 136MT
+9144MB - 153MT
+10240MB - 170MT
+
+PACOTES PREMIUM (3 DIAS 🗓 – RENOVÁVEIS)
+2000MB - 44MT
+3000MB - 66MT
+4000MB - 88MT
+5000MB - 109MT
+6000MB - 133MT
+7000MB - 149MT
+10000MB - 219MT
+Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 3 dias
+
+SEMANAIS BÁSICOS (5 DIAS 🗓 – RENOVÁVEIS)
+1700MB - 45MT
+2900MB - 80MT
+3400MB - 110MT
+5500MB - 150MT
+7800MB - 200MT
+11400MB - 300MT
+Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 5 dias
+
+SEMANAIS PREMIUM (15 DIAS 🗓 – RENOVÁVEIS)
+3000MB - 100MT
+5000MB - 149MT
+8000MB - 201MT
+10000MB - 231MT
+20000MB - 352MT
+Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 15 dias
+
+PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
+2.8GB - 100MT
+5.8GB - 175MT
+8.8GB - 200MT
+10.8GB - 249MT
+12.8GB - 300MT
+15.8GB - 349MT
+18.8GB - 400MT
+20.8GB - 449MT
+25.8GB - 549MT
+32.8GB - 649MT
+51.2GB - 1049MT
+60.2GB - 1249MT
+80.2GB - 1449MT
+100.2GB - 1700MT
+Observação: Pacotes mensais não compatíveis com Txuna
+
+CHAMADAS ILIMITADAS — VODACOM 📞 ♾
+
+11GB - 449MT - Ilimitadas ✨
+14.5GB - 500MT - Ilimitadas
+26.5GB - 700MT - Ilimitadas
+37.5GB - 1000MT - Ilimitadas
+53.5GB - 1500MT - Ilimitadas
+102.5GB - 2150MT - Ilimitadas
+Inclui chamadas e SMS ilimitadas para todas as redes
+
+CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
+
+9GB - 469MT - Ilimitadas ✨
+23GB - 950MT - Ilimitadas
+38GB - 1450MT - Ilimitadas
+46GB - 1700MT - Ilimitadas
+53GB - 1900MT - Ilimitadas
+68GB - 2400MT - Ilimitadas
+Inclui chamadas e SMS ilimitadas para todas as redes
+
+🔹 CONEXÃO SEM LIMITES 🔹
+Internet rápida, chamadas e SMS ilimitadas.
+Pacotes exclusivos Vodacom e Movitel.
+Sempre conectado, sempre no controle!
+`,
+
+        pagamento: `💸 FORMAS DE PAGAMENTO
+
+🟠 E-Mola – Glória | 📲 860186270  
+🔴 M-Pesa – Leonor | 📲 857451196  
+
+⚠ ATENÇÃO  
+▪ Após o pagamento, envie a confirmação ✉ ** e o seu número para receber o seu pacote 📲  
+▪ Envie ** o valor exato da tabela 💰  
+
+NB: Válido apenas para Vodacom  
+🚀 Garanta seus Megabytes agora!
+`
+    },
+    '120363418742247460@g.us': {
+        nome: 'AutoData VIP',
+        tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - OUTUBRO 2025 🚨🔥✅
+
+📆 PACOTES DIÁRIOS
+512MB = 10MT 💵💽
+1024MB = 17MT 💵💽
+1200MB = 20MT 💵💽
+2048MB = 34MT 💵💽
+2200MB = 40MT 💵💽
+3072MB = 51MT 💵💽
+4096MB = 68MT 💵💽
+5120MB = 85MT 💵💽
+6144MB = 102MT 💵💽
+7168MB = 119MT 💵💽
+8192MB = 136MT 💵💽
+9144MB = 153MT 💵💽
+10240MB = 170MT 💵💽
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+2000MB = 44MT 💵💽
+3000MB = 66MT 💵💽
+4000MB = 88MT 💵💽
+5000MB = 109MT 💵💽
+6000MB = 133MT 💵💽
+7000MB = 149MT 💵💽
+10000MB = 219MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 3 dias
+
+📅 SEMANAIS BÁSICOS (5 Dias – Renováveis)
+1700MB = 45MT 💵💽
+2900MB = 80MT 💵💽
+3400MB = 110MT 💵💽
+5500MB = 150MT 💵💽
+7800MB = 200MT 💵💽
+11400MB = 300MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 5 dias
+
+📅 SEMANAIS PREMIUM (15 Dias – Renováveis)
+3000MB = 100MT 💵💽
+5000MB = 149MT 💵💽
+8000MB = 201MT 💵💽
+10000MB = 231MT 💵💽
+20000MB = 352MT 💵💽
+🔄 Bônus: 100MB extra ao atualizar dentro de 15 dias
+
+📅 PACOTES MENSAIS
+12.8GB = 270MT 💵💽
+22.8GB = 435MT 💵💽
+32.8GB = 605MT 💵💽
+52.8GB = 945MT 💵💽
+60.2GB = 1249MT 💵💽
+80.2GB = 1449MT 💵💽
+100.2GB = 1700MT 💵💽
+
+💎 PACOTES DIAMANTE MENSAIS
+Chamadas + SMS ilimitadas + 11GB = 460MT 💵
+Chamadas + SMS ilimitadas + 24GB = 820MT 💵
+Chamadas + SMS ilimitadas + 50GB = 1550MT 💵
+Chamadas + SMS ilimitadas + 100GB = 2250MT 💵
+
+📍 NB: Válido apenas para Vodacom
+📍 Para o Pacote Mensal e Diamante, não deve ter Txuna crédito ativo!`,
+
+        pagamento: `FORMAS DE PAGAMENTO ATUALIZADAS
+
+1- M-PESA
+NÚMERO: 848715208
+NOME:  NATACHA ALICE
+
+NÚMERO: 871112049
+NOME: NATACHA ALICE`
+    },
+'120363420106859235@g.us': {
+        nome: 'MozStreaming MB’s v3*',
+        tabela: `📢🔥 TABELA ATUALIZADA – OUTUBRO 2025 🔥📢
+Internet e Chamadas Ilimitadas – Vodacom
+Pacotes Diários | Semanais | Mensais
+
+OFERTA ESPECIAL – 24 HORAS ⏱
+600MB - 10MT
+800MB - 15MT
+1024MB - 17MT
+1200MB - 20MT
+2048MB - 34MT
+
+PACOTES DIÁRIOS (24H ⏱)
+2400MB - 40MT
+3072MB - 51MT
+4096MB - 68MT
+5120MB - 85MT
+6144MB - 102MT
+7168MB - 119MT
+8192MB - 136MT
+9144MB - 153MT
+10240MB - 170MT
+
+PACOTES PREMIUM (3 DIAS 🗓 – RENOVÁVEIS)
+2000MB - 44MT
+3000MB - 66MT
+4000MB - 88MT
+5000MB - 109MT
+6000MB - 133MT
+7000MB - 149MT
+10000MB - 219MT
+Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 3 dias
+
+SEMANAIS BÁSICOS (5 DIAS 🗓 – RENOVÁVEIS)
+1700MB - 45MT
+2900MB - 80MT
+3400MB - 110MT
+5500MB - 150MT
+7800MB - 200MT
+11400MB - 300MT
+Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 5 dias
+
+SEMANAIS PREMIUM (15 DIAS 🗓 – RENOVÁVEIS)
+3000MB - 100MT
+5000MB - 149MT
+8000MB - 201MT
+10000MB - 231MT
+20000MB - 352MT
+Bônus 🔄: Receba 100MB extras para atualizar os megas dentro de 15 dias
+
+PACOTES MENSAIS EXCLUSIVOS (30 DIAS 📆 – NÃO RENOVÁVEIS)
+2.8GB - 100MT
+5.8GB - 175MT
+8.8GB - 200MT
+10.8GB - 249MT
+12.8GB - 300MT
+15.8GB - 349MT
+18.8GB - 400MT
+20.8GB - 449MT
+25.8GB - 549MT
+32.8GB - 649MT
+51.2GB - 1049MT
+60.2GB - 1249MT
+80.2GB - 1449MT
+100.2GB - 1700MT
+Observação: Pacotes mensais não compatíveis com Txuna
+
+CHAMADAS ILIMITADAS — VODACOM 📞 ♾
+
+11GB - 449MT - Ilimitadas ✨
+14.5GB - 500MT - Ilimitadas
+26.5GB - 700MT - Ilimitadas
+37.5GB - 1000MT - Ilimitadas
+53.5GB - 1500MT - Ilimitadas
+102.5GB - 2150MT - Ilimitadas
+Inclui chamadas e SMS ilimitadas para todas as redes
+
+CHAMADAS ILIMITADAS — MOVITEL 📞 ♾
+
+9GB - 469MT - Ilimitadas ✨
+23GB - 950MT - Ilimitadas
+38GB - 1450MT - Ilimitadas
+46GB - 1700MT - Ilimitadas
+53GB - 1900MT - Ilimitadas
+68GB - 2400MT - Ilimitadas
+Inclui chamadas e SMS ilimitadas para todas as redes
+
+🔹 CONEXÃO SEM LIMITES 🔹
+Internet rápida, chamadas e SMS ilimitadas.
+Pacotes exclusivos Vodacom e Movitel.
+Sempre conectado, sempre no controle!
+`,
+
+        pagamento: `FORMAS DE PAGAMENTO
+📱 M-Pesa: 844345161 (Elton Matusse)
+📱 E-Mola: 864524363 (Aleocha Matusse)
+
+📩 Envie o comprovativo, após o pagamento e o número que receberá os dados!
+`
+    },
+'120363422150610418@g.us': {
+        nome: 'MozStreaming MB’s vV3*',
+        tabela: `TABELA ATUALIZADA
+
+INTERNET & CHAMADAS ILIMITADAS 
+
+Vodacom 
+PACOTES DIÁRIOS — 24H
+
+600MB = 10MT
+800MB = 15MT
+1024MB = 17MT
+1200MB = 20MT
+2048MB = 34MT
+
+2400MB = 40MT
+3072MB = 51MT
+4096MB = 68MT
+5120MB = 85MT
+6144MB = 102MT
+7168MB = 119MT
+8192MB = 136MT
+9144MB = 153MT
+10240MB = 170MT
+
+PACOTES PREMIUM — 3 DIAS (Renováveis)
+
+2000MB = 44MT
+3000MB = 66MT
+4000MB = 88MT
+5000MB = 109MT
+6000MB = 133MT
+7000MB = 149MT
+10000MB = 219MT
+
+Bônus: +100MB ao atualizar dentro de 3 dias
+
+SEMANAIS BÁSICOS — 5 DIAS (Renováveis)
+
+1700MB = 45MT
+2900MB = 80MT
+3400MB = 110MT
+5500MB = 150MT
+7800MB = 200MT
+11400MB = 300MT
+
+Bônus: +100MB ao atualizar dentro de 5 dias
+
+PACOTES MENSAIS — 30 DIAS (Não Renováveis)
+
+2.8GB = 100MT
+5.8GB = 175MT
+8.8GB = 200MT
+10.8GB = 249MT
+12.8GB = 300MT
+15.8GB = 349MT
+18.8GB = 400MT
+20.8GB = 449MT
+25.8GB = 549MT
+32.8GB = 649MT
+51.2GB = 1049MT
+60.2GB = 1249MT
+80.2GB = 1449MT
+100.2GB = 1700MT
+
+Observação: Pacotes mensais não compatíveis com Txuna
+
+CHAMADAS ILIMITADAS — VODACOM
+
+11GB = 449MT
+14.5GB = 500MT
+26.5GB = 700MT
+37.5GB = 1000MT
+53.5GB = 1500MT
+102.5GB = 2150MT
+
+CHAMADAS ILIMITADAS — MOVITEL
+
+9GB = 469MT
+23GB = 950MT
+38GB = 1450MT
+46GB = 1700MT
+53GB = 1900MT
+68GB = 2400MT
+
+CONEXÃO SEM LIMITES
+
+Internet rápida • Chamadas ilimitadas • SMS ilimitados
+Pacotes atualizados e confiáveis.`,
+
+        pagamento: `💸 FORMAS DE PAGAMENTO
+
+🟠 E-Mola – Glória | 📲 860186270  
+🔴 M-Pesa – Leonor | 📲 857451196  
+
+⚠ ATENÇÃO  
+▪ Após o pagamento, envie a confirmação ✉ ** e o seu número para receber o seu pacote 📲  
+▪ Envie ** o valor exato da tabela 💰  
+
+NB: Válido apenas para Vodacom  
+🚀 Garanta seus Megabytes agora!`
+    }
 };
 
 
@@ -4704,19 +5314,69 @@ async function lidParaNumero(lid) {
 
 function contemConteudoSuspeito(mensagem) {
     const texto = mensagem.toLowerCase();
+    const textoOriginal = mensagem;
 
-    // Detectar apenas URLs reais, não a palavra "link"
-    // Regex atualizado para detectar apenas links reais (http://, https://, www., ou domínios completos)
-    // Explicação:
-    // - https?://...  -> URLs com esquema
-    // - www....       -> URLs começando com www
-    // - domínio.tld    -> detectar padrões como example.com (lista de TLDs comuns)
-    // - encurtadores  -> bit.ly, tinyurl.com, t.me, wa.me, whatsapp.com, telegram.me
-    const temLink = /(?:https?:\/\/[\S]+|www\.[\S]+|(?:bit\.ly|tinyurl\.com|t\.me|wa\.me|whatsapp\.com|telegram\.me)\/[\S]+|[a-z0-9\-]+\.(?:com|net|org|io|br|co|xyz|online|info|biz|me|us|edu|gov)(?:[\/\s]|$))/i.test(texto);
+    // ===== DETECÇÃO ULTRA-RIGOROSA DE LINKS =====
+    // Detecta QUALQUER indício de link, URL, domínio ou encurtador
+
+    const padroes = [
+        // 1. URLs com protocolo (http://, https://, ftp://) - detecta em qualquer posição
+        /(?:https?|ftp):\/\/[^\s]+/gi,
+
+        // 2. URLs começando com www - detecta em qualquer posição
+        /(?:^|\s|[^\w])www\.[^\s]+/gi,
+
+        // 3. Domínios completos (palavra.com, palavra.net, etc) - QUALQUER POSIÇÃO
+        // Lista expandida de TLDs mais comuns
+        /(?:^|\s|[^\w])([a-z0-9\-_]+\.(?:com|net|org|io|br|co|uk|us|edu|gov|mil|int|info|biz|name|pro|aero|asia|cat|coop|jobs|mobi|museum|tel|travel|xxx|xyz|top|site|online|store|tech|app|dev|ai|cloud|digital|email|life|live|news|photo|pics|shop|video|web|world|academy|accountant|actor|agency|apartments|army|associates|attorney|auction|audio|band|bar|beer|bike|bingo|blog|boutique|builders|business|cab|cafe|camera|camp|capital|cards|care|careers|cash|casino|catering|center|chat|cheap|church|city|claims|cleaning|clinic|clothing|club|coach|codes|coffee|college|community|company|computer|condos|construction|consulting|contractors|cooking|cool|country|coupons|credit|creditcard|cruises|dance|dating|deals|degree|delivery|dental|dentist|design|diamonds|diet|digital|direct|directory|discount|doctor|dog|domains|download|education|email|energy|engineer|engineering|enterprises|equipment|estate|events|exchange|expert|express|fail|farm|fashion|film|finance|financial|fish|fishing|fitness|flights|florist|flowers|football|forsale|foundation|fund|furniture|gallery|games|garden|gift|gifts|glass|global|gold|golf|graphics|gratis|green|gripe|group|guide|guitars|guru|haus|health|healthcare|hockey|holdings|holiday|homes|horse|hospital|host|hosting|house|immo|immobilien|industries|institute|insure|international|investments|jewelry|kaufen|kitchen|land|lawyer|lease|legal|lgbt|limited|limo|link|loan|loans|lol|luxury|maison|management|market|marketing|mba|media|memorial|men|menu|money|mortgage|movie|navy|network|ninja|partners|parts|party|photography|photos|pizza|place|plumbing|plus|poker|properties|property|pub|racing|recipes|reisen|rentals|repair|report|republican|restaurant|reviews|rocks|run|salon|school|schule|services|shoes|shopping|show|singles|soccer|social|software|solar|solutions|studio|style|supplies|supply|support|surf|surgery|systems|tax|taxi|team|technology|tennis|theater|tips|tires|today|tools|tours|town|toys|trade|training|university|vacations|ventures|vet|viajes|video|villas|vision|voyage|watch|website|wedding|wine|works|wtf|zone|mz|ao|za|pt|es|fr|de|it|ru|cn|jp|kr|in|au|nz|ca|mx|ar|cl|pe|ve|ec|py|uy|bo|cr|pa|ni|hn|sv|gt|cu|do|ht|jm|tt|bs|bb|gd|lc|vc|ag|dm|kn|ms|tc|vg|ai|bm|ky))(?:[\/\s\?\#\,\.\!\)]|$)/gi,
+
+        // 4. Encurtadores de URL conhecidos - detecta em qualquer posição
+        /(?:bit\.ly|tinyurl\.com|short\.link|ow\.ly|buff\.ly|adf\.ly|goo\.gl|t\.co|is\.gd|cli\.gs|pic\.twitter\.com|soo\.gd|s2r\.co|clicky\.me|budurl\.com|bc\.vc|tinyurl\.com|url\.ie|tiny\.cc|prettylinkpro\.com|scrnch\.me|filoops\.info|vzturl\.com|qr\.net|1url\.com|tweez\.me|v\.gd|tr\.im|link\.zip|cutt\.ly|rb\.gy|short\.io|tny\.im|tiny\.one)(?:\/[^\s]*)?/gi,
+
+        // 5. Links do WhatsApp e Telegram - detecta em qualquer posição
+        /(?:wa\.me|api\.whatsapp\.com|chat\.whatsapp\.com|whatsapp\.com\/channel|t\.me|telegram\.me|telegram\.dog)(?:\/[^\s]*)?/gi,
+
+        // 6. Padrões específicos de convite - detecta em qualquer posição
+        /(?:chat\.whatsapp\.com|wa\.me\/join|invite\.whatsapp|group\.whatsapp)/gi,
+
+        // 7. Domínios genéricos - SUPER RIGOROSO - detecta abc.xyz em qualquer lugar
+        /(?:^|\s|[^\w@])([a-zA-Z0-9\-_]{2,}\.[a-zA-Z]{2,})(?:[\/\?\#][^\s]*)?(?:\s|[\,\.\!\)\;]|$)/g,
+
+        // 8. Padrões como "nome . com" ou "nome ponto com" (com espaços)
+        /[a-z0-9\-_]+\s*(?:\.|\(?\s*ponto\s*\)?|\[\s*ponto\s*\])\s*(?:com|net|org|br|io|co|mz)/gi,
+
+        // 9. IP addresses (xxx.xxx.xxx.xxx) - detecta em qualquer posição
+        /(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/g,
+
+        // 10. Padrões de link disfarçados (com espaços, parênteses, colchetes)
+        /(?:http|https|www)\s*[:\/\s]+/gi,
+
+        // 11. @ seguido de domínio (email-like que pode ser link)
+        /@[a-z0-9\-_]+\.[a-z]{2,}/gi,
+
+        // 12. Links sem protocolo tipo "site.com/pagina" no meio de texto
+        /(?:^|\s)([a-z0-9\-]+\.(?:com|net|org|br|io|co|mz)\/[^\s]+)/gi,
+
+        // 13. Padrões com "visite", "acesse", "veja" seguido de possível link
+        /(?:visite|acesse|veja|confira|clique|entre)\s*(?:em|no|na)?\s*[:\-]?\s*([a-z0-9\-\.]+\.[a-z]{2,})/gi
+    ];
+
+    let linkDetectado = false;
+    let tipoLink = '';
+
+    for (let i = 0; i < padroes.length; i++) {
+        if (padroes[i].test(textoOriginal) || padroes[i].test(texto)) {
+            linkDetectado = true;
+            tipoLink = `padrão ${i + 1}`;
+            console.log(`🔍 Link detectado no ${tipoLink}: "${textoOriginal.substring(0, 100)}..."`);
+            break;
+        }
+    }
 
     return {
-        temLink: MODERACAO_CONFIG.detectarLinks && temLink,
-        suspeito: MODERACAO_CONFIG.detectarLinks && temLink
+        temLink: MODERACAO_CONFIG.detectarLinks && linkDetectado,
+        suspeito: MODERACAO_CONFIG.detectarLinks && linkDetectado,
+        tipoDeteccao: tipoLink
     };
 }
 
@@ -4746,7 +5406,7 @@ async function removerParticipante(chatId, participantId, motivo) {
 async function aplicarModeracao(message, motivoDeteccao) {
     const chatId = message.from;
     const authorId = message.author || message.from;
-    
+
     try {
         // Ativar moderação para todos os grupos que estiverem em CONFIGURACAO_GRUPOS.
         // Se o grupo está listado em CONFIGURACAO_GRUPOS a moderação será aplicada independente de entradas conflitantes em MODERACAO_CONFIG.ativado.
@@ -4759,12 +5419,21 @@ async function aplicarModeracao(message, motivoDeteccao) {
             return;
         }
 
-        console.log(`🚨 MODERAÇÃO: ${motivoDeteccao}`);
+        console.log(`🚨 MODERAÇÃO ATIVADA: ${motivoDeteccao} | Autor: ${authorId}`);
 
+        // PASSO 1: APAGAR MENSAGEM PRIMEIRO (antes de remover usuário)
+        let mensagemDeletada = false;
         if (MODERACAO_CONFIG.apagarMensagem) {
-            await deletarMensagem(message);
+            console.log(`🗑️ Tentando apagar mensagem com link...`);
+            mensagemDeletada = await deletarMensagem(message);
+            if (mensagemDeletada) {
+                console.log(`✅ Mensagem deletada com sucesso`);
+            } else {
+                console.log(`❌ Falha ao deletar mensagem`);
+            }
         }
 
+        // PASSO 2: REMOVER USUÁRIO (depois de apagar mensagem)
         if (MODERACAO_CONFIG.removerUsuario) {
             // Tentar obter informações do contato para menção/nomes
             let mentionId = String(authorId).replace('@c.us', '').replace('@lid', '');
@@ -4778,7 +5447,7 @@ async function aplicarModeracao(message, motivoDeteccao) {
                 // ignora erro de obtenção de contato, usaremos o ID reduzido
             }
 
-            // Enviar aviso ao grupo antes/depois da remoção
+            // Enviar aviso ao grupo antes da remoção
             try {
                 // VALIDAÇÃO CRÍTICA: Verificar se é um ID válido de usuário
                 const ehIDValido = authorId &&
@@ -4800,7 +5469,14 @@ async function aplicarModeracao(message, motivoDeteccao) {
                 console.log('⚠️ Não foi possível enviar aviso de remoção:', errAviso.message);
             }
 
+            console.log(`🚫 Removendo usuário ${authorId} do grupo...`);
             const removido = await removerParticipante(chatId, authorId, motivoDeteccao);
+
+            if (removido) {
+                console.log(`✅ Usuário removido com sucesso`);
+            } else {
+                console.log(`❌ Falha ao remover usuário`);
+            }
 
             if (!removido) {
                 try {
