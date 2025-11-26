@@ -5316,6 +5316,19 @@ function contemConteudoSuspeito(mensagem) {
     const texto = mensagem.toLowerCase();
     const textoOriginal = mensagem;
 
+    // ===== EXCEÇÕES: Ignorar comprovantes de pagamento =====
+    const ehComprovanteMPesa = /confirmado\s+[A-Z0-9]+\.\s+transferiste/i.test(textoOriginal);
+    const ehComprovanteEmola = /o\s+valor\s+de\s+\d+[\.,]\d+\s*mt\s+foi\s+transferido/i.test(textoOriginal);
+
+    if (ehComprovanteMPesa || ehComprovanteEmola) {
+        console.log(`✅ Comprovante de pagamento detectado - ignorando verificação de links`);
+        return {
+            temLink: false,
+            suspeito: false,
+            tipoDeteccao: 'comprovante'
+        };
+    }
+
     // ===== DETECÇÃO ULTRA-RIGOROSA DE LINKS =====
     // Detecta QUALQUER indício de link, URL, domínio ou encurtador
 
@@ -5339,11 +5352,11 @@ function contemConteudoSuspeito(mensagem) {
         // 6. Padrões específicos de convite - detecta em qualquer posição
         /(?:chat\.whatsapp\.com|wa\.me\/join|invite\.whatsapp|group\.whatsapp)/gi,
 
-        // 7. Domínios genéricos - SUPER RIGOROSO - detecta abc.xyz em qualquer lugar
-        /(?:^|\s|[^\w@])([a-zA-Z0-9\-_]{2,}\.[a-zA-Z]{2,})(?:[\/\?\#][^\s]*)?(?:\s|[\,\.\!\)\;]|$)/g,
+        // 7. Domínios genéricos - detecta abc.xyz MAS exclui valores monetários (45.00MT)
+        /(?:^|\s|[^\w@\d])([a-zA-Z][a-zA-Z0-9\-_]+\.[a-zA-Z]{2,})(?:[\/\?\#][^\s]*)?(?:\s|[\,\!\)\;]|$)/g,
 
-        // 8. Padrões como "nome . com" ou "nome ponto com" (com espaços)
-        /[a-z0-9\-_]+\s*(?:\.|\(?\s*ponto\s*\)?|\[\s*ponto\s*\])\s*(?:com|net|org|br|io|co|mz)/gi,
+        // 8. Padrões como "nome ponto com" ou "site . com" (com espaços) - apenas letras antes
+        /(?:^|\s)([a-z][a-z0-9\-_]*)\s*(?:\(?\s*ponto\s*\)?|\[\s*ponto\s*\])\s*(?:com|net|org|br|io|co|mz)/gi,
 
         // 9. IP addresses (xxx.xxx.xxx.xxx) - detecta em qualquer posição
         /(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/g,
