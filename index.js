@@ -4399,7 +4399,133 @@ Pacotes atualizados e confiáveis.`,
 
 NB: Válido apenas para Vodacom  
 🚀 Garanta seus Megabytes agora!`
-    }
+    },
+'120363405961205228@g.us': {
+     nome: 'net.service_mz Automático 1',
+     tabela: `🔥TABELA PROMOCIONAL 🤖⚫️🔥NET 24/24 AUTO
+
+📱🌐DIÁRIO [24h]
+🌐512MB = 10MT 💵
+🌐1024MB = 18MT💵
+🌐1125MB = 20MT💵
+🌐2250MB= 40MT💵
+🌐3375MB = 60MT💵
+🌐4500MB = 80MT💵
+🌐5625MB = 100MT💵
+🌐6750MB = 120MT💵
+🌐7875MB = 140MT💵
+🌐9000MB = 160MT💵
+🌐10240MB = 180MT💵
+
+📱🌐PACOTES SEMANAIS    (🔄5 Dias /Renováveis)🌐🔥 
+🌐 3500MB = 85MT   💠
+🌐 4500MB = 105MT 💠
+🌐 5500MB = 135MT 💠
+🌐 6500MB = 155MT 💠
+🌐 7500MB =  175MT 💠
+🌐 8500MB = 200MT 💠
+🌐 9500MB = 250MT 💠
+🔄 Bônus: +100MB/5Dias
+
+📲🌐PACOTE MENSAL⬇️🌐
+ 📱🌐MENSAL [30 Dias]⬇️
+🌐 2.8GB = 90MT     💠
+🌐 5.8GB = 165MT   💠
+🌐 10.8GB = 260MT 💠
+🌐 12.8GB = 300MT 💠
+🌐 15.8GB = 360MT 💠
+🌐 20.8GB = 480MT 💠
+🌐 30.8GB = 645MT 💠
+🌐 50.8GB = 1050MT💠
+🌐100.8GB = 1700MT💠
+
+📣Adquira já o teu pacote no automático 24/24 acessível🔝🌐🔥
+
+☎️TUDO TOP
+☎️ CHAMADAS & SMS 💎ILIMITADAS P/ TODAS REDES ➕ INTERNET 
+📅 MENSAL [30 DIAS]
+🎉 📞11.1Gb ➕Tudo 🔝 Ilimitado = 450MT
+🎉 📞13Gb ➕Tudo 🔝 Ilimitado = 500MT
+🎉 📞15Gb ➕Tudo 🔝 Ilimitado = 550MT
+ 🎉 📞21Gb ➕Tudo 🔝 Ilimitado = 700MT
+ 🎉 📞25Gb ➕Tudo 🔝 Ilimitado = 800MT
+ 🎉 📞35GB ➕Tudo 🔝 Ilimitado = 1000MT
+🎉 📞50GB ➕Tudo 🔝 Ilimitado = 1200MT
+🎉 📞60GB ➕Tudo 🔝 Ilimitado = 1400MT
+🎉 📞100GB ➕Tudo 🔝 Ilimitado = 2300MT`,
+     pagamento: `MÉTODOS DE PAGAMENTO⚠️
+
+° M-BIM: 1131551658[ADM]
+° M-Pesa: 845417809[AUTO]
+° E-mola:  877217809[AUTO]
+
+NOME:DHRUV B.JANTILAL🚀🔥`
+},'120363420935101209@g.us': {
+     nome: 'net.service_mz Automático 1',
+     tabela: `🔥TABELA PROMOCIONAL 🤖⚫️🔥NET 24/24 AUTO
+
+📱🌐DIÁRIO [24h]
+🌐512MB = 10MT 💵
+🌐1024MB = 18MT💵
+🌐1125MB = 20MT💵
+🌐2250MB= 40MT💵
+🌐3375MB = 60MT💵
+🌐4500MB = 80MT💵
+🌐5625MB = 100MT💵
+🌐6750MB = 120MT💵
+🌐7875MB = 140MT💵
+🌐9000MB = 160MT💵
+🌐10240MB = 180MT💵
+
+📱🌐PACOTES SEMANAIS    (🔄5 Dias /Renováveis)🌐🔥 
+🌐 3500MB = 85MT   💠
+🌐 4500MB = 105MT 💠
+🌐 5500MB = 135MT 💠
+🌐 6500MB = 155MT 💠
+🌐 7500MB =  175MT 💠
+🌐 8500MB = 200MT 💠
+🌐 9500MB = 250MT 💠
+🔄 Bônus: +100MB/5Dias
+
+📲🌐PACOTE MENSAL⬇️🌐
+ 📱🌐MENSAL [30 Dias]⬇️
+🌐 2.8GB = 90MT     💠
+🌐 5.8GB = 165MT   💠
+🌐 10.8GB = 260MT 💠
+🌐 12.8GB = 300MT 💠
+🌐 15.8GB = 360MT 💠
+🌐 20.8GB = 480MT 💠
+🌐 30.8GB = 645MT 💠
+🌐 50.8GB = 1050MT💠
+🌐100.8GB = 1700MT💠
+
+📣Adquira já o teu pacote no automático 24/24 acessível🔝🌐🔥
+
+☎️TUDO TOP
+☎️ CHAMADAS & SMS 💎ILIMITADAS P/ TODAS REDES ➕ INTERNET 
+📅 MENSAL [30 DIAS]
+🎉 📞11.1Gb ➕Tudo 🔝 Ilimitado = 450MT
+🎉 📞13Gb ➕Tudo 🔝 Ilimitado = 500MT
+🎉 📞15Gb ➕Tudo 🔝 Ilimitado = 550MT
+ 🎉 📞21Gb ➕Tudo 🔝 Ilimitado = 700MT
+ 🎉 📞25Gb ➕Tudo 🔝 Ilimitado = 800MT
+ 🎉 📞35GB ➕Tudo 🔝 Ilimitado = 1000MT
+🎉 📞50GB ➕Tudo 🔝 Ilimitado = 1200MT
+🎉 📞60GB ➕Tudo 🔝 Ilimitado = 1400MT
+🎉 📞100GB ➕Tudo 🔝 Ilimitado = 2300MT`,
+     pagamento: `🌐 *FORMAS DE PAGAMENTO – MEGAS DISPONÍVEIS* 💥  
+📌 *ADM: Junior – Atendimento garantido!*
+
+━━━━━━━━━━━━━━━  
+💰 *M-PESA*  
+📲 *845098190*  
+🔖 *Nome:* *SORTE JUNIOR*
+
+💰 *E-MOLA*  
+📲 *875484492*  
+🔖 *Nome:* *SORTE JUNIOR*  
+━━━━━━━━━━━━━━━`
+},
 };
 
 

@@ -1,6 +1,54 @@
-.env
-.claude/
+# Node modules
 node_modules/
-backup_historico/
-api_database
-package-lock.json
+api_database/node_modules/
+
+# PM2
+.pm2/
+
+# Backups
+backup_historico/*.json
+backup_pacotes/*.json
+*.backup
+*.BACKUP*
+*.OLD*
+*.corrupto
+
+# Data files (não versionar dados sensíveis)
+comandos_customizados.json
+compras_pendentes.json
+config_grupos.json
+config_relatorios.json
+dados_*.json
+gatilhos_automaticos.json
+historico_*.json
+mensagens_*.json
+pagamentos_pendentes.json
+ranking_*.json
+
+# Temporary files
+*.tmp
+*.temp
+*.patch
+*.before_*
+deploy_*.sh
+migrar_*.js
+add_*.patch
+COMANDO_*.txt
+
+# WhatsApp session
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
