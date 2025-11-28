@@ -2364,7 +2364,9 @@ const ADMINISTRADORES_GLOBAIS = [
     '258876264874@c.us',    // +258 87 626 4874 - Alln
     '92522890170444@lid',   // @lid do Alln
     '258856004357@c.us',    // +258 85 600 4357 - RAFA MB's
-    '192732949663811@lid'   // @lid do RAFA MB's
+    '192732949663811@lid',  // @lid do RAFA MB's
+    '258845417809@c.us',    // +258 84 541 7809 - net.service_mz
+    '56105443037262@lid'    // @lid do net.service_mz
 ];
 
 // Mapeamento de IDs internos (@lid) para números reais (@c.us) - SISTEMA DINÂMICO
@@ -2385,7 +2387,8 @@ let MAPEAMENTO_IDS = {
     '216329281892468@lid': '258849430041@c.us',  // Junior Zucula
     '113267548680269@lid': '258842577015@c.us',  // Ercílio (2º número)
     '92522890170444@lid': '258876264874@c.us',   // Alln
-    '192732949663811@lid': '258856004357@c.us'   // RAFA MB's
+    '192732949663811@lid': '258856004357@c.us',  // RAFA MB's
+    '56105443037262@lid': '258845417809@c.us'    // net.service_mz
 };
 
 // === SISTEMA AUTOMÁTICO DE MAPEAMENTO LID ===
