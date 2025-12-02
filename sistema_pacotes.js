@@ -96,9 +96,24 @@ class SistemaPacotes {
                 }
             }
 
-            // Carregar histórico (manter em memória, não precisa carregar do DB a cada vez)
-            this.historicoRenovacoes = [];
-            console.log(`📦 Histórico de renovações está no MariaDB`);
+            // ✅ CORREÇÃO: Carregar histórico das últimas 48h do MariaDB
+            try {
+                const responseHistorico = await axios.get(
+                    `${this.API_PACOTES_URL}/renovacoes/recentes?horas=48`,
+                    { timeout: this.timeout }
+                );
+
+                if (responseHistorico.data.success && responseHistorico.data.renovacoes) {
+                    this.historicoRenovacoes = responseHistorico.data.renovacoes;
+                    console.log(`📦 ${this.historicoRenovacoes.length} renovações carregadas do histórico (48h)`);
+                } else {
+                    this.historicoRenovacoes = [];
+                    console.log(`📦 Nenhuma renovação no histórico recente`);
+                }
+            } catch (error) {
+                console.log(`⚠️ PACOTES: Erro ao carregar histórico: ${error.message}`);
+                this.historicoRenovacoes = [];
+            }
 
         } catch (error) {
             console.error(`❌ PACOTES: Erro ao carregar dados:`, error);
@@ -504,9 +519,19 @@ class SistemaPacotes {
     
     // === VERIFICAR RENOVAÇÕES ===
     async verificarRenovacoes() {
+        // === LOCK GLOBAL: Apenas uma instância pode verificar renovações por vez ===
+        const fileLock = require('./file-lock.js');
+        const lockAcquired = await fileLock.acquireLock('renovacao_pacotes.lock', 5000).catch(() => false);
+        
+        if (!lockAcquired) {
+            console.log(`⏭️  PACOTES: Outra instância está verificando renovações - pulando`);
+            return;
+        }
+        
         try {
             const agora = new Date();
-            console.log(`🔄 PACOTES: Verificando renovações... (${agora.toLocaleString('pt-BR')})`);
+            const instanceId = process.env.BOT_INSTANCE || 'main';
+            console.log(`🔄 PACOTES [${instanceId}]: Verificando renovações... (${agora.toLocaleString('pt-BR')})`);
             
             // Se não há clientes ativos, não há nada para verificar
             if (Object.keys(this.clientesAtivos).length === 0) {
@@ -549,6 +574,9 @@ class SistemaPacotes {
             
         } catch (error) {
             console.error(`❌ PACOTES: Erro na verificação automática:`, error);
+        } finally {
+            // Liberar lock
+            await fileLock.releaseLock('renovacao_pacotes.lock');
         }
     }
     
@@ -561,8 +589,57 @@ class SistemaPacotes {
             const diaAtual = cliente.diasTotal - cliente.diasRestantes + 1;
             const novaReferencia = `${cliente.referenciaOriginal}D${diaAtual + 1}`;
             
-            // Criar PEDIDO e PAGAMENTO de renovação (ambos para Tasker)
+            // === CONTROLE DE DUPLICAÇÃO TRIPLO ===
+            const hoje = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+            // ✅ VERIFICAÇÃO 1: Histórico em memória (rápido)
+            const jaRenovadoMemoria = this.historicoRenovacoes.some(h => {
+                const dataRenovacao = new Date(h.timestamp).toISOString().split('T')[0];
+                return h.novaReferencia === novaReferencia && dataRenovacao === hoje;
+            });
+
+            if (jaRenovadoMemoria) {
+                console.log(`⏭️  DUPLICAÇÃO EVITADA (memória): ${novaReferencia}`);
+                const agora = new Date();
+                cliente.proximaRenovacao = this.calcularProximaRenovacao(agora);
+                await this.salvarPacoteMariaDB(clienteId, cliente);
+                return;
+            }
+
+            // ✅ VERIFICAÇÃO 2: MariaDB (definitivo)
+            try {
+                const response = await axios.get(
+                    `${this.API_PACOTES_URL}/renovacoes/verificar/${novaReferencia}`,
+                    { timeout: this.timeout }
+                );
+
+                if (response.data.existe) {
+                    console.log(`⏭️  DUPLICAÇÃO EVITADA (MariaDB): ${novaReferencia} já existe`);
+                    const agora = new Date();
+                    cliente.proximaRenovacao = this.calcularProximaRenovacao(agora);
+                    await this.salvarPacoteMariaDB(clienteId, cliente);
+                    return;
+                }
+            } catch (error) {
+                console.log(`⚠️ Erro ao verificar duplicação no MariaDB: ${error.message}`);
+                // Continua - melhor renovar duplicado que perder renovação
+            }
+
+            // ✅ VERIFICAÇÃO 3: Última renovação por timestamp (segurança extra)
             const agora = new Date();
+            const ultimaRenovacao = new Date(cliente.ultimaRenovacao);
+            const diferencaHoras = (agora - ultimaRenovacao) / (1000 * 60 * 60);
+
+            if (diferencaHoras < 12) {
+                console.log(`⏭️  DUPLICAÇÃO EVITADA (timestamp): Última renovação há ${diferencaHoras.toFixed(1)}h`);
+                cliente.proximaRenovacao = this.calcularProximaRenovacao(agora);
+                await this.salvarPacoteMariaDB(clienteId, cliente);
+                return;
+            }
+            // === FIM DO CONTROLE DE DUPLICAÇÃO ===
+            
+            // Criar PEDIDO e PAGAMENTO de renovação (ambos para Tasker)
+            
             const valor100MB = this.calcularValor100MB(cliente.grupoId);
             
             // Criar PEDIDO na planilha de pedidos

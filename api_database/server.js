@@ -13,6 +13,7 @@ const db = require('./database');
 const pedidosComuns = require('./routes/pedidos_comuns');
 const pedidosDiamante = require('./routes/pedidos_diamante');
 const pagamentos = require('./routes/pagamentos');
+const pacotes = require('./routes/pacotes');
 
 const app = express();
 const PORT = process.env.API_PORT || 3002;
@@ -39,6 +40,9 @@ app.use('/api/diamante', pedidosDiamante);
 
 // Pagamentos (substitui script de pagamentos)
 app.use('/api/pagamentos', pagamentos);
+
+// Pacotes automáticos
+app.use('/api/pacotes', pacotes);
 
 // Health check
 app.get('/health', async (req, res) => {
@@ -67,6 +71,7 @@ app.get('/', (req, res) => {
             pedidos: '/api/pedidos',
             diamante: '/api/diamante',
             pagamentos: '/api/pagamentos',
+            pacotes: '/api/pacotes',
             health: '/health'
         }
     });
@@ -91,6 +96,7 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`   POST /api/pedidos`);
     console.log(`   POST /api/diamante`);
     console.log(`   POST /api/pagamentos`);
+    console.log(`   GET/POST /api/pacotes`);
     console.log('============================================');
 });
 

@@ -1,6 +1,14 @@
 require('dotenv').config();
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+
+// === SISTEMA DE DADOS COMPARTILHADOS E FILE LOCKING ===
+const fileLock = require('./file-lock.js');
+const SHARED_DATA_DIR = process.env.SHARED_DATA_DIR || require('path').join(__dirname, 'dados_compartilhados');
+const BOT_INSTANCE = process.env.BOT_INSTANCE || 'main';
+console.log(`🤖 Instância: ${BOT_INSTANCE} | Dados: ${SHARED_DATA_DIR}`);
+// ======================================================
+
 const fs = require('fs').promises;
 const fssync = require('fs');
 const path = require('path');
@@ -553,7 +561,7 @@ let pacotesDiamantePendentes = {};
 // === SISTEMA DE RETRY SILENCIOSO PARA PAGAMENTOS ===
 let pagamentosPendentes = {}; // {id: {dados do pedido}}
 let timerRetryPagamentos = null;
-const ARQUIVO_PAGAMENTOS_PENDENTES = './pagamentos_pendentes.json';
+const ARQUIVO_PAGAMENTOS_PENDENTES = require('path').join(SHARED_DATA_DIR, 'pagamentos_pendentes.json');
 const RETRY_INTERVAL = 25000; // 25 segundos - verificação otimizada (planilha mantém apenas 48h de dados)
 const RETRY_TIMEOUT = 5 * 60 * 1000; // 5 minutos - tempo máximo de tentativas
 const MAX_RETRY_ATTEMPTS = 12; // 12 tentativas em 5 minutos (1 a cada 25s)
@@ -575,11 +583,11 @@ let pedidosSaque = {}; // referencia -> dados do pedido
 let membrosEntrada = {}; // {grupoId: {memberId: dataEntrada}}
 
 // Arquivos de persistência
-const ARQUIVO_REFERENCIAS = './dados_referencias.json';
-const ARQUIVO_BONUS = './dados_bonus.json';
-const ARQUIVO_CODIGOS = './dados_codigos.json';
-const ARQUIVO_SAQUES = './dados_saques.json';
-const ARQUIVO_MEMBROS = './dados_membros_entrada.json';
+const ARQUIVO_REFERENCIAS = require('path').join(SHARED_DATA_DIR, 'dados_referencias.json');
+const ARQUIVO_BONUS = require('path').join(SHARED_DATA_DIR, 'dados_bonus.json');
+const ARQUIVO_CODIGOS = require('path').join(SHARED_DATA_DIR, 'dados_codigos.json');
+const ARQUIVO_SAQUES = require('path').join(SHARED_DATA_DIR, 'dados_saques.json');
+const ARQUIVO_MEMBROS = require('path').join(SHARED_DATA_DIR, 'dados_membros_entrada.json');
 
 // === FUNÇÕES DO SISTEMA DE REFERÊNCIA ===
 
@@ -2028,7 +2036,7 @@ async function marcarPagamentoComoProcessado(referencia, valor) {
 
 // Base de dados de compradores
 let historicoCompradores = {};
-const ARQUIVO_HISTORICO = 'historico_compradores.json';
+const ARQUIVO_HISTORICO = require('path').join(SHARED_DATA_DIR, 'historico_compradores.json');
 
 // Cache de administradores REMOVIDO - usa apenas ADMINISTRADORES_GLOBAIS
 
@@ -2320,7 +2328,7 @@ let gruposLogados = new Set();
 
 // === COMANDOS CUSTOMIZADOS ===
 let comandosCustomizados = {};
-const ARQUIVO_COMANDOS = 'comandos_customizados.json';
+const ARQUIVO_COMANDOS = require('path').join(SHARED_DATA_DIR, 'comandos_customizados.json');
 
 // REMOVIDO: Sistema de registro de mensagens (movido para outro bot)
 
@@ -5270,7 +5278,7 @@ function obterRenovacoesPendentesTasker() {
 // === COMANDOS CUSTOMIZADOS - FUNÇÕES ===
 
 let gatilhosAutomaticos = {}; // { chatId: { gatilho: { resposta, criadoPor, criadoEm } } }
-const ARQUIVO_GATILHOS = './gatilhos_automaticos.json';
+const ARQUIVO_GATILHOS = require('path').join(SHARED_DATA_DIR, 'gatilhos_automaticos.json');
 
 async function carregarComandosCustomizados() {
     try {
