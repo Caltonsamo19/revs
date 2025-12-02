@@ -3459,8 +3459,8 @@ Nós oferecemos a solução para suas necessidades de dados a preços acessívei
 
 📩 Envie o seu comprovante no grupo, juntamente com o número que receberá os dados.`
 },
-'120363041024889744@g.us': {
-        nome: 'NET PROMOÇÃO 17MT V12',
+'120363024858104299@g.us': {
+        nome: 'NET PROMOÇÃO 17MT V3',
         tabela: `✅🔥🚨 PROMOÇÃO DE 🛜 MEGAS VODACOM AO MELHOR PREÇO DO MERCADO - NOVEMBRO 2025 🚨🔥✅
 
 📆 PACOTES DIÁRIOS
