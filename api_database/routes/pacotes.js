@@ -8,6 +8,20 @@ const router = express.Router();
 const db = require('../database');
 
 // ============================================================================
+// HELPER: Converter ISO datetime para MySQL datetime
+// ============================================================================
+function toMySQLDateTime(isoString) {
+    if (!isoString) return null;
+    try {
+        const date = new Date(isoString);
+        return date.toISOString().slice(0, 19).replace('T', ' ');
+    } catch (error) {
+        console.error('❌ Erro ao converter datetime:', error.message);
+        return null;
+    }
+}
+
+// ============================================================================
 // GET /api/pacotes/ativos - Buscar pacotes ativos
 // ============================================================================
 router.get('/ativos', async (req, res) => {
@@ -26,6 +40,33 @@ router.get('/ativos', async (req, res) => {
 
     } catch (error) {
         console.error('❌ Erro ao buscar pacotes ativos:', error.message);
+        return res.json({
+            success: false,
+            error: error.message,
+            pacotes: []
+        });
+    }
+});
+
+// ============================================================================
+// GET /api/pacotes/todos - Buscar TODOS os pacotes (para debug)
+// ============================================================================
+router.get('/todos', async (req, res) => {
+    try {
+        const [rows] = await db.pool.execute(
+            `SELECT * FROM pacotes ORDER BY created_at DESC LIMIT 100`
+        );
+
+        console.log(`📦 ${rows.length} pacotes encontrados no total`);
+
+        return res.json({
+            success: true,
+            pacotes: rows,
+            total: rows.length
+        });
+
+    } catch (error) {
+        console.error('❌ Erro ao buscar todos pacotes:', error.message);
         return res.json({
             success: false,
             error: error.message,
@@ -62,8 +103,12 @@ router.post('/', async (req, res) => {
                     status = ?, ultima_renovacao = ?
                 WHERE cliente_id = ?`,
                 [numero, grupo_id, tipo_pacote, dias_total, dias_restantes,
-                 megas_iniciais, valor_mt_inicial, data_expiracao, proxima_renovacao,
-                 renovacoes, status, ultima_renovacao, cliente_id]
+                 megas_iniciais, valor_mt_inicial,
+                 toMySQLDateTime(data_expiracao),
+                 toMySQLDateTime(proxima_renovacao),
+                 renovacoes, status,
+                 toMySQLDateTime(ultima_renovacao),
+                 cliente_id]
             );
 
             console.log(`✅ Pacote atualizado: ${cliente_id}`);
@@ -78,8 +123,12 @@ router.post('/', async (req, res) => {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [cliente_id, numero, referencia_original, grupo_id, tipo_pacote,
                  dias_total, dias_restantes, megas_iniciais, valor_mt_inicial,
-                 data_inicio, data_expiracao, hora_envio_original,
-                 proxima_renovacao, renovacoes, status, ultima_renovacao]
+                 toMySQLDateTime(data_inicio),
+                 toMySQLDateTime(data_expiracao),
+                 toMySQLDateTime(hora_envio_original),
+                 toMySQLDateTime(proxima_renovacao),
+                 renovacoes, status,
+                 toMySQLDateTime(ultima_renovacao)]
             );
 
             console.log(`✅ Pacote criado: ${cliente_id}`);
@@ -116,7 +165,10 @@ router.post('/renovacao', async (req, res) => {
              dia, dias_restantes, proxima_renovacao, timestamp_renovacao, grupo_id)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [cliente_id, numero, referencia_original, nova_referencia,
-             dia, dias_restantes, proxima_renovacao, timestamp_renovacao, grupo_id]
+             dia, dias_restantes,
+             toMySQLDateTime(proxima_renovacao),
+             toMySQLDateTime(timestamp_renovacao),
+             grupo_id]
         );
 
         console.log(`✅ Renovação registrada: ${nova_referencia}`);
