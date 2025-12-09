@@ -20,7 +20,31 @@ const PORT = process.env.API_PORT || 3002;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+
+// Middleware personalizado para JSON com tratamento de erros
+app.use(express.json({
+    verify: (req, res, buf, encoding) => {
+        try {
+            JSON.parse(buf);
+        } catch(e) {
+            console.error(`❌ JSON inválido recebido: ${buf.toString().substring(0, 100)}`);
+            throw new Error('JSON inválido');
+        }
+    }
+}));
+
+// Error handler para JSON malformado (deve vir logo após express.json())
+app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        console.error('❌ Erro de parse JSON:', err.message);
+        return res.status(400).json({
+            success: false,
+            error: 'JSON inválido recebido',
+            message: 'Verifique se a variável %JSON_PAYLOAD está sendo preenchida corretamente no Tasker'
+        });
+    }
+    next(err);
+});
 
 // Log de requisições
 app.use((req, res, next) => {

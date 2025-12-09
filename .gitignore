@@ -38,9 +38,13 @@ COMANDO_*.txt
 # WhatsApp session
 .wwebjs_auth/
 .wwebjs_cache/
+auth_baileys/
+backup_local_data/
+.locks/
 
 # Environment
 .env
+.env.*
 .env.local
 
 # Logs

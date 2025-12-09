@@ -1,12 +1,14 @@
 require('dotenv').config();
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { BaileysAdapter } = require('./baileys-adapter.js');
 const qrcode = require('qrcode-terminal');
 
 // === SISTEMA DE DADOS COMPARTILHADOS E FILE LOCKING ===
 const fileLock = require('./file-lock.js');
 const SHARED_DATA_DIR = process.env.SHARED_DATA_DIR || require('path').join(__dirname, 'dados_compartilhados');
-const BOT_INSTANCE = process.env.BOT_INSTANCE || 'main';
-console.log(`🤖 Instância: ${BOT_INSTANCE} | Dados: ${SHARED_DATA_DIR}`);
+const INSTANCE_NAME = process.env.INSTANCE_NAME || process.env.BOT_INSTANCE || 'baileys-test';
+console.log(`🤖 Bot Baileys - Instância: ${INSTANCE_NAME}`);
+console.log(`📂 Dados compartilhados: ${SHARED_DATA_DIR}`);
+console.log(`📁 Diretório local: ${__dirname}`);
 // ======================================================
 
 const fs = require('fs').promises;
@@ -284,29 +286,8 @@ function normalizarNumeroTelefone(numero) {
     return numero9digitos;
 }
 
-// Criar instância do cliente (SEGUINDO PADRÃO BOT1)
-const client = new Client({
-    authStrategy: new LocalAuth({
-        clientId: "bot_retalho" // Simplificado como bot1
-    }),
-    puppeteer: {
-        headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-extensions',
-            '--no-first-run',
-            '--no-default-browser-check',
-            '--disable-background-timer-throttling',
-            '--disable-backgrounding-occluded-windows',
-            '--disable-renderer-backgrounding',
-            '--disable-features=TranslateUI',
-            '--disable-ipc-flooding-protection'
-        ],
-        timeout: 60000
-    }
-});
+// Criar instância do cliente usando Baileys
+const client = new BaileysAdapter();
 
 // === INICIALIZAR A IA ===
 require('dotenv').config();
@@ -2374,7 +2355,13 @@ const ADMINISTRADORES_GLOBAIS = [
     '258856004357@c.us',    // +258 85 600 4357 - RAFA MB's
     '192732949663811@lid',  // @lid do RAFA MB's
     '258845417809@c.us',    // +258 84 541 7809 - net.service_mz
-    '56105443037262@lid'    // @lid do net.service_mz
+    '56105443037262@lid',   // @lid do net.service_mz
+    '258845098190@c.us',    // +258 84 509 8190 - JUNIOR
+    '243894499434672@lid',  // @lid do JUNIOR
+    '258840543474@c.us',    // +258 84 054 3474 - X Trupe
+    '263849034969338@lid',  // @lid do X Trupe
+    '258857132830@c.us',    // +258 85 713 2830 - Novo admin
+    '22587904114791@lid'    // @lid do novo admin
 ];
 
 // Mapeamento de IDs internos (@lid) para números reais (@c.us) - SISTEMA DINÂMICO
@@ -2396,7 +2383,10 @@ let MAPEAMENTO_IDS = {
     '113267548680269@lid': '258842577015@c.us',  // Ercílio (2º número)
     '92522890170444@lid': '258876264874@c.us',   // Alln
     '192732949663811@lid': '258856004357@c.us',  // RAFA MB's
-    '56105443037262@lid': '258845417809@c.us'    // net.service_mz
+    '56105443037262@lid': '258845417809@c.us',   // net.service_mz
+    '243894499434672@lid': '258845098190@c.us',  // JUNIOR
+    '263849034969338@lid': '258840543474@c.us',  // X Trupe
+    '22587904114791@lid': '258857132830@c.us'    // Novo admin
 };
 
 // === SISTEMA AUTOMÁTICO DE MAPEAMENTO LID ===
@@ -3458,6 +3448,80 @@ Nós oferecemos a solução para suas necessidades de dados a preços acessívei
 - ↪📞📱 Almeida  
 
 📩 Envie o seu comprovante no grupo, juntamente com o número que receberá os dados.`
+},
+'120363421401975543@g.us': {
+    nome: 'PrimeNet Exclusive🛜🌐✅',
+    tabela: `🅿️/Consumidores🔥🥳🥳
+Nós oferecemos a solução para suas necessidades de dados a preços acessíveis.
+
+🔥🎉 PACOTE DIÁRIO 👌 🔥🎉
+🌐 500MB = 10MT 💸
+🌐 1024MB = 17MT 💸
+🌐 1150MB = 20MT 💸
+🌐 1500MB = 27MT 💸
+🌐 2048MB = 34MT 💸
+🌐 3300MB = 40MT 💸
+🌐 3072MB = 51MT 💸
+🌐 3900MB = 60MT 💸
+🌐 4096MB = 68MT 💸
+🌐 5120MB = 85MT 💸
+🌐 7168MB = 120MT 💸
+🌐 10240MB = 170MT 💸
+🌐 11264MB = 190MT 💸
+🌐 20480MB = 340MT 💸
+
+📅 PACOTES PREMIUM (3 Dias – Renováveis)
+🌐 2000MB = 44MT 💵💽
+🌐 3000MB = 66MT 💵💽
+🌐 4000MB = 88MT 💵💽
+🌐 5000MB = 109MT 💵💽
+🌐 6000MB = 133MT 💵💽
+🌐 7000MB = 149MT 💵💽
+🌐 10000MB = 219MT 💵💽
+🔄 Bônus: +100MB ao atualizar dentro de 3 dias
+
+📅 PACOTES SEMANAIS BÁSICOS (5 Dias – Renováveis)
+🌐 1700MB = 45MT 💵💽
+🌐 2900MB = 80MT 💵💽
+🌐 3400MB = 110MT 💵💽
+🌐 5500MB = 150MT 💵💽
+🌐 7800MB = 200MT 💵💽
+🌐 11400MB = 300MT 💵💽
+🔄 Bônus: +100MB ao atualizar dentro de 5 dias
+
+📅 PACOTES SEMANAIS PREMIUM (15 Dias – Renováveis)
+🌐 3000MB = 100MT 💵💽
+🌐 5000MB = 149MT 💵💽
+🌐 8000MB = 201MT 💵💽
+🌐 10000MB = 231MT 💵💽
+🌐 20000MB = 352MT 💵💽
+🔄 Bônus: +100MB ao atualizar dentro de 15 dias
+
+🔥📞 PACOTE MENSAL 📞🔥
+🌐 3072MB = 115MT 💸
+🌐 5120MB = 165MT 💸
+🌐 7168MB = 195MT 💸
+🌐 10240MB = 260MT 💸
+🌐 11264MB = 290MT 💸
+🌐 20480MB = 450MT 💸
+🌐 40960MB = 900MT 💸
+
+💳 FORMAS DE PAGAMENTO: ⤵️
+📲 E-MOLA: 872685743 💶💰
+👤 Almeida Vasco
+
+📲 M-PESA: 851923280 💷💰
+👤 Almeida
+
+📩 Envie o seu comprovante no grupo, juntamente com o número que receberá os dados.
+✅`,
+    pagamento: `💳 FORMAS DE PAGAMENTO:⤵
+- 📲 *𝗘-𝗠𝗢𝗟𝗔: *872685743💶💰
+- Almeida Vasco
+- 📲 *𝗠-𝗣𝗘𝗦𝗔: 851923280💷💰
+- ↪📞📱 Almeida
+
+📩 Envie o seu comprovante no grupo, juntamente com o número que receberá os dados.`
 },
 '120363024858104299@g.us': {
         nome: 'NET PROMOÇÃO 17MT V3',
@@ -4537,6 +4601,129 @@ NOME:DHRUV B.JANTILAL🚀🔥`
 🔖 *Nome:* *SORTE JUNIOR*  
 ━━━━━━━━━━━━━━━`
 },
+'258849146856-1459797778@g.us': {
+    nome: 'X Byte',
+    tabela: `📢 *X BYTE - PACOTES DE INTERNET 📡🔥*
+
+📅 *MEGAS DIÁRIOS AUTOMÁTICOS:*
+
+- 510MB = 10MT
+- 700MB = 15MT
+- 1024MB = 18 MT
+- 1100MB = 20 MT
+- 1400MB = 25 MT
+- 1630MB = 30 MT
+- 2048MB = 36 MT
+- 2200MB = 40 MT
+- 3072MB = 54 MT
+- 3300MB = 60 MT
+- 4096MB = 72 MT
+- 4400MB = 80 MT
+- 5120MB = 90 MT
+- 6144MB = 108 MT
+- 7168MB = 126 MT
+- 10240MB = 180 MT
+
+📅 *SEMANAIS PREMIUM ( 7 Dias – Renováveis):*
+
+- 3482MB = 95 MT
+- 5120MB = 125 MT
+- 6144MB = 145 MT
+- 7168MB = 165 MT
+- 9216MB = 210 MT
+- 10240MB = 245 MT
+  🔄 *Bônus:* 100MB extra ao atualizar dentro de 7 dias
+
+📅 *SEMANAIS PREMIUM (15 Dias – Renováveis)*
+
+- 3000MB = 110 MT
+- 5000MB = 150 MT
+- 8000MB = 200 MT
+- 10000MB = 270 MT
+- 20000MB = 380 MT
+  🔄 *Bônus:* 100MB extra ao atualizar dentro de 15 dias
+
+🗓️ *PACOTE MENSAL :*
+
+- 5.8GB = 165 MT
+- 6.8GB = 175 MT
+- 13.8GB = 290 MT
+- 20.8GB = 450 MT
+- 32.8GB = 640 MT
+- 41.8GB = 870 MT
+- 51.8GB = 1190 MT
+
+*N.B:*  \`Pacotes diários, semanal e mensal são automáticos\`
+
+💎 *DIAMANTE MENSAL*
+
+*TUDO TOP ILIMITADO*
+
+- Chamadas e SMS ilimitadas + *11.8GB* = *450MT*
+- Chamadas e SMS ilimitadas + *14.8GB* = *520MT*
+- Chamadas e SMS ilimitadas + *20.8GB* = *600MT*
+- Chamadas e SMS ilimitadas + *31.8GB* = *820MT*
+
+⚠️ **Pacotes mensais e diamante não deves ter Txuna Crédito!**
+
+✅ Assine já e fique sempre conectado!* 🚀
+📲 *X_byte*`,
+    pagamento: `💳 *MÉTODOS DE PAGAMENTO E-MOLA DA X BYTE*
+
+- *M-Pesa*: 840543474 - *Manuel Cafula*
+- *Emola*: 872707122 - *Shelvan Manuel*`
+},
+'120363309897537629@g.us': {
+    nome: 'Fiel Net',
+    tabela: `*ATENÇÃO NOVA TABELA ATUALIZADA 📍*
+
+*PACOTES DIÁRIOS*
+
+*10MT----------512MB*
+*15M-----------850MB*
+*17MT---------1024MB*
+*20MT---------1150MB*
+*25MT---------1400MB*
+*30MT---------1800MB*
+*34MT---------2050MB*
+*36MT---------2200MB*
+*40MT---------2300MB*
+*45MT---------2800MB*
+*50MT---------3100MB*
+*55MT---------3300MB*
+*60MT---------3450MB*
+*70MT---------4000MB*
+*80MT---------4500MB*
+*90MT---------5050MB*
+*100MT--------6000MB*
+*170MT--------10240MB*
+*340MT--------20480MB*
+
+*PACOTES SEMANAIS*
+
+*48MT-----------1450MB*
+*90MT-----------2900MB*
+*145MT---------4360MB*
+*189MT---------6500MB*
+*275MT---------9760MB*
+
+*PACOTES DE 30DIAS*
+
+*175MT--------5000MB*
+*250MT-------11000M*
+*320MT------16000MB*
+*500MT------25000MB*
+*1000MT----50000MB*
+
+*FIM*
+
+_✍️Fiel Net_`,
+    pagamento: `💳 *FORMAS/ PAGAMENTOS :*
+
+*𝗠-𝗣𝗘𝗦𝗔:* 847201772 Rosa inguana
+
+*E-MOLA:* 860229199 Samito Eduardo Alfandeca`
+}
 };
 
 
@@ -5943,9 +6130,7 @@ client.on('auth_failure', (msg) => {
     console.error('❌ Falha na autenticação:', msg);
 });
 
-client.on('loading_screen', (percent, message) => {
-    console.log('⏳ Carregando WhatsApp...', percent + '%', message);
-});
+// Evento 'loading_screen' não existe no Baileys - removido
 
 client.on('ready', async () => {
     console.log('✅ Bot conectado e pronto!');
@@ -6543,6 +6728,111 @@ async function processMessage(message) {
             // === COMANDOS DO SISTEMA DE COMPRAS ===
             if (sistemaCompras) {
                 // .ranking - Mostrar ranking completo de compradores
+                // === COMANDO .ENVIAR - CRIAR PEDIDO MANUALMENTE (SOMENTE ADMINS GLOBAIS) ===
+                if (comando.startsWith('.enviar')) {
+                    // Verificar se é admin global
+                    const remetente = message.author || message.from;
+                    const isAdminGlobal = ADMINISTRADORES_GLOBAIS.includes(remetente);
+
+                    if (!isAdminGlobal) {
+                        await message.reply('❌ *Acesso negado!* Apenas administradores globais podem usar este comando.');
+                        return;
+                    }
+
+                    try {
+                        // Formato: .enviar 1GB 852118624 ou .enviar 512MB 852118624
+                        const partes = comando.split(' ');
+
+                        if (partes.length !== 3) {
+                            await message.reply(
+                                `❌ *FORMATO INCORRETO*\n\n` +
+                                `✅ *Uso correto:*\n` +
+                                `.enviar [MEGAS] [NUMERO]\n\n` +
+                                `*Exemplos:*\n` +
+                                `• .enviar 1GB 258852118624\n` +
+                                `• .enviar 512MB 258840000000\n` +
+                                `• .enviar 2048 852118624`
+                            );
+                            return;
+                        }
+
+                        let megas = partes[1].toUpperCase();
+                        const numeroRecebido = partes[2];
+
+                        // Converter GB para MB se necessário
+                        if (megas.includes('GB')) {
+                            const gb = parseFloat(megas.replace('GB', ''));
+                            megas = Math.round(gb * 1024);
+                        } else if (megas.includes('MB')) {
+                            megas = parseInt(megas.replace('MB', ''));
+                        } else {
+                            megas = parseInt(megas);
+                        }
+
+                        // Validar megas
+                        if (isNaN(megas) || megas <= 0) {
+                            await message.reply('❌ Quantidade de megas inválida!');
+                            return;
+                        }
+
+                        // Normalizar número (apenas remover caracteres não numéricos)
+                        const numero = numeroRecebido.replace(/[^0-9]/g, '');
+
+                        // Validar número (mínimo 9 dígitos)
+                        if (numero.length < 9) {
+                            await message.reply('❌ Número inválido! Deve ter no mínimo 9 dígitos.');
+                            return;
+                        }
+
+                        // Gerar referência única
+                        const timestamp = Date.now();
+                        const random = Math.floor(Math.random() * 1000);
+                        const referencia = `ADM${timestamp}${random}`;
+
+                        console.log(`📝 ADMIN CRIANDO PEDIDO MANUAL: ${referencia}|${megas}|${numero}`);
+
+                        // Enviar para MariaDB
+                        const resultado = await enviarParaGoogleSheets(
+                            referencia,
+                            megas,
+                            numero,
+                            message.from,
+                            'Admin-Manual',
+                            remetente
+                        );
+
+                        if (resultado.sucesso) {
+                            await message.reply(
+                                `✅ *PEDIDO CRIADO COM SUCESSO!*\n\n` +
+                                `💰 Referência: ${referencia}\n` +
+                                `📊 Megas: ${megas >= 1024 ? (megas/1024).toFixed(1)+'GB' : megas+'MB'}\n` +
+                                `📱 Número: ${numero}\n` +
+                                `📍 Grupo: ${getConfiguracaoGrupo(message.from)?.nome || 'Desconhecido'}\n\n` +
+                                `🔄 Pedido registrado e aguardando processamento.\n` +
+                                `⏰ ${new Date().toLocaleString('pt-BR')}`
+                            );
+                        } else if (resultado.duplicado) {
+                            await message.reply(
+                                `⚠️ *PEDIDO DUPLICADO*\n\n` +
+                                `💰 Referência: ${referencia}\n` +
+                                `📝 Status: ${resultado.status_existente}\n\n` +
+                                `❌ Este pedido já existe no sistema.`
+                            );
+                        } else {
+                            await message.reply(
+                                `❌ *ERRO AO CRIAR PEDIDO*\n\n` +
+                                `⚠️ ${resultado.erro || 'Erro desconhecido'}\n\n` +
+                                `Tente novamente ou contate o suporte.`
+                            );
+                        }
+
+                    } catch (error) {
+                        console.error('❌ Erro ao processar comando .enviar:', error);
+                        await message.reply(`❌ Erro ao criar pedido: ${error.message}`);
+                    }
+                    return;
+                }
+
                 if (comando === '.ranking') {
                     try {
                         const ranking = await sistemaCompras.obterRankingCompletoGrupo(message.from);
