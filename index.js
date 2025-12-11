@@ -4536,7 +4536,7 @@ NB: Válido apenas para Vodacom
 
 NOME:DHRUV B.JANTILAL🚀🔥`
 },'120363420935101209@g.us': {
-     nome: 'net.service_mz Automático 1',
+     nome: 'AutoDeal Junior',
      tabela: `🔥TABELA PROMOCIONAL 🤖⚫️🔥NET 24/24 AUTO
 
 📱🌐DIÁRIO [24h]
@@ -6710,17 +6710,26 @@ async function processMessage(message) {
                     resposta += `👥 **Clientes ativos:** ${status.clientesAtivos}\n`;
                     resposta += `⏱️ **Verificação:** ${status.intervalVerificacao/60000} min\n`;
                     resposta += `📦 **Tipos disponíveis:** ${status.tiposPacotes.join(', ')}\n`;
-                    resposta += `📊 **Histórico:** ${status.historicoSize} registros\n\n`;
+                    resposta += `📊 **Histórico:** ${status.historicoSize} registros\n`;
+                    resposta += `⚠️ **Fila pendentes:** ${status.filaPendentesSize} itens\n\n`;
                     resposta += `🔧 **Comandos Administrativos:**\n`;
                     resposta += `• *.pacote DIAS REF NUMERO* - Criar pacote\n`;
                     resposta += `• *.pacotes_ativos* - Listar ativos\n`;
                     resposta += `• *.pacotes_stats* - Estatísticas\n`;
-                    resposta += `• *.cancelar_pacote NUMERO REF* - Cancelar\n\n`;
+                    resposta += `• *.cancelar_pacote NUMERO REF* - Cancelar\n`;
+                    resposta += `• *.pacotes-debug* - Status detalhado (DEBUG)\n\n`;
                     resposta += `👤 **Comando para Clientes:**\n`;
                     resposta += `• *.validade NUMERO* - Verificar validade do pacote\n\n`;
                     resposta += `⚡ *Sistema funcionando automaticamente!*`;
-                    
+
                     await message.reply(resposta);
+                    return;
+                }
+
+                // .pacotes-debug - Status detalhado para debugging
+                if (comando === '.pacotes-debug') {
+                    const resultado = sistemaPacotes.getStatusDetalhado();
+                    await message.reply(resultado);
                     return;
                 }
             }

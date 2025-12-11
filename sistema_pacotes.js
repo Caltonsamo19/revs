@@ -22,8 +22,7 @@ class SistemaPacotes {
         this.TIPOS_PACOTES = {
             '3': { dias: 3, nome: '3 Dias' },
             '5': { dias: 5, nome: '5 Dias' },
-            '15': { dias: 15, nome: '15 Dias' },
-            '30': { dias: 30, nome: '30 Dias' }
+            '10': { dias: 10, nome: '10 Dias' }
         };
         
         // Arquivo para persistir dados dos clientes ativos
@@ -866,7 +865,7 @@ class SistemaPacotes {
             const pacotesRenovaveis = {
                 '3': [],
                 '5': [],
-                '15': []
+                '10': []
             };
 
             if (!tabelaTexto) {
@@ -883,9 +882,9 @@ class SistemaPacotes {
                 const linhaTrim = linha.trim();
 
                 // Detectar seções de pacotes renováveis
-                // IMPORTANTE: Verificar 15 dias ANTES de 5 dias (15 contém "5 Dias")
-                if (linhaTrim.includes('15 Dias') && linhaTrim.includes('Renováveis')) {
-                    secaoAtual = '15';
+                // IMPORTANTE: Verificar 10 dias ANTES de 3 dias para evitar conflitos
+                if (linhaTrim.includes('10 Dias') && linhaTrim.includes('Renováveis')) {
+                    secaoAtual = '10';
                     continue;
                 } else if (linhaTrim.includes('5 Dias') && linhaTrim.includes('Renováveis')) {
                     secaoAtual = '5';
@@ -940,7 +939,7 @@ class SistemaPacotes {
 
         } catch (error) {
             console.error('❌ PACOTES: Erro ao extrair pacotes renováveis:', error);
-            return { '3': [], '5': [], '15': [] };
+            return { '3': [], '5': [], '10': [] };
         }
     }
 }
