@@ -5282,7 +5282,7 @@ async function enviarParaTasker(referencia, valor, numero, grupoId, autorMensage
             }
         }
 
-        // === DETECTAR E ATIVAR PACOTES AUTOMÁTICOS (3, 5, 15 DIAS) ===
+        // === DETECTAR E ATIVAR PACOTES AUTOMÁTICOS (3, 5, 10 DIAS) ===
         if (sistemaPacotes && CONFIGURACAO_GRUPOS[grupoId]) {
             try {
                 const tabelaGrupo = CONFIGURACAO_GRUPOS[grupoId].tabela;
