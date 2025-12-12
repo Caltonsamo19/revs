@@ -6605,7 +6605,7 @@ async function processMessage(message) {
                         const partes = message.body.trim().split(' ');
 
                         if (partes.length < 4) {
-                            await message.reply(`❌ *USO INCORRETO*\n\n✅ **Formato correto:**\n*.pacote DIAS REF NUMERO*\n\n📝 **Exemplos:**\n• *.pacote 3 ABC123 845123456*\n• *.pacote 5 XYZ789 847654321*\n• *.pacote 15 DEF456 841234567*\n\n📦 **Dias disponíveis:** 3, 5, 15, 30\n\n🌍 **Formatos de número aceitos:**\n• 845123456\n• +258 845 123 456\n• 258845123456\n\n⚠️ **IMPORTANTE:**\nEste comando serve APENAS para agendar renovações automáticas.\nVocê deve ter enviado o pacote principal MANUALMENTE antes de usar este comando.\n\n🔄 O sistema agendará renovações diárias de 100MB durante o período especificado.`);
+                            await message.reply(`❌ *USO INCORRETO*\n\n✅ **Formato correto:**\n*.pacote DIAS REF NUMERO*\n\n📝 **Exemplos:**\n• *.pacote 3 ABC123 845123456*\n• *.pacote 5 XYZ789 847654321*\n• *.pacote 10 DEF456 841234567*\n\n📦 **Dias disponíveis:** 3, 5, 10\n\n🌍 **Formatos de número aceitos:**\n• 845123456\n• +258 845 123 456\n• 258845123456\n\n⚠️ **IMPORTANTE:**\nEste comando serve APENAS para agendar renovações automáticas.\nVocê deve ter enviado o pacote principal MANUALMENTE antes de usar este comando.\n\n🔄 O sistema agendará renovações diárias de 100MB durante o período especificado.`);
                             return;
                         }
 
